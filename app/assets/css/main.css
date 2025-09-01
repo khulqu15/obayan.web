@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@import "preline/variants.css";
+@source "../../node_modules/preline/dist/*.js";
+
+@keyframes shimmer-glow {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.shimmer-border {
+    position: relative;
+    z-index: 1;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.shimmer-border::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(
+        90deg,
+        #fff2 0%,
+        #facc15 25%,
+        #fff2 50%,
+        #facc15 75%,
+        #fff2 100%
+    );
+    background-size: 200% auto;
+    animation: shimmer-glow 2.5s linear infinite;
+    mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    border-radius: inherit;
+}
+
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-Black.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-BlackItalic.otf') format('opentype');
+    font-weight: 900;
+    font-style: italic;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-Bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-BoldItalic.otf') format('opentype');
+    font-weight: 700;
+    font-style: italic;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-Book.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-BookItalic.otf') format('opentype');
+    font-weight: 400;
+    font-style: italic;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-Demi.otf') format('opentype');
+    font-weight: 600;
+    font-style: normal;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-DemiItalic.otf') format('opentype');
+    font-weight: 600;
+    font-style: italic;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-ExtraBold.otf') format('opentype');
+    font-weight: 800;
+    font-style: normal;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-ExtraBoldItalic.otf') format('opentype');
+    font-weight: 800;
+    font-style: italic;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-ExtraThin.otf') format('opentype');
+    font-weight: 200;
+    font-style: normal;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-ExtraThinItalic.otf') format('opentype');
+    font-weight: 200;
+    font-style: italic;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-Light.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-LightItalic.otf') format('opentype');
+    font-weight: 300;
+    font-style: italic;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-Medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-MediumItalic.otf') format('opentype');
+    font-weight: 500;
+    font-style: italic;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-Thin.otf') format('opentype');
+    font-weight: 100;
+    font-style: normal;
+}
+  
+@font-face {
+    font-family: 'MaisonNeueExtended';
+    src: url('/assets/fonts/MaisonNeueExtended-ThinItalic.otf') format('opentype');
+    font-weight: 100;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/assets/fonts/Montserrat-VariableFont_wght.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+}
+  
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/assets/fonts/Montserrat-Italic-VariableFont_wght.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: italic;
+}
+
+* {
+    font-family: 'Montserrat' ,sans-serif;
+}
+
+.font-1 {
+    font-family: 'MaisonNeueExtended', sans-serif !important;
+}
+
+@layer utilities {
+    .scrollbar-none {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .scrollbar-none::-webkit-scrollbar {
+        display: none;
+    }
+}
