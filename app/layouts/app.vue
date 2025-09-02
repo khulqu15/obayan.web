@@ -6,7 +6,7 @@
           <ul class="flex items-center gap-1.5">
             <li class="inline-flex items-center relative text-gray-200 pe-1.5 last:pe-0 last:after:hidden after:absolute after:top-1/2 after:end-0 after:inline-block after:w-px after:h-3.5 after:bg-gray-300 after:rounded-full after:-translate-y-1/2 after:rotate-12 dark:text-neutral-200 dark:after:bg-neutral-700">
               <a class="shrink-0 inline-flex justify-center items-center size-8 rounded-md text-xl inline-block font-semibold focus:outline-hidden focus:opacity-80" href="#" aria-label="Brand">
-                <img src="/assets/logo.png" alt="Logo AlBerr">
+                <img src="/logo.png" alt="Logo AlBerr">
                 <Icon icon="mdi:hexagon-multiple" class="text-white text-[20px]" />
               </a>
 
@@ -160,7 +160,7 @@ useSeoMeta({
   ogDescription: description,
   ogType: 'website',
   ogUrl: url.value,
-  ogImage: '/assets/logo.png',
+  ogImage: 'logo.png',
   twitterCard: 'summary_large_image',
   twitterSite: config.public.twitterSite || undefined,
   themeColor: '#0ea5e9',
@@ -191,7 +191,7 @@ useHead({
         '@type': 'Organization',
         name: 'Pondok Pesantren Alberr',
         url: config.public.siteUrl,
-        logo: `${config.public.siteUrl}/assets/logo.png`,
+        logo: `${config.public.siteUrl}/logo.png`,
         sameAs: [
           'https://facebook.com/alberr',
           'https://instagram.com/alberr'

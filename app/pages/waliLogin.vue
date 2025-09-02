@@ -171,7 +171,7 @@
                   </a>
                 </div>
               </div>
-              <img src="/assets/pattern.png" alt="Mosque Pattern" class="absolute bottom-0 w-full opacity-80 -right-[60%]">
+              <!-- <img src="/assets/pattern.png" alt="Mosque Pattern" class="absolute bottom-0 w-full opacity-80 -right-[60%]"> -->
             </div>
           </div>
         </aside>
@@ -223,7 +223,7 @@ useSeoMeta({
   ogDescription: description,
   ogType: 'website',
   ogUrl: url.value,
-  ogImage: '/assets/logo.png',
+  ogImage: '/logo.png',
   twitterCard: 'summary_large_image',
   themeColor: '#0ea5e9',
   robots: 'noindex, nofollow, noarchive'

@@ -1,4 +1,3 @@
-<!-- pages/app/announcement.vue -->
 <template>
   <div class="space-y-4 p-6">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -248,7 +247,6 @@ const tableRows = computed(() =>
   }))
 )
 
-// -------- Helpers --------
 function fmtDateTime(ms?: number | null) {
   if (!ms) return ''
   try { return new Date(ms).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) } catch { return '' }
@@ -258,7 +256,6 @@ function nextOne(r: AnnouncementRow) {
   return next ? next.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-'
 }
 
-// -------- Actions in table --------
 function toggleActive(row: AnnouncementRow) {
   updateAnnouncement(row.id, { active: !row.active }, { refresh: false })
 }
@@ -266,7 +263,6 @@ function testSpeak(row: AnnouncementRow) {
   speakAnnouncement(row, { mark: false })
 }
 
-// -------- Speak helper --------
 function pickVoice(lang?: string, wantName?: string) {
   if (!supportsTTS) return undefined
   const list = voices.value.length ? voices.value : window.speechSynthesis.getVoices()
@@ -284,7 +280,6 @@ function pickVoice(lang?: string, wantName?: string) {
 }
 async function speakAnnouncement(r: AnnouncementRow, opts: { mark?: boolean } = {}) {
   if (!supportsTTS) return
-  // stop suara sebelumnya
   window.speechSynthesis.cancel()
 
   const text = `${r.title ? r.title + '. ' : ''}${r.message}`
@@ -306,7 +301,6 @@ async function speakAnnouncement(r: AnnouncementRow, opts: { mark?: boolean } = 
   window.speechSynthesis.speak(u)
 }
 
-// -------- Form state --------
 const showForm = ref(false)
 const formMode = ref<'create' | 'edit'>('create')
 const saving = ref(false)
@@ -338,7 +332,7 @@ const form = reactive<Omit<AnnouncementRow, 'id'>>({
 
 const daysTemp = ref<number[]>([])
 const timesTemp = ref<string[]>(['07:00'])
-const startDateInput = ref<string>('') // YYYY-MM-DD
+const startDateInput = ref<string>('')
 const endDateInput = ref<string>('')
 
 const schedulePreview = computed(() => {
@@ -414,6 +408,7 @@ function toYMD(ms: number) {
   const pad = (n:number)=>String(n).padStart(2,'0')
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
 }
+
 function ymdToMs(ymd: string | undefined): number | null {
   if (!ymd) return null
   const [y,m,d] = ymd.split('-').map(Number)

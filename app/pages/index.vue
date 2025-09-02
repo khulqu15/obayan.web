@@ -1,139 +1,170 @@
 <template>
   <div>
-    <!-- CMS mode -->
-    <ClientOnly v-if="cmsActive">
-      <component
-        v-for="s in enabledSections"
-        :is="resolveSection(s.key)"
-        :key="s.id"
-        v-bind="s.props || {}"
-      />
-    </ClientOnly>
-
-    <!-- Fallback ke layout statis (kalau belum ada data CMS atau status draft) -->
-    <template v-else>
-      <HeaderHero />
-      <InfoHero />
-      <BlogHero />
-      <HeroFacilityHero />
-      <InvitationHero />
-      <HeroProgramHero />
-    </template>
+    <HeroObayan />
+    <MarqueeLogos />
+    <FeatureBlocks />
+    <ProductCards />
+    <IntegrationToriId />
+    <StepsHowItWorks />
+    <PricingPlans />
+    <FAQAccordion />
+    <CTASection />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useRoute, useRuntimeConfig } from '#imports'
-import { useWeb } from '~/composables/data/useWeb'
+  import { computed } from 'vue'
+  import { useRoute, useRuntimeConfig, useSeoMeta, useHead } from '#imports'
+  import HeroObayan from '~/components/landing/HeroObayan.vue'
+  import MarqueeLogos from '~/components/landing/MarqueeLogos.vue'
+  import FeatureBlocks from '~/components/landing/FeatureBlocks.vue'
+  import ProductCards from '~/components/landing/ProductCards.vue'
+  import IntegrationToriId from '~/components/landing/IntegrationToriId.vue'
+  import StepsHowItWorks from '~/components/landing/StepsHowItWorks.vue'
+  import PricingPlans from '~/components/landing/PricingPlans.vue'
+  import FAQAccordion from '~/components/landing/FAQAccordion.vue'
+  import CTASection from '~/components/landing/CTASection.vue'
 
-import HeaderHero from '~/components/hero/HeaderHero.vue'
-import InfoHero from '~/components/hero/InfoHero.vue'
-import BlogHero from '~/components/hero/BlogHero.vue'
-import InvitationHero from '~/components/hero/InvitationHero.vue'
-import HeroFacilityHero from '~/components/hero/FacilityHero.vue'
-import HeroProgramHero from '~/components/hero/ProgramHero.vue'
+  
+  const route  = useRoute()
+  const config = useRuntimeConfig()
 
-const {
-  meta, sortedSections, subscribePage,
-} = useWeb()
+  const siteUrl   = config.public.siteUrl   || 'https://obayan.sencra.io'
+  const siteName  = config.public.siteName  || 'Obayan'
+  const twitterId = config.public.twitterSite || '@obayan_id'
+  const ogImage   = '/og-obayan.png'
+  const logoPath  = '/logo.png'
 
-onMounted(() => {
-  subscribePage('/')
-})
+  const pageTitle = 'Obayan · Platform Pesantren Modern'
+  const pageDesc  = 'Obayan menyatukan web profile, SIAKAD, pembayaran, akademik, absensi RFID & Fingerprint (ToriID), kunjungan, pelanggaran, dan perizinan dalam satu portal yang ringan dan menyenangkan.'
+  const pageUrl = computed(() => new URL(route.fullPath || '/', siteUrl).toString())
 
-const enabledSections = computed(() =>
-  sortedSections.value.filter(s => s.enabled !== false)
-)
+  useSeoMeta({
+    title: pageTitle,
+    description: pageDesc,
+    ogTitle: pageTitle,
+    ogDescription: pageDesc,
+    ogType: 'website',
+    ogSiteName: siteName,
+    ogUrl: pageUrl,
+    ogImage: () => siteUrl + ogImage,
+    ogLocale: 'id_ID',
+    twitterCard: 'summary_large_image',
+    twitterSite: () => twitterId,
+    themeColor: '#58CC02',
+    robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+    applicationName: siteName,
+    appleMobileWebAppTitle: siteName,
+    keywords: 'obayan, pesantren, siakad, rfid, fingerprint, toriid, absensi, pembayaran, qris'
+  })
 
-const cmsActive = computed(() =>
-  enabledSections.value.length > 0 && (meta.value?.status || 'draft') === 'published'
-)
-
-const registry: Record<string, any> = {
-  HeaderHero,
-  HeroHeaderHero: HeaderHero,
-  InfoHero,
-  HeroInfoHero: InfoHero,
-  BlogHero,
-  HeroBlogHero: BlogHero,
-  InvitationHero,
-  HeroInvitationHero: InvitationHero,
-  HeroFacilityHero,
-  HeroProgramHero,
-}
-
-const heroModules = import.meta.glob('~/components/hero/**/*.vue', { eager: true }) as Record<string, any>
-function resolveSection(key: string) {
-  if (registry[key]) return registry[key]
-  for (const path in heroModules) {
-    if (path.endsWith(`/${key}.vue`)) return heroModules[path].default
-  }
-  return {
-    template: `<div class="p-4">
-      <div class="rounded-lg border border-dashed text-sm p-4 text-gray-500 dark:text-neutral-400">
-        Unknown section: <b>{{ key }}</b>
-      </div>
-    </div>`,
-    props: { key: { type: String, required: true } },
-  }
-}
-
-const route = useRoute()
-const config = useRuntimeConfig()
-const fallbackTitle = 'Ponpes Alberr | Pesantren Inovatif & Informatif'
-const fallbackDescription = 'Selamat datang di Ponpes Alberr Pandaan: KMI/Diniyah, Tahfidz, MTs/MA, kegiatan santri, dan PPDB online.'
-const url = computed(() => new URL(route.fullPath || '/', config.public.siteUrl).toString())
-
-const seoTitle = computed(() => meta.value?.title || fallbackTitle)
-const seoDesc  = computed(() => meta.value?.description || fallbackDescription)
-const ogImage  = computed(() => meta.value?.ogImage || '/assets/logo.png')
-
-useSeoMeta({
-  title: seoTitle,
-  description: seoDesc,
-  ogTitle: seoTitle,
-  ogDescription: seoDesc,
-  ogType: 'website',
-  ogUrl: url,
-  ogImage: ogImage,
-  twitterCard: 'summary_large_image',
-  twitterSite: () => (config.public.twitterSite || undefined),
-  themeColor: '#0ea5e9',
-  robots: 'index, follow'
-})
-
-useHead({
-  link: [{ rel: 'canonical', href: url.value }],
-  script: [
-    {
-      type: 'application/ld+json',
-      children: computed(() => JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'WebSite',
-        name: config.public.siteName,
-        url: config.public.siteUrl,
-        potentialAction: {
-          '@type': 'SearchAction',
-          target: `${config.public.siteUrl}/search?q={query}`,
-          'query-input': 'required name=query'
-        }
-      }))
-    },
-    {
-      type: 'application/ld+json',
-      children: computed(() => JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        name: 'Pondok Pesantren Alberr',
-        url: config.public.siteUrl,
-        logo: `${config.public.siteUrl}/assets/logo.png`,
-        sameAs: [
-          'https://facebook.com/alberr',
-          'https://instagram.com/alberr'
-        ]
-      }))
-    }
-  ]
-})
+  useHead({
+    htmlAttrs: { lang: 'id' },
+    link: [
+      { rel: 'canonical', href: pageUrl.value },
+      { rel: 'icon', type: 'image/png', href: '/favicon.png' },
+      { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+      { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+      { rel: 'preconnect', href: 'https://fonts.googleapis.com' }
+    ],
+    meta: [
+      { name: 'format-detection', content: 'telephone=no' }
+    ],
+    script: [
+      // Organization
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: siteName,
+          url: siteUrl,
+          logo: siteUrl + logoPath,
+          sameAs: [
+            'https://instagram.com/obayan',
+            'https://www.youtube.com/@obayan',
+            'https://www.linkedin.com/company/obayan'
+          ]
+        })
+      },
+      // WebSite + SearchAction
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: siteName,
+          url: siteUrl,
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: `${siteUrl}/search?q={search_term_string}`,
+            'query-input': 'required name=search_term_string'
+          }
+        })
+      },
+      // SoftwareApplication (SaaS)
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'SoftwareApplication',
+          name: siteName,
+          applicationCategory: 'BusinessApplication',
+          operatingSystem: 'Web',
+          description: pageDesc,
+          url: siteUrl,
+          image: siteUrl + ogImage,
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: 'IDR',
+            price: '399000',
+            category: 'subscription',
+            availability: 'https://schema.org/InStock'
+          }
+        })
+      },
+      // FAQPage (selaraskan dengan konten FAQ di landing kamu)
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'Apa itu ToriID dan bagaimana integrasinya?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'ToriID adalah perangkat RFID + Fingerprint yang terhubung ke Obayan melalui gateway. Setiap scan dikirim ke endpoint aman bertanda tenant untuk absensi, izin, dan kunjungan secara real-time.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'Apakah bisa custom branding?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Bisa. Logo, warna, domain, hingga susunan halaman dapat disesuaikan tanpa mengubah kode inti.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'Metode pembayaran apa yang didukung?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'QRIS, Virtual Account, transfer manual dengan unggah bukti, dan rekonsiliasi otomatis.'
+              }
+            },
+            {
+              '@type': 'Question',
+              name: 'Bagaimana skema lisensi?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Berbasis langganan per modul (bulanan atau tahunan) dengan opsi diskon untuk multi-campus.'
+              }
+            }
+          ]
+        })
+      }
+    ]
+  })
 </script>

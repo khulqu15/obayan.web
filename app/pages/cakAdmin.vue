@@ -7,7 +7,7 @@
     <div class="relative z-10 w-full max-w-md">
       <div class="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border border-gray-200 dark:border-neutral-700 shadow-2xl rounded-2xl p-8">
         <div class="flex flex-col items-center gap-2 mb-6">
-          <img src="/assets/logo.png" alt="Logo" class="w-16 h-16 rounded-xl shadow" />
+          <img src="/logo.png" alt="Logo" class="w-16 h-16 rounded-xl shadow" />
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Admin Login</h1>
           <p class="text-sm text-gray-600 dark:text-gray-400">Masuk untuk mengelola sistem</p>
         </div>

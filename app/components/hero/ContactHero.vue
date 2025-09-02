@@ -2,10 +2,10 @@
   <section ref="wrapEl" class="relative overflow-hidden dark:bg-neutral-900 bg-gray-100" id="contact">
     <div aria-hidden="true" class="pointer-events-none absolute inset-0">
       <div ref="bg1" class="absolute top-10 -left-24 w-[42rem] h-[42rem] rounded-full opacity-40 blur-3xl
-                           bg-gradient-to-br from-blue-200 to-blue-200 dark:from-blue-900/40 dark:to-blue-900/30
+                           bg-gradient-to-br from-emerald-200 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-900/30
                            will-change-transform" />
       <div ref="bg2" class="absolute bottom-10 -right-24 w-[36rem] h-[36rem] rounded-full opacity-30 blur-3xl
-                           bg-gradient-to-tr from-blue-100 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/30
+                           bg-gradient-to-tr from-emerald-100 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-900/30
                            will-change-transform" />
       <div class="absolute inset-0 [mask-image:radial-gradient(70%_60%_at_50%_40%,#000,transparent_80%)]">
         <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(0,0,0,.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,.06)_1px,transparent_1px)] bg-[size:32px_32px] dark:bg-[linear-gradient(to_right,rgba(255,255,255,.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,.06)_1px,transparent_1px)]" />
@@ -16,34 +16,31 @@
       <div class="grid lg:grid-cols-12 gap-8 items-stretch">
         <div class="lg:col-span-6 space-y-7">
           <div class="space-y-3">
-            <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-400">
-              <span class="inline-block size-2 rounded-full bg-blue-600" />
+            <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+              <span class="inline-block size-2 rounded-full bg-emerald-600" />
               Hubungi Kami
             </p>
             <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-gray-900 dark:text-white">
-              Ada pertanyaan? <span class="text-blue-600 dark:text-blue-400">Mari terhubung</span>
+              Ada pertanyaan? <span class="text-emerald-600 dark:text-emerald-400">Mari terhubung</span>
             </h1>
-            <p class="text-gray-600 dark:text-neutral-300 max-w-xl">
-              Kami siap membantu menjawab pertanyaan Anda seputar informasi pendaftaran, kunjungan hingga kolaborasi program.
-            </p>
           </div>
 
           <div class="grid sm:grid-cols-2 gap-3">
             <div class="group rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60 backdrop-blur p-4 flex items-start gap-3 hover:shadow transition">
-              <ClientOnly><Icon icon="ph:map-pin" class="size-6 text-blue-600 dark:text-blue-400 mt-0.5" /></ClientOnly>
+              <ClientOnly><Icon icon="ph:map-pin" class="size-6 text-emerald-600 dark:text-emerald-400 mt-0.5" /></ClientOnly>
               <div class="min-w-0">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Alamat</h3>
                 <p class="text-xs text-gray-600 dark:text-neutral-300 line-clamp-3">
-                  Kantor Pondok Pesantren AlBerr
+                  {{ address }}
                 </p>
-                <button @click="copy(address)" class="mt-2 text-[12px] text-blue-600 hover:text-blue-700 inline-flex items-center gap-1">
+                <button @click="copy(address)" class="mt-2 text-[12px] text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1">
                   <ClientOnly><Icon icon="ph:copy" class="size-3.5" /></ClientOnly> Salin
                 </button>
               </div>
             </div>
 
             <div class="group rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60 backdrop-blur p-4 flex items-start gap-3 hover:shadow transition">
-              <ClientOnly><Icon icon="ph:paper-plane-tilt" class="size-6 text-blue-600 dark:text-blue-400 mt-0.5" /></ClientOnly>
+              <ClientOnly><Icon icon="ph:paper-plane-tilt" class="size-6 text-emerald-600 dark:text-emerald-400 mt-0.5" /></ClientOnly>
               <div class="min-w-0">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Email</h3>
                 <p class="text-xs text-gray-600 dark:text-neutral-300 truncate">{{ email }}</p>
@@ -59,7 +56,7 @@
             </div>
 
             <div class="group rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60 backdrop-blur p-4 flex items-start gap-3 hover:shadow transition">
-              <ClientOnly><Icon icon="ph:phone-call" class="size-6 text-blue-600 dark:text-blue-400 mt-0.5" /></ClientOnly>
+              <ClientOnly><Icon icon="ph:phone-call" class="size-6 text-emerald-600 dark:text-emerald-400 mt-0.5" /></ClientOnly>
               <div class="min-w-0">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Telepon</h3>
                 <p class="text-xs text-gray-600 dark:text-neutral-300">{{ phone }}</p>
@@ -75,7 +72,7 @@
             </div>
 
             <div class="group rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60 backdrop-blur p-4 flex items-start gap-3 hover:shadow transition">
-              <ClientOnly><Icon icon="ph:clock" class="size-6 text-blue-600 dark:text-blue-400 mt-0.5" /></ClientOnly>
+              <ClientOnly><Icon icon="ph:clock" class="size-6 text-emerald-600 dark:text-emerald-400 mt-0.5" /></ClientOnly>
               <div class="min-w-0">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Jam Layanan</h3>
                 <p class="text-xs text-gray-600 dark:text-neutral-300">Senin–Jumat 08.00–15.30 WIB</p>
@@ -89,32 +86,32 @@
             <div class="grid sm:grid-cols-2 gap-3">
               <label class="block">
                 <span class="text-xs text-gray-600 dark:text-neutral-300">Nama</span>
-                <input v-model="form.name" required type="text" class="mt-1 w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-600" />
+                <input v-model="form.name" required type="text" class="mt-1 w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-600" />
               </label>
               <label class="block">
                 <span class="text-xs text-gray-600 dark:text-neutral-300">Email</span>
-                <input v-model="form.email" required type="email" class="mt-1 w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-600" />
+                <input v-model="form.email" required type="email" class="mt-1 w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-600" />
               </label>
             </div>
             <label class="block">
               <span class="text-xs text-gray-600 dark:text-neutral-300">Subjek</span>
-              <input v-model="form.subject" required type="text" class="mt-1 w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-600" />
+              <input v-model="form.subject" required type="text" class="mt-1 w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-600" />
             </label>
             <label class="block">
               <span class="text-xs text-gray-600 dark:text-neutral-300">Pesan</span>
-              <textarea v-model="form.message" required rows="4" class="mt-1 w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-600"></textarea>
+              <textarea v-model="form.message" required rows="4" class="mt-1 w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-600"></textarea>
             </label>
 
             <div class="flex items-center justify-between pt-2">
               <p class="text-[12px] text-gray-500 dark:text-neutral-400">Dengan mengirim pesan, Anda setuju dengan ketentuan & privasi.</p>
-              <button :disabled="sending" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-60">
+              <button :disabled="sending" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-emerald-700 disabled:opacity-60">
                 <ClientOnly><Icon :icon="sending ? 'ph:loader' : 'ph:paper-plane-tilt'" class="size-4 animate-spin" :class="sending ? 'inline' : 'hidden'" /></ClientOnly>
                 <ClientOnly><Icon v-if="!sending" icon="ph:paper-plane-tilt" class="size-4" /></ClientOnly>
                 <span>{{ sending ? 'Mengirim…' : 'Kirim Pesan' }}</span>
               </button>
             </div>
 
-            <p v-if="feedback" class="text-[12px] mt-1" :class="ok ? 'text-blue-600' : 'text-red-600'">
+            <p v-if="feedback" class="text-[12px] mt-1" :class="ok ? 'text-emerald-600' : 'text-red-600'">
               {{ feedback }}
             </p>
           </form>
@@ -155,7 +152,7 @@
               Email Kami
             </a>
             <a :href="`https://wa.me/${waIntl}?text=${encodeURIComponent('Assalamu’alaikum, saya ingin bertanya tentang...')}`" target="_blank" rel="noopener"
-               class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-blue-700">
+               class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-emerald-700">
               <ClientOnly><Icon icon="ph:whatsapp-logo" class="size-4" /></ClientOnly>
               Chat WhatsApp
             </a>
@@ -170,12 +167,12 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { Icon } from '@iconify/vue'
 
-const address = 'Jl. Pesantren No. 1, Pandaan, Pasuruan, Jawa Timur 67156'
-const email = 'info@alberr.sch.id'
-const phone = '085856376399'
-const waIntl = '6285856376399'
-const mapQuery = encodeURIComponent('Pondok Pesantren Alberr, Pandaan, Pasuruan')
-const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3954.154822990777!2d112.68858257934568!3d-7.666498699999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7d9e72d847345%3A0xb58b63681aec9b37!2sPondok%20Pesantren%20ALBERR%20(Putra)%20-%20Karangjati%20Pandaan!5e0!3m2!1sid!2sid!4v1755450928977!5m2!1sid!2sid`
+const address = 'Jl. Remaja RT 6 RW 6, Martopuro, Purwosari, Pasuruan'
+const email = 'obayan@sencra.io'
+const phone = '0895396004952'
+const waIntl = '62895396004952'
+const mapQuery = encodeURIComponent('Jl. Remaja RT 6 RW 6, Martopuro, Purwosari, Pasuruan')
+const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d988.2888441620331!2d112.74534226966536!3d-7.773343570734113!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7d37a331c2ac9%3A0x4bf659be1fca851!2sSidescript%20Developer!5e0!3m2!1sen!2sid!4v1756724609264!5m2!1sen!2sid`
 const directionsHref = `https://www.google.com/maps/dir/?api=1&destination=${mapQuery}`
 
 const form = ref({ name: '', email: '', subject: '', message: '' })
