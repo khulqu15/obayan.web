@@ -31,7 +31,6 @@ export type SantriItem = {
   gen?: string
 }
 
-
 export type WaliProfile = {
   uid: string
   phone?: string

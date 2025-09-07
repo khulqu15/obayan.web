@@ -1,8 +1,7 @@
 <template>
   <div class="p-4">
-    <!-- ======= LIST VIEW (tanpa ?kode) ======= -->
+    <!-- ===================== LIST VIEW ===================== -->
     <template v-if="!kode">
-      <!-- Header -->
       <div class="w-full flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="flex items-center gap-2">
           <h1 class="text-xl font-semibold">Kelas</h1>
@@ -11,13 +10,19 @@
         <div class="flex items-center gap-2">
           <div class="relative">
             <Icon icon="lucide:search" class="size-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input v-model="q" type="search" placeholder="Cari kelas…"
-                  class="pl-8 pr-3 py-2 text-sm rounded-lg border border-gray-100 bg-white dark:bg-neutral-800 dark:border-neutral-700 w-64
-                        focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+            <input
+              v-model="q"
+              type="search"
+              placeholder="Cari kelas…"
+              class="pl-8 pr-3 py-2 text-sm rounded-lg border border-gray-100 bg-white dark:bg-neutral-800 dark:border-neutral-700 w-64
+                     focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+            />
           </div>
 
-          <select v-model="selectedCategory"
-                  class="px-3 py-2 text-sm rounded-lg border border-gray-100 bg-white dark:bg-neutral-800 dark:border-neutral-700">
+          <select
+            v-model="selectedCategory"
+            class="px-3 py-2 text-sm rounded-lg border border-gray-100 bg-white dark:bg-neutral-800 dark:border-neutral-700"
+          >
             <option value="all">Semua Kategori</option>
             <option value="putra">Putra</option>
             <option value="putri">Putri</option>
@@ -29,18 +34,22 @@
             Tampilkan Arsip
           </label>
 
-          <button @click="openCreateClass"
-                  class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+          <button
+            @click="openCreateClass"
+            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+          >
             <Icon icon="lucide:plus" class="size-4" /> Kelas Baru
           </button>
         </div>
       </div>
 
-      <!-- Grid Cards -->
       <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <div v-for="c in filtered" :key="c.id"
-            class="group rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-xs dark:bg-neutral-800 dark:border-neutral-700"
-            @click="goDetailByCode(c.code)">
+        <div
+          v-for="c in filtered"
+          :key="c.id"
+          class="group rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-xs dark:bg-neutral-800 dark:border-neutral-700"
+          @click="goDetailByCode(c.code)"
+        >
           <div class="relative h-28">
             <img v-if="c.coverUrl" :src="c.coverUrl" class="w-full h-full object-cover" />
             <div v-else class="w-full h-full" :style="{ background: c.color || '#2563eb' }"></div>
@@ -48,7 +57,7 @@
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
             <div class="absolute bottom-2 left-3 right-3 text-white">
               <div class="flex items-center justify-between">
-                <div>
+                <div class="min-w-0">
                   <h3 class="font-semibold leading-tight truncate">{{ c.title }}</h3>
                   <p class="text-xs opacity-90 truncate">
                     <span v-if="c.level">{{ c.level }}</span>
@@ -64,8 +73,7 @@
           </div>
 
           <div class="p-3 flex items-center justify-between">
-            <span class="inline-flex items-center gap-1 text-xs rounded-md px-2 py-1 border dark:border-neutral-700"
-                  :class="badgeClass(c.category)">
+            <span class="inline-flex items-center gap-1 text-xs rounded-md px-2 py-1 border dark:border-neutral-700" :class="badgeClass(c.category)">
               <Icon :icon="badgeIcon(c.category)" class="size-3.5" />
               {{ labelCategory(c.category) }}
             </span>
@@ -81,25 +89,37 @@
         </div>
       </div>
 
-      <!-- Context Menu -->
+      <!-- Context Menu (LIST) -->
       <teleport to="body">
-        <div v-if="menu.open"
-            class="fixed z-[80] min-w-48 rounded-lg border border-gray-100 bg-white shadow-lg dark:bg-neutral-800 dark:border-neutral-700"
-            :style="{ left: menu.x + 'px', top: menu.y + 'px' }"
-            @click.stop>
+        <div
+          v-if="menu.open"
+          class="fixed z-[80] min-w-48 rounded-lg border border-gray-100 bg-white shadow-lg dark:bg-neutral-800 dark:border-neutral-700"
+          :style="{ left: menu.x + 'px', top: menu.y + 'px' }"
+          @click.stop
+        >
           <div class="px-3 py-2 text-xs text-gray-500 dark:text-neutral-400 border-b dark:border-neutral-700">
             {{ menu.current?.title }}
           </div>
           <ul class="py-1 text-sm">
-            <li><button class="w-full text-left px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-neutral-700" @click="editCurrentClass">Edit</button></li>
+            <li>
+              <button class="w-full text-left px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-neutral-700" @click="editCurrentClass">
+                Edit
+              </button>
+            </li>
             <li v-if="!menu.current?.archived">
-              <button class="w-full text-left px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-neutral-700" @click="archiveCurrentClass">Arsipkan</button>
+              <button class="w-full text-left px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-neutral-700" @click="archiveCurrentClass">
+                Arsipkan
+              </button>
             </li>
             <li v-else>
-              <button class="w-full text-left px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-neutral-700" @click="unarchiveCurrentClass">Keluarkan dari Arsip</button>
+              <button class="w-full text-left px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-neutral-700" @click="unarchiveCurrentClass">
+                Keluarkan dari Arsip
+              </button>
             </li>
             <li>
-              <button class="w-full text-left px-3 py-1.5 hover:bg-gray-50 text-rose-600 dark:hover:bg-neutral-700" @click="deleteCurrentClass">Hapus</button>
+              <button class="w-full text-left px-3 py-1.5 hover:bg-gray-50 text-rose-600 dark:hover:bg-neutral-700" @click="deleteCurrentClass">
+                Hapus
+              </button>
             </li>
           </ul>
         </div>
@@ -122,12 +142,21 @@
                 <div>
                   <label class="text-xs text-gray-500 dark:text-neutral-400">Cover</label>
                   <div class="mt-1 flex items-center gap-3">
-                    <input type="file" accept="image/*" @change="onPickClassCover"
-                          class="block w-full text-sm file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-gray-100
-                                dark:file:bg-neutral-700 dark:file:text-neutral-200" />
-                    <button v-if="classCoverPreview" type="button"
-                            class="px-2 py-1 text-xs rounded-md border border-gray-200 hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
-                            @click="clearClassCover">Hapus</button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      @change="onPickClassCover"
+                      class="block w-full text-sm file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-gray-100
+                             dark:file:bg-neutral-700 dark:file:text-neutral-200"
+                    />
+                    <button
+                      v-if="classCoverPreview"
+                      type="button"
+                      class="px-2 py-1 text-xs rounded-md border border-gray-200 hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                      @click="clearClassCover"
+                    >
+                      Hapus
+                    </button>
                   </div>
                   <div v-if="classCoverPreview" class="mt-2 rounded-lg overflow-hidden border border-gray-200 dark:border-neutral-700">
                     <img :src="classCoverPreview" alt="cover" class="w-full h-36 object-cover">
@@ -137,21 +166,31 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
                     <label class="text-xs text-gray-500 dark:text-neutral-400">Nama Kelas</label>
-                    <input v-model.trim="classForm.title" type="text"
-                          class="mt-1 w-full rounded-md border-gray-300 border bg-white dark:bg-neutral-900 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" required />
+                    <input
+                      v-model.trim="classForm.title"
+                      type="text"
+                      class="mt-1 w-full rounded-md border-gray-300 border bg-white dark:bg-neutral-900 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                      required
+                    />
                   </div>
                   <div>
                     <label class="text-xs text-gray-500 dark:text-neutral-400">Level/Paralel</label>
-                    <input v-model.trim="classForm.level" type="text" placeholder="Contoh: 1 SMP A"
-                          class="mt-1 w-full rounded-md border-gray-300 border bg-white dark:bg-neutral-900 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                    <input
+                      v-model.trim="classForm.level"
+                      type="text"
+                      placeholder="Contoh: 1 SMP A"
+                      class="mt-1 w-full rounded-md border-gray-300 border bg-white dark:bg-neutral-900 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    />
                   </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
                     <label class="text-xs text-gray-500 dark:text-neutral-400">Kategori</label>
-                    <select v-model="classForm.category"
-                            class="mt-1 w-full rounded-md border-gray-300 border bg-white dark:bg-neutral-900 dark:border-neutral-700 px-3 py-2 text-sm">
+                    <select
+                      v-model="classForm.category"
+                      class="mt-1 w-full rounded-md border-gray-300 border bg-white dark:bg-neutral-900 dark:border-neutral-700 px-3 py-2 text-sm"
+                    >
                       <option value="putra">Putra</option>
                       <option value="putri">Putri</option>
                       <option value="campuran">Campuran</option>
@@ -159,20 +198,31 @@
                   </div>
                   <div>
                     <label class="text-xs text-gray-500 dark:text-neutral-400">Ruang</label>
-                    <input v-model.trim="classForm.room" type="text"
-                          class="mt-1 w-full rounded-md border-gray-300 border bg-white dark:bg-neutral-900 dark:border-neutral-700 px-3 py-2 text-sm" />
+                    <input
+                      v-model.trim="classForm.room"
+                      type="text"
+                      class="mt-1 w-full rounded-md border-gray-300 border bg-white dark:bg-neutral-900 dark:border-neutral-700 px-3 py-2 text-sm"
+                    />
                   </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
                     <label class="text-xs text-gray-500 dark:text-neutral-400">Warna</label>
-                    <input v-model="classForm.color" type="color" class="mt-1 h-9 rounded-md border w-full bg-white border-gray-300 dark:bg-neutral-900 dark:border-neutral-700 px-1 py-1 text-sm" />
+                    <input
+                      v-model="classForm.color"
+                      type="color"
+                      class="mt-1 h-9 rounded-md border w-full bg-white border-gray-300 dark:bg-neutral-900 dark:border-neutral-700 px-1 py-1 text-sm"
+                    />
                   </div>
                   <div>
                     <label class="text-xs text-gray-500 dark:text-neutral-400">Kode Kelas</label>
-                    <input v-model.trim="classForm.code" type="text" placeholder="Auto jika kosong"
-                          class="mt-1 w-full rounded-md border-gray-300 border bg-white dark:bg-neutral-900 dark:border-neutral-700 px-3 py-2 text-sm" />
+                    <input
+                      v-model.trim="classForm.code"
+                      type="text"
+                      placeholder="Auto jika kosong"
+                      class="mt-1 w-full rounded-md border-gray-300 border bg-white dark:bg-neutral-900 dark:border-neutral-700 px-3 py-2 text-sm"
+                    />
                   </div>
                 </div>
 
@@ -183,22 +233,19 @@
                   </button>
                 </div>
               </form>
-
             </div>
           </div>
         </div>
       </teleport>
     </template>
 
-    <!-- ======= DETAIL VIEW (dengan ?kode) ======= -->
+    <!-- ===================== DETAIL VIEW ===================== -->
     <template v-else>
-      <!-- Jika kode ada tapi kelas belum ditemukan -->
       <div v-if="kode && !klass" class="rounded-xl border p-4 dark:border-neutral-700">
         Kelas dengan kode <b>{{ kode }}</b> tidak ditemukan atau sedang memuat...
       </div>
 
       <div v-else class="space-y-4">
-        <!-- Header -->
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-xl font-semibold">{{ klass?.title }}</h1>
@@ -215,14 +262,13 @@
           </div>
         </div>
 
-        <!-- Cover -->
         <div class="h-36 w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-neutral-700 relative">
           <img v-if="klass?.coverUrl" :src="klass.coverUrl" class="w-full h-full object-cover" />
           <div v-else class="w-full h-full" :style="{ background: klass?.color || '#2563eb' }"></div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
         </div>
 
-        <!-- Tabs + Quick Add -->
+        <!-- Tabs -->
         <div class="border-b border-gray-100 dark:border-neutral-700 flex gap-3 text-sm items-center">
           <button
             v-for="t in tabs"
@@ -245,11 +291,14 @@
           </button>
         </div>
 
-        <!-- Content -->
         <div>
           <!-- Stream -->
           <div v-if="tab==='Stream'" class="grid gap-3">
-            <div v-for="item in latestFeed" :key="item.key" class="rounded-xl border border-gray-200 p-3 bg-white dark:bg-neutral-800 dark:border-neutral-700">
+            <div
+              v-for="item in latestFeed"
+              :key="item.key"
+              class="rounded-xl border border-gray-200 p-3 bg-white dark:bg-neutral-800 dark:border-neutral-700"
+            >
               <div class="text-xs text-gray-500 dark:text-neutral-400">{{ item.type }} • {{ formatDateTime(item.createdAt) }}</div>
               <div class="mt-1 font-medium">{{ item.title }}</div>
               <div class="text-sm text-gray-600 dark:text-neutral-300" v-if="item.desc">{{ item.desc }}</div>
@@ -257,8 +306,13 @@
             <div v-if="!latestFeed.length" class="text-sm text-gray-500 dark:text-neutral-400">Belum ada aktivitas.</div>
           </div>
 
+          <!-- Tugas -->
           <div v-else-if="tab==='Tugas'" class="grid gap-3">
-            <div v-for="t in tasks" :key="t.id" class="rounded-xl border border-gray-200 p-3 bg-white dark:bg-neutral-800 dark:border-neutral-700">
+            <div
+              v-for="t in tasks"
+              :key="t.id"
+              class="rounded-xl border border-gray-200 p-3 bg-white dark:bg-neutral-800 dark:border-neutral-700"
+            >
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                   <div class="font-semibold truncate">{{ t.title }}</div>
@@ -274,8 +328,13 @@
             <div v-if="!tasks.length" class="text-sm text-gray-500 dark:text-neutral-400">Belum ada tugas.</div>
           </div>
 
+          <!-- Materi -->
           <div v-else-if="tab==='Materi'" class="grid gap-3">
-            <div v-for="m in materials" :key="m.id" class="rounded-xl border border-gray-200 p-3 bg-white dark:bg-neutral-800 dark:border-neutral-700">
+            <div
+              v-for="m in materials"
+              :key="m.id"
+              class="rounded-xl border border-gray-200 p-3 bg-white dark:bg-neutral-800 dark:border-neutral-700"
+            >
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                   <div class="font-semibold truncate">{{ m.title }}</div>
@@ -291,10 +350,15 @@
             <div v-if="!materials.length" class="text-sm text-gray-500 dark:text-neutral-400">Belum ada materi.</div>
           </div>
 
+          <!-- Forum -->
           <div v-else-if="tab==='Forum'" class="grid gap-3">
-            <div v-for="p in posts" :key="p.id" class="rounded-xl border border-gray-200 p-3 bg-white dark:bg-neutral-800 dark:border-neutral-700">
+            <div
+              v-for="p in posts"
+              :key="p.id"
+              class="rounded-xl border border-gray-200 p-3 bg-white dark:bg-neutral-800 dark:border-neutral-700"
+            >
               <div class="text-xs text-gray-500 dark:text-neutral-400">{{ formatDateTime(p.createdAt) }}</div>
-              <div class="font-semibold mt-0.5">{{ p.title }}</div>
+              <div class="font-semibold mt-0.5 truncate">{{ p.title }}</div>
               <div class="text-sm text-gray-600 dark:text-neutral-300 mt-1" v-if="p.content">{{ p.content }}</div>
               <div class="mt-2 flex gap-2">
                 <button class="px-2 py-1 text-xs rounded-md border dark:border-neutral-700" @click="openPostModal(p)">Edit</button>
@@ -303,10 +367,180 @@
             </div>
             <div v-if="!posts.length" class="text-sm text-gray-500 dark:text-neutral-400">Belum ada diskusi.</div>
           </div>
+
+          <!-- ===================== ANGGOTA ===================== -->
+          <div v-else-if="tab==='Anggota'" class="grid lg:grid-cols-12 gap-4">
+            <!-- Kiri: sumber santri (belum anggota) + multi-select -->
+            <div class="lg:col-span-7 space-y-3">
+              <div class="rounded-xl border border-gray-200 p-3 bg-white dark:bg-neutral-800 dark:border-neutral-700">
+                <div class="flex flex-wrap items-center gap-2">
+                  <!-- Autocomplete add-one -->
+                  <div class="relative">
+                    <Icon icon="lucide:user-plus" class="size-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      v-model="autocompleteQuery"
+                      type="search"
+                      placeholder="Tambah cepat: ketik nama/ortu/kamar lalu Enter"
+                      @keydown.enter.prevent="handleAutocompleteEnter"
+                      @input="showAutocomplete = true"
+                      class="w-80 pl-8 pr-3 py-2 text-sm rounded-lg border border-gray-100 bg-white
+                             dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    />
+                    <!-- dropdown suggestion -->
+                    <div
+                      v-if="showAutocomplete && autocompleteQuery && filteredSuggestions.length"
+                      class="absolute z-20 mt-1 w-[28rem] rounded-lg border border-gray-200 bg-white shadow-lg
+                             dark:bg-neutral-800 dark:border-neutral-700 max-h-72 overflow-y-auto"
+                    >
+                      <button
+                        v-for="opt in filteredSuggestions"
+                        :key="opt.id"
+                        type="button"
+                        class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700"
+                        :disabled="addingIds.has(opt.id)"
+                        @click="addMembers([opt.id]); resetAutocomplete()"
+                      >
+                        <div class="font-medium truncate">{{ opt.santri }}</div>
+                        <div class="text-xs text-gray-500 dark:text-neutral-400 truncate">
+                          {{ opt.walisantri || '-' }} · Gen {{ opt.gen || '-' }} · {{ opt.kamar || '-' }}
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Filter daftar -->
+                  <div class="relative">
+                    <Icon icon="lucide:search" class="size-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      v-model="santriFilter"
+                      type="search"
+                      placeholder="Cari santri (belum anggota)…"
+                      class="pl-8 pr-3 py-2 text-sm rounded-lg border border-gray-100 bg-white dark:bg-neutral-800 dark:border-neutral-700 w-64
+                             focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    />
+                  </div>
+
+                  <div class="ml-auto flex items-center gap-2">
+                    <label class="inline-flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        v-model="selectAllVisible"
+                        @change="toggleSelectAllVisible"
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      >
+                      Pilih semua tampak
+                    </label>
+                    <button
+                      :disabled="!selectedAddIds.size"
+                      class="py-2 px-3 inline-flex items-center gap-x-2 text-sm rounded-lg
+                             bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                      @click="addMembers(Array.from(selectedAddIds))"
+                    >
+                      <Icon icon="lucide:user-plus" class="size-4" /> Tambah terpilih ({{ selectedAddIds.size }})
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-xl border border-gray-200 bg-white dark:bg-neutral-800 dark:border-neutral-700 overflow-hidden">
+                <div class="px-3 py-2 text-xs text-gray-500 dark:text-neutral-400 border-b dark:border-neutral-700">
+                  {{ availableSantri.length }} santri belum bergabung
+                </div>
+                <div class="max-h-[60vh] overflow-y-auto divide-y divide-gray-100 dark:divide-neutral-700">
+                  <label
+                    v-for="s in visibleAvailableSantri"
+                    :key="s.id"
+                    class="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-700/50"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="s.id"
+                      :checked="selectedAddIds.has(s.id)"
+                      @change="toggleSelectOne(s.id, $event)"
+                      class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <div class="min-w-0">
+                      <div class="font-medium truncate">{{ s.santri }}</div>
+                      <div class="text-xs text-gray-500 dark:text-neutral-400 truncate">
+                        {{ s.walisantri || '-' }} · Gen {{ s.gen || '-' }} · {{ s.kamar || '-' }}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      class="ml-auto px-2 py-1 text-xs rounded-md border dark:border-neutral-700 disabled:opacity-50"
+                      :disabled="addingIds.has(s.id)"
+                      @click.stop.prevent="addMembers([s.id])"
+                    >
+                      <span v-if="addingIds.has(s.id)">
+                        <Icon icon="ph:spinner" class="size-3 animate-spin" />
+                      </span>
+                      <span v-else>Tambah</span>
+                    </button>
+                  </label>
+                  <div v-if="!visibleAvailableSantri.length" class="p-3 text-sm text-gray-500 dark:text-neutral-400">
+                    Tidak ada hasil. Coba ubah kata kunci.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kanan: daftar anggota -->
+            <div class="lg:col-span-5 space-y-3">
+              <div class="rounded-xl border border-gray-200 p-3 bg-white dark:bg-neutral-800 dark:border-neutral-700">
+                <div class="flex items-center gap-2">
+                  <Icon icon="lucide:users" class="size-4" />
+                  <div class="font-medium">Anggota Kelas</div>
+                  <div class="text-xs text-gray-500 dark:text-neutral-400">({{ membersDetailed.length }})</div>
+                  <div class="ml-auto relative">
+                    <Icon icon="lucide:search" class="size-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      v-model="memberFilter"
+                      type="search"
+                      placeholder="Cari anggota…"
+                      class="pl-8 pr-3 py-1.5 text-sm rounded-lg border border-gray-100 bg-white dark:bg-neutral-800 dark:border-neutral-700 w-56
+                             focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-xl border border-gray-200 bg-white dark:bg-neutral-800 dark:border-neutral-700 overflow-hidden">
+                <div class="max-h-[60vh] overflow-y-auto divide-y divide-gray-100 dark:divide-neutral-700">
+                  <div
+                    v-for="m in visibleMembers"
+                    :key="m.id"
+                    class="flex items-center gap-3 px-3 py-2"
+                  >
+                    <div class="min-w-0">
+                      <div class="font-medium truncate">{{ m.santri }}</div>
+                      <div class="text-xs text-gray-500 dark:text-neutral-400 truncate">
+                        {{ m.walisantri || '-' }} · Gen {{ m.gen || '-' }} · {{ m.kamar || '-' }}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      class="ml-auto px-2 py-1 text-xs rounded-md border text-rose-600 dark:border-neutral-700"
+                      :disabled="removingIds.has(m.id)"
+                      @click="removeMember(m.id)"
+                    >
+                      <span v-if="removingIds.has(m.id)">
+                        <Icon icon="ph:spinner" class="size-3 animate-spin" />
+                      </span>
+                      <span v-else>Hapus</span>
+                    </button>
+                  </div>
+                  <div v-if="!visibleMembers.length" class="p-3 text-sm text-gray-500 dark:text-neutral-400">
+                    Belum ada anggota.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- =================== END ANGGOTA =================== -->
         </div>
       </div>
 
-      <!-- Modal gabungan (Tugas/Materi/Forum) -->
+      <!-- Item Modal (Tugas/Materi/Forum) -->
       <teleport to="body">
         <div v-if="itemModal.open" class="fixed inset-0 z-[90]">
           <div class="absolute inset-0 bg-black/40" @click="closeItemModal" />
@@ -314,7 +548,7 @@
             <div class="w-full max-w-lg rounded-2xl border border-gray-100 bg-white shadow-xl dark:bg-neutral-800 dark:border-neutral-700">
               <div class="p-4 border-b border-gray-200 dark:border-neutral-700 font-semibol flex justify-between">
                 <div>
-                    {{ itemModal.title }}
+                  {{ itemModal.title }}
                 </div>
                 <div @click="closeItemModal"><Icon icon="material-symbols:close-rounded" width="24" height="24" /></div>
               </div>
@@ -384,13 +618,19 @@ import {
   type MaterialItem,
   type PostItem
 } from '~/composables/data/useClass'
+import { useSantri, type SantriRow } from '~/composables/data/useSantri'
+import { ref as dbRef, onValue, off, update, get } from 'firebase/database'
+import { useNuxtApp } from '#app'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Kelas' } })
 
 const route = useRoute()
 const router = useRouter()
+const addingIds = ref<Set<string>>(new Set())
+const removingIds = ref<Set<string>>(new Set())
+const membershipKey = ref<string>('')
 
-/** useClass composable */
+/** ===== useClass (list + detail + CRUD) ===== */
 const {
   // List
   filtered, q, selectedCategory, showArchived, subscribeAll,
@@ -400,21 +640,28 @@ const {
   // Detail CRUD
   createTask, updateTask, deleteTask,
   createMaterial, updateMaterial, deleteMaterial,
-  createPost, updatePost, deletePost
+  createPost, updatePost, deletePost, currentCode, currentId
 } = useClass()
+
+/** ===== Santri source ===== */
+const { rows: santriRows, subscribeSantri, unsubscribeSantri } = useSantri()
 
 /** ===== Router state ===== */
 const kode = ref<string | null>(null)
-watch(() => route.query.kode, async (v) => {
-  kode.value = typeof v === 'string' ? v.toUpperCase() : null
-  if (kode.value) {
-    await subscribeByCode(kode.value)
-  } else {
-    unbindDetail()
-  }
-}, { immediate: true })
+watch(
+  () => route.query.kode,
+  async (v) => {
+    kode.value = typeof v === 'string' ? v.toUpperCase() : null
+    if (kode.value) {
+      await subscribeByCode(kode.value)
+    } else {
+      unbindDetail()
+    }
+  },
+  { immediate: true }
+)
 
-/** ====== LIST VIEW: context menu & class modal ====== */
+/** ===== LIST VIEW: context menu & class modal ===== */
 const menu = reactive<{ open:boolean; x:number; y:number; current:ClassItem|null }>({ open:false, x:0, y:0, current:null })
 function openMenu(c: ClassItem, e: MouseEvent) {
   menu.current = c
@@ -438,6 +685,25 @@ async function deleteCurrentClass(){
 }
 async function archiveCurrentClass(){ if (menu.current) await archiveClass(menu.current.id, true); menu.open=false }
 async function unarchiveCurrentClass(){ if (menu.current) await archiveClass(menu.current.id, false); menu.open=false }
+
+async function resolveMembershipKey() {
+  const idKey = currentId.value || ''
+  const codeKey = (klass.value?.code || currentCode.value || '').toString()
+  let chosen = idKey || codeKey
+  try {
+    if (codeKey) {
+      const sCode = await get(dbRef($realtimeDb, `alberr/class_members/${codeKey}`))
+      if (sCode.exists()) chosen = codeKey
+    }
+  } catch (e) {
+    console.warn('resolveMembershipKey:', e)
+  }
+  membershipKey.value = chosen
+  bindMembers(chosen)
+}
+
+watch([currentId, currentCode], () => { resolveMembershipKey() })
+watch(klass, () => { resolveMembershipKey() })
 
 const classModal = reactive<{ open:boolean; mode:'create'|'edit'; id?:string }>(
   { open:false, mode:'create', id: undefined }
@@ -499,9 +765,9 @@ function onPickClassCover(e: Event) {
 }
 function clearClassCover() { classCoverFile.value=null; classCoverPreview.value=null }
 
-/** ====== DETAIL VIEW: tabs & item modal ====== */
-const tab = ref<'Stream'|'Tugas'|'Materi'|'Forum'>('Stream')
-const tabs = ['Stream','Tugas','Materi','Forum'] as const
+/** ===== DETAIL VIEW: tabs & item modal ===== */
+const tab = ref<'Stream'|'Tugas'|'Materi'|'Forum'|'Anggota'>('Stream')
+const tabs = ['Stream','Tugas','Materi','Forum','Anggota'] as const
 
 const itemModal = reactive<{ open:boolean; title:string; kind:'Tugas'|'Materi'|'Forum'; editingId?:string | null }>({
   open:false, title:'', kind:'Tugas', editingId:null
@@ -526,7 +792,6 @@ function badgeClass(cat: ClassCategory) {
     default:      return `${base} text-indigo-700 dark:text-indigo-300`
   }
 }
-
 function badgeIcon(cat: ClassCategory) {
   return cat === 'putra'
     ? 'lucide:badge-check'
@@ -534,7 +799,6 @@ function badgeIcon(cat: ClassCategory) {
     ? 'lucide:sparkles'
     : 'lucide:users'
 }
-
 function labelCategory(cat: ClassCategory) {
   return cat === 'putra' ? 'Putra' : cat === 'putri' ? 'Putri' : 'Campuran'
 }
@@ -579,19 +843,171 @@ async function saveItemModal() {
   }
 }
 
+/** ===== Anggota: state & helpers ===== */
+const { $realtimeDb } = useNuxtApp()
+
+// id santri yang menjadi anggota kelas ini
+const memberIds = ref<string[]>([])
+let stopMembers: (() => void) | null = null
+
+function bindMembers(key: string) {
+  unbindMembers()
+  if (!key) return
+  const r = dbRef($realtimeDb, `alberr/class_members/${key}`)
+  const handler = (snap:any) => {
+    const val = snap.val() || {}
+    memberIds.value = Object.keys(val)
+  }
+  onValue(r, handler)
+  stopMembers = () => off(r, 'value', handler)
+}
+
+function unbindMembers(){ if (stopMembers) { stopMembers(); stopMembers = null } }
+
+watch(klass, (k) => {
+  if (k?.id) bindMembers(k.id)
+  else unbindMembers()
+})
+
+// detail anggota (gabung id -> SantriRow)
+const membersDetailed = computed<SantriRow[]>(() => {
+  const set = new Set(memberIds.value)
+  return santriRows.value.filter(s => set.has(s.id))
+})
+
+// santri yang belum jadi anggota
+const availableSantri = computed<SantriRow[]>(() => {
+  const set = new Set(memberIds.value)
+  return santriRows.value.filter(s => !set.has(s.id))
+})
+
+/* Autocomplete add-one */
+const autocompleteQuery = ref('')
+const showAutocomplete = ref(false)
+const filteredSuggestions = computed(() => {
+  const q = autocompleteQuery.value.trim().toLowerCase()
+  if (!q) return []
+  return availableSantri.value
+    .filter(s =>
+      [s.santri, s.walisantri, s.kamar, s.gen].some(v => (v || '').toLowerCase().includes(q))
+    )
+    .slice(0, 12)
+})
+function resetAutocomplete() {
+  autocompleteQuery.value = ''
+  showAutocomplete.value = false
+}
+function handleAutocompleteEnter() {
+  const first = filteredSuggestions.value[0]
+  if (first) addMembers([first.id])
+  resetAutocomplete()
+}
+
+/* Multi-select daftar available */
+const santriFilter = ref('')
+const memberFilter = ref('')
+
+const visibleAvailableSantri = computed(() => {
+  const q = santriFilter.value.trim().toLowerCase()
+  const base = availableSantri.value
+  if (!q) return base.slice(0, 300)
+  return base.filter(s =>
+    [s.santri, s.walisantri, s.kamar, s.gen].some(v => (v || '').toLowerCase().includes(q))
+  ).slice(0, 300)
+})
+const visibleMembers = computed(() => {
+  const q = memberFilter.value.trim().toLowerCase()
+  const base = membersDetailed.value
+  if (!q) return base
+  return base.filter(s =>
+    [s.santri, s.walisantri, s.kamar, s.gen].some(v => (v || '').toLowerCase().includes(q))
+  )
+})
+
+const selectedAddIds = ref<Set<string>>(new Set())
+const selectAllVisible = ref(false)
+function toggleSelectAllVisible() {
+  const next = new Set(selectedAddIds.value)
+  if (selectAllVisible.value) {
+    visibleAvailableSantri.value.forEach(s => next.add(s.id))
+  } else {
+    visibleAvailableSantri.value.forEach(s => next.delete(s.id))
+  }
+  selectedAddIds.value = next
+}
+function toggleSelectOne(id: string, ev: Event) {
+  const checked = (ev.target as HTMLInputElement).checked
+  const next = new Set(selectedAddIds.value)
+  checked ? next.add(id) : next.delete(id)
+  selectedAddIds.value = next
+}
+
+function toast(msg: string) {
+  console.log(msg)
+}
+
+async function addMembers(ids: string[]) {
+  const key = membershipKey.value
+  if (!key || !ids?.length) return
+
+  const existing = new Set(memberIds.value)
+  const toAdd = ids.filter(id => !existing.has(id))
+  if (!toAdd.length) return
+
+  const payload: Record<string, any> = {}
+  const now = Date.now()
+
+  for (const sid of toAdd) {
+    // tulis ke key aktif (id atau code)
+    payload[`alberr/class_members/${key}/${sid}`] = { addedAt: now }
+    // index balik selalu pakai id (stabil)
+    if (currentId.value) payload[`alberr/santri_classes/${sid}/${currentId.value}`] = true
+  }
+
+  // OPTIONAL MIGRATION: kalau key=code dan id tersedia, mirror ke id juga
+  if (key === currentCode.value && currentId.value) {
+    for (const sid of toAdd) {
+      payload[`alberr/class_members/${currentId.value}/${sid}`] = { addedAt: now }
+    }
+  }
+
+  await update(dbRef($realtimeDb), payload)
+}
+
+async function removeMember(santriId: string) {
+  const key = membershipKey.value
+  if (!key) return
+
+  const payload: Record<string, any> = {}
+  payload[`alberr/class_members/${key}/${santriId}`] = null
+  if (currentId.value) payload[`alberr/santri_classes/${santriId}/${currentId.value}`] = null
+
+  // OPTIONAL MIGRATION: hapus mirror di id bila key=code
+  if (key === currentCode.value && currentId.value) {
+    payload[`alberr/class_members/${currentId.value}/${santriId}`] = null
+  }
+
+  await update(dbRef($realtimeDb), payload)
+}
+
 /** ===== Common actions ===== */
 function goDetailByCode(code?: string) { if (!code) return; router.push({ path: '/app/class', query: { kode: code } }) }
 function goBack(){ router.push({ path: '/app/class' }) }
 
 /** ===== Lifecycle ===== */
 onMounted(() => {
-  // Selalu bind list untuk tampilan awal tanpa kode
+  // list kelas
   subscribeAll()
-  // @ts-ignore (opsional preline)
+  // santri source untuk anggota
+  subscribeSantri()
+  // preline (opsional)
+  // @ts-ignore
   window.HSStaticMethods?.autoInit?.()
 })
 onUnmounted(() => {
   unbindDetail()
+  unbindMembers()
+  unsubscribeSantri()
 })
 </script>
 

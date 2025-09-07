@@ -81,7 +81,6 @@
           </div>
         </li>
 
-        <!-- skeleton -->
         <li v-if="isInitialLoading" class="space-y-2">
           <div v-for="i in 3" :key="'s-'+i" class="animate-pulse rounded-lg border border-gray-200 dark:border-neutral-700 p-3">
             <div class="h-3 w-1/3 bg-gray-200 dark:bg-neutral-700 rounded mb-2"></div>
@@ -94,7 +93,6 @@
         </li>
       </ul>
 
-      <!-- sentinel lazyload -->
       <div ref="sentinel" class="h-8"></div>
     </div>
   </div>

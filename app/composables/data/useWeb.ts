@@ -189,6 +189,10 @@ export function useWeb() {
     sectionsOrder.value = []
   }
 
+  function setActivePath(p: string) {
+    currentPath.value = normalizePath(p)
+  }
+
   async function ensurePage(path: string, init?: Partial<WebPageMeta>) {
     const key = pathToKey(path)
     const mRef = dref($realtimeDb, `alberr/web/pages/${key}/meta`)
@@ -337,9 +341,13 @@ export function useWeb() {
     return id
   }
 
-  async function updateSection(id: string, patch: { key?: string; enabled?: boolean; props?: any }) {
-    const key = currentKey.value
-    const node = dref($realtimeDb, `alberr/web/pages/${key}/sections/${id}`)
+  async function updateSection(
+    id: string,
+    patch: { key?: string; enabled?: boolean; props?: any },
+    pathOverride?: string
+  ) {
+    const targetKey = pathOverride ? pathToKey(normalizePath(pathOverride)) : currentKey.value
+    const node = dref($realtimeDb, `alberr/web/pages/${targetKey}/sections/${id}`)
     const data: any = { updatedAt: serverTimestamp() }
     if (patch.key !== undefined) data.key = patch.key
     if (patch.enabled !== undefined) data.enabled = !!patch.enabled
@@ -405,13 +413,21 @@ export function useWeb() {
     await reorderSections(order)
   }
 
-  /* ===== Media ops (for section props) ===== */
-
-  async function uploadMedia(file: File) {
+  async function uploadMedia(
+    file: File,
+    opts?: { folder?: string; pathOverride?: string; filenamePrefix?: string }
+  ) {
     if (!isClient || !$storage) return { url: '', path: '' }
-    const key = currentKey.value
+    const key = opts?.pathOverride ? pathToKey(normalizePath(opts.pathOverride)) : currentKey.value
     const ext = (file.name?.split('.').pop() || 'bin').toLowerCase()
-    const path = `alberr/web/media/${key}/${Date.now()}.${ext}`
+    const stamp = Date.now()
+    const prefix = (opts?.filenamePrefix || '').replace(/[^a-z0-9_-]/gi, '')
+    const fname = `${prefix ? prefix + '_' : ''}${stamp}.${ext}`
+    const folder = (opts?.folder ?? 'media').replace(/^\/+|\/+$/g, '')
+    const path = folder
+      ? `alberr/web/${folder}/${key}/${fname}`
+      : `alberr/web/${key}/${fname}`
+
     const sr = sref($storage, path)
     const snap = await uploadBytes(sr, file, { contentType: file.type || 'application/octet-stream' })
     const url = await getDownloadURL(sref($storage, snap.metadata.fullPath))
@@ -422,8 +438,6 @@ export function useWeb() {
     if (!isClient || !$storage || !path) return
     try { await deleteObject(sref($storage, path)) } catch {}
   }
-
-  /* ===== Page CRUD ===== */
 
   async function createPage(input: { path: string; title?: string; description?: string; status?: WebStatus }) {
     const normalized = normalizePath(input.path)
@@ -525,32 +539,18 @@ export function useWeb() {
   })
 
   return {
-    // state
     loading, error,
-
-    // list
     pages, subscribePages, unbindPages,
-
-    // current detail
     currentPath, currentKey, meta, sections, sectionsOrder,
     sortedSections, enabledSections,
     subscribePage, unbindDetail,
-
-    // meta ops
     upsertMeta, uploadOgImage, deleteOgImage,
-
-    // sections ops
     addSection, updateSection, setSectionEnabled,
     duplicateSection, deleteSection, reorderSections, moveSection: moveSection,
-
-    // media ops
     uploadMedia, deleteMedia,
-
-    // page ops
     createPage, deletePage, renamePage, clonePage,
     getPageSnapshot, publishPage,
-
-    // helpers
-    normalizePath, pathToKey, keyToPath, safeJSON
+    normalizePath, pathToKey, keyToPath, safeJSON,
+    setActivePath
   }
 }

@@ -78,13 +78,14 @@
               <ClientOnly><Icon icon="ph:clock" class="size-6 text-blue-600 dark:text-blue-400 mt-0.5" /></ClientOnly>
               <div class="min-w-0">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Jam Layanan</h3>
-                <p class="text-xs text-gray-600 dark:text-neutral-300">Senin–Jumat 08.00–15.30 WIB</p>
-                <p class="text-xs text-gray-600 dark:text-neutral-300">Sabtu 08.00–12.00 WIB</p>
+                <p v-for="(h, i) in hours" :key="i" class="text-xs text-gray-600 dark:text-neutral-300">
+                  {{ h }}
+                </p>
               </div>
             </div>
           </div>
 
-          <!-- form -->
+          <!-- form (tetap hidden) -->
           <form @submit.prevent="submit" class="rounded-2xl hidden border border-gray-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/60 backdrop-blur p-5 space-y-3">
             <div class="grid sm:grid-cols-2 gap-3">
               <label class="block">
@@ -138,11 +139,9 @@
               />
             </ClientOnly>
 
-            <!-- overlay gradient -->
             <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
           </div>
 
-          <!-- quick actions -->
           <div class="mt-4 flex flex-wrap gap-3">
             <a :href="directionsHref" target="_blank" rel="noopener"
                class="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:text-gray-100 text-gray-800 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/60 px-4 py-2.5 text-sm font-medium hover:bg-white dark:hover:bg-neutral-800">
@@ -168,66 +167,77 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useNuxtApp } from '#app'
+import { ref as dbRef, onValue, off } from 'firebase/database'
 import { Icon } from '@iconify/vue'
 
-const address = 'Jl. Pesantren No. 1, Pandaan, Pasuruan, Jawa Timur 67156'
-const email = 'info@alberr.sch.id'
-const phone = '085856376399'
-const waIntl = '6285856376399'
-const mapQuery = encodeURIComponent('Pondok Pesantren Alberr, Pandaan, Pasuruan')
-const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3954.154822990777!2d112.68858257934568!3d-7.666498699999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7d9e72d847345%3A0xb58b63681aec9b37!2sPondok%20Pesantren%20ALBERR%20(Putra)%20-%20Karangjati%20Pandaan!5e0!3m2!1sid!2sid!4v1755450928977!5m2!1sid!2sid`
-const directionsHref = `https://www.google.com/maps/dir/?api=1&destination=${mapQuery}`
+const address = ref('Jl. Pesantren No. 1, Pandaan, Pasuruan, Jawa Timur 67156')
+const email = ref('info@alberr.sch.id')
+const phone = ref('085856376399')
+const waIntl = ref('6285856376399')
+const mapSrc = ref('https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3954.154822990777!2d112.68858257934568!3d-7.666498699999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7d9e72d847345%3A0xb58b63681aec9b37!2sPondok%20Pesantren%20ALBERR%20(Putra)%20-%20Karangjati%20Pandaan!5e0!3m2!1sid!2sid!4v1755450928977!5m2!1sid!2sid')
+const mapQuery = ref('Pondok Pesantren Alberr, Pandaan, Pasuruan')
+const hours = ref<string[]>(['Senin–Jumat 08.00–15.30 WIB', 'Sabtu 08.00–12.00 WIB'])
+const directionsHref = ref(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery.value)}`)
 
-const form = ref({ name: '', email: '', subject: '', message: '' })
-const sending = ref(false)
-const feedback = ref('')
-const ok = ref(false)
-const submit = async () => {
-  sending.value = true
-  feedback.value = ''
-  ok.value = false
-  await new Promise(r => setTimeout(r, 900))
-  sending.value = false
-  ok.value = true
-  feedback.value = 'Alhamdulillah, pesan Anda terkirim. Kami akan segera membalas.'
-  form.value = { name: '', email: '', subject: '', message: '' }
+let unbind: null | (() => void) = null
+function bindContact() {
+  const { $realtimeDb } = useNuxtApp() as any
+  const r = dbRef($realtimeDb, 'alberr/contact')
+  const h = onValue(r, (s) => {
+    const data = s.val() || {}
+    const c = data.contact || {}
+    address.value = c.address || address.value
+    email.value   = c.email   || email.value
+    phone.value   = c.phone   || phone.value
+    waIntl.value  = c.waIntl  || waIntl.value
+    mapSrc.value  = c.mapEmbedSrc || mapSrc.value
+    mapQuery.value = c.mapQuery || mapQuery.value
+    hours.value   = Array.isArray(c.hours) && c.hours.length ? c.hours : hours.value
+    directionsHref.value = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery.value)}`
+  })
+  unbind = () => off(r, 'value', h as any)
 }
+onMounted(bindContact)
+onBeforeUnmount(()=>{ unbind?.(); unbind = null })
 
-function copy(text: string) {
-  if (typeof navigator !== 'undefined' && navigator.clipboard) {
-    navigator.clipboard.writeText(text)
-    feedback.value = 'Tersalin ke papan klip.'
-    ok.value = true
-    setTimeout(() => (feedback.value = ''), 1500)
-  }
-}
-
+/* efek UI */
 const wrapEl = ref<HTMLElement | null>(null)
 const bg1 = ref<HTMLElement | null>(null)
 const bg2 = ref<HTMLElement | null>(null)
 const mapCard = ref<HTMLElement | null>(null)
 
-let raf = 0
-let mx = 0, my = 0, sy = 0
-
+let raf = 0, mx = 0, my = 0, sy = 0
 function loop() {
-  const dx = (mx - 0.5)
-  const dy = (my - 0.5)
-
+  const dx = (mx - 0.5), dy = (my - 0.5)
   if (bg1.value) bg1.value.style.transform = `translate3d(${dx * -20}px, ${dy * -20}px, 0) scale(1.06)`
   if (bg2.value) bg2.value.style.transform = `translate3d(${dx * 16}px, ${dy * 16}px, 0) scale(1.04)`
   if (mapCard.value) {
-    const tiltX = dy * 3
-    const tiltY = dx * -3
+    const tiltX = dy * 3, tiltY = dx * -3
     mapCard.value.style.transform = `translateY(${sy * -0.06}px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`
   }
   raf = requestAnimationFrame(loop)
 }
+onMounted(()=>{ loop() })
+onBeforeUnmount(()=> cancelAnimationFrame(raf))
 
-onMounted(() => {
-  loop()
-})
-onBeforeUnmount(() => {
-  cancelAnimationFrame(raf)
-})
+/* form mini – dummy */
+const form = ref({ name: '', email: '', subject: '', message: '' })
+const sending = ref(false)
+const feedback = ref('')
+const ok = ref(false)
+const submit = async () => {
+  sending.value = true; feedback.value=''; ok.value=false
+  await new Promise(r=>setTimeout(r,900))
+  sending.value = false; ok.value=true
+  feedback.value = 'Alhamdulillah, pesan Anda terkirim. Kami akan segera membalas.'
+  form.value = { name:'', email:'', subject:'', message:'' }
+}
+function copy(text: string) {
+  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    navigator.clipboard.writeText(text)
+    feedback.value = 'Tersalin ke papan klip.'; ok.value = true
+    setTimeout(()=>feedback.value='', 1500)
+  }
+}
 </script>

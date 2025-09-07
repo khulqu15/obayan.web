@@ -1,5 +1,6 @@
 <template>
   <section class="relative overflow-hidden dark:bg-neutral-900 bg-gray-100" id="facility">
+    <!-- Deco -->
     <svg aria-hidden="true" class="hidden md:block absolute top-[30%] -left-10 size-48 opacity-15 text-blue-700 dark:text-blue-500" viewBox="0 0 120 120" fill="currentColor">
       <path d="M60 10c8 7 14 12 14 22v6h6c5 0 10 4 10 9v40H30V47c0-5 5-9 10-9h6v-6c0-10 6-15 14-22Z"/>
       <rect x="18" y="87" width="84" height="8" rx="3"/>
@@ -15,28 +16,29 @@
 
     <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-12">
       <div class="grid lg:grid-cols-12 gap-8 items-center">
+        <!-- Copy -->
         <div class="lg:col-span-6">
           <p class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-400">
             <span class="inline-block size-1.5 rounded-full bg-blue-600"></span>
-            Fasilitas Pondok Alberr
+            {{ eyebrow }}
           </p>
 
           <h1 class="mt-2 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-gray-900 dark:text-white">
-            Nyaman, Tertib, <span class="text-blue-600 dark:text-blue-400">Inklusif</span> 
-            <span class="text-blue-600 dark:text-emerald-400"> dirancang untuk bertumbuh</span>
+            {{ headingMain }}
+            <span class="text-blue-600 dark:text-blue-400">{{ headingHi1 }}</span>
+            <span class="text-blue-600 dark:text-emerald-400"> {{ headingHi2 }}</span>
           </h1>
 
           <p class="mt-3 text-gray-600 dark:text-neutral-300 max-w-2xl">
-            Dari asrama yang rapi, masjid yang lapang, ruang kelas interaktif, hingga perpustakaan
-            Semua disiapkan untuk mendukung adab, akademik, dan kemandirian santri.
+            {{ description }}
           </p>
 
-          <div class="mt-6 space-y-3">
-
-          </div>
-
           <div class="mt-7 grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div v-for="s in stats" :key="s.label" class="rounded-xl border border-gray-200 bg-white/70 backdrop-blur p-4 dark:bg-neutral-800/60 dark:border-neutral-700">
+            <div
+              v-for="s in stats"
+              :key="s.label + s.value"
+              class="rounded-xl border border-gray-200 bg-white/70 backdrop-blur p-4 dark:bg-neutral-800/60 dark:border-neutral-700"
+            >
               <div class="flex-col items-center gap-3 flex-wrap">
                 <ClientOnly>
                   <Icon :icon="s.icon" class="size-5 text-blue-600 dark:text-blue-400" />
@@ -49,23 +51,35 @@
           </div>
 
           <div class="mt-7 flex flex-wrap gap-3">
-            <a href="/gallery"
+            <a :href="galleryHref"
                class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-blue-700 focus:outline-hidden">
               <ClientOnly><Icon icon="lucide:image" class="size-4" /></ClientOnly>
               Lihat Galeri
             </a>
-            <button aria-haspopup="dialog" aria-expanded="false" aria-controls="hs-brochures-view" data-hs-overlay="#hs-brochures-view" type="button"
-               class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white/80 backdrop-blur px-4 py-2.5 text-sm font-medium text-gray-800 shadow-2xs dark:bg-neutral-800/70 dark:border-neutral-700 dark:text-neutral-100">
+
+            <button
+              v-if="brochureImages.length"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+              aria-controls="hs-brochures-view"
+              data-hs-overlay="#hs-brochures-view"
+              type="button"
+              class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white/80 backdrop-blur px-4 py-2.5 text-sm font-medium text-gray-800 shadow-2xs dark:bg-neutral-800/70 dark:border-neutral-700 dark:text-neutral-100"
+            >
               <ClientOnly><Icon icon="lucide:download" class="size-4" /></ClientOnly>
               Unduh Brosur
             </button>
           </div>
         </div>
 
-        <div id="hs-brochures-view" class="hs-overlay hidden size-full fixed top-0 start-0 z-80 overflow-x-hidden overflow-y-auto" role="dialog" tabindex="-1" aria-labelledby="hs-brochures-view-label">
+        <!-- Overlay (Brosur Viewer) -->
+        <div
+          id="hs-brochures-view"
+          class="hs-overlay hidden size-full fixed top-0 start-0 z-80 overflow-x-hidden overflow-y-auto"
+          role="dialog" tabindex="-1" aria-labelledby="hs-brochures-view-label"
+        >
           <div class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-500 mt-0 opacity-0 ease-out transition-all md:max-w-5xl md:w-full m-3 md:mx-auto">
             <div class="relative flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl overflow-hidden dark:bg-neutral-900 dark:border-neutral-800">
-
               <!-- Close -->
               <div class="absolute top-2 end-2">
                 <button type="button" class="size-8 inline-flex justify-center items-center gap-x-2 rounded-full border border-transparent bg-gray-100 text-gray-800 hover:bg-gray-200 focus:outline-hidden dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-300" aria-label="Close" data-hs-overlay="#hs-brochures-view">
@@ -80,7 +94,11 @@
                 <p class="text-xs text-gray-500 dark:text-neutral-400">Gunakan <code>CTRL</code> untuk zoom</p>
               </div>
 
-              <div v-if="brochureImages.length" class="relative w-full aspect-video rounded-xl border border-gray-200 overflow-hidden bg-gray-100 dark:border-neutral-800 dark:bg-neutral-800 select-none">
+              <!-- Stage -->
+              <div
+                v-if="brochureImages.length"
+                class="relative w-full aspect-video rounded-xl border border-gray-200 overflow-hidden bg-gray-100 dark:border-neutral-800 dark:bg-neutral-800 select-none"
+              >
                 <div
                   ref="stageRef"
                   :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
@@ -121,14 +139,17 @@
                 </button>
               </div>
 
-
               <!-- Footer -->
               <div class="flex flex-wrap justify-between items-center gap-2 py-3 px-4 bg-gray-50 border-t border-gray-200 dark:bg-neutral-950 dark:border-neutral-800">
                 <div class="text-xs text-gray-500 dark:text-neutral-400">
                   Total: {{ brochureImages.length }} file
                 </div>
                 <div class="flex gap-2">
-                  <a :href="brochureImages[selectedBrochure]" download class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700">
+                  <a
+                    :href="brochureImages[selectedBrochure]"
+                    download
+                    class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                  >
                     <ClientOnly><Icon icon="lucide:download" class="size-4" /></ClientOnly>
                     Unduh
                   </a>
@@ -142,100 +163,141 @@
           </div>
         </div>
 
-
-
+        <!-- Gallery grid -->
         <div class="lg:col-span-6">
           <div class="grid grid-cols-12 gap-3 sm:gap-4">
-            <div class="col-span-7">
+            <!-- Tile 0 (besar) -->
+            <div v-if="tiles[0]" class="col-span-7">
               <div class="relative h-64 sm:h-80 rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-neutral-800">
-                <img src="/assets/images/masjid.jpg"
-                     alt="Masjid pondok"
-                     class="absolute inset-0 w-full h-full object-cover">
+                <img :src="tiles[0].src" :alt="tiles[0].label" class="absolute inset-0 w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
                 <div class="absolute bottom-3 left-3 rounded-lg bg-black/40 backdrop-blur px-3 py-1.5 text-white text-xs inline-flex items-center gap-1.5">
-                  <ClientOnly><Icon icon="ph:mosque" class="size-3.5" /></ClientOnly>
-                  Masjid & Aula
+                  <ClientOnly><Icon :icon="tiles[0].icon" class="size-3.5" /></ClientOnly>
+                  {{ tiles[0].label }}
                 </div>
               </div>
             </div>
+
+            <!-- Tile 1–2 (stack kanan) -->
             <div class="col-span-5 space-y-3 sm:space-y-4">
-              <div class="relative h-32 sm:h-40 rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-neutral-800">
-                <img src="/assets/images/kelas.jpg"
-                     alt="Ruang kelas interaktif"
-                     class="absolute inset-0 w-full h-full object-cover">
+              <div v-if="tiles[1]" class="relative h-32 sm:h-40 rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-neutral-800">
+                <img :src="tiles[1].src" :alt="tiles[1].label" class="absolute inset-0 w-full h-full object-cover">
                 <div class="absolute bottom-3 left-3 rounded-lg bg-black/40 backdrop-blur px-3 py-1.5 text-white text-xs inline-flex items-center gap-1.5">
-                  <ClientOnly><Icon icon="ph:chalkboard-teacher" class="size-3.5" /></ClientOnly>
-                  Kelas Interaktif
+                  <ClientOnly><Icon :icon="tiles[1].icon" class="size-3.5" /></ClientOnly>
+                  {{ tiles[1].label }}
                 </div>
               </div>
-              <div class="relative h-32 sm:h-40 rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-neutral-800">
-                <img src="/assets/images/activity.jpg"
-                     alt="Perpustakaan"
-                     class="absolute inset-0 w-full h-full object-cover">
+              <div v-if="tiles[2]" class="relative h-32 sm:h-40 rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-neutral-800">
+                <img :src="tiles[2].src" :alt="tiles[2].label" class="absolute inset-0 w-full h-full object-cover">
                 <div class="absolute bottom-3 left-3 rounded-lg bg-black/40 backdrop-blur px-3 py-1.5 text-white text-xs inline-flex items-center gap-1.5">
-                  <ClientOnly><Icon icon="ph:books" class="size-3.5" /></ClientOnly>
-                  Perpustakaan
+                  <ClientOnly><Icon :icon="tiles[2].icon" class="size-3.5" /></ClientOnly>
+                  {{ tiles[2].label }}
                 </div>
               </div>
             </div>
-            <div class="col-span-6">
+
+            <!-- Tile 3–4 (baris bawah 2 kolom) -->
+            <div v-if="tiles[3]" class="col-span-6">
               <div class="relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-neutral-800">
-                <img src="/assets/images/lapangan.jpg"
-                     alt="Lapangan olahraga"
-                     class="absolute inset-0 w-full h-full object-cover">
+                <img :src="tiles[3].src" :alt="tiles[3].label" class="absolute inset-0 w-full h-full object-cover">
                 <div class="absolute bottom-3 left-3 rounded-lg bg-black/40 backdrop-blur px-3 py-1.5 text-white text-xs inline-flex items-center gap-1.5">
-                  <ClientOnly><Icon icon="ph:soccer-ball" class="size-3.5" /></ClientOnly>
-                  Lapangan Olahraga
+                  <ClientOnly><Icon :icon="tiles[3].icon" class="size-3.5" /></ClientOnly>
+                  {{ tiles[3].label }}
                 </div>
               </div>
             </div>
-            <div class="col-span-6">
+            <div v-if="tiles[4]" class="col-span-6">
               <div class="relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-neutral-800">
-                <img src="/assets/images/asrama.jpg"
-                     alt="Asrama santri"
-                     class="absolute inset-0 w-full h-full object-cover">
+                <img :src="tiles[4].src" :alt="tiles[4].label" class="absolute inset-0 w-full h-full object-cover">
                 <div class="absolute bottom-3 left-3 rounded-lg bg-black/40 backdrop-blur px-3 py-1.5 text-white text-xs inline-flex items-center gap-1.5">
-                  <ClientOnly><Icon icon="ph:house" class="size-3.5" /></ClientOnly>
-                  Asrama & Kafetaria
+                  <ClientOnly><Icon :icon="tiles[4].icon" class="size-3.5" /></ClientOnly>
+                  {{ tiles[4].label }}
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <!-- /grid -->
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Icon } from '@iconify/vue'
 
-const stats = [
-  { label: 'Asrama', value: '8', icon: 'ph:house' },
-  { label: 'Ruang Kelas', value: '24', icon: 'ph:chalkboard-teacher' },
-  { label: 'Perpustakaan', value: '1', icon: 'ph:books' },
-  { label: 'Lapangan', value: '3', icon: 'ph:soccer-ball' }
-]
+type Stat = { label: string; value: string; icon: string }
+type Tile = { src: string; label: string; icon: string }
+type Shape = {
+  eyebrow: string
+  headingMain: string
+  headingHi1: string
+  headingHi2: string
+  description: string
+  stats: Stat[]
+  gallery: Tile[]
+  brochures: string[]
+  galleryHref: string
+}
 
-const brochureCount = 2
+const defaults: Shape = {
+  eyebrow: 'Fasilitas Pondok Alberr',
+  headingMain: 'Nyaman, Tertib,',
+  headingHi1: 'Inklusif',
+  headingHi2: 'dirancang untuk bertumbuh',
+  description:
+    'Dari asrama yang rapi, masjid yang lapang, ruang kelas interaktif, hingga perpustakaan. Semua disiapkan untuk mendukung adab, akademik, dan kemandirian santri.',
+  stats: [
+    { label: 'Asrama', value: '8', icon: 'ph:house' },
+    { label: 'Ruang Kelas', value: '24', icon: 'ph:chalkboard-teacher' },
+    { label: 'Perpustakaan', value: '1', icon: 'ph:books' },
+    { label: 'Lapangan', value: '3', icon: 'ph:soccer-ball' }
+  ],
+  gallery: [
+    { src: '/assets/images/masjid.jpg',   label: 'Masjid & Aula',      icon: 'ph:mosque' },
+    { src: '/assets/images/kelas.jpg',    label: 'Kelas Interaktif',   icon: 'ph:chalkboard-teacher' },
+    { src: '/assets/images/activity.jpg', label: 'Perpustakaan',       icon: 'ph:books' },
+    { src: '/assets/images/lapangan.jpg', label: 'Lapangan Olahraga',  icon: 'ph:soccer-ball' },
+    { src: '/assets/images/asrama.jpg',   label: 'Asrama & Kafetaria', icon: 'ph:house' }
+  ],
+  brochures: [
+    '/assets/images/brochures/1.jpg',
+    '/assets/images/brochures/2.jpg'
+  ],
+  galleryHref: '/gallery'
+}
 
-const brochureImages = computed(() =>
-  Array.from({ length: brochureCount }, (_, i) => `/assets/images/brochures/${i + 1}.jpg`)
-)
+const props = defineProps<{ props?: Partial<Shape> }>()
+const merged = computed<Shape>(() => merge(defaults, props.props || {}))
 
+const eyebrow = computed(() => merged.value.eyebrow)
+const headingMain = computed(() => merged.value.headingMain)
+const headingHi1 = computed(() => merged.value.headingHi1)
+const headingHi2 = computed(() => merged.value.headingHi2)
+const description = computed(() => merged.value.description)
+const stats = computed(() => merged.value.stats)
+const tiles = computed(() => merged.value.gallery)
+const brochureImages = computed(() => merged.value.brochures)
+const galleryHref = computed(() => merged.value.galleryHref)
+
+/* --------- Zoom/Pan Viewer --------- */
 const selectedBrochure = ref(0)
 function prevBrochure() {
-  selectedBrochure.value = (selectedBrochure.value - 1 + brochureImages.value.length) % brochureImages.value.length
+  const n = brochureImages.value.length
+  if (!n) return
+  selectedBrochure.value = (selectedBrochure.value - 1 + n) % n
 }
 function nextBrochure() {
-  selectedBrochure.value = (selectedBrochure.value + 1) % brochureImages.value.length
+  const n = brochureImages.value.length
+  if (!n) return
+  selectedBrochure.value = (selectedBrochure.value + 1) % n
 }
 
 const scale = ref(0.1)
 const minScale = 0.1
 const maxScale = 4
-const tx = ref(0) // translate X (px)
+const tx = ref(0)
 const ty = ref(0)
 const isDragging = ref(false)
 let startX = 0, startY = 0, startTx = 0, startTy = 0
@@ -244,22 +306,19 @@ let pinchStartDist = 0
 let pinchStartScale = 1
 let pinchCenter = { x: 0, y: 0 }
 
-const imgStyle = computed(() => {
-  return {
-    transform: `translate(${tx.value}px, ${ty.value}px) scale(${scale.value}) translate(-50%, -50%)`,
-    transformOrigin: '0 0',
-    maxWidth: 'none',
-    maxHeight: 'none'
-  }
-})
+const stageRef = ref<HTMLElement | null>(null)
+const imgStyle = computed(() => ({
+  transform: `translate(${tx.value}px, ${ty.value}px) scale(${scale.value}) translate(-50%, -50%)`,
+  transformOrigin: '0 0',
+  maxWidth: 'none',
+  maxHeight: 'none'
+}))
 
 function resetZoom() {
   scale.value = 0.1
   tx.value = 0
   ty.value = 0
 }
-
-const stageRef = ref<HTMLElement | null>(null)
 
 function clampPan() {
   if (scale.value <= 0.1) {
@@ -276,22 +335,18 @@ function clampPan() {
   ty.value = Math.max(Math.min(ty.value,  boundY), -boundY)
 }
 
-
 function onWheel(e: WheelEvent) {
   const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
   const cx = e.clientX - rect.left - rect.width / 2
   const cy = e.clientY - rect.top - rect.height / 2
 
-  const isPinchZoom = e.ctrlKey === true
-
-  if (isPinchZoom) {
+  if (e.ctrlKey === true) {
     e.preventDefault()
     const prevScale = scale.value
     const zoomIntensity = 0.0005
     let nextScale = prevScale * (1 - e.deltaY * zoomIntensity)
     nextScale = Math.min(Math.max(nextScale, minScale), maxScale)
     if (nextScale === prevScale) return
-
     const k = nextScale / prevScale
     tx.value = cx - k * (cx - tx.value)
     ty.value = cy - k * (cy - ty.value)
@@ -306,9 +361,7 @@ function onWheel(e: WheelEvent) {
     tx.value -= e.deltaX * panFactor
     ty.value -= e.deltaY * panFactor
     clampPan()
-    return
   }
-
 }
 
 function onPointerDown(e: MouseEvent) {
@@ -319,27 +372,21 @@ function onPointerDown(e: MouseEvent) {
   startTx = tx.value
   startTy = ty.value
 }
-
 function onPointerMove(e: MouseEvent) {
   if (!isDragging.value) return
   tx.value = startTx + (e.clientX - startX)
   ty.value = startTy + (e.clientY - startY)
   clampPan()
 }
-
-function onPointerUp() {
-  isDragging.value = false
-}
+function onPointerUp() { isDragging.value = false }
 
 function onDblClick(e: MouseEvent) {
   const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
   const cx = e.clientX - rect.left - rect.width / 2
   const cy = e.clientY - rect.top - rect.height / 2
-
   const prevScale = scale.value
   const nextScale = prevScale < 2 ? 2 : 1
   const k = nextScale / prevScale
-
   tx.value = cx - k * (cx - tx.value)
   ty.value = cy - k * (cy - ty.value)
   scale.value = nextScale
@@ -352,12 +399,9 @@ function distance(t1: Touch, t2: Touch) {
   const dy = t2.clientY - t1.clientY
   return Math.hypot(dx, dy)
 }
-
 function midpoint(t1: Touch, t2: Touch, rect: DOMRect) {
-  return {
-    x: ((t1.clientX + t2.clientX) / 2) - rect.left - rect.width / 2,
-    y: ((t1.clientY + t2.clientY) / 2) - rect.top - rect.height / 2
-  }
+  return { x: ((t1.clientX + t2.clientX) / 2) - rect.left - rect.width / 2,
+           y: ((t1.clientY + t2.clientY) / 2) - rect.top  - rect.height / 2 }
 }
 
 function onTouchStart(e: TouchEvent) {
@@ -374,7 +418,6 @@ function onTouchStart(e: TouchEvent) {
     pinchCenter = midpoint(e.touches[0]!, e.touches[1]!, rect)
   }
 }
-
 function onTouchMove(e: TouchEvent) {
   if (e.touches.length === 1 && isDragging.value) {
     tx.value = startTx + (e.touches[0]!.clientX - startX)
@@ -384,7 +427,6 @@ function onTouchMove(e: TouchEvent) {
     const currDist = distance(e.touches[0]!, e.touches[1]!)
     let nextScale = pinchStartScale * (currDist / pinchStartDist)
     nextScale = Math.min(Math.max(nextScale, minScale), maxScale)
-
     const prevScale = scale.value
     const k = nextScale / prevScale
     tx.value = pinchCenter.x - k * (pinchCenter.x - tx.value)
@@ -393,13 +435,23 @@ function onTouchMove(e: TouchEvent) {
     clampPan()
   }
 }
-
 function onTouchEnd() {
   isDragging.value = false
-  if (pinchStartDist > 0 && scale.value < 1.02) {
-    resetZoom()
-  }
+  if (pinchStartDist > 0 && scale.value < 1.02) resetZoom()
   pinchStartDist = 0
 }
 
+function merge(base: Shape, patch: Partial<Shape>): Shape {
+  return {
+    eyebrow: patch.eyebrow ?? base.eyebrow,
+    headingMain: patch.headingMain ?? base.headingMain,
+    headingHi1: patch.headingHi1 ?? base.headingHi1,
+    headingHi2: patch.headingHi2 ?? base.headingHi2,
+    description: patch.description ?? base.description,
+    stats: Array.isArray(patch.stats) && patch.stats.length ? patch.stats : [...base.stats],
+    gallery: Array.isArray(patch.gallery) && patch.gallery.length ? patch.gallery : [...base.gallery],
+    brochures: Array.isArray(patch.brochures) && patch.brochures.length ? patch.brochures : [...base.brochures],
+    galleryHref: patch.galleryHref ?? base.galleryHref
+  }
+}
 </script>

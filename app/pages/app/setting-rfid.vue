@@ -1,5 +1,6 @@
 <template>
   <section class="relative">
+    <!-- BG -->
     <div class="pointer-events-none absolute inset-0 -z-10">
       <div class="absolute inset-0
                   bg-white dark:bg-neutral-950
@@ -16,10 +17,15 @@
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-lg font-semibold">Registrasi / Penggantian Kartu RFID</h1>
           <div class="flex items-center gap-2">
-          <button @click="reloadAll" class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Muat Ulang</button>
+            <button @click="reloadAll"
+                    class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
+              Muat Ulang
+            </button>
           </div>
         </div>
       </div>
+
+      <!-- Panel waiting live scan singleton (/alberr/rfid/live) -->
       <div class="lg:col-span-2 col-span-6">
         <div class="sticky top-10">
           <div class="rounded-xl border border-gray-200 dark:border-neutral-700 p-4 relative overflow-hidden">
@@ -37,10 +43,22 @@
             </div>
             <div class="relative">
               <p class="mt-4 text-center">Menunggu RFID...</p>
+              <div class="mt-3 text-xs rounded border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900/50 px-3 py-2">
+                Terakhir: <strong>{{ liveScanHex }}</strong><br>
+                Waktu: <strong>{{ liveScanTime }}</strong>
+              </div>
+              <div class="mt-2 flex items-center justify-center gap-2">
+                <button @click="cancelLive"
+                        class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
+                  Bersihkan
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Tabel santri + aksi bind/replace/unbind -->
       <div class="lg:col-span-5 col-span-6">
         <DataTable title="Daftar Santri & Kartu" :rows="tableRows" :columns="columns" :rowKey="(r) => r.id">
           <template #cell-santri="{ row }">
@@ -49,20 +67,21 @@
           </template>
           <template #cell-uid="{ row }">
             <span v-if="row.uid" class="inline-flex items-center px-2 py-0.5 text-xs rounded bg-gray-100 dark:bg-neutral-800">
-                {{ shortenUid(row.uid) }}
+              {{ shortenUid(row.uid) }}
             </span>
             <span v-else class="text-gray-400">—</span>
           </template>
           <template #cell-action="{ row }">
             <div class="flex flex-wrap gap-1">
-                <button v-if="row.uid" @click="openReplace(row)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800">Ganti Kartu</button>
-                <button v-else @click="openBind(row)" class="text-xs px-2 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700">Bind Baru</button>
-                <button v-if="row.uid" @click="askUnbind(row)" class="text-xs px-2 py-1 rounded border text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
+              <button v-if="row.uid" @click="openReplace(row)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800">Ganti Kartu</button>
+              <button v-else @click="openBind(row)" class="text-xs px-2 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700">Bind Baru</button>
+              <button v-if="row.uid" @click="askUnbind(row)" class="text-xs px-2 py-1 rounded border text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
             </div>
           </template>
         </DataTable>
       </div>
 
+      <!-- Modal bind dari /alberr/rfid/live (singleton) -->
       <ModalShell v-model="showLive" title="Scan RFID Terdeteksi" size="3xl">
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
           <div class="lg:col-span-2 order-1 lg:order-2">
@@ -98,7 +117,7 @@
           </div>
           <div class="lg:col-span-3 order-2 lg:order-1">
             <div class="rounded-xl border border-gray-200 dark:border-neutral-700 p-4 space-y-3">
-              <label class="text-xs text-gray-600 dark:text-neutral-300">Nama Santri </label>
+              <label class="text-xs text-gray-600 dark:text-neutral-300">Nama Santri</label>
               <input
                 v-model="nameInput"
                 list="santriNameList"
@@ -135,7 +154,7 @@
         </div>
 
         <template #footer>
-          <button @click="clearLive" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
+          <button @click="cancelLive" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
             Tutup
           </button>
           <button
@@ -148,6 +167,7 @@
         </template>
       </ModalShell>
 
+      <!-- Modal menunggu tap (mode bind/replace) dari /alberr/rfid/scans (mode=Registrasi) -->
       <ModalShell v-model="showWait" :title="waitMode==='replace' ? 'Ganti Kartu RFID' : 'Registrasi Kartu RFID'">
         <div class="grid grid-cols-1 gap-4">
           <div class="rounded-xl border border-gray-200 dark:border-neutral-700 p-4 relative overflow-hidden">
@@ -231,8 +251,10 @@ import { useRFID } from '~/composables/data/useRFID'
 definePageMeta({ layout: 'app', layoutProps: { title: 'Registrasi RFID' } })
 
 const { rows: santriRows, fetchSantri } = useSantri()
-const { loading, error, bySantri, byCard, fetchBindings, isCardBound, unbindSantri, bindCardToSantri,
-        waiting, lastTap, startWaitingTap, stopWaitingTap, subscribeLive, unsubscribeLive, live, clearLive } = useRFID()
+const {
+  loading, error, bySantri, byCard, fetchBindings, isCardBound, unbindSantri, bindCardToSantri,
+  waiting, lastTap, startWaitingTap, stopWaitingTap, subscribeLive, unsubscribeLive, live, clearLive
+} = useRFID()
 
 onMounted(async () => {
   await Promise.all([fetchSantri(), fetchBindings()])
@@ -245,6 +267,7 @@ const selectedSantri = ref<ReturnType<typeof useSantri>['rows']['value'][number]
 const liveError = ref<string | null>(null)
 
 watch(live, (v) => {
+  // Tampilkan modal bind dari singleton live
   if (v && v.rfid) {
     showLive.value = true
     liveError.value = null
@@ -260,7 +283,7 @@ const columns = [
 
 const tableRows = computed(() => {
   return santriRows.value.map(s => {
-    const curUid = bySantri.value?.[s.id]?.uid || ''
+    const curUid = bySantri.value?.[s.id]?.uid || s.rfid || ''
     return {
       id: s.id,
       santri: s.santri,
@@ -286,19 +309,15 @@ const liveScanHex = computed(() => {
 
 const liveScanTime = computed(() => {
   const ts = live.value?.timestamp
-  console.log(live.value)
   if (!ts) return '—'
   try {
-    return String(ts)
+    const n = typeof ts === 'number' ? ts : Date.parse(String(ts))
+    return isNaN(n) ? String(ts) : new Date(n).toLocaleString('id-ID')
   } catch { return String(ts) }
 })
 
 async function cancelLive() {
-  try {
-    await clearLive()  // hapus /alberr/rfid/live
-  } finally {
-    closeLive()        // tutup modal
-  }
+  try { await clearLive() } finally { showLive.value = false }
 }
 
 const canBindLive = computed(() => !!(live.value?.rfid && selectedSantri.value?.id))
@@ -322,14 +341,11 @@ async function confirmBindLive() {
       kamar: selectedSantri.value.kamar
     })
     await Promise.all([fetchSantri(), fetchBindings()])
-    closeLive()
+    showLive.value = false
+    await clearLive()
   } catch (e: any) {
     liveError.value = e?.message ?? 'Gagal melakukan bind'
   }
-}
-
-function closeLive() {
-  showLive.value = false
 }
 
 function shortenUid(uid: string) {
@@ -362,11 +378,6 @@ function openReplace(row: any) {
   startWaitingTap()
 }
 
-function stopWaitAndClose() {
-  stopWaitingTap()
-  showWait.value = false
-}
-
 function stopWait() {
   stopWaitingTap()
   waitError.value = null
@@ -374,9 +385,7 @@ function stopWait() {
   showWait.value = false
 }
 
-const candidateUid = computed(() => {
-  return (lastTap.value?.uid || manualUid.value || '').trim()
-})
+const candidateUid = computed(() => (lastTap.value?.uid || manualUid.value || '').trim())
 
 async function confirmBind() {
   if (!target.value) return
@@ -399,7 +408,8 @@ async function confirmBind() {
       kamar: target.value.kamar,
       replacedFrom: waitMode.value === 'replace' ? (target.value.currentUid || '') : undefined
     })
-    stopWaitAndClose()
+    stopWait()
+    await Promise.all([fetchSantri(), fetchBindings()])
   } catch (e:any) {
     waitError.value = e?.message ?? 'Gagal menyimpan'
   }
@@ -409,6 +419,7 @@ async function askUnbind(row: any) {
   if (!row?.id) return
   if (!confirm(`Hapus kartu untuk ${row.santri}?`)) return
   await unbindSantri(row.id)
+  await Promise.all([fetchSantri(), fetchBindings()])
 }
 
 async function reloadAll() {
@@ -419,7 +430,6 @@ onBeforeUnmount(() => {
   stopWaitingTap()
   unsubscribeLive()
 })
-
 </script>
 
 <style scoped>

@@ -74,39 +74,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { Icon } from '@iconify/vue'
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
+import { getDatabase, ref as dref, get } from 'firebase/database'
+import { ROLE_DEFAULT_ROUTES, type AppRole } from '~/composables/data/useUser'
 
 const form = ref({ email: '', password: '', remember: false })
 const showPassword = ref(false)
 const loading = ref(false)
 const AUTH_KEY = 'alberr:auth'
 
-const PASSPHRASE = 'alberr-admin-secret'       // NOTE: untuk demo. taruh di env kalau serius
-const SALT       = 'alberr-static-salt'        // NOTE: untuk demo
-const ITER       = 120_000                     // PBKDF2 iterations
+const PASSPHRASE = 'alberr-admin-secret'
+const SALT       = 'alberr-static-salt'
+const ITER       = 120_000
 const IV_BYTES   = 12
 
 async function deriveKey(pass: string, salt: string) {
   const enc = new TextEncoder()
-  const keyMaterial = await crypto.subtle.importKey(
-    'raw', enc.encode(pass), { name: 'PBKDF2' }, false, ['deriveKey']
-  )
-  return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: enc.encode(salt), iterations: ITER, hash: 'SHA-256' },
-    keyMaterial,
-    { name: 'AES-GCM', length: 256 },
-    false,
-    ['encrypt', 'decrypt']
-  )
+  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(pass), { name: 'PBKDF2' }, false, ['deriveKey'])
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: enc.encode(salt), iterations: ITER, hash: 'SHA-256' },
+    keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt'])
 }
+function toB64(buf: ArrayBuffer) { return btoa(String.fromCharCode(...new Uint8Array(buf))) }
 
-function toB64(buf: ArrayBuffer) {
-  return btoa(String.fromCharCode(...new Uint8Array(buf)))
-}
-function fromB64(b64: string) {
-  return Uint8Array.from(atob(b64), c => c.charCodeAt(0)).buffer
-}
+onMounted(() => {
+  const hasToken = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
+  if (hasToken) {
+    window.location.replace('/app')
+  }
+})
 
 async function encryptJSON(data: any) {
   const key = await deriveKey(PASSPHRASE, SALT)
@@ -116,42 +113,88 @@ async function encryptJSON(data: any) {
   return JSON.stringify({ v: 1, iv: toB64(iv), ct: toB64(cipher) })
 }
 
-async function decryptJSON(serialized: string) {
-  const obj = JSON.parse(serialized)
-  const key = await deriveKey(PASSPHRASE, SALT)
-  const iv = new Uint8Array(fromB64(obj.iv))
-  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, fromB64(obj.ct))
-  return JSON.parse(new TextDecoder().decode(plain))
+/* ---------- Helpers ACL ---------- */
+const normalize = (p: string) => {
+  try { const u = new URL(p, 'http://x'); return u.pathname.replace(/\/+$/,'') || '/' }
+  catch { return (p || '/').replace(/\/+$/,'') || '/' }
+}
+function coerceRoutes(v: any): string[] {
+  if (Array.isArray(v)) return v.map(String)
+  if (v && typeof v === 'object') return Object.values(v).filter(x => typeof x === 'string').map(String)
+  return []
+}
+function pickFirstAllowedPath(routes: string[]): string {
+  const arr = routes.map(normalize).filter(Boolean)
+  if (arr.includes('/app')) return '/app'
+  const firstApp = arr.find(p => p.startsWith('/app'))
+  return firstApp || '/app'
 }
 
+/* ---------- Login ---------- */
 const login = async () => {
   loading.value = true
   try {
     const email = form.value.email.trim().toLowerCase()
     const pass  = form.value.password
-    await new Promise(r => setTimeout(r, 600))
-    if (email !== 'admin@alberr.sch.id' || pass !== '12345678') {
-      alert('Email atau password salah.')
+
+    // 1) Firebase Auth
+    const auth = getAuth()
+    const cred = await signInWithEmailAndPassword(auth, email, pass)
+    const user = cred.user
+
+    // 2) Profil dari RTDB (/alberr/user/<uid> prefer, fallback /alberr/users/<uid>)
+    const db = getDatabase()
+    let snap = await get(dref(db, `alberr/user/${user.uid}`))
+    if (!snap.exists()) snap = await get(dref(db, `alberr/users/${user.uid}`))
+
+    if (!snap.exists()) {
+      alert('Profil belum dibuat. Hubungi admin.')
       return
     }
+    const profile = snap.val() || {}
+
+    if (profile.isActive === false) {
+      alert('Akun Anda non-aktif. Hubungi admin.')
+      return
+    }
+
+    const role: AppRole = (profile.role || 'wali') as AppRole
+
+    // allowedRoutes bisa array atau object → normalisasi
+    let allowedRoutes = coerceRoutes(profile.allowedRoutes)
+    if (!allowedRoutes.length) {
+      allowedRoutes = ROLE_DEFAULT_ROUTES[role] || ['/app']
+    }
+
+    // 3) Simpan sesi terenkripsi (untuk layout/app.vue)
     const now = Math.floor(Date.now() / 1000)
     const ttl = form.value.remember ? 30 * 24 * 3600 : 24 * 3600
     const session = {
-      sub: 'admin',
-      email,
-      role: 'admin',
+      sub: user.uid,
+      uid: user.uid,
+      email: profile.email || user.email || email,
+      name: profile.displayName || user.displayName || '(tanpa nama)',
+      role,
+      allowedRoutes,
       iat: now,
       exp: now + ttl
     }
     const token = await encryptJSON(session)
-    localStorage.setItem(AUTH_KEY, token)
-    window.location.href = '/app'
-  } catch (e) {
+    if (form.value.remember) {
+      sessionStorage.removeItem(AUTH_KEY)
+      localStorage.setItem(AUTH_KEY, token)
+    } else {
+      localStorage.removeItem(AUTH_KEY)
+      sessionStorage.setItem(AUTH_KEY, token)
+    }
+
+    const dest = pickFirstAllowedPath(allowedRoutes)
+    window.location.replace(dest)
+  } catch (e: any) {
     console.error(e)
-    alert('Terjadi kesalahan saat login.')
+    alert(e?.message || 'Email atau password salah.')
   } finally {
     loading.value = false
   }
 }
-
 </script>

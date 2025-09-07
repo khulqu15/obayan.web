@@ -18,6 +18,7 @@
       <HeroFacilityHero />
       <InvitationHero />
       <HeroProgramHero />
+      <HeroProgramHero />
     </template>
   </div>
 </template>

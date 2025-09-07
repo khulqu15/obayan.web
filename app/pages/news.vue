@@ -1,5 +1,6 @@
 <template>
   <section id="news" class="relative overflow-hidden dark:bg-neutral-900 bg-gray-100">
+    <!-- Subtle BG grid + blobs -->
     <div aria-hidden="true" class="pointer-events-none absolute inset-0">
       <div class="absolute top-10 -left-24 w-[42rem] h-[42rem] rounded-full opacity-40 blur-3xl
                   bg-gradient-to-br from-blue-200 to-blue-200 dark:from-blue-900/40 dark:to-blue-900/30" />
@@ -11,24 +12,28 @@
       </div>
     </div>
 
+    <!-- HERO -->
     <div class="relative">
       <div class="absolute inset-0">
-        <img src="/assets/images/profile.png" class="w-full h-[36vh] sm:h-[44vh] object-cover opacity-80" alt="Cover News">
+        <img :src="cfg.hero.cover" class="w-full heroH object-cover opacity-80"
+             :style="{'--hero-sm': cfg.hero.heightSm, '--hero-lg': cfg.hero.heightLg}" alt="Cover News">
         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/10" />
       </div>
-      <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 h-[36vh] sm:h-[44vh] flex items-end">
+      <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 heroH flex items-end"
+           :style="{'--hero-sm': cfg.hero.heightSm, '--hero-lg': cfg.hero.heightLg}">
         <div class="mb-10">
           <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-blue-200">
-            <span class="inline-block size-2 rounded-full bg-blue-400" /> Kabar Terbaru
+            <span class="inline-block size-2 rounded-full bg-blue-400" /> {{ cfg.hero.badge }}
           </p>
-          <h1 class="mt-1 text-3xl sm:text-5xl font-bold text-white">Berita Pondok Pesantren Alberr</h1>
-          <p class="mt-2 text-blue-100">Informasi kegiatan, pengumuman, dan liputan santri.</p>
+          <h1 class="mt-1 text-3xl sm:text-5xl font-bold text-white">{{ cfg.hero.title }}</h1>
+          <p class="mt-2 text-blue-100">{{ cfg.hero.subtitle }}</p>
         </div>
       </div>
     </div>
 
+    <!-- BODY -->
     <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
-
+      <!-- DETAIL -->
       <div v-if="isDetail" class="max-w-3xl mx-auto">
         <div class="flex items-center justify-between">
           <button @click="backToList" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-3 py-1.5 text-sm hover:bg-blue-700">
@@ -42,14 +47,13 @@
             <button type="button"
                 data-hs-overlay="#hs-share-modal"
                 class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60 px-3 py-1.5 text-sm text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-neutral-700">
-            <Icon icon="ph:share-network" class="size-4" /> Bagikan
+              <Icon icon="ph:share-network" class="size-4" /> Bagikan
             </button>
-
           </div>
         </div>
 
         <div v-if="!current && !pending" class="mt-8 rounded-2xl border border-dashed border-gray-300 dark:border-neutral-700 p-10 text-center">
-          <p class="text-gray-600 dark:text-neutral-300">Berita tidak ditemukan.</p>
+          <p class="text-gray-600 dark:text-neutral-300">{{ cfg.texts.notFound }}</p>
           <button @click="backToList" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm hover:bg-blue-700">
             <Icon icon="ph:arrow-left" class="size-4" /> Kembali ke Daftar
           </button>
@@ -105,12 +109,14 @@
         </article>
       </div>
 
+      <!-- LIST -->
       <div v-else>
+        <!-- Filters -->
         <div class="rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/60 backdrop-blur p-4">
           <div class="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
             <div class="flex-1 flex items-center gap-2">
               <label class="relative flex-1">
-                <input v-model="q" type="text" placeholder="Cari berita (judul/isi/tag)…"
+                <input v-model="q" type="text" :placeholder="cfg.texts.searchPlaceholder"
                        class="w-full rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-800 dark:text-neutral-100 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-600">
                 <span class="absolute right-3 top-2.5 text-gray-400 text-xs">{{ filtered.length }} hasil</span>
               </label>
@@ -185,70 +191,71 @@
         </div>
 
         <div v-if="!pending && filtered.length === 0" class="mt-10 rounded-2xl border border-dashed border-gray-300 dark:border-neutral-700 p-10 text-center">
-          <p class="text-gray-600 dark:text-neutral-300">Berita masih kosong.</p>
+          <p class="text-gray-600 dark:text-neutral-300">{{ cfg.texts.emptyList }}</p>
         </div>
 
         <div v-if="hasMore && !pending" class="mt-8 text-center">
           <button @click="loadMore" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-blue-700">
             <Icon icon="ph:arrow-circle-down" class="size-4" />
-            Tampilkan Lebih Banyak
+            {{ cfg.texts.loadMore }}
           </button>
         </div>
       </div>
 
-        <div id="hs-share-modal"
-            class="hs-overlay hidden size-full fixed top-0 start-0 z-[80] overflow-y-auto pointer-events-none">
+      <!-- Share Modal (Preline) -->
+      <div id="hs-share-modal"
+           class="hs-overlay hidden size-full fixed top-0 start-0 z-[80] overflow-y-auto pointer-events-none">
         <div class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-300 mt-0 opacity-0 transition-all
                     sm:max-w-md mx-auto p-4 max-h-[calc(100%-3.5rem)] h-auto">
-            <div class="pointer-events-auto bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700
-                        rounded-2xl shadow-lg">
+          <div class="pointer-events-auto bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700
+                      rounded-2xl shadow-lg">
             <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-neutral-700">
-                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Bagikan</h3>
-                <button type="button" class="size-8 inline-flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700"
-                        data-hs-overlay="#hs-share-modal" aria-label="Tutup">
+              <h3 class="text-base font-semibold text-gray-900 dark:text-white">Bagikan</h3>
+              <button type="button" class="size-8 inline-flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700"
+                      data-hs-overlay="#hs-share-modal" aria-label="Tutup">
                 <Icon icon="ph:x" class="size-4 text-gray-500 dark:text-neutral-300" />
-                </button>
+              </button>
             </div>
 
             <div class="p-4 grid gap-2">
-                <button type="button"
-                        @click="nativeShare"
-                        class="w-full inline-flex items-center gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
+              <button type="button"
+                      @click="nativeShare"
+                      class="w-full inline-flex items-center gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
                 <Icon icon="ph:device-mobile" class="size-4" />
                 <span>Sistem Bagikan</span>
-                </button>
+              </button>
 
-                <a :href="facebookHref" target="_blank" rel="noopener"
-                class="w-full inline-flex items-center gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
+              <a :href="facebookHref" target="_blank" rel="noopener"
+                 class="w-full inline-flex items-center gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
                 <Icon icon="mdi:facebook" class="size-4" />
                 <span>Facebook</span>
-                </a>
+              </a>
 
-                <a :href="twitterHref" target="_blank" rel="noopener"
-                class="w-full inline-flex items-center gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
+              <a :href="twitterHref" target="_blank" rel="noopener"
+                 class="w-full inline-flex items-center gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
                 <Icon icon="ri:twitter-x-line" class="size-4" />
                 <span>X (Twitter)</span>
-                </a>
+              </a>
 
-                <a :href="whatsappHref" target="_blank" rel="noopener"
-                class="w-full inline-flex items-center gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
+              <a :href="whatsappHref" target="_blank" rel="noopener"
+                 class="w-full inline-flex items-center gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
                 <Icon icon="mdi:whatsapp" class="size-4" />
                 <span>WhatsApp</span>
-                </a>
+              </a>
 
-                <button type="button"
-                        @click="copyShare"
-                        class="w-full inline-flex items-center justify-between gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
+              <button type="button"
+                      @click="copyShare"
+                      class="w-full inline-flex items-center justify-between gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
                 <span class="inline-flex items-center gap-3">
-                    <Icon icon="ph:link" class="size-4" />
-                    <span>Salin link</span>
+                  <Icon icon="ph:link" class="size-4" />
+                  <span>Salin link</span>
                 </span>
                 <span v-if="copied" class="text-xs text-green-600 dark:text-green-400">Tersalin!</span>
-                </button>
+              </button>
             </div>
-            </div>
+          </div>
         </div>
-        </div>
+      </div>
 
       <div v-if="error" class="mt-8 rounded-2xl border border-rose-300/60 dark:border-rose-700 bg-rose-50/60 dark:bg-rose-900/30 p-4 text-sm text-rose-700 dark:text-rose-200">
         {{ error }}
@@ -258,46 +265,88 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useNews } from '~/composables/data/useNews'
+import { useWeb } from '~/composables/data/useWeb'
+
+defineOptions({ name: 'NewsPage' })
 
 const {
   pending, error, items,
   q, selectedCategory, selectedTags, sortBy, toggleTag, resetFilters,
   filtered, paged, hasMore, page, pageSize,
   isDetail, current, openDetail, backToList,
-  renderedDetailHtml
+  renderedDetailHtml, categories
 } = useNews()
 
 function loadMore() { page.value++ }
-
 function formatDate(ts: number) {
   return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(ts)
 }
 
-const runtime = useRuntimeConfig()
+const PAGE_DEFAULTS = {
+  hero: {
+    cover: '/assets/images/profile.png',
+    badge: 'Kabar Terbaru',
+    title: 'Berita Pondok Pesantren Alberr',
+    subtitle: 'Informasi kegiatan, pengumuman, dan liputan santri.',
+    heightSm: '36vh',
+    heightLg: '44vh'
+  },
+  texts: {
+    searchPlaceholder: 'Cari berita (judul/isi/tag)…',
+    emptyList: 'Berita masih kosong.',
+    notFound: 'Berita tidak ditemukan.',
+    loadMore: 'Tampilkan Lebih Banyak'
+  }
+} as const
+
 const route = useRoute()
-const siteUrl = runtime.public.siteUrl || ''
-const canonical = computed(() => new URL(route.fullPath || '/', siteUrl).toString())
-const shareUrl = computed(() => canonical.value)
+const runtime = useRuntimeConfig()
+const siteUrl = runtime.public?.siteUrl || ''
 
-async function copyLink() {
-  try {
-    await navigator.clipboard.writeText(canonical.value)
-  } catch {}
-}
+const web = useWeb()
+const { data: pageSnap } = await useAsyncData(`webpage-${route.path}`, () => web.getPageSnapshot(route.path))
 
-const baseTitle = 'Berita | Pondok Pesantren Alberr'
-const baseDesc = 'Kumpulan kabar terbaru: kegiatan, pengumuman, prestasi, kajian santri.'
+const newsSectionProps = computed<any>(() => {
+  const sections = pageSnap.value?.sections || []
+  return sections.find((s: any) => s?.key === 'NewsPage')?.props || {}
+})
 
-const pageTitle = computed(() => isDetail.value
-  ? (current?.value?.title ?? baseTitle)
-  : baseTitle)
+const cfg = computed(() => ({
+  hero: {
+    cover: newsSectionProps.value?.hero?.cover || PAGE_DEFAULTS.hero.cover,
+    badge: newsSectionProps.value?.hero?.badge || PAGE_DEFAULTS.hero.badge,
+    title: newsSectionProps.value?.hero?.title || PAGE_DEFAULTS.hero.title,
+    subtitle: newsSectionProps.value?.hero?.subtitle || PAGE_DEFAULTS.hero.subtitle,
+    heightSm: newsSectionProps.value?.hero?.heightSm || PAGE_DEFAULTS.hero.heightSm,
+    heightLg: newsSectionProps.value?.hero?.heightLg || PAGE_DEFAULTS.hero.heightLg
+  },
+  texts: {
+    searchPlaceholder: newsSectionProps.value?.texts?.searchPlaceholder || PAGE_DEFAULTS.texts.searchPlaceholder,
+    emptyList: newsSectionProps.value?.texts?.emptyList || PAGE_DEFAULTS.texts.emptyList,
+    notFound: newsSectionProps.value?.texts?.notFound || PAGE_DEFAULTS.texts.notFound,
+    loadMore: newsSectionProps.value?.texts?.loadMore || PAGE_DEFAULTS.texts.loadMore
+  }
+}))
 
-const pageDesc = computed(() => isDetail.value
-  ? (current?.value?.excerpt || baseDesc)
-  : baseDesc)
+const pageMeta = computed<any>(() => pageSnap.value?.meta || {})
+
+const canonical = computed(() => {
+  try { return new URL(route.fullPath || '/', siteUrl).toString() }
+  catch { return siteUrl || '/' }
+})
+
+const baseTitle = computed(() => pageMeta.value?.title || 'Berita | Pondok Pesantren Alberr')
+const baseDesc  = computed(() => pageMeta.value?.description || 'Kumpulan kabar terbaru: kegiatan, pengumuman, prestasi, kajian santri.')
+const twitterSite = computed(() => pageMeta.value?.twitterSite || undefined)
+const themeColor  = computed(() => pageMeta.value?.themeColor || '#0ea5e9')
+const robots      = computed(() => pageMeta.value?.robots || 'index, follow')
+const ogImage     = computed(() => current?.value?.cover || pageMeta.value?.ogImage || '/assets/logo.png')
+
+const pageTitle = computed(() => isDetail.value ? (current?.value?.title ?? baseTitle.value) : baseTitle.value)
+const pageDesc  = computed(() => isDetail.value ? (current?.value?.excerpt || baseDesc.value) : baseDesc.value)
 
 useSeoMeta({
   title: pageTitle,
@@ -306,20 +355,19 @@ useSeoMeta({
   ogDescription: pageDesc,
   ogType: computed(() => isDetail.value ? 'article' : 'website'),
   ogUrl: canonical,
-  ogImage: computed(() => current?.value?.cover || '/assets/logo.png'),
+  ogImage,
   twitterCard: 'summary_large_image',
-  twitterSite: runtime.public.twitterSite || undefined,
-  themeColor: '#0ea5e9',
-  robots: 'index, follow'
+  twitterSite,
+  themeColor,
+  robots
 })
 
-useHead({
-  link: [{ rel: 'canonical', href: canonical.value }],
-})
+useHead({ link: [{ rel: 'canonical', href: canonical.value }] })
 
 watch(current, () => {
   if (!current?.value) return
   const art = current.value
+  const origin = siteUrl || (typeof window !== 'undefined' ? window.location.origin : '/')
   useHead({
     script: [{
       type: 'application/ld+json',
@@ -329,12 +377,12 @@ watch(current, () => {
         headline: art.title,
         datePublished: new Date(art.publishedAt || Date.now()).toISOString(),
         dateModified: new Date(art.publishedAt || Date.now()).toISOString(),
-        image: art.cover ? [ new URL(art.cover, siteUrl).toString() ] : [],
+        image: art.cover ? [ new URL(art.cover, origin).toString() ] : [],
         author: { '@type': 'Organization', name: 'Pondok Pesantren Alberr' },
         publisher: {
           '@type': 'Organization',
           name: 'Pondok Pesantren Alberr',
-          logo: { '@type': 'ImageObject', url: new URL('/assets/logo.png', siteUrl).toString() }
+          logo: { '@type': 'ImageObject', url: new URL('/assets/logo.png', origin).toString() }
         },
         mainEntityOfPage: canonical.value
       })
@@ -342,44 +390,27 @@ watch(current, () => {
   })
 })
 
-const shareText = computed(() =>
-  (current?.value?.title && isDetail.value) ? current.value.title : 'Berita Ponpes Alberr'
-)
-
+async function copyLink() { try { await navigator.clipboard.writeText(canonical.value) } catch {} }
+const shareText   = computed(() => (current?.value?.title && isDetail.value) ? current.value.title : 'Berita Ponpes Alberr')
 const encodedUrl  = computed(() => encodeURIComponent(canonical.value))
 const encodedText = computed(() => encodeURIComponent(`${shareText.value} – ${canonical.value}`))
-
-const facebookHref = computed(() =>
-  `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl.value}`
-)
-const twitterHref = computed(() =>
-  `https://twitter.com/intent/tweet?url=${encodedUrl.value}&text=${encodeURIComponent(shareText.value)}`
-)
-const whatsappHref = computed(() =>
-  `https://wa.me/?text=${encodedText.value}`
-)
+const facebookHref = computed(() => `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl.value}`)
+const twitterHref  = computed(() => `https://twitter.com/intent/tweet?url=${encodedUrl.value}&text=${encodeURIComponent(shareText.value)}`)
+const whatsappHref = computed(() => `https://wa.me/?text=${encodedText.value}`)
 
 const copied = ref(false)
-async function copyShare() {
-  await copyLink()
-  copied.value = true
-  setTimeout(() => (copied.value = false), 1200)
-}
-
+async function copyShare() { await copyLink(); copied.value = true; setTimeout(() => (copied.value = false), 1200) }
 async function nativeShare() {
   try {
-    if (navigator.share) {
-      await navigator.share({
-        title: shareText.value,
-        text: shareText.value,
-        url: canonical.value
-      })
-    } else {
-      await copyShare()
-    }
-  } catch {
-    // user canceled, ignore
-  }
+    if (navigator.share) { await navigator.share({ title: shareText.value, text: shareText.value, url: canonical.value }) }
+    else { await copyShare() }
+  } catch {}
 }
-
 </script>
+
+<style scoped>
+.heroH { height: var(--hero-sm); }
+@media (min-width: 640px) {
+  .heroH { height: var(--hero-lg); }
+}
+</style>
