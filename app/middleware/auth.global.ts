@@ -75,7 +75,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   try {
-    const raw = localStorage.getItem(AUTH_KEY)
+    const raw = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
     if (!raw) throw new Error('no token')
 
     const data = await decryptJSON(raw)

@@ -302,11 +302,13 @@ const firstAllowedPath = computed<string | null>(() => {
 })
 function enforceRouteAccess(p: string) {
   if (!p.startsWith('/app')) return
-  if (!aclReady.value) return            // ⟵ jangan redirect sebelum ACL siap
+  if (!aclReady.value) return
   if (!tokenUser.value) return
   if (hasAccessTo(p)) return
   const fallback = firstAllowedPath.value || '/cakAdmin'
-  if (p !== fallback) router.replace(fallback + '?denied=1')
+  if (p !== fallback) {
+    // setTimeout(() => router.replace(fallback), 1000)
+  }
 }
 
 /* Sidebar filtered */
@@ -397,7 +399,8 @@ const user = computed(() => ({
 }))
 function logout() {
   localStorage.removeItem('alberr:auth')
-  navigateTo('/cakAdmin')
+  sessionStorage.removeItem('alberr:auth')
+  window.location.href = '/cakAdmin'
 }
 
 /* RTDB ACL sync */
@@ -443,13 +446,12 @@ async function startAclWatcher(uidHint?: string | null) {
 /* Lifecycle */
 onMounted(async () => {
   try {
-    const raw = localStorage.getItem(AUTH_KEY)
+    const raw = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
     if (!raw) throw new Error('no token')
     const data = await decryptJSON(raw)
     const now = Math.floor(Date.now() / 1000)
     if (!data?.exp || now >= data.exp) throw new Error('expired')
 
-    // seed identitas (allowedRoutes akan dioverride RTDB)
     tokenUser.value = {
       uid: data.uid,
       email: data.email,
@@ -462,12 +464,11 @@ onMounted(async () => {
     }
 
     await nextTick()
-    // mulai sync ACL; enforce dilakukan setelah ACL siap
     await startAclWatcher(tokenUser.value?.uid)
   } catch {
     localStorage.removeItem(AUTH_KEY)
     if (!route.path.startsWith('/auth') && route.path !== '/' && route.path !== '/cakAdmin') {
-      router.replace('/cakAdmin')
+      // router.replace('/cakAdmin')
     }
     aclReady.value = true
   } finally {
