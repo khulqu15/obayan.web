@@ -42,7 +42,7 @@
 
           <div class="flex items-center gap-2">
             <button @click="copyLink" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60 px-3 py-1.5 text-sm text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-neutral-700">
-              <Icon icon="ph:link" class="size-4" /> Salin Tautan
+              <Icon icon="ph:link" class="size-4" /> {{ copied ? 'Tersalin' : 'Salin URL' }}
             </button>
             <button type="button"
                 data-hs-overlay="#hs-share-modal"
@@ -202,60 +202,137 @@
         </div>
       </div>
 
-      <!-- Share Modal (Preline) -->
-      <div id="hs-share-modal"
-           class="hs-overlay hidden size-full fixed top-0 start-0 z-[80] overflow-y-auto pointer-events-none">
-        <div class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-300 mt-0 opacity-0 transition-all
-                    sm:max-w-md mx-auto p-4 max-h-[calc(100%-3.5rem)] h-auto">
-          <div class="pointer-events-auto bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700
-                      rounded-2xl shadow-lg">
+      <div
+        id="hs-share-modal"
+        class="hs-overlay hidden fixed inset-0 z-[80] overflow-y-auto pointer-events-none [--overlay-backdrop:rgba(15,23,42,.65)]"
+        role="dialog"
+        aria-labelledby="hs-share-modal-label"
+        aria-modal="true"
+      >
+        <div
+          class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-300 mt-0 opacity-0 transition-all
+                mx-auto p-4 max-h-[calc(100%-3.5rem)] h-auto w-full sm:max-w-lg"
+        >
+          <div class="pointer-events-auto rounded-2xl border border-gray-200 bg-white shadow-xl
+                      dark:border-neutral-700 dark:bg-neutral-800">
+            <!-- Header -->
             <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-neutral-700">
-              <h3 class="text-base font-semibold text-gray-900 dark:text-white">Bagikan</h3>
-              <button type="button" class="size-8 inline-flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700"
-                      data-hs-overlay="#hs-share-modal" aria-label="Tutup">
-                <Icon icon="ph:x" class="size-4 text-gray-500 dark:text-neutral-300" />
+              <h3 id="hs-share-modal-label" class="text-base font-semibold text-gray-900 dark:text-white">
+                Bagikan
+              </h3>
+              <button
+                type="button"
+                class="size-8 inline-flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700"
+                data-hs-overlay="#hs-share-modal"
+                aria-label="Tutup"
+              >
+                <svg class="size-4 text-gray-500 dark:text-neutral-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
 
-            <div class="p-4 grid gap-2">
-              <button type="button"
-                      @click="nativeShare"
-                      class="w-full inline-flex items-center gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
-                <Icon icon="ph:device-mobile" class="size-4" />
-                <span>Sistem Bagikan</span>
-              </button>
+            <div class="p-4 space-y-4">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  @click="nativeShare"
+                  class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm
+                        hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:bg-neutral-700"
+                >
+                  <span class="inline-flex size-9 items-center justify-center rounded-lg bg-gray-900 text-white dark:bg-white dark:text-gray-900">
+                    <Icon icon="ph:device-mobile" class="size-5" />
+                  </span>
+                  <span class="font-medium text-gray-800 dark:text-neutral-100">Sistem</span>
+                </button>
 
-              <a :href="facebookHref" target="_blank" rel="noopener"
-                 class="w-full inline-flex items-center gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
-                <Icon icon="mdi:facebook" class="size-4" />
-                <span>Facebook</span>
-              </a>
+                <a
+                  :href="facebookHref"
+                  target="_blank" rel="noopener"
+                  class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm
+                        hover:bg-blue-50 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:bg-blue-900/20"
+                >
+                  <span class="inline-flex size-9 items-center justify-center rounded-lg bg-blue-600 text-white">
+                    <Icon icon="mdi:facebook" class="size-5" />
+                  </span>
+                  <span class="font-medium text-gray-800 dark:text-neutral-100">Facebook</span>
+                </a>
 
-              <a :href="twitterHref" target="_blank" rel="noopener"
-                 class="w-full inline-flex items-center gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
-                <Icon icon="ri:twitter-x-line" class="size-4" />
-                <span>X (Twitter)</span>
-              </a>
+                <a
+                  :href="twitterHref"
+                  target="_blank" rel="noopener"
+                  class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm
+                        hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:bg-neutral-700"
+                >
+                  <span class="inline-flex size-9 items-center justify-center rounded-lg bg-black text-white">
+                    <Icon icon="ri:twitter-x-fill" class="size-5" />
+                  </span>
+                  <span class="font-medium text-gray-800 dark:text-neutral-100">X (Twitter)</span>
+                </a>
 
-              <a :href="whatsappHref" target="_blank" rel="noopener"
-                 class="w-full inline-flex items-center gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
-                <Icon icon="mdi:whatsapp" class="size-4" />
-                <span>WhatsApp</span>
-              </a>
+                <a
+                  :href="whatsappHref"
+                  target="_blank" rel="noopener"
+                  class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm
+                        hover:bg-emerald-50 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:bg-emerald-900/20"
+                >
+                  <span class="inline-flex size-9 items-center justify-center rounded-lg bg-emerald-600 text-white">
+                    <Icon icon="mdi:whatsapp" class="size-5" />
+                  </span>
+                  <span class="font-medium text-gray-800 dark:text-neutral-100">WhatsApp</span>
+                </a>
+              </div>
 
-              <button type="button"
-                      @click="copyShare"
-                      class="w-full inline-flex items-center justify-between gap-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-700">
-                <span class="inline-flex items-center gap-3">
-                  <Icon icon="ph:link" class="size-4" />
-                  <span>Salin link</span>
-                </span>
-                <span v-if="copied" class="text-xs text-green-600 dark:text-green-400">Tersalin!</span>
+              <!-- Link box -->
+              <div class="grid sm:grid-cols-[1fr_auto] gap-2">
+                <div class="relative">
+                  <input
+                    :value="canonical"
+                    readonly
+                    class="w-full rounded-xl border border-gray-200 bg-white/90 px-3 py-2 pr-24 text-sm text-gray-800
+                          shadow-sm focus:outline-hidden dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                  />
+                  <button
+                    type="button"
+                    @click="copyShare"
+                    class="absolute right-1.5 top-1.5 inline-flex items-center gap-1.5 rounded-lg border border-gray-200
+                          bg-white px-2.5 py-1.5 text-xs text-gray-700 hover:bg-gray-50
+                          dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                  >
+                    <Icon icon="ph:copy" class="size-4" />
+                    <span>Salin</span>
+                    <span v-if="copied" class="ml-1 text-emerald-600 dark:text-emerald-400">✓</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  @click="copyShare"
+                  class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-black
+                        dark:bg-white dark:text-gray-900 dark:hover:bg-neutral-100"
+                >
+                  Salin Link
+                </button>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200 text-xs text-gray-500
+                        dark:border-neutral-700 dark:text-neutral-400">
+              <span>Bagikan tautan ini ke teman kalian</span>
+              <button
+                type="button"
+                class="px-2.5 py-1.5 rounded-md border border-gray-200 hover:bg-gray-50
+                      dark:border-neutral-700 dark:hover:bg-neutral-700"
+                data-hs-overlay="#hs-share-modal"
+              >
+                Tutup
               </button>
             </div>
           </div>
         </div>
       </div>
+
 
       <div v-if="error" class="mt-8 rounded-2xl border border-rose-300/60 dark:border-rose-700 bg-rose-50/60 dark:bg-rose-900/30 p-4 text-sm text-rose-700 dark:text-rose-200">
         {{ error }}
@@ -265,7 +342,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useNews } from '~/composables/data/useNews'
 import { useWeb } from '~/composables/data/useWeb'
@@ -332,11 +409,45 @@ const cfg = computed(() => ({
 }))
 
 const pageMeta = computed<any>(() => pageSnap.value?.meta || {})
+const canonical = ref('/')
 
-const canonical = computed(() => {
-  try { return new URL(route.fullPath || '/', siteUrl).toString() }
-  catch { return siteUrl || '/' }
+function computeCanonical() {
+  try {
+    const base =
+      siteUrl ||
+      (typeof window !== 'undefined' ? window.location.origin : '')
+    const path = route.fullPath || '/'
+    canonical.value = new URL(path, base || 'http://localhost').toString()
+  } catch {
+    canonical.value =
+      (typeof window !== 'undefined' ? window.location.href : '/') || '/'
+  }
+}
+
+onMounted(async() => {
+  const { HSStaticMethods } = await import('preline')
+  HSStaticMethods?.autoInit?.()
+  computeCanonical
 })
+watch(() => route.fullPath, computeCanonical, { immediate: true })
+useHead({ link: [{ rel: 'canonical', href: canonical }] })
+
+async function copyToClipboard(text: string) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text); return true
+    }
+  } catch {}
+  try {
+    const ta = document.createElement('textarea')
+    ta.value = text
+    ta.setAttribute('readonly','')
+    ta.style.position='fixed'; ta.style.opacity='0'
+    document.body.appendChild(ta); ta.select()
+    const ok = document.execCommand('copy'); document.body.removeChild(ta)
+    return ok
+  } catch { return false }
+}
 
 const baseTitle = computed(() => pageMeta.value?.title || 'Berita | Pondok Pesantren Alberr')
 const baseDesc  = computed(() => pageMeta.value?.description || 'Kumpulan kabar terbaru: kegiatan, pengumuman, prestasi, kajian santri.')
@@ -390,21 +501,38 @@ watch(current, () => {
   })
 })
 
-async function copyLink() { try { await navigator.clipboard.writeText(canonical.value) } catch {} }
-const shareText   = computed(() => (current?.value?.title && isDetail.value) ? current.value.title : 'Berita Ponpes Alberr')
+const shareText   = computed(() =>
+  (current?.value?.title && isDetail.value) ? current.value.title : 'Berita Ponpes Alberr'
+)
 const encodedUrl  = computed(() => encodeURIComponent(canonical.value))
 const encodedText = computed(() => encodeURIComponent(`${shareText.value} – ${canonical.value}`))
-const facebookHref = computed(() => `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl.value}`)
-const twitterHref  = computed(() => `https://twitter.com/intent/tweet?url=${encodedUrl.value}&text=${encodeURIComponent(shareText.value)}`)
-const whatsappHref = computed(() => `https://wa.me/?text=${encodedText.value}`)
+
+const facebookHref = computed(
+  () => `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl.value}`
+)
+const twitterHref  = computed(
+  () => `https://twitter.com/intent/tweet?url=${encodedUrl.value}&text=${encodeURIComponent(shareText.value)}`
+)
+const whatsappHref = computed(
+  () => `https://wa.me/?text=${encodedText.value}`
+)
 
 const copied = ref(false)
-async function copyShare() { await copyLink(); copied.value = true; setTimeout(() => (copied.value = false), 1200) }
-async function nativeShare() {
+async function copyLink() {
+  const ok = await copyToClipboard(canonical.value)
+  copied.value = ok
+  if (ok) setTimeout(() => (copied.value = false), 1200)
+}
+async function copyShare() {
+  await copyLink()
+}
+async function nativeShare(){
+  const url = canonical.value
   try {
-    if (navigator.share) { await navigator.share({ title: shareText.value, text: shareText.value, url: canonical.value }) }
-    else { await copyShare() }
+    if (navigator.share) { await navigator.share({ title: shareText.value, text: shareText.value, url }); return }
   } catch {}
+  const w = window.open(twitterHref.value, '_blank', 'noopener,noreferrer')
+  if (!w) await copyLink()
 }
 </script>
 

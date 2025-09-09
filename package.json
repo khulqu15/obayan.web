@@ -27,6 +27,7 @@
     "firebase": "^12.1.0",
     "isomorphic-dompurify": "^2.26.0",
     "marked": "^16.2.0",
+    "motion-v": "^1.7.1",
     "nuxt": "^4.0.3",
     "nuxt-tiptap-editor": "^2.3.1",
     "papaparse": "^5.5.3",

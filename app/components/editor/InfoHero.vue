@@ -264,7 +264,10 @@ type Shape = {
   profilHref: string
 }
 
-const props = defineProps<{ section: { id: string; key: string; props?: Partial<Shape> } }>()
+const props = defineProps<{ 
+  section: { id: string; key: string; props?: Partial<Shape> }, 
+  pagePath?: string 
+}>()
 const defaults: Shape = {
   headingPrefix: 'Kenapa Memilih',
   brandText: 'Pondok Alberr',
@@ -311,7 +314,11 @@ function merge(base: Shape, patch: Partial<Shape>): Shape {
   }
 }
 
-const { updateSection } = useWeb()
+const webApi = useWeb()
+watch(() => props.pagePath, (p) => {
+  (webApi as any)?.setActivePath?.(p)
+}, { immediate: true })
+const { updateSection } = webApi
 
 async function save() {
   try {
@@ -328,7 +335,6 @@ function resetToDefault() {
   activeTab.value = 'Konten'
 }
 
-/* ========= ICON PICKER ========= */
 type Target = { kind: 'reasons' | 'misi'; index: number }
 
 const iconModal = reactive({

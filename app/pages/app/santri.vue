@@ -63,6 +63,10 @@
       <form class="space-y-3" @submit.prevent="submitForm">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
+            <label class="text-xs text-gray-600 dark:text-neutral-300">Gen</label>
+            <input v-model.trim="form.gen" required class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" placeholder="mis. 2024"/>
+          </div>
+          <div>
             <label class="text-xs text-gray-600 dark:text-neutral-300">Nama Santri</label>
             <input v-model.trim="form.santri" required class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
           </div>
@@ -85,6 +89,27 @@
           <div>
             <label class="text-xs text-gray-600 dark:text-neutral-300">Jenjang</label>
             <input v-model.trim="form.jenjang" placeholder="KMI / MTs / MA / ..." class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+          </div>
+          <div>
+            <label class="text-xs text-gray-600 dark:text-neutral-300">Status</label>
+            <select
+              v-model="form.status"
+              class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"
+            >
+              <option value="aktif">Aktif</option>
+              <option value="nonaktif">Nonaktif</option>
+              <option value="lulus">Lulus</option>
+              <option value="cuti">Cuti</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-xs text-gray-600 dark:text-neutral-300">Alamat</label>
+            <textarea
+              v-model.trim="form.alamat"
+              rows="2"
+              class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"
+              placeholder="Alamat lengkap wali/santri"
+            />
           </div>
         </div>
 
@@ -190,21 +215,27 @@ const saving = ref(false)
 const formError = ref<string | null>(null)
 const current = ref<SantriRow | null>(null)
 const form = reactive<Omit<SantriRow, 'id'>>({
+  gen: '',
   santri: '',
   walisantri: '',
   nohp: '',
   kuotaKunjunganBulanIni: 0,
   kamar: '',
-  jenjang: ''
+  jenjang: '',
+  alamat: '',
+  status: 'aktif'
 })
 
 function resetForm() {
+  form.gen = ''
   form.santri = ''
   form.walisantri = ''
   form.nohp = ''
   form.kuotaKunjunganBulanIni = 0
   form.kamar = ''
   form.jenjang = ''
+  form.alamat = ''
+  form.status = 'aktif'
   formError.value = null
 }
 
@@ -217,12 +248,15 @@ function openCreate() {
 function openEdit(row: SantriRow) {
   formMode.value = 'edit'
   current.value = row
+  form.gen = row.gen || ''
   form.santri = row.santri
   form.walisantri = row.walisantri || ''
   form.nohp = row.nohp || ''
   form.kuotaKunjunganBulanIni = row.kuotaKunjunganBulanIni ?? 0
   form.kamar = row.kamar || ''
   form.jenjang = row.jenjang || ''
+  form.alamat = row.alamat || ''
+  form.status = (row.status as any) || 'aktif'
   formError.value = null
   showForm.value = true
 }
@@ -230,6 +264,10 @@ function openEdit(row: SantriRow) {
 async function submitForm() {
   if (!form.santri?.trim()) {
     formError.value = 'Nama santri wajib diisi.'
+    return
+  }
+  if (!form.gen?.trim()) {
+    formError.value = 'Gen wajib diisi.'
     return
   }
   saving.value = true

@@ -23,7 +23,6 @@
       </div>
     </div>
 
-    <!-- HERO -->
     <div v-show="activeTab === 'Hero'" class="mt-3 grid sm:grid-cols-2 gap-4">
       <div class="sm:col-span-2">
         <label class="text-xs text-gray-500">Gambar Cover (URL/Data URL)</label>
@@ -46,7 +45,6 @@
           </button>
         </div>
 
-        <!-- Preview hero -->
         <div class="mt-3">
           <div class="text-xs text-gray-500 mb-1">Pratinjau Cover</div>
           <div class="h-32 rounded-lg overflow-hidden border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800 flex items-center justify-center">
@@ -84,7 +82,6 @@
       </div>
     </div>
 
-    <!-- TEKS -->
     <div v-show="activeTab === 'Teks'" class="mt-3 grid gap-3">
       <div>
         <label class="text-xs text-gray-500">Placeholder Pencarian</label>
@@ -165,7 +162,6 @@
       </div>
     </div>
 
-    <!-- Notes -->
     <div class="mt-4 flex flex-wrap gap-2">
       <p v-if="savedNote" class="text-[11px] text-emerald-600">{{ savedNote }}</p>
       <p v-if="errNote" class="text-[11px] text-rose-600">{{ errNote }}</p>
@@ -198,9 +194,9 @@ type Shape = {
 
 const props = defineProps<{
   section: { id: string; key: string; props?: Partial<Shape> }
+  pagePath?: string
 }>()
 
-/* ===== Defaults ===== */
 const defaults: Shape = {
   hero: {
     cover: '/assets/images/activity1.jpg',
@@ -246,7 +242,6 @@ function merge(base: Shape, patch?: Partial<Shape>): Shape {
   }
 }
 
-/* ===== State ===== */
 const form = reactive<Shape>(merge(defaults, props.section?.props))
 const savedNote = ref(''); const errNote = ref('')
 const tabs = ['Hero', 'Teks', 'Galeri'] as const
@@ -254,9 +249,12 @@ const activeTab = ref<typeof tabs[number]>('Hero')
 
 watch(() => props.section?.props, (p) => { Object.assign(form, merge(defaults, p)) })
 
-const { updateSection, uploadMedia } = useWeb()
+const webApi = useWeb()
+watch(() => props.pagePath, (p) => {
+  (webApi as any)?.setActivePath?.(p)
+}, { immediate: true })
+const { updateSection, uploadMedia } = webApi
 
-/* ===== Actions ===== */
 async function save() {
   try {
     errNote.value = ''
@@ -272,18 +270,16 @@ function resetToDefault() {
   activeTab.value = 'Hero'
 }
 
-/* Unggah hero cover ke Firebase Storage (folder path mengikuti current page key) */
 async function onPickHeroImage(ev: Event) {
   const input = ev.target as HTMLInputElement
   const file = input.files?.[0]; if (!file) return
   try {
-    const up = await uploadMedia(file) // otomatis ke alberr/web/media/{pageKey}/...
+    const up = await uploadMedia(file)
     if (up?.url) form.hero.cover = up.url
   } catch {}
   input.value = ''
 }
 
-/* Unggah gambar item */
 async function onPickItemImage(ev: Event, idx: number) {
   const input = ev.target as HTMLInputElement
   const file = input.files?.[0]; if (!file) return
@@ -294,10 +290,8 @@ async function onPickItemImage(ev: Event, idx: number) {
   input.value = ''
 }
 
-/* Fallback handler bila img error */
 function onImgError(e: Event) {
   const el = e.target as HTMLImageElement
-  // Small inline SVG placeholder
   el.src =
     'data:image/svg+xml;utf8,' +
     encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="100%" height="100%" fill="#f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="12">No Image</text></svg>')

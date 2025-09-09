@@ -1,3 +1,4 @@
+<!-- pages/gallery.vue -->
 <template>
   <section id="gallery" class="relative overflow-hidden dark:bg-neutral-900 bg-gray-100">
     <div aria-hidden="true" class="pointer-events-none absolute inset-0">
@@ -11,40 +12,48 @@
       </div>
     </div>
 
+    <!-- HERO -->
     <div class="relative pt-36">
       <div class="absolute inset-0">
-        <img src="/assets/images/activity1.jpg" class="w-full h-full object-cover opacity-80" alt="Cover Gallery">
+        <img :src="hero.cover" class="w-full h-full object-cover opacity-80" alt="Cover Gallery">
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
       </div>
-      <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 h-[36vh] sm:h-[44vh] flex items-end">
+
+      <!-- height mengikuti data editor (hero.heightSm / hero.heightLg) -->
+      <div
+        class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 flex items-end"
+        :style="{ height: heroHeight }"
+      >
         <div class="mb-10">
           <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-blue-200">
-            <span class="inline-block size-2 rounded-full bg-blue-400" /> Galeri Kegiatan Santri
+            <span class="inline-block size-2 rounded-full bg-blue-400" /> {{ hero.badge }}
           </p>
-          <h1 class="mt-1 text-3xl sm:text-5xl font-bold text-white">Gallery Pondok Pesantren Alberr</h1>
-          <p class="mt-2 text-blue-100">Dokumentasi kegiatan, fasilitas, dan momen terbaik di pesantren.</p>
+          <h1 class="mt-1 text-3xl sm:text-5xl font-bold text-white">{{ hero.title }}</h1>
+          <p class="mt-2 text-blue-100">{{ hero.subtitle }}</p>
         </div>
       </div>
     </div>
 
+    <!-- FILTER BAR -->
     <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
       <div class="rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/60 backdrop-blur p-4">
         <div class="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
           <div class="flex-1 flex items-center gap-2">
             <label class="relative flex-1">
-              <input v-model="q" type="text" placeholder="Cari foto (judul/tag/kategori)…"
+              <input v-model="q" type="text" :placeholder="texts.searchPlaceholder"
                      class="w-full rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-800 dark:text-neutral-100 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-600">
               <span class="absolute right-3 top-2.5 text-gray-400 text-xs">{{ filtered.length }} hasil</span>
             </label>
+
             <div>
-                <select v-model="selectedCategory"
-                        @change="setCategory(selectedCategory)"
-                        class="block w-52 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm text-gray-700 dark:text-neutral-200 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">All</option>
-                    <option v-for="c in categoriesUi" :key="c" :value="c">
-                    {{ c }}
-                    </option>
-                </select>
+              <select v-model="selectedCategory"
+                      @change="setCategory(selectedCategory)"
+                      class="block w-52 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm text-gray-700 dark:text-neutral-200 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <option value="">{{ texts.categoryAll }}</option>
+                <option v-for="c in categories" :key="c" :value="c">
+                  {{ c }}
+                </option>
+              </select>
             </div>
 
             <div class="hidden sm:block">
@@ -56,8 +65,8 @@
               </select>
             </div>
           </div>
-
         </div>
+
         <div class="flex flex-wrap gap-2 mt-3">
           <button v-for="t in tagsUi" :key="t"
                   @click="toggleTag(t)"
@@ -72,10 +81,9 @@
         </div>
       </div>
 
-      <!-- Masonry Gallery -->
+      <!-- MASONRY -->
       <div class="mt-6 columns-1 sm:columns-2 lg:columns-3 gap-4 [column-fill:_balance]">
-        <div v-for="(img, idx) in paged" :key="img.src"
-             class="mb-4 break-inside-avoid">
+        <div v-for="(img, idx) in paged" :key="img.src" class="mb-4 break-inside-avoid">
           <figure class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60">
             <img
               :src="img.src"
@@ -97,16 +105,19 @@
         </div>
       </div>
 
-      <!-- Load more -->
+      <!-- LOAD MORE -->
       <div v-if="hasMore" class="mt-6 text-center">
-        <button class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-blue-700">
+        <button
+          class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-blue-700"
+          @click="loadMore"
+        >
           <ClientOnly><Icon icon="ph:arrow-circle-down" class="size-4" /></ClientOnly>
-          Tampilkan Lebih Banyak
+          {{ texts.loadMore }}
         </button>
       </div>
     </div>
 
-    <!-- LIGHTBOX (Preline overlay) -->
+    <!-- LIGHTBOX -->
     <div id="hs-lightbox" class="hs-overlay hidden size-full fixed top-0 start-0 z-[90] overflow-x-hidden overflow-y-auto" role="dialog" tabindex="-1" aria-labelledby="hs-lightbox-label">
       <div class="hs-overlay-open:opacity-100 hs-overlay-open:duration-300 opacity-0 ease-out transition-all max-w-[96rem] w-full mx-auto p-3">
         <div class="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800 bg-neutral-950/90">
@@ -164,9 +175,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useWeb } from '~/composables/data/useWeb'
 
+/* ================= SEO ================= */
 const route = useRoute()
 const config = useRuntimeConfig()
 
@@ -181,7 +194,7 @@ useSeoMeta({
   ogDescription: description,
   ogType: 'website',
   ogUrl: url.value,
-  ogImage: '/assets/logo.png',           // siapkan file OG image
+  ogImage: '/assets/logo.png',
   twitterCard: 'summary_large_image',
   twitterSite: config.public.twitterSite || undefined,
   themeColor: '#0ea5e9',
@@ -222,32 +235,134 @@ useHead({
   ]
 })
 
-
-const galleryCount = 18
-const baseImages = Array.from({ length: galleryCount }, (_, i) => {
-  const idx = i + 1
-  const categories = ['Kegiatan', 'Fasilitas', 'Asrama', 'Kelas', 'Masjid']
-  const tagsPool = ['santri','kajian','tahfidz','olahraga','kelas','perpustakaan','asrama','kebersihan','masjid']
-  const pick = (arr: string[], n: number) => arr.sort(() => 0.5 - Math.random()).slice(0, n)
-  return {
-    src: `/assets/images/gallery/${idx}.jpg`,
-    title: `Dokumentasi #${idx}`,
-    category: categories[idx % categories.length],
-    tags: pick(tagsPool, 2),
-    createdAt: Date.now() - idx * 86400000
+/* ============ Ambil props dari Editor: GalleryPage ============ */
+type Shape = {
+  hero: {
+    cover: string
+    badge: string
+    title: string
+    subtitle: string
+    heightSm: string
+    heightLg: string
+  },
+  texts: {
+    searchPlaceholder: string
+    categoryAll: string
+    loadMore: string
+  },
+  gallery: {
+    items: Array<{ src: string; title: string; category: string; tagsText?: string; tags?: string[]; createdAt?: number }>
   }
+}
+
+const defaults: Shape = {
+  hero: {
+    cover: '/assets/images/activity1.jpg',
+    badge: 'Galeri Kegiatan Santri',
+    title: 'Gallery Pondok Pesantren Alberr',
+    subtitle: 'Dokumentasi kegiatan, fasilitas, dan momen terbaik di pesantren.',
+    heightSm: '36vh',
+    heightLg: '44vh'
+  },
+  texts: {
+    searchPlaceholder: 'Cari foto (judul/tag/kategori)…',
+    categoryAll: 'All',
+    loadMore: 'Tampilkan Lebih Banyak'
+  },
+  gallery: {
+    items: [
+      { src: '/assets/images/gallery/1.jpg', title: 'Dokumentasi #1', category: 'Kegiatan', tagsText: 'santri, kajian' },
+      { src: '/assets/images/gallery/2.jpg', title: 'Dokumentasi #2', category: 'Fasilitas', tagsText: 'kelas, perpustakaan' }
+    ]
+  }
+}
+
+function merge(base: Shape, patch?: Partial<Shape>): Shape {
+  return {
+    hero: {
+      cover: patch?.hero?.cover ?? base.hero.cover,
+      badge: patch?.hero?.badge ?? base.hero.badge,
+      title: patch?.hero?.title ?? base.hero.title,
+      subtitle: patch?.hero?.subtitle ?? base.hero.subtitle,
+      heightSm: patch?.hero?.heightSm ?? base.hero.heightSm,
+      heightLg: patch?.hero?.heightLg ?? base.hero.heightLg
+    },
+    texts: {
+      searchPlaceholder: patch?.texts?.searchPlaceholder ?? base.texts.searchPlaceholder,
+      categoryAll: patch?.texts?.categoryAll ?? base.texts.categoryAll,
+      loadMore: patch?.texts?.loadMore ?? base.texts.loadMore
+    },
+    gallery: {
+      items: Array.isArray(patch?.gallery?.items) && patch!.gallery!.items.length
+        ? patch!.gallery!.items
+        : [...base.gallery.items]
+    }
+  }
+}
+
+const web = useWeb()
+const { sections, subscribePage } = web
+onMounted(() => { subscribePage(route.path || '/') })
+watch(() => route.path, (p) => { subscribePage(p || '/') })
+
+const galleryProps = computed<Partial<Shape> | undefined>(() =>
+  sections.value.find(s => s.key === 'GalleryPage')?.props as any
+)
+const shape = computed<Shape>(() => merge(defaults, galleryProps.value))
+
+/* ================== Normalisasi data untuk UI ================== */
+const hero = computed(() => shape.value.hero)
+const texts = computed(() => shape.value.texts)
+
+const items = computed(() =>
+  (shape.value.gallery.items || []).map((it, idx) => {
+    const tags = Array.isArray((it as any).tags)
+      ? (it as any).tags
+      : (it.tagsText || '')
+          .split(',')
+          .map(t => t.trim())
+          .filter(Boolean)
+
+    return {
+      src: it.src,
+      title: it.title || `Dokumentasi #${idx + 1}`,
+      category: it.category || '',
+      tags,
+      createdAt: it.createdAt ?? (Date.now() - (idx + 1) * 86400000)
+    }
+  })
+)
+
+/* Responsive height hero (mengikuti data editor) */
+const isLg = ref(false)
+const heroHeight = computed(() => (isLg.value ? hero.value.heightLg : hero.value.heightSm))
+onMounted(() => {
+  const mq = window.matchMedia('(min-width: 1024px)')
+  const handler = () => (isLg.value = mq.matches)
+  handler()
+  mq.addEventListener('change', handler)
+  onBeforeUnmount(() => mq.removeEventListener('change', handler))
 })
 
+/* ================= Filter / Sort ================= */
 const q = ref('')
 const selectedCategory = ref<string>('')
-const categoriesUi = ['Semua Kategori', 'Kegiatan', 'Fasilitas', 'Asrama', 'Kelas', 'Masjid']
-const allTags = Array.from(new Set(baseImages.flatMap(i => i.tags)))
-const selectedTags = ref<Set<string>>(new Set())
-const tagsUi = computed(() => allTags)
 const sortBy = ref<'newest' | 'oldest' | 'title'>('newest')
 
+const categories = computed(() => {
+  const set = new Set(items.value.map(i => i.category).filter(Boolean))
+  return Array.from(set)
+})
+
+const allTags = computed(() => {
+  const set = new Set(items.value.flatMap(i => i.tags))
+  return Array.from(set)
+})
+const selectedTags = ref<Set<string>>(new Set())
+const tagsUi = computed(() => allTags.value)
+
 function setCategory(c: string) {
-  selectedCategory.value = (c === 'Semua Kategori') ? '' : c
+  selectedCategory.value = c || ''
 }
 function toggleTag(t: string) {
   const s = new Set(selectedTags.value)
@@ -262,19 +377,23 @@ function resetFilters() {
 }
 
 const filtered = computed(() => {
-  let out = baseImages.filter(i => {
+  let out = items.value.filter(i => {
     const mq = q.value.trim().toLowerCase()
-    const matchQ = !mq || i.title.toLowerCase().includes(mq) || i.tags.some(t => t.includes(mq))
+    const matchQ = !mq ||
+      i.title.toLowerCase().includes(mq) ||
+      i.tags.some(t => t.toLowerCase().includes(mq)) ||
+      i.category.toLowerCase().includes(mq)
     const matchC = !selectedCategory.value || i.category === selectedCategory.value
     const matchT = selectedTags.value.size === 0 || [...selectedTags.value].every(t => i.tags.includes(t))
     return matchQ && matchC && matchT
   })
-  if (sortBy.value === 'newest') out.sort((a,b) => b.createdAt - a.createdAt)
-  if (sortBy.value === 'oldest') out.sort((a,b) => a.createdAt - b.createdAt)
-  if (sortBy.value === 'title')  out.sort((a,b) => a.title.localeCompare(b.title))
+  if (sortBy.value === 'newest') out.sort((a, b) => b.createdAt - a.createdAt)
+  if (sortBy.value === 'oldest') out.sort((a, b) => a.createdAt - b.createdAt)
+  if (sortBy.value === 'title') out.sort((a, b) => a.title.localeCompare(b.title))
   return out
 })
 
+/* ================= Pagination ================= */
 const page = ref(1)
 const pageSize = 12
 const startIndex = computed(() => 0)
@@ -282,6 +401,7 @@ const paged = computed(() => filtered.value.slice(0, page.value * pageSize))
 const hasMore = computed(() => paged.value.length < filtered.value.length)
 function loadMore() { page.value++ }
 
+/* ================= Lightbox / Zoom ================= */
 const index = ref(0)
 const current = computed(() => filtered.value[index.value])
 
@@ -302,7 +422,6 @@ function closeLightbox() {
   document.documentElement.classList.remove('hs-overlay-open:overflow-y-hidden')
   document.removeEventListener('keydown', onKey)
 }
-
 function prev() { index.value = (index.value - 1 + filtered.value.length) % filtered.value.length; resetZoom(false) }
 function next() { index.value = (index.value + 1) % filtered.value.length; resetZoom(false) }
 function onKey(e: KeyboardEvent) {

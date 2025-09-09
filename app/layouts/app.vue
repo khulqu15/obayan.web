@@ -77,7 +77,6 @@
 
     <!-- Sidebar: render setelah tokenUser siap -->
     <div
-      :key="'sb-'+(tokenUser?.allowedRoutes||[]).join('|')"
       id="hs-pro-sidebar"
       class="hs-overlay [--body-scroll:true] lg:[--overlay-backdrop:false] [--is-layout-affect:true] [--opened:lg] [--auto-close:lg]
              hs-overlay-open:translate-x-0 lg:hs-overlay-layout-open:translate-x-0 -translate-x-full transition-all duration-300 transform
@@ -119,7 +118,6 @@
               <p class="text-xs text-neutral-400">{{ (user.email || '-').substring(0, 18) }}{{ (user.email || '').length > 24 ? '…' : '' }}</p>
             </div>
           </div>
-
           <div v-for="group in sidebarGroups" :key="group.title" class="pt-3 mt-3 flex flex-col border-t border-gray-200/10 first:border-t-0 first:pt-0 first:mt-0 dark:border-neutral-700">
             <button
               type="button"
@@ -142,7 +140,7 @@
             <transition name="collapse">
               <ul v-if="!isCollapsed(groupKey(group))" :id="`grp-${groupKey(group)}`" class="ms-1.5 mt-1 flex flex-col gap-y-1">
                 <li v-for="item in group.items" :key="item.label">
-                  <NuxtLink v-if="hasAccessTo(item.href)" class="w-full flex items-center gap-x-2 py-2 px-2.5 text-sm rounded-lg focus:outline-hidden" :to="item.href" :class="menuClass(item)" data-hs-overlay-close @click="handleNavClick(item.href, $event)">
+                  <NuxtLink class="w-full flex items-center gap-x-2 py-2 px-2.5 text-sm rounded-lg focus:outline-hidden" :to="item.href" :class="menuClass(item)" data-hs-overlay-close @click="handleNavClick(item.href, $event)">
                     <Icon v-if="item.icon" :icon="item.icon" class="size-4" />
                     {{ item.label }}
                   </NuxtLink>
@@ -235,7 +233,8 @@ useHead({ link: [{ rel: 'canonical', href: url.value }] })
 /* Sidebar data */
 type Item = { label: string; href: string; icon?: string }
 type SidebarGroup = { title: string; key?: string; items: Item[] }
-const rawSidebar = ref<SidebarGroup[]>([
+
+const ADMIN_SIDEBAR: SidebarGroup[] = [
   { title: 'Beranda', items: [
     { label: 'Dashboard', href: '/app', icon: 'lucide:layout-dashboard' },
     { label: 'Berita Informasi', href: '/app/news', icon: 'hugeicons:news' },
@@ -276,46 +275,77 @@ const rawSidebar = ref<SidebarGroup[]>([
     { label: 'Hak Akses', href: '/app/user', icon: 'solar:key-broken' },
     { label: 'Website', href: '/app/web', icon: 'icon-park-outline:web-page' },
   ]},
-])
+]
+
+const DEFAULT_WALI_ROUTES = ['/wali','/wali/santri','/wali/pembayaran','/wali/pengumuman']
+const WALI_SIDEBAR: SidebarGroup[] = [
+  { title: 'Wali', items: [
+    { label: 'Beranda',     href: '/wali',               icon: 'lucide:house' },
+    { label: 'Santri',      href: '/wali/santri',        icon: 'lucide:user-round' },
+    { label: 'Pembayaran',  href: '/wali/pembayaran',    icon: 'akar-icons:money' },
+    { label: 'Pengumuman',  href: '/wali/pengumuman',    icon: 'lucide:megaphone' },
+    { label: 'Akademik',  href: '/wali/akademik',    icon: 'solar:chart-linear' },
+    { label: 'Perizinan',  href: '/wali/perizinan',    icon: 'solar:letter-linear' },
+    { label: 'Kunjungan',  href: '/wali/kunjungan',    icon: 'material-symbols:parent-child-dining-outline-rounded' },
+  ]},
+]
+
+function getSidebarForRole(role?: string, currentPath?: string): SidebarGroup[] {
+  console.log(role)
+  if (role === 'wali') return WALI_SIDEBAR
+  if (role === 'admin' || role === 'superadmin' || role === 'operator' || role === 'staff') {
+    return ADMIN_SIDEBAR
+  }
+  return currentPath?.startsWith('/wali') ? WALI_SIDEBAR : ADMIN_SIDEBAR
+}
 
 const tokenUser = ref<{ uid:string; email:string; role:string; name:string; allowedRoutes:string[] } | null>(null)
+const rawSidebar = computed<SidebarGroup[]>(
+  () => getSidebarForRole(tokenUser.value?.role, route.path)
+)
 const aclReady   = ref(false)
 
 const normalize = (p: string) => { try { const u = new URL(p, 'http://x'); return u.pathname.replace(/\/+$/,'') || '/' } catch { return p.replace(/\/+$/,'') || '/' } }
+
 function isAllowed(path: string, allowed: string[]) {
   const a = normalize(path)
   const list = (allowed || []).map(normalize)
-  return list.some(r => a === r)
+  return list.some(r => a === r || (r !== '/' && a.startsWith(r + '/')))
 }
 
 const hasAccessTo = (path: string) => {
-  const isAllow = isAllowed(path, tokenUser.value?.allowedRoutes || [])
-  return isAllow
+  const ok = isAllowed(path, effectiveAllowedRoutes.value)
+  return ok
 }
+
 const allMenuPaths = computed(() => rawSidebar.value.flatMap(g => g.items.map(i => i.href)))
 const firstAllowedPath = computed<string | null>(() => {
-  const allowed = tokenUser.value?.allowedRoutes || []
+  const role = tokenUser.value?.role
+  const allowed = effectiveAllowedRoutes.value
+  if (role === 'wali') return '/wali'
   if (!allowed.length) return null
   if (allowed.some(a => normalize(a) === '/app')) return '/app'
   for (const p of allMenuPaths.value) if (isAllowed(p, allowed)) return p
   return null
 })
 function enforceRouteAccess(p: string) {
-  if (!p.startsWith('/app')) return
+  if (!(p.startsWith('/app') || p.startsWith('/wali'))) return
   if (!aclReady.value) return
   if (!tokenUser.value) return
   if (hasAccessTo(p)) return
-  const fallback = firstAllowedPath.value || '/cakAdmin'
-  if (p !== fallback) {
-    // setTimeout(() => router.replace(fallback), 1000)
-  }
+  const fallback = firstAllowedPath.value
+    || (tokenUser.value?.role === 'wali' ? '/wali' : '/cakAdmin')
+  if (p !== fallback) router.replace(fallback)
 }
 
-/* Sidebar filtered */
 const effectiveAllowedRoutes = computed<string[]>(() => {
-  const ar = tokenUser.value?.allowedRoutes
-  return Array.isArray(ar) && ar.length ? ar : []
+  const role = tokenUser.value?.role
+  const raw  = tokenUser.value?.allowedRoutes
+  const routes = Array.isArray(raw) ? raw.map(String) : []
+  if (role === 'wali') return routes.length ? routes : DEFAULT_WALI_ROUTES
+  return routes
 })
+
 const sidebarGroups = computed<SidebarGroup[]>(() => {
   const routes = effectiveAllowedRoutes.value
   return rawSidebar.value
@@ -323,11 +353,10 @@ const sidebarGroups = computed<SidebarGroup[]>(() => {
     .filter(g => g.items.length > 0)
 })
 
-/* Active/collapse helpers */
 const normalizePath = (p: string) => normalize(p)
 const isItemActive = (currentPath: string, href: string) => {
   const a = normalizePath(currentPath), b = normalizePath(href)
-  if (b === '/app') return a === b
+  if (b === '/app' || b === '/wali') return a === b
   return a === b || a.startsWith(b + '/')
 }
 const isGroupActive = (g: SidebarGroup) => g.items?.some(i => isItemActive(route.path, i.href)) ?? false
@@ -336,29 +365,43 @@ const collapsedGroups = useState<Record<string, boolean>>('sidebarCollapsed', ()
 const groupKey = (g: SidebarGroup) => g.key ?? g.title.toLowerCase().trim().replace(/[^\w]+/g, '-')
 const isCollapsed = (key: string) => (collapsedGroups.value[key] ?? true)
 function toggleGroup(key: string) {
-  const open = !isCollapsed(key)
-  if (open) { collapsedGroups.value[key] = true } else { closeAllExcept(key) }
+  const wasCollapsed = isCollapsed(key)
+  if (wasCollapsed) {
+    closeAllExcept(key)
+    collapsedGroups.value[key] = false
+  } else collapsedGroups.value[key] = true
   persistCollapsed()
 }
-const persistCollapsed = () => { if (!process.client) return; try { localStorage.setItem(STORAGE_KEY, JSON.stringify(collapsedGroups.value)) } catch {} }
-function closeAllExcept(targetKey: string) { for (const g of sidebarGroups.value) collapsedGroups.value[groupKey(g)] = (groupKey(g) !== targetKey) }
-watch(collapsedGroups, persistCollapsed, { deep: true })
 
-/* Auth UI */
+function closeAllExcept(targetKey: string) {
+  for (const g of rawSidebar.value) {
+    const k = groupKey(g)
+    collapsedGroups.value[k] = (k !== targetKey)
+  }
+}
+
+const persistCollapsed = () => { if (!process.client) return; try { localStorage.setItem(STORAGE_KEY, JSON.stringify(collapsedGroups.value)) } catch {} }
+watch(collapsedGroups, persistCollapsed, { deep: true })
+type AccountItem = { label: 'Profile' | 'Settings' | 'Logout'; icon: string; href: string }
+
 const authLoading = useState<boolean>('authLoading', () => true)
 const isAuthed    = useState<boolean>('isAuthed', () => false)
 const rightOpen = ref(false)
-const accountMenu = ref([
-  { label: 'Profile',  icon: 'lucide:user',       href: '/app/profile' },
-  { label: 'Settings', icon: 'lucide:settings-2', href: '/app/setting' },
-  { label: 'Logout',   icon: 'lucide:log-out',    href: '#' },
-])
+const accountMenu = computed<AccountItem[]>(() => {
+  const base = (tokenUser.value?.role === 'wali' || route.path.startsWith('/wali')) ? '/wali' : '/app'
+  return [
+    { label: 'Profile',  icon: 'lucide:user',       href: `${base}/profile` },
+    { label: 'Settings', icon: 'lucide:settings-2', href: `${base}/setting` },
+    { label: 'Logout',   icon: 'lucide:log-out',    href: '#' },
+  ]
+})
 const baseLinkClass = 'text-neutral-300 hover:bg-white/5 focus:bg-white/5 hover:text-neutral-100 transition-colors'
 function menuClass(item: Item) {
   return isItemActive(route.path, item.href)
     ? `${baseLinkClass} bg-blue-600/20 ring-1 ring-blue-500/30 text-neutral-100`
     : baseLinkClass
 }
+
 function handleNavClick(to: string, e: MouseEvent) {
   e.preventDefault()
   e.stopPropagation()
@@ -371,7 +414,6 @@ function handleNavClick(to: string, e: MouseEvent) {
   router.push(to)
 }
 
-/* Token decrypt (kompatibel dgn kode lama) */
 const PASSPHRASE = 'alberr-admin-secret'
 const SALT       = 'alberr-static-salt'
 const ITER       = 120_000
@@ -390,7 +432,6 @@ async function decryptJSON(serialized: string) {
   return JSON.parse(new TextDecoder().decode(plain))
 }
 
-/* Session / display user */
 const sessionUser = useState<any>('sessionUser', () => ({}))
 const user = computed(() => ({
   name: tokenUser.value?.name || sessionUser.value?.name || 'Pengguna',
@@ -400,17 +441,18 @@ const user = computed(() => ({
 function logout() {
   localStorage.removeItem('alberr:auth')
   sessionStorage.removeItem('alberr:auth')
-  window.location.href = '/cakAdmin'
+  window.location.href = '/'
 }
 
-/* RTDB ACL sync */
 function coerceRoutes(v: any): string[] {
   if (Array.isArray(v)) return v.map(String)
   if (v && typeof v === 'object') return Object.values(v).filter(x => typeof x === 'string').map(String)
   return []
 }
+const uniq = (arr: string[]) => Array.from(new Set(arr.map(normalize)))  // helper unik
+
 function applyAllowedRoutes(uid: string, routesRaw: any) {
-  const routes = coerceRoutes(routesRaw)
+  const coerced = coerceRoutes(routesRaw)
   const prev = tokenUser.value || {
     uid,
     email: $auth?.currentUser?.email || '-',
@@ -418,10 +460,19 @@ function applyAllowedRoutes(uid: string, routesRaw: any) {
     role: 'wali',
     allowedRoutes: []
   }
-  tokenUser.value = { ...prev, uid, allowedRoutes: routes }
+
+  const baseDefault =
+    prev.role === 'wali'
+      ? DEFAULT_WALI_ROUTES
+      : (['admin','superadmin','operator','staff'].includes(prev.role) ? ['/app'] : [])
+
+  const nextAllowed = uniq([...(coerced || []), ...baseDefault])
+
+  tokenUser.value = { ...prev, uid, allowedRoutes: nextAllowed }
   aclReady.value = true
   enforceRouteAccess(route.path)
 }
+
 async function startAclWatcher(uidHint?: string | null) {
   let uid = uidHint || $auth?.currentUser?.uid || null
   if (!uid) {
@@ -429,9 +480,8 @@ async function startAclWatcher(uidHint?: string | null) {
       const unsub = onAuthStateChanged($auth, u => { uid = u?.uid || null; unsub(); resolve() }, () => resolve())
     })
   }
-  if (!uid) { aclReady.value = true; return } // tidak ada user; biarkan guard lain bekerja
+  if (!uid) { aclReady.value = true; return }
   const r = dbRef($realtimeDb, `/alberr/users/${uid}/allowedRoutes`)
-  // ambil sekali (first snapshot) lalu subscribe realtime
   try {
     const snap = await get(r)
     console.log('ACL snapshot', snap.exists() ? snap.val() : '(no data)')
@@ -443,7 +493,6 @@ async function startAclWatcher(uidHint?: string | null) {
   onValue(r, (s) => applyAllowedRoutes(uid!, s.val()), { onlyOnce: false })
 }
 
-/* Lifecycle */
 onMounted(async () => {
   try {
     const raw = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
@@ -460,7 +509,7 @@ onMounted(async () => {
       allowedRoutes: Array.isArray(data.allowedRoutes) ? data.allowedRoutes : []
     }
     if (route.path === '/' || route.path === '/login' || route.path === '/cakAdmin') {
-      router.replace('/app')
+      router.replace(tokenUser.value?.role === 'wali' ? '/wali' : '/app')
     }
 
     await nextTick()
@@ -487,4 +536,7 @@ watch(() => route.fullPath, () => { rightOpen.value = false; enforceRouteAccess(
 .size-5 { width: 1.25rem; height: 1.25rem; }
 .size-4 { width: 1rem; height: 1rem; }
 .size-3-5 { width: 0.875rem; height: 0.875rem; }
+
+.collapse-enter-active, .collapse-leave-active { transition: height .2s ease; overflow: hidden; }
+.collapse-enter-from, .collapse-leave-to { height: 0; }
 </style>

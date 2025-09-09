@@ -100,9 +100,7 @@ function toB64(buf: ArrayBuffer) { return btoa(String.fromCharCode(...new Uint8A
 
 onMounted(() => {
   const hasToken = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
-  if (hasToken) {
-    window.location.replace('/app')
-  }
+  if (hasToken) window.location.replace('/app')
 })
 
 async function encryptJSON(data: any) {
