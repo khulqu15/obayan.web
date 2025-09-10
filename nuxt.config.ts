@@ -31,7 +31,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      siteUrl: 'https://alberr.hayago.id',
+      siteUrl: 'https://alberr-obayan.sencra.io',
       siteName: 'Pondok Pesantren Alberr',
       siteDescription: 'Pondok pesantren inovatif: diniyah, tahfidz, dan pendidikan formal berkarakter.',
       twitterSite: '@alberr'

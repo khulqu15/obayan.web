@@ -61,10 +61,28 @@
                       </div>
                     </div>
                     <div class="p-1 border-t border-gray-200 dark:border-neutral-800">
-                      <a v-for="item in accountMenu" :href="item.href" :key="item.label" @click="item.label == 'Logout' ? logout() : ''" class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="#">
-                        <Icon :icon="item.icon" class="size-4" />
-                        {{ item.label }}
-                      </a>
+                      <template v-for="item in accountMenu" :key="item.label">
+                        <!-- Item biasa -->
+                        <NuxtLink
+                          v-if="item.label !== 'Logout'"
+                          :to="item.href"
+                          class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-600 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
+                        >
+                          <Icon :icon="item.icon" class="size-4" />
+                          {{ item.label }}
+                        </NuxtLink>
+
+                        <!-- Logout: buka modal -->
+                        <button
+                          v-else
+                          type="button"
+                          class="w-full text-left flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-50 focus:outline-hidden dark:text-red-400 dark:hover:bg-red-950/30"
+                          data-hs-overlay="#logout-modal"
+                        >
+                          <Icon :icon="item.icon" class="size-4" />
+                          {{ item.label }}
+                        </button>
+                      </template>
                     </div>
                   </div>
                 </div>
@@ -202,6 +220,55 @@
         </div>
       </div>
     </main>
+    <div
+      id="logout-modal"
+      class="hs-overlay fixed inset-0 z-[90] hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="logout-title"
+    >
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+      <!-- Card -->
+      <div class="relative mx-auto my-8 w-[92%] max-w-md">
+        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+          <div class="p-5 sm:p-6">
+            <div class="flex items-start gap-4">
+              <div class="shrink-0 rounded-xl bg-red-100 p-3 dark:bg-red-900/30">
+                <Icon icon="lucide:log-out" class="size-6 text-red-600 dark:text-red-400" />
+              </div>
+              <div class="min-w-0">
+                <h3 id="logout-title" class="text-base font-semibold text-gray-800 dark:text-neutral-100">
+                  Konfirmasi Keluar
+                </h3>
+                <p class="mt-1 text-sm text-gray-600 dark:text-neutral-400">
+                  Anda akan keluar dari dashboard. Pastikan tidak ada perubahan yang belum disimpan.
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-5 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                class="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:outline-hidden dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                data-hs-overlay="#logout-modal"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-hidden"
+                @click="doLogout"
+              >
+                Keluar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -391,7 +458,7 @@ const accountMenu = computed<AccountItem[]>(() => {
   const base = (tokenUser.value?.role === 'wali' || route.path.startsWith('/wali')) ? '/wali' : '/app'
   return [
     { label: 'Profile',  icon: 'lucide:user',       href: `${base}/profile` },
-    { label: 'Settings', icon: 'lucide:settings-2', href: `${base}/setting` },
+    { label: 'Settings', icon: 'lucide:settings-2', href: `#` },
     { label: 'Logout',   icon: 'lucide:log-out',    href: '#' },
   ]
 })
@@ -438,7 +505,7 @@ const user = computed(() => ({
   email: tokenUser.value?.email || sessionUser.value?.email || '-',
   avatar: sessionUser.value?.avatar || '/assets/pp.jpg'
 }))
-function logout() {
+function doLogout() {
   localStorage.removeItem('alberr:auth')
   sessionStorage.removeItem('alberr:auth')
   window.location.href = '/'
