@@ -49,14 +49,24 @@ export type Product = {
 
 /* Helper image placeholders (Unsplash) – bebas diganti */
 const img = {
-  siakad: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1400&auto=format&fit=crop',
-  cms: 'https://images.unsplash.com/photo-1529101091764-c3526daf38fe?q=80&w=1400&auto=format&fit=crop',
-  app: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1400&auto=format&fit=crop',
-  cbt: 'https://images.unsplash.com/photo-1554224154-22dec7ec8818?q=80&w=1400&auto=format&fit=crop',
-  toriid: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=1400&auto=format&fit=crop',
-  autobot: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1400&auto=format&fit=crop',
-  alt1: 'https://images.unsplash.com/photo-1557800636-894a64c1696f?q=80&w=1400&auto=format&fit=crop',
-  alt2: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1400&auto=format&fit=crop',
+  siakad: '/assets/images/product/siakad/0.png',
+  cms: '/assets/images/product/web/0.png',
+  app: '/assets/images/product/app/0.png',
+  cbt: '/assets/images/product/app/0.png',
+  toriid: '/assets/images/product/toriid/0.png',
+  autobot: '/assets/images/product/autobot/0.png',
+  alt1: '/assets/images/product/siakad/1.png',
+  alt2: '/assets/images/product/siakad/2.png',
+  cms_alt1: '/assets/images/product/web/1.png',
+  cms_alt2: '/assets/images/product/web/2.png',
+  app_alt1: '/assets/images/product/app/1.png',
+  app_alt2: '/assets/images/product/app/2.png',
+  cbt_alt1: '/assets/images/product/app/1.png',
+  cbt_alt2: '/assets/images/product/app/2.png',
+  toriid_alt1: '/assets/images/product/toriid/1.png',
+  toriid_alt2: '/assets/images/product/toriid/2.png',
+  autobot_alt1: '/assets/images/product/autobot/1.png',
+  autobot_alt2: '/assets/images/product/autobot/2.png',
 }
 
 /* ========================= CATALOG ========================= */
@@ -156,7 +166,7 @@ export const produk: Product[] = [
     icon: 'ph:globe',
     tone: 'blue',
     tags: ['CMS', 'Berita', 'Prestasi'],
-    images: { cover: img.cms, alt1: img.alt1, alt2: img.alt2 },
+    images: { cover: img.cms, alt1: img.cms_alt1, alt2: img.cms_alt2 },
     detail: {
       overview:
         'CMS visual untuk halaman profil, berita, pengumuman, hingga katalog prestasi. SEO-ready dan cepat.',
@@ -235,7 +245,7 @@ export const produk: Product[] = [
     icon: 'duo-icons:app',
     tone: 'amber',
     tags: ['Android/iOS', 'Wali', 'Realtime'],
-    images: { cover: img.app, alt1: img.alt1, alt2: img.alt2 },
+    images: { cover: img.app, alt1: img.app_alt1, alt2: img.app_alt2 },
     detail: {
       overview:
         'Satu aplikasi untuk wali memantau aktivitas anak: hadir, nilai terbaru, status tagihan, hingga pengumuman sekolah.',
@@ -311,7 +321,7 @@ export const produk: Product[] = [
     icon: 'garden:app-26',
     tone: 'violet',
     tags: ['CBT', 'Ujian', 'Bank Soal'],
-    images: { cover: img.cbt, alt1: img.alt1, alt2: img.alt2 },
+    images: { cover: img.cbt, alt1: img.cbt_alt1, alt2: img.cbt_alt2 },
     detail: {
       overview:
         'Rancang ujian dengan bank soal, mixing tipe soal, pengawasan, hingga remedial otomatis.',
@@ -388,7 +398,7 @@ export const produk: Product[] = [
     icon: 'ph:identification-badge',
     tone: 'emerald',
     tags: ['RFID', 'QRIS', 'Realtime'],
-    images: { cover: img.toriid, alt1: img.alt1, alt2: img.alt2 },
+    images: { cover: img.toriid, alt1: img.toriid_alt1, alt2: img.toriid_alt2 },
     detail: {
       overview:
         'Sistem presensi terintegrasi untuk siswa & staf. Data hadir real-time mengalir ke kelas/keuangan/notifikasi.',
@@ -461,7 +471,7 @@ export const produk: Product[] = [
     icon: 'mage:robot',
     tone: 'violet',
     tags: ['WA/API', 'Email', 'Telegram'],
-    images: { cover: img.autobot, alt1: img.alt1, alt2: img.alt2 },
+    images: { cover: img.autobot, alt1: img.autobot_alt1, alt2: img.autobot_alt2 },
     detail: {
       overview:
         'Otomasi komunikasi ke wali/guru: pengumuman, pengingat jatuh tempo, status izin, presensi, dll.',

@@ -184,7 +184,7 @@
               <img
                 v-if="activeFeature.images?.cover"
                 :src="activeFeature.images.cover"
-                class="w-full h-52 sm:h-full object-cover"
+                class="w-full h-96 object-cover"
                 alt="cover" />
               <div class="grid sm:grid-cols-2 gap-3 p-4 bg-white dark:bg-neutral-900">
                 <div v-for="(k, i) in activeFeature.detail.kpis" :key="i" class="rounded-xl bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-800 p-4">

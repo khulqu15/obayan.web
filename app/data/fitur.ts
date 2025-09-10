@@ -50,9 +50,9 @@ export const fitur: Feature[] = [
   short: 'Kalender bersama, peminjaman ruang/aset, undangan & pengingat multi-channel.',
   tags: ['Kalender', 'Event', 'Ruang'],
   images: {
-    cover: 'https://images.unsplash.com/photo-1513623954575-263b061061e0?q=80&w=1400&auto=format&fit=crop',
-    useCases: 'https://images.unsplash.com/photo-1526948128573-703ee1aeb6fa?q=80&w=1400&auto=format&fit=crop',
-    benefits: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=1400&auto=format&fit=crop'
+    cover: '/assets/images/fitur/agenda/0.png',
+    useCases: '/assets/images/fitur/agenda/1.png',
+    benefits: '/assets/images/fitur/agenda/2.png'
   },
   detail: {
     overview:
@@ -129,9 +129,9 @@ export const fitur: Feature[] = [
     short: 'Broadcast internal/eksternal realtime dengan target audiens, template, dan jadwal.',
     tags: ['Broadcast', 'Multi-channel', 'Template'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/pengumuman/0.png',
+        useCases: '/assets/images/fitur/pengumuman/1.png',
+        benefits: '/assets/images/fitur/pengumuman/2.png'
     },
     detail: {
       overview:
@@ -209,9 +209,9 @@ export const fitur: Feature[] = [
     short: 'CMS berita/artikel: editor kaya, SEO, jadwal tayang, kategori & arsip.',
     tags: ['CMS', 'SEO', 'Artikel'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1519331379826-bdba0f8f76b9?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1511207538754-e8555f98ff63?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1557800636-894a64c1696f?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/berita/0.png',
+        useCases: '/assets/images/fitur/berita/1.png',
+        benefits: '/assets/images/fitur/berita/2.png'
     },
     detail: {
       overview:
@@ -288,9 +288,9 @@ export const fitur: Feature[] = [
   short: 'Absensi harian & per-sesi: manual, QR, perangkat; atur terlambat/izin & rekap otomatis.',
   tags: ['Kehadiran', 'Terlambat', 'Rekap'],
   images: {
-    cover: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1400&auto=format&fit=crop',
-    useCases: 'https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?q=80&w=1400&auto=format&fit=crop',
-    benefits: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1400&auto=format&fit=crop'
+    cover: '/assets/images/fitur/absensi/0.png',
+    useCases: '/assets/images/fitur/absensi/1.png',
+    benefits: '/assets/images/fitur/absensi/2.png'
   },
   detail: {
     overview:
@@ -371,9 +371,9 @@ export const fitur: Feature[] = [
     short: 'Editor situs profil: drag-and-drop, komponen siap pakai, SEO—tanpa coding.',
     tags: ['CMS', 'Builder', 'SEO'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1522199710521-72d69614c702?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/web/0.png',
+        useCases: '/assets/images/fitur/web/1.png',
+        benefits: '/assets/images/fitur/web/2.png'
     },
     detail: {
       overview:
@@ -452,9 +452,9 @@ export const fitur: Feature[] = [
     short: 'Kelola data santri/murid, guru, kelas, tahun ajaran, dan arsip akademik dari satu tempat.',
     tags: ['Data Induk', 'Kelas', 'Tahun Ajaran'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/siakad/0.png',
+        useCases: '/assets/images/fitur/siakad/1.png',
+        benefits: '/assets/images/fitur/siakad/2.png'
     },
     detail: {
       overview:
@@ -533,9 +533,9 @@ export const fitur: Feature[] = [
     short: 'Kelola jadwal, materi, tugas, ujian—terstruktur dan mudah dipantau.',
     tags: ['Jadwal', 'Materi', 'Ujian'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1588075592446-265fd1e6e76d?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/akademik/0.png',
+        useCases: '/assets/images/fitur/akademik/1.png',
+        benefits: '/assets/images/fitur/akademik/2.png'
     },
     detail: {
       overview:
@@ -614,9 +614,9 @@ export const fitur: Feature[] = [
     short: 'Penilaian harian, UTS, UAS, rapor otomatis dengan template kustom.',
     tags: ['Rapor', 'Kurikulum', 'Rubrik'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1543286386-713bdd548da4?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/nilai/0.png',
+        useCases: '/assets/images/fitur/nilai/1.png',
+        benefits: '/assets/images/fitur/nilai/2.png'
     },
     detail: {
       overview:
@@ -695,9 +695,9 @@ export const fitur: Feature[] = [
     short: 'Izin pulang/sakit/kegiatan; verifikasi berjenjang; dokumen cetak otomatis.',
     tags: ['Izin', 'Workflow', 'Cetak'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1542626991-cbc4e32524cc?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/perizinan/0.png',
+        useCases: '/assets/images/fitur/perizinan/1.png',
+        benefits: '/assets/images/fitur/perizinan/2.png'
     },
     detail: {
       overview:
@@ -776,9 +776,9 @@ export const fitur: Feature[] = [
     short: 'SPP/syahriyah, tagihan event, dan rekonsiliasi. Terima transfer/VA/QRIS.',
     tags: ['SPP', 'Tagihan', 'VA/QRIS'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1556742400-b5b7c5121f9a?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/pembayaran/0.png',
+        useCases: '/assets/images/fitur/pembayaran/1.png',
+        benefits: '/assets/images/fitur/pembayaran/2.png'
     },
     detail: {
       overview:
@@ -857,9 +857,9 @@ export const fitur: Feature[] = [
     short: 'Pembukuan sederhana hingga laporan periodik. Transparan & siap audit.',
     tags: ['Buku Kas', 'Arus Kas', 'Audit'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1523875194681-bedd468c58bf?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1554224155-1696413565d3?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/keuangan/0.png',
+        useCases: '/assets/images/fitur/keuangan/1.png',
+        benefits: '/assets/images/fitur/keuangan/2.png'
     },
     detail: {
       overview:
@@ -938,9 +938,9 @@ export const fitur: Feature[] = [
     short: 'Kelola peran & izin granular: admin, TU, guru, wali, pimpinan.',
     tags: ['RBAC', 'Keamanan', 'Audit'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1485217988980-11786ced9454?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1549923746-c502d488b3ea?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/akses/0.png',
+        useCases: '/assets/images/fitur/akses/1.png',
+        benefits: '/assets/images/fitur/akses/2.png'
     },
     detail: {
       overview:
@@ -1019,9 +1019,9 @@ export const fitur: Feature[] = [
     short: 'Presensi terintegrasi & realtime: RFID, QR, Face.',
     tags: ['RFID', 'Realtime', 'Integrasi'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1485217988980-11786ced9454?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/absensi/0.png',
+        useCases: '/assets/images/fitur/absensi/1.png',
+        benefits: '/assets/images/fitur/absensi/2.png'
     },
     detail: {
       overview:
@@ -1100,9 +1100,9 @@ export const fitur: Feature[] = [
     short: 'Simpan dan publikasikan data prestasi santri/guru, lengkap dengan dokumentasi.',
     tags: ['Trophy', 'Portofolio', 'Publikasi'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1511974035430-5de47d3b95da?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/prestasi/0.png',
+        useCases: '/assets/images/fitur/prestasi/1.png',
+        benefits: '/assets/images/fitur/prestasi/2.png'
     },
     detail: {
       overview:
@@ -1180,9 +1180,9 @@ export const fitur: Feature[] = [
     short: 'Catat pelanggaran, poin, tindak lanjut, dan surat pernyataan otomatis.',
     tags: ['Disiplin', 'Poin', 'Tindak Lanjut'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1516251193007-45ef944ab0c6?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/pelanggaran/0.png',
+        useCases: '/assets/images/fitur/pelanggaran/1.png',
+        benefits: '/assets/images/fitur/pelanggaran/2.png'
     },
     detail: {
       overview:
@@ -1260,9 +1260,9 @@ export const fitur: Feature[] = [
     short: 'Penjadwalan piket berkala, rekap hadir, dan printout otomatis.',
     tags: ['Piket', 'Jadwal', 'Rekap'],
     images: {
-      cover: 'https://images.unsplash.com/photo-1517976487492-576ea1085bf4?q=80&w=1400&auto=format&fit=crop',
-      useCases: 'https://images.unsplash.com/photo-1557800636-894a64c1696f?q=80&w=1400&auto=format&fit=crop',
-      benefits: 'https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=1400&auto=format&fit=crop'
+        cover: '/assets/images/fitur/perizinan/0.png',
+        useCases: '/assets/images/fitur/perizinan/1.png',
+        benefits: '/assets/images/fitur/perizinan/2.png'
     },
     detail: {
       overview:
