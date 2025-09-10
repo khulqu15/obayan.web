@@ -19,7 +19,6 @@
         </p>
       </div>
 
-      <!-- Cards -->
       <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <article
           v-for="(f, i) in features"
@@ -27,21 +26,18 @@
           class="group relative rounded-2xl border border-gray-200/70 dark:border-neutral-800 bg-white/70 dark:bg-white/5 backdrop-blur-xl p-6 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-emerald-400"
           :style="cardDelayStyle(i)"
         >
-          <!-- Decorative glow ring -->
           <div class="absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity -z-10"
                aria-hidden="true"
                style="background: radial-gradient(80% 60% at 50% 0%, rgba(16,185,129,0.12), transparent 60%);">
           </div>
 
           <div class="flex items-start gap-4">
-            <!-- Icon container -->
             <div class="relative">
               <div class="size-11 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300 flex items-center justify-center ring-1 ring-emerald-200/60 dark:ring-emerald-800/40 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110">
                 <ClientOnly>
                   <Icon :icon="f.icon" class="size-5" aria-hidden="true" />
                 </ClientOnly>
               </div>
-              <!-- small accent dot -->
               <span class="absolute -top-1 -right-1 inline-flex size-3 rounded-full bg-emerald-500/90 ring-4 ring-white dark:ring-neutral-900"></span>
             </div>
 
@@ -58,7 +54,6 @@
           <!-- bottom divider -->
           <div class="mt-5 h-px bg-gradient-to-r from-transparent via-gray-200/80 to-transparent dark:via-neutral-800/80"></div>
 
-          <!-- subtle CTA row (opsional; tetap non-dummy karena link bisa diisi dari data bila ada) -->
           <div class="mt-4 flex items-center justify-between text-sm">
             <span class="text-gray-500 dark:text-neutral-400">Bagian dari ekosistem Obayan</span>
             <a v-if="f.href" :href="f.href" class="font-medium text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1">

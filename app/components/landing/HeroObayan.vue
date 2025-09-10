@@ -1,5 +1,5 @@
 <template>
-    <section id="hero" class="relative overflow-hidden pt-36 pb-24 sm:pt-40">
+    <section id="home" class="relative overflow-hidden pt-36 pb-24 sm:pt-40">
         <!-- Background: gradient + dots -->
         <div class="absolute inset-0 -z-10">
             <div class="h-full w-full bg-gradient-to-b from-emerald-50/60 via-white to-white dark:from-emerald-900/20 dark:via-neutral-900 dark:to-neutral-950" />

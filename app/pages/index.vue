@@ -4,6 +4,7 @@
     <MarqueeLogos />
     <FeatureBlocks />
     <ProductCards />
+    <CaseStudy/>
     <IntegrationToriId />
     <StepsHowItWorks />
     <PricingPlans />
@@ -24,7 +25,7 @@
   import PricingPlans from '~/components/landing/PricingPlans.vue'
   import FAQAccordion from '~/components/landing/FAQAccordion.vue'
   import CTASection from '~/components/landing/CTASection.vue'
-
+  import CaseStudy from '~/components/landing/CaseStudy.vue'
   
   const route  = useRoute()
   const config = useRuntimeConfig()
@@ -71,7 +72,6 @@
       { name: 'format-detection', content: 'telephone=no' }
     ],
     script: [
-      // Organization
       {
         type: 'application/ld+json',
         children: JSON.stringify({
@@ -87,7 +87,6 @@
           ]
         })
       },
-      // WebSite + SearchAction
       {
         type: 'application/ld+json',
         children: JSON.stringify({

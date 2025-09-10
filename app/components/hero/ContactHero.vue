@@ -121,7 +121,7 @@
           <div ref="mapCard" class="relative h-[28rem] rounded-3xl overflow-hidden border border-gray-200 dark:border-neutral-700 bg-white/60 dark:bg-neutral-800/50 shadow-lg will-change-transform">
             <div class="absolute z-10 top-4 left-4 inline-flex items-center gap-2 rounded-full bg-black/40 text-white backdrop-blur px-3 py-1.5 text-xs">
               <ClientOnly><Icon icon="ph:map-trifold" class="size-4" /></ClientOnly>
-              Peta Lokasi Pondok
+              Lokasi Kantor Obayan
             </div>
 
             <ClientOnly>

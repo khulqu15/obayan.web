@@ -9,15 +9,15 @@
     <div class="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-end justify-between gap-3">
         <div>
-          <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight">Modul Produk</h2>
+          <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight">Modul Fitur</h2>
           <p class="text-gray-600 dark:text-neutral-300">Pilih sesuai kebutuhan; hidupkan & padukan kapan saja.</p>
         </div>
-        <a href="#pricing" class="btn-ghost">Lihat Harga</a>
+        <NuxtLink to="/fitur" class="btn-ghost">Semua Fitur</NuxtLink>
       </div>
 
       <!-- grid kartu -->
       <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <article
+        <NuxtLink :to="p.demoHref"
           v-for="p in localProducts"
           :key="p.key"
           class="group relative overflow-hidden rounded-2xl border border-gray-200/70 dark:border-neutral-800
@@ -58,7 +58,7 @@
           <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true">
             <div class="absolute -right-10 -bottom-10 size-32 rounded-full bg-emerald-400/10 blur-2xl" />
           </div>
-        </article>
+        </NuxtLink>
       </div>
     </div>
   </section>
@@ -94,7 +94,7 @@ const localProducts: Array<{
     icon:'ph:globe',
     tags:['SEO','Blog','Profil'],
     featured:false,
-    demoHref:'#demo?module=webprofile',
+    demoHref:'/fitur?slug=profile-web-editor',
     salesHref:'#contact?module=webprofile'
   },
   {
@@ -104,7 +104,7 @@ const localProducts: Array<{
     icon:'ph:student',
     tags:['Rapor','Kelas','Data'],
     featured:true,
-    demoHref:'#demo?module=siakad',
+    demoHref:'/fitur?slug=siakad',
     salesHref:'#contact?module=siakad'
   },
   {
@@ -114,7 +114,7 @@ const localProducts: Array<{
     icon:'ph:bank',
     tags:['QRIS','VA','SPP'],
     featured:true,
-    demoHref:'#demo?module=payment',
+    demoHref:'/fitur?slug=pembayaran',
     salesHref:'#contact?module=payment'
   },
   {
@@ -124,7 +124,7 @@ const localProducts: Array<{
     icon:'ph:chalkboard-teacher',
     tags:['Jadwal','Materi','CBT'],
     featured:false,
-    demoHref:'#demo?module=academic',
+    demoHref:'/fitur?slug=nilai-rapor',
     salesHref:'#contact?module=academic'
   },
   {
@@ -134,7 +134,7 @@ const localProducts: Array<{
     icon:'ph:identification-badge',
     tags:['RFID','Fingerprint','Shift'],
     featured:true,
-    demoHref:'#demo?module=attendance',
+    demoHref:'/fitur?slug=absensi',
     salesHref:'#contact?module=attendance'
   },
   {
@@ -144,7 +144,7 @@ const localProducts: Array<{
     icon:'ph:map-pin',
     tags:['Security','Pass','Wali'],
     featured:false,
-    demoHref:'#demo?module=visitor',
+    demoHref:'/fitur?slug=pengumuman',
     salesHref:'#contact?module=visitor'
   },
   {
@@ -154,7 +154,7 @@ const localProducts: Array<{
     icon:'ph:warning',
     tags:['Poin','Pembinaan','Notifikasi'],
     featured:false,
-    demoHref:'#demo?module=violation',
+    demoHref:'/fitur?slug=pelanggaran',
     salesHref:'#contact?module=violation'
   },
   {
@@ -164,7 +164,7 @@ const localProducts: Array<{
     icon:'ph:note-pencil',
     tags:['Approval','Surat','Arsip'],
     featured:false,
-    demoHref:'#demo?module=permission',
+    demoHref:'/fitur?slug=perizinan-printout',
     salesHref:'#contact?module=permission'
   }
 ]

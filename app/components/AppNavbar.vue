@@ -42,10 +42,10 @@
             <div class="grow">
               <div class="flex flex-col md:flex-row md:justify-end md:items-center gap-0.5 md:gap-1">
                 <!-- Simple links -->
-                <a
+                <NuxtLink
                   v-for="l in navLinks"
                   :key="l.label"
-                  :href="l.href"
+                  :to="l.href"
                   :class="[linkBaseClass, !isScrolledOrOpen ? linkTopClass : linkScrolledClass]"
                 >
                   <ClientOnly>
@@ -53,7 +53,7 @@
                     <template #fallback><span class="w-4 h-4 me-2 inline-block" /></template>
                   </ClientOnly>
                   {{ l.label }}
-                </a>
+                </NuxtLink>
 
                 <!-- Dropdown: Fitur -->
                 <div class="hs-dropdown relative md:inline-flex md:[--strategy:fixed] [--strategy:static] [--adaptive:none] [--is-collapse:true] md:[--is-collapse:false]">
@@ -132,7 +132,7 @@
                     aria-orientation="vertical"
                     aria-labelledby="hs-header-produk"
                   >
-                    <div class="py-1 md:p-2 md:grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="py-1 md:p-2 md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div v-for="col in produkMenu" :key="col.title" class="flex flex-col">
                         <span class="ms-2.5 mb-2 font-semibold text-xs uppercase text-gray-800 dark:text-neutral-200">{{ col.title }}</span>
                         <a
@@ -152,23 +152,6 @@
                         </a>
                       </div>
 
-                      <!-- CTA PPDB -->
-                      <div class="mt-2 md:mt-0 flex flex-col">
-                        <div class="p-3 rounded-xl hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
-                          <div class="flex gap-x-4 items-center">
-                            <img class="size-24 rounded-lg object-cover" :src="ppdbCta.image" alt="PPDB">
-                            <div class="grow">
-                              <p class="text-sm text-gray-800 dark:text-neutral-200 font-medium">{{ ppdbCta.title }}</p>
-                              <p class="text-sm text-gray-500 dark:text-neutral-500">{{ ppdbCta.desc }}</p>
-                              <a :href="ppdbCta.href" class="mt-2 inline-flex items-center gap-x-1 text-sm text-blue dark:text-blue-400 font-medium">
-                                Daftar sekarang
-                                <ClientOnly><Icon icon="lucide:arrow-right" class="size-4" /></ClientOnly>
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- /CTA -->
                     </div>
                   </div>
                 </div>
@@ -183,7 +166,7 @@
 
             <!-- CTAs -->
             <div class="flex flex-wrap items-center gap-x-1.5">
-              <a href="#pricing" :class="!isScrolledOrOpen ? outlineTopClass : outlineScrolledClass">Harga</a>
+              <NuxtLink to="/#pricing" :class="!isScrolledOrOpen ? outlineTopClass : outlineScrolledClass">Harga</NuxtLink>
               <a href="#demo" :class="!isScrolledOrOpen ? primaryTopClass : primaryScrolledClass">Coba Demo</a>
             </div>
           </div>
@@ -238,7 +221,7 @@ const primaryScrolledClass = 'py-2 px-2.5 inline-flex items-center font-medium t
 /* Primary links */
 const navLinks = ref([
   { label: 'Beranda', href: '/#home', icon: 'ph:house' },
-  { label: 'Tentang', href: '/#information', icon: 'ph:info' }
+  { label: 'Tentang', href: '/tentang', icon: 'ph:info' }
 ])
 
 /* Mobile state */
@@ -250,24 +233,31 @@ const fiturMenu = ref([
   {
     title: 'Akademik',
     items: [
-      { label: 'SIAKAD', href: '/#products', icon: 'ph:student', desc: 'Data santri, kelas, nilai, rapor.' },
-      { label: 'Akademik', href: '/#products', icon: 'ph:chalkboard-teacher', desc: 'Jadwal, materi, tugas, ujian.' },
-      { label: 'Perizinan', href: '/#products', icon: 'ph:note-pencil', desc: 'Izin keluar/sakit/tugas.' }
-    ]
+      { label: 'SIAKAD', href: '/fitur?slug=siakad', icon: 'ph:student', desc: 'Manajemen data santri / murid, guru' },
+      { label: 'Kelas Akademik', href: '/fitur?slug=kelas-akademik', icon: 'streamline-plump:class-lesson', desc: 'Jadwal, materi, tugas, ujian.' },
+      { label: 'Data Nilai', href: '/fitur?slug=nilai-rapor', icon: 'tabler:chart-line', desc: 'Manajemen perkembangan santri / murid' },
+      { label: 'Prestasi', href: '/fitur?slug=prestasi', icon: 'fluent:trophy-20-regular', desc: 'Simpan dan publish data prestasi' },
+      { label: 'Absensi', href: '/fitur?slug=absensi', icon: 'lucide:user-check', desc: 'Absensi harian & per-sesi terintegrasi' },
+  ]
   },
   {
     title: 'Operasional',
     items: [
-      { label: 'Absensi ToriID', href: '/#integrations', icon: 'ph:identification-badge', desc: 'RFID/Fingerprint real-time.' },
-      { label: 'Kunjungan', href: '/#products', icon: 'ph:map-pin', desc: 'Pengajuan wali & pass keamanan.' },
-      { label: 'Pelanggaran', href: '/#products', icon: 'ph:warning', desc: 'Poin & pembinaan.' }
+      { label: 'Agenda', href: '/fitur?slug=agenda', icon: 'mynaui:calendar', desc: 'Manajemen data agenda dan acara' },
+      { label: 'Pengumuman', href: '/fitur?slug=pengumuman', icon: 'mingcute:announcement-line', desc: 'Pengumuman internal dan external secara realtime' },
+      { label: 'Berita Informasi', href: '/fitur?slug=berita-informasi', icon: 'iconamoon:news-light', desc: 'Publish dan manajemen data berita, article' },
+      { label: 'Perizinan & Printout', href: '/fitur?slug=perizinan-printout', icon: 'hugeicons:note', desc: 'Record data perizinan dan integrasikan pada printer' },
+      { label: 'Pelanggaran', href: '/fitur?slug=pelanggaran', icon: 'mingcute:fault-line', desc: 'Izin keluar/sakit/tugas.' },
+      { label: 'Jadwal Piket', href: '/fitur?slug=perizinan', icon: 'uil:list-ol', desc: 'Jadwalkan piket secara berkala dan printout' }
     ]
   },
   {
-    title: 'Keuangan',
+    title: 'Lain lain',
     items: [
-      { label: 'Pembayaran', href: '/#products', icon: 'ph:bank', desc: 'SPP, QRIS/VA & rekonsiliasi.' },
-      { label: 'Notifikasi WA', href: '/#pricing', icon: 'ph:chat-circle-dots', desc: 'Tagihan & pengumuman otomatis.' }
+      { label: 'Pembayaran', href: '/fitur?slug=pembayaran', icon: 'akar-icons:money', desc: 'SPP, Syahriyah & Rekonsiliasi.' },
+      { label: 'Laporan Keuangan', href: '/fitur?slug=laporan-keuangan', icon: 'mynaui:chart-line', desc: 'Laporan keuangan setiap hari' },
+      { label: 'Profile Web Editor', href: '/fitur?slug=profile-web-editor', icon: 'fluent:design-ideas-24-regular', desc: 'Kustomisasi dan edit kebutuhan web tanpa ribet' },
+      { label: 'Hak Akses', href: '/fitur?slug=hak-akses', icon: 'hugeicons:access', desc: 'Tugaskan pengurus secara spesifik menjadi admin' },
     ]
   }
 ])
@@ -276,30 +266,24 @@ const produkMenu = ref([
   {
     title: 'Website',
     items: [
-      { label: 'Web Profile', href: '/#products', icon: 'ph:globe', desc: 'Profil lembaga SEO-ready.' }
+      { label: 'Obayan Siakad', href: '/produk?slug=obayan-siakad', icon: 'mingcute:web-line', desc: 'Sistem Management Pendidikan' },
+      { label: 'Obayan CMS', href: '/produk?slug=obayan-cms', icon: 'ph:globe', desc: 'Website Customable dan Editable' },
     ]
   },
   {
-    title: 'Akademik',
+    title: 'Mobile App',
     items: [
-      { label: 'SIAKAD', href: '/#products', icon: 'ph:student' },
-      { label: 'Akademik (LMS/CBT)', href: '/#products', icon: 'ph:chalkboard-teacher' }
+      { label: 'Obayan App', href: '/produk?slug=obayan-app', icon: 'duo-icons:app', desc: 'Aplikasi Monitoring Santri / Murid' },
+      { label: 'Obayan CBT', href: '/produk?slug=obayan-cbt', icon: 'garden:app-26', desc: 'Aplikasi Ujian Pendidikan' },
     ]
   },
   {
-    title: 'Operasional',
+    title: 'Best Add-On',
     items: [
-      { label: 'Absensi (ToriID)', href: '/#integrations', icon: 'ph:identification-badge' },
-      { label: 'Kunjungan', href: '/#products', icon: 'ph:map-pin' },
-      { label: 'Perizinan', href: '/#products', icon: 'ph:note-pencil' }
+      { label: 'ToriID', href: '/produk?slug=toriid', icon: 'ph:identification-badge', desc: 'System Attendance Terintegrasi & Realtime' },
+      { label: 'Autobot', href: '/produk?slug=autobot', icon: 'mage:robot', desc: 'Bot messaging email / whatsapp / telegram' },
     ]
   },
-  {
-    title: 'Keuangan',
-    items: [
-      { label: 'Pembayaran', href: '/#products', icon: 'ph:bank' }
-    ]
-  }
 ])
 
 /* CTA card in Produk */
