@@ -17,7 +17,7 @@
 
       <!-- grid kartu -->
       <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <NuxtLink :to="p.demoHref"
+        <NuxtLink :to="{path: '/fitur', query: {slug: p.demoHref}}"
           v-for="p in localProducts"
           :key="p.key"
           class="group relative overflow-hidden rounded-2xl border border-gray-200/70 dark:border-neutral-800
@@ -94,7 +94,7 @@ const localProducts: Array<{
     icon:'ph:globe',
     tags:['SEO','Blog','Profil'],
     featured:false,
-    demoHref:'/fitur?slug=profile-web-editor',
+    demoHref:'profile-web-editor',
     salesHref:'#contact?module=webprofile'
   },
   {
@@ -104,7 +104,7 @@ const localProducts: Array<{
     icon:'ph:student',
     tags:['Rapor','Kelas','Data'],
     featured:true,
-    demoHref:'/fitur?slug=siakad',
+    demoHref:'siakad',
     salesHref:'#contact?module=siakad'
   },
   {
@@ -114,7 +114,7 @@ const localProducts: Array<{
     icon:'ph:bank',
     tags:['QRIS','VA','SPP'],
     featured:true,
-    demoHref:'/fitur?slug=pembayaran',
+    demoHref:'pembayaran',
     salesHref:'#contact?module=payment'
   },
   {
@@ -124,7 +124,7 @@ const localProducts: Array<{
     icon:'ph:chalkboard-teacher',
     tags:['Jadwal','Materi','CBT'],
     featured:false,
-    demoHref:'/fitur?slug=nilai-rapor',
+    demoHref:'nilai-rapor',
     salesHref:'#contact?module=academic'
   },
   {
@@ -134,7 +134,7 @@ const localProducts: Array<{
     icon:'ph:identification-badge',
     tags:['RFID','Fingerprint','Shift'],
     featured:true,
-    demoHref:'/fitur?slug=absensi',
+    demoHref:'absensi',
     salesHref:'#contact?module=attendance'
   },
   {
@@ -144,7 +144,7 @@ const localProducts: Array<{
     icon:'ph:map-pin',
     tags:['Security','Pass','Wali'],
     featured:false,
-    demoHref:'/fitur?slug=pengumuman',
+    demoHref:'pengumuman',
     salesHref:'#contact?module=visitor'
   },
   {
@@ -154,7 +154,7 @@ const localProducts: Array<{
     icon:'ph:warning',
     tags:['Poin','Pembinaan','Notifikasi'],
     featured:false,
-    demoHref:'/fitur?slug=pelanggaran',
+    demoHref:'pelanggaran',
     salesHref:'#contact?module=violation'
   },
   {
@@ -164,7 +164,7 @@ const localProducts: Array<{
     icon:'ph:note-pencil',
     tags:['Approval','Surat','Arsip'],
     featured:false,
-    demoHref:'/fitur?slug=perizinan-printout',
+    demoHref:'perizinan-printout',
     salesHref:'#contact?module=permission'
   }
 ]

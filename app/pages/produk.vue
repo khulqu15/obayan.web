@@ -2,7 +2,7 @@
 <template>
   <div class="text-gray-800 dark:text-neutral-200 overflow-hidden pt-24">
     <!-- HERO -->
-    <section class="relative">
+    <section :key="isDetail ? `detail-hero-${slug}` : 'list-hero'" class="relative">
       <div aria-hidden="true" class="pointer-events-none absolute inset-0">
         <div class="absolute -top-24 -right-24 w-[42rem] h-[42rem] rounded-full opacity-30 blur-3xl
                     bg-gradient-to-br from-green-200 to-emerald-200 dark:from-amber-900/40 dark:to-emerald-900/30" />
@@ -64,7 +64,7 @@
     </section>
 
     <!-- LIST -->
-    <section v-if="!activeProduct" class="relative">
+    <section v-if="!isDetail" :key="'list-section'" class="relative">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <article
@@ -138,7 +138,7 @@
     </section>
 
     <!-- DETAIL -->
-    <section v-else>
+    <section v-else :key="`detail-section-${slug}`">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
         <!-- hero detail -->
         <div class="rounded-3xl border border-gray-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-900/70 p-5 sm:p-7">
@@ -421,7 +421,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, watch, onMounted, onBeforeMount, watchEffect } from 'vue'
 import { useRoute, useRouter, useHead } from '#imports'
 import { Icon } from '@iconify/vue'
 import type { Tone, Category, Product } from '~/data/produk'
@@ -451,8 +451,15 @@ const filteredProducts = computed(() => {
 /* ====== Detail selection ====== */
 const route = useRoute()
 const router = useRouter()
-const slug = computed(() => (route.query.slug as string | undefined) || '')
-const activeProduct = computed<Product | null>(() => produk.find(c => c.slug === slug.value) || null)
+const rawSlug = computed(() => route.query.slug)
+const slug = computed<string>(() => {
+  const s = rawSlug.value
+  return typeof s === 'string' ? s : Array.isArray(s) ? s[0] : ''
+})
+const activeProduct = computed<Product | null>(
+  () => produk.find(c => c.slug === slug.value) || null
+)
+const isDetail = computed(() => !!slug.value && !!activeProduct.value)
 
 const relatedProducts = computed(() => {
   if (!activeProduct.value) return []
@@ -506,8 +513,13 @@ const chipTone = (tone: Tone) => ({
   violet: 'bg-violet-100/70 text-violet-800 dark:bg-violet-500/15 dark:text-violet-300'
 }[tone])
 
-/* ====== Guard ====== */
-watch(slug, (s) => {
+onBeforeMount(() => {
+  const s = slug.value?.trim()
+  if (s && !activeProduct.value) router.replace('/produk')
+})
+
+watchEffect(() => {
+  const s = slug.value?.trim()
   if (s && !activeProduct.value) router.replace('/produk')
 })
 </script>

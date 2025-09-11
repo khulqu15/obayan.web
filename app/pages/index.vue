@@ -5,6 +5,7 @@
     <FeatureBlocks />
     <ProductCards />
     <CaseStudy/>
+    <ProductView/>
     <IntegrationToriId />
     <StepsHowItWorks />
     <PricingPlans />
@@ -26,6 +27,7 @@
   import FAQAccordion from '~/components/landing/FAQAccordion.vue'
   import CTASection from '~/components/landing/CTASection.vue'
   import CaseStudy from '~/components/landing/CaseStudy.vue'
+  import ProductView from '~/components/landing/ProductView.vue'
   
   const route  = useRoute()
   const config = useRuntimeConfig()

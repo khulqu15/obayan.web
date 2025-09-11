@@ -21,7 +21,7 @@
           <span
             class="bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500"
           >
-            Siap membuat operasional pondok lebih ringan?
+            Siap membuat operasional pendidikan lebih ringan?
           </span>
         </h2>
         <p

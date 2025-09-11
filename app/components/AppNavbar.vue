@@ -42,10 +42,10 @@
             <div class="grow">
               <div class="flex flex-col md:flex-row md:justify-end md:items-center gap-0.5 md:gap-1">
                 <!-- Simple links -->
-                <NuxtLink
+                <a
                   v-for="l in navLinks"
                   :key="l.label"
-                  :to="l.href"
+                  :href="l.href"
                   :class="[linkBaseClass, !isScrolledOrOpen ? linkTopClass : linkScrolledClass]"
                 >
                   <ClientOnly>
@@ -53,7 +53,7 @@
                     <template #fallback><span class="w-4 h-4 me-2 inline-block" /></template>
                   </ClientOnly>
                   {{ l.label }}
-                </NuxtLink>
+                </a>
 
                 <!-- Dropdown: Fitur -->
                 <div class="hs-dropdown relative md:inline-flex md:[--strategy:fixed] [--strategy:static] [--adaptive:none] [--is-collapse:true] md:[--is-collapse:false]">
@@ -85,10 +85,10 @@
                     <div class="py-1 md:p-2 md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div v-for="col in fiturMenu" :key="col.title" class="flex flex-col">
                         <span class="ms-2.5 mb-2 font-semibold text-xs uppercase text-gray-800 dark:text-neutral-200">{{ col.title }}</span>
-                        <a
+                        <NuxtLink
                           v-for="it in col.items"
                           :key="it.label"
-                          :href="it.href"
+                          :to="{path: '/fitur', query: { slug: it.href }}"
                           class="p-3 flex gap-x-4 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
                         >
                           <ClientOnly>
@@ -99,7 +99,7 @@
                             <p class="font-medium text-sm text-gray-800 dark:text-neutral-200">{{ it.label }}</p>
                             <p v-if="it.desc" class="text-sm text-gray-500 dark:text-neutral-500">{{ it.desc }}</p>
                           </div>
-                        </a>
+                        </NuxtLink>
                       </div>
                     </div>
                   </div>
@@ -135,10 +135,10 @@
                     <div class="py-1 md:p-2 md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div v-for="col in produkMenu" :key="col.title" class="flex flex-col">
                         <span class="ms-2.5 mb-2 font-semibold text-xs uppercase text-gray-800 dark:text-neutral-200">{{ col.title }}</span>
-                        <a
+                        <NuxtLink
                           v-for="it in col.items"
                           :key="it.label"
-                          :href="it.href"
+                          :to="{path: '/produk', query: {slug: it.href}}"
                           class="p-3 flex gap-x-4 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
                         >
                           <ClientOnly>
@@ -149,7 +149,7 @@
                             <p class="font-medium text-sm text-gray-800 dark:text-neutral-200">{{ it.label }}</p>
                             <p v-if="it.desc" class="text-sm text-gray-500 dark:text-neutral-500">{{ it.desc }}</p>
                           </div>
-                        </a>
+                        </NuxtLink>
                       </div>
 
                     </div>
@@ -167,7 +167,7 @@
             <!-- CTAs -->
             <div class="flex flex-wrap items-center gap-x-1.5">
               <NuxtLink to="/#pricing" :class="!isScrolledOrOpen ? outlineTopClass : outlineScrolledClass">Harga</NuxtLink>
-              <a href="#demo" :class="!isScrolledOrOpen ? primaryTopClass : primaryScrolledClass">Coba Demo</a>
+              <NuxtLink to="/#demo" :class="!isScrolledOrOpen ? primaryTopClass : primaryScrolledClass">Coba Demo</NuxtLink>
             </div>
           </div>
         </div>
@@ -233,31 +233,31 @@ const fiturMenu = ref([
   {
     title: 'Akademik',
     items: [
-      { label: 'SIAKAD', href: '/fitur?slug=siakad', icon: 'ph:student', desc: 'Manajemen data santri / murid, guru' },
-      { label: 'Kelas Akademik', href: '/fitur?slug=kelas-akademik', icon: 'streamline-plump:class-lesson', desc: 'Jadwal, materi, tugas, ujian.' },
-      { label: 'Data Nilai', href: '/fitur?slug=nilai-rapor', icon: 'tabler:chart-line', desc: 'Manajemen perkembangan santri / murid' },
-      { label: 'Prestasi', href: '/fitur?slug=prestasi', icon: 'fluent:trophy-20-regular', desc: 'Simpan dan publish data prestasi' },
-      { label: 'Absensi', href: '/fitur?slug=absensi', icon: 'lucide:user-check', desc: 'Absensi harian & per-sesi terintegrasi' },
+      { label: 'SIAKAD', href: 'siakad', icon: 'ph:student', desc: 'Manajemen data santri / murid, guru' },
+      { label: 'Kelas Akademik', href: 'kelas-akademik', icon: 'streamline-plump:class-lesson', desc: 'Jadwal, materi, tugas, ujian.' },
+      { label: 'Data Nilai', href: 'nilai-rapor', icon: 'tabler:chart-line', desc: 'Manajemen perkembangan santri / murid' },
+      { label: 'Prestasi', href: 'prestasi', icon: 'fluent:trophy-20-regular', desc: 'Simpan dan publish data prestasi' },
+      { label: 'Absensi', href: 'absensi', icon: 'lucide:user-check', desc: 'Absensi harian & per-sesi terintegrasi' },
   ]
   },
   {
     title: 'Operasional',
     items: [
-      { label: 'Agenda', href: '/fitur?slug=agenda', icon: 'mynaui:calendar', desc: 'Manajemen data agenda dan acara' },
-      { label: 'Pengumuman', href: '/fitur?slug=pengumuman', icon: 'mingcute:announcement-line', desc: 'Pengumuman internal dan external secara realtime' },
-      { label: 'Berita Informasi', href: '/fitur?slug=berita-informasi', icon: 'iconamoon:news-light', desc: 'Publish dan manajemen data berita, article' },
-      { label: 'Perizinan & Printout', href: '/fitur?slug=perizinan-printout', icon: 'hugeicons:note', desc: 'Record data perizinan dan integrasikan pada printer' },
-      { label: 'Pelanggaran', href: '/fitur?slug=pelanggaran', icon: 'mingcute:fault-line', desc: 'Izin keluar/sakit/tugas.' },
-      { label: 'Jadwal Piket', href: '/fitur?slug=perizinan', icon: 'uil:list-ol', desc: 'Jadwalkan piket secara berkala dan printout' }
+      { label: 'Agenda', href: 'agenda', icon: 'mynaui:calendar', desc: 'Manajemen data agenda dan acara' },
+      { label: 'Pengumuman', href: 'pengumuman', icon: 'mingcute:announcement-line', desc: 'Pengumuman internal dan external secara realtime' },
+      { label: 'Berita Informasi', href: 'berita-informasi', icon: 'iconamoon:news-light', desc: 'Publish dan manajemen data berita, article' },
+      { label: 'Perizinan & Printout', href: 'perizinan-printout', icon: 'hugeicons:note', desc: 'Record data perizinan dan integrasikan pada printer' },
+      { label: 'Pelanggaran', href: 'pelanggaran', icon: 'mingcute:fault-line', desc: 'Izin keluar/sakit/tugas.' },
+      { label: 'Jadwal Piket', href: 'perizinan', icon: 'uil:list-ol', desc: 'Jadwalkan piket secara berkala dan printout' }
     ]
   },
   {
     title: 'Lain lain',
     items: [
-      { label: 'Pembayaran', href: '/fitur?slug=pembayaran', icon: 'akar-icons:money', desc: 'SPP, Syahriyah & Rekonsiliasi.' },
-      { label: 'Laporan Keuangan', href: '/fitur?slug=laporan-keuangan', icon: 'mynaui:chart-line', desc: 'Laporan keuangan setiap hari' },
-      { label: 'Profile Web Editor', href: '/fitur?slug=profile-web-editor', icon: 'fluent:design-ideas-24-regular', desc: 'Kustomisasi dan edit kebutuhan web tanpa ribet' },
-      { label: 'Hak Akses', href: '/fitur?slug=hak-akses', icon: 'hugeicons:access', desc: 'Tugaskan pengurus secara spesifik menjadi admin' },
+      { label: 'Pembayaran', href: 'pembayaran', icon: 'akar-icons:money', desc: 'SPP, Syahriyah & Rekonsiliasi.' },
+      { label: 'Laporan Keuangan', href: 'laporan-keuangan', icon: 'mynaui:chart-line', desc: 'Laporan keuangan setiap hari' },
+      { label: 'Profile Web Editor', href: 'profile-web-editor', icon: 'fluent:design-ideas-24-regular', desc: 'Kustomisasi dan edit kebutuhan web tanpa ribet' },
+      { label: 'Hak Akses', href: 'hak-akses', icon: 'hugeicons:access', desc: 'Tugaskan pengurus secara spesifik menjadi admin' },
     ]
   }
 ])
@@ -266,22 +266,22 @@ const produkMenu = ref([
   {
     title: 'Website',
     items: [
-      { label: 'Obayan Siakad', href: '/produk?slug=obayan-siakad', icon: 'mingcute:web-line', desc: 'Sistem Management Pendidikan' },
-      { label: 'Obayan CMS', href: '/produk?slug=obayan-cms', icon: 'ph:globe', desc: 'Website Customable dan Editable' },
+      { label: 'Obayan Siakad', href: 'obayan-siakad', icon: 'mingcute:web-line', desc: 'Sistem Management Pendidikan' },
+      { label: 'Obayan CMS', href: 'obayan-cms', icon: 'ph:globe', desc: 'Website Customable dan Editable' },
     ]
   },
   {
     title: 'Mobile App',
     items: [
-      { label: 'Obayan App', href: '/produk?slug=obayan-app', icon: 'duo-icons:app', desc: 'Aplikasi Monitoring Santri / Murid' },
-      { label: 'Obayan CBT', href: '/produk?slug=obayan-cbt', icon: 'garden:app-26', desc: 'Aplikasi Ujian Pendidikan' },
+      { label: 'Obayan App', href: 'obayan-app', icon: 'duo-icons:app', desc: 'Aplikasi Monitoring Santri / Murid' },
+      { label: 'Obayan CBT', href: 'obayan-cbt', icon: 'garden:app-26', desc: 'Aplikasi Ujian Pendidikan' },
     ]
   },
   {
     title: 'Best Add-On',
     items: [
-      { label: 'ToriID', href: '/produk?slug=toriid', icon: 'ph:identification-badge', desc: 'System Attendance Terintegrasi & Realtime' },
-      { label: 'Autobot', href: '/produk?slug=autobot', icon: 'mage:robot', desc: 'Bot messaging email / whatsapp / telegram' },
+      { label: 'ToriID', href: 'toriid', icon: 'ph:identification-badge', desc: 'System Attendance Terintegrasi & Realtime' },
+      { label: 'Autobot', href: 'autobot', icon: 'mage:robot', desc: 'Bot messaging email / whatsapp / telegram' },
     ]
   },
 ])

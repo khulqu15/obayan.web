@@ -168,7 +168,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { Icon } from '@iconify/vue'
 
 const address = 'Jl. Remaja RT 6 RW 6, Martopuro, Purwosari, Pasuruan'
-const email = 'obayan@sencra.io'
+const email = 'team.sencra@gmail.com'
 const phone = '0895396004952'
 const waIntl = '62895396004952'
 const mapQuery = encodeURIComponent('Jl. Remaja RT 6 RW 6, Martopuro, Purwosari, Pasuruan')

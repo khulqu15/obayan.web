@@ -1,6 +1,6 @@
 <template>
   <div class="text-gray-800 dark:text-neutral-200 overflow-hidden pt-24">
-    <section class="relative">
+    <section :key="isDetail ? `detail-${slug}` : 'list-hero'" class="relative">
       <div aria-hidden="true" class="pointer-events-none absolute inset-0">
         <div class="absolute -top-16 -left-24 w-[42rem] h-[42rem] rounded-full opacity-40 blur-3xl
                     bg-gradient-to-br from-emerald-200 to-teal-200 dark:from-emerald-900/40 dark:to-teal-900/30" />
@@ -64,7 +64,7 @@
     </section>
 
     <!-- LIST -->
-    <section v-if="!activeFeature" class="relative">
+    <section  v-if="!isDetail" :key="'list-section'" class="relative">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <article
@@ -121,7 +121,7 @@
       </div>
     </section>
 
-    <section v-else>
+    <section v-else :key="`detail-section-${slug}`"> 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <div class="rounded-2xl border border-gray-200 bg-white/80 backdrop-blur p-5 sm:p-7 dark:bg-neutral-900/70 dark:border-neutral-700">
           <div class="flex flex-col lg:flex-row items-start gap-6">
@@ -389,7 +389,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, watchEffect, onMounted, onBeforeMount } from 'vue'
 import { useRoute, useRouter, useHead } from '#imports'
 import { Icon } from '@iconify/vue'
 import type { Tone, Category, Feature } from '~/data/fitur'
@@ -416,30 +416,31 @@ const filteredFeatures = computed(() => {
   })
 })
 
-/* ========= Detail selection ========= */
 const route = useRoute()
 const router = useRouter()
-const slug = computed(() => (route.query.slug as string | undefined) || '')
+const slug = computed(() => {
+  const s = route.query.slug
+  return typeof s === 'string' ? s : Array.isArray(s) ? s[0] : ''
+})
 const activeFeature = computed<Feature | null>(() => fitur.find(c => c.slug === slug.value) || null)
+const isDetail = computed(() => !!slug.value && !!activeFeature.value)
 const relatedFeatures = computed(() => {
   if (!activeFeature.value) return []
   const relSlugs = activeFeature.value.detail.related || []
   return fitur.filter(c => relSlugs.includes(c.slug))
 })
 
-/* ========= Sections (ditambah 2: Potensi & Manfaat) ========= */
 const sections = (f: Feature) => ([
   { title: 'Ringkasan', icon: 'lucide:badge-check' },
   { title: 'Masalah yang Diselesaikan', icon: 'lucide:bug' },
   { title: 'Kemampuan Utama', icon: 'lucide:sparkles' },
   { title: 'Alur Kerja', icon: 'lucide:list-ordered' },
   { title: 'Integrasi', icon: 'lucide:git-merge' },
-  { title: 'Potensi Penerapan', icon: 'lucide:rocket' },        // NEW
-  { title: 'Manfaat & Dampak', icon: 'lucide:heart-handshake' }, // NEW
+  { title: 'Potensi Penerapan', icon: 'lucide:rocket' },
+  { title: 'Manfaat & Dampak', icon: 'lucide:heart-handshake' },
   { title: 'FAQ & Langkah Berikutnya', icon: 'lucide:help-circle' }
 ])
 
-/* ========= SEO ========= */
 useHead(() => {
   const baseTitle = 'Fitur Obayan'
   if (!activeFeature.value) {
@@ -456,7 +457,6 @@ useHead(() => {
   }
 })
 
-/* ========= Styles ========= */
 const badgeTone = (tone: Tone) => ({
   emerald: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
   blue: 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300',
@@ -471,12 +471,17 @@ const chipTone = (tone: Tone) => ({
   violet: 'bg-violet-100/70 text-violet-800 dark:bg-violet-500/15 dark:text-violet-300'
 }[tone])
 
-/* ========= Guards ========= */
-watch(slug, (s) => {
+onBeforeMount(() => {
+  const s = slug.value?.trim()
+  if (!s) router.replace('/fitur')
+  else if (!activeFeature.value) router.replace('/fitur')
+})
+
+watchEffect(() => {
+  const s = slug.value?.trim()
   if (s && !activeFeature.value) router.replace('/fitur')
 })
 
-/* ========= Why cards ========= */
 const whyObayan = [
   { title: 'Modular & Scalable', desc: 'Aktifkan modul sesuai fase; tumbuh tanpa migrasi ulang.', icon: 'lucide:layout-grid', tone: 'emerald' as Tone },
   { title: 'Keamanan Serius', desc: 'RBAC, audit log, backup & enkripsi by default.', icon: 'lucide:shield-check', tone: 'blue' as Tone },

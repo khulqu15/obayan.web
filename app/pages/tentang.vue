@@ -44,7 +44,7 @@
           </div>
 
           <p class="mt-3 text-xs text-white/70">
-            Dibangun dengan cinta di Indonesia • Nuxt + Tailwind + Preline Pro • Terintegrasi penuh antar modul.
+            Dibangun dengan oleh Sencra.io • Terintegrasi penuh antar modul.
           </p>
         </div>
       </div>
