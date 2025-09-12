@@ -154,19 +154,21 @@
           </div>
 
           <div class="mt-6">
-            <h3 class="font-medium mb-2">CTA Buttons</h3>
+            <div class="flex flex-wrap justify-between items-center gap-3 mb-3">
+              <h3 class="font-medium mb-2">CTA Buttons</h3>
+              <button class="mt-2 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-500 hover:border-blue-600 hover:text-blue-600 focus:outline-hidden focus:border-blue-600 focus:text-blue-600 disabled:opacity-50 disabled:pointer-events-none dark:border-neutral-700 dark:text-neutral-400 dark:hover:text-blue-500 dark:hover:border-blue-600 dark:focus:text-blue-500 dark:focus:border-blue-600" @click="form.ctaButtons.push({ label: 'Baru', href: '#', style: 'outline' })"><ClientOnly><Icon icon="lucide:plus" class="size-4"/></ClientOnly>Tambah CTA</button>
+            </div>
             <div class="space-y-2">
               <div v-for="(b, i) in form.ctaButtons" :key="i" class="flex items-center gap-2">
-                <select v-model="b.style" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500/40 w-32">
+                <select v-model="b.style" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500/40 w-32">
                   <option value="primary">primary</option>
                   <option value="outline">outline</option>
                 </select>
-                <input v-model="b.label" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500/40 flex-1" placeholder="Label"/>
-                <input v-model="b.href" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500/40 flex-1" placeholder="/route"/>
+                <input v-model="b.label" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500/40 flex-1" placeholder="Label"/>
+                <input v-model="b.href" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500/40 flex-1" placeholder="/route"/>
                 <button class="inline-flex items-center gap-2 px-2.5 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700" @click="form.ctaButtons.splice(i,1)"><ClientOnly><Icon icon="lucide:trash" class="size-4"/></ClientOnly></button>
               </div>
             </div>
-            <button class="mt-2 btn-secondary" @click="form.ctaButtons.push({ label: 'Baru', href: '#', style: 'outline' })"><ClientOnly><Icon icon="lucide:plus" class="size-4"/></ClientOnly>Tambah CTA</button>
           </div>
         </div>
       </section>

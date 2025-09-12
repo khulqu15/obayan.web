@@ -1,14 +1,24 @@
 <template>
   <section class="p-6 space-y-4">
-    <div class="flex items-center justify-between">
-      <h1 class="text-lg font-semibold">Manajemen Maskan & Kamar</h1>
-      <button @click="openMaskanCreate" class="text-xs px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">
-        + Tambah Maskan
-      </button>
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+      <h1 class="text-lg font-semibold">Daftar Kamar</h1>
+      <div class="flex items-center gap-2">
+        <button
+          @click="openAddMaskan"
+          class="text-xs px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">
+          + Tambah Maskan
+        </button>
+        <NuxtLink
+          to="/app/maskan"
+          class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
+          Kelola Struktur Maskan
+        </NuxtLink>
+      </div>
     </div>
 
-    <div class="flex items-center gap-2 text-xs">
-      <span class="text-gray-600 dark:text-neutral-300">Filter Tipe:</span>
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-2 items-center text-xs">
+      <span class="text-gray-600 dark:text-neutral-300">Tipe:</span>
       <button
         v-for="t in tipeTabs"
         :key="t.value"
@@ -18,289 +28,154 @@
           : 'border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800']">
         {{ t.label }}
       </button>
+
+      <div class="w-px h-4 bg-gray-200 dark:bg-neutral-700 mx-1" />
+
+      <label class="text-gray-600 dark:text-neutral-300">Maskan:</label>
+      <select v-model="activeMaskan" class="px-2 py-1.5 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900">
+        <option value="ALL">Semua</option>
+        <option v-for="m in maskanOptions" :key="m.id" :value="m.id">Maskan {{ m.name }}</option>
+      </select>
+
+      <div class="w-px h-4 bg-gray-200 dark:bg-neutral-700 mx-1" />
+
+      <input v-model.trim="q" placeholder="Cari kamar / santri…" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 w-64" />
     </div>
 
-    <DataTable
-      title="Daftar Maskan"
-      :rows="filteredMaskan"
-      :columns="columns"
-      :rowKey="(r) => r.id"
-    >
-      <template #cell-name="{ row: m }">
-        <div class="font-semibold">Maskan {{ m.name }}</div>
-        <div class="text-xs text-gray-500">{{ m.deskripsi || '—' }}</div>
-      </template>
+    <!-- Table -->
+    <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-neutral-700">
+      <table class="min-w-full text-xs">
+        <thead class="bg-gray-50 dark:bg-neutral-900/40">
+          <tr class="text-left">
+            <th class="px-3 py-2">Maskan</th>
+            <th class="px-3 py-2">Kamar</th>
+            <th class="px-3 py-2">Ketua</th>
+            <th class="px-3 py-2">Kapasitas</th>
+            <th class="px-3 py-2">Penghuni</th>
+            <th class="px-3 py-2">Aktif</th>
+            <th class="px-3 py-2 w-56">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-neutral-800">
+          <tr v-for="r in filteredRooms" :key="r.maskanId + ':' + r.id">
+            <td class="px-3 py-2">Maskan {{ r.maskanName }} <span class="text-[11px] ml-1 text-gray-500">({{ r.tipe }})</span></td>
+            <td class="px-3 py-2 font-semibold">{{ r.number }}</td>
+            <td class="px-3 py-2">
+              <div class="flex items-center gap-2">
+                <span>{{ displayPjName(r.pj) || '—' }}</span>
+                <button @click="openSetKetua(r)" class="text-[11px] px-2 py-0.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Ubah</button>
+              </div>
+            </td>
+            <td class="px-3 py-2">{{ r.capacity ?? 0 }}</td>
+            <td class="px-3 py-2">
+              <span>{{ r.santri.length }} santri</span>
+            </td>
+            <td class="px-3 py-2">
+              <span :class="['px-2 py-0.5 rounded', r.active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300']">
+                {{ r.active ? 'Aktif' : 'Nonaktif' }}
+              </span>
+            </td>
+            <td class="px-3 py-2">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <button @click="openResidents(r)" class="px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Penghuni</button>
+                <button @click="openSetKetua(r)" class="px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Ketua</button>
+                <button @click="openRoomEdit(r)" class="px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Edit Kamar</button>
+                <button @click="openRoomDelete(r)" class="px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus Kamar</button>
+                <button
+                  class="px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 disabled:opacity-50"
+                  @click="openRoomCreate(r)">
+                  + Tambah Kamar
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="!filteredRooms.length">
+            <td colspan="7" class="px-3 py-6 text-center text-gray-500">Tidak ada data kamar.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-      <template #cell-tipe="{ row: m }">
-        <span class="inline-flex items-center text-xs px-2 py-0.5 rounded border border-gray-200 dark:border-neutral-700">
-          {{ m.tipe }}
-        </span>
-      </template>
-
-      <template #cell-pj="{ row: m }">
-        <div class="flex items-center gap-2">
-            <div>
-            <div class="text-sm">{{ displayPjName(m.pj) || '—' }}</div>
-            <div v-if="m.pj?.santriId" class="text-[11px] text-gray-500">terhubung ke data santri</div>
-            </div>
-            <button @click="openMaskanEditPj(m)" class="text-xs px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
-            Ubah PJ
-            </button>
-        </div>
-    </template>
-
-      <template #cell-rooms="{ row: m }">
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-gray-700 dark:text-neutral-300">{{ m.rooms.length }} kamar</span>
+    <!-- Modal: Set Ketua -->
+    <ModalShell size="2xl" v-model="showKetua" :title="roomForKetua ? `Ubah Ketua Kamar ${roomForKetua.number} • Maskan ${roomForKetua.maskanName}` : 'Ubah Ketua Kamar'">
+      <div v-if="roomForKetua" class="space-y-3">
+        <p class="text-xs text-gray-600 dark:text-neutral-300">Pilih dari penghuni kamar ini:</p>
+        <div class="max-h-60 overflow-auto rounded border border-gray-200 dark:border-neutral-700 divide-y dark:divide-neutral-800">
           <button
-            @click="openRooms(m)"
-            class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
-            Kelola
+            v-for="s in roomForKetua.santri"
+            :key="s.id"
+            @click="selectKetua(s)"
+            class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800 border-b border-gray-200"
+          >
+            <div class="text-sm font-medium">{{ s.santri }}</div>
+            <div class="text-[11px] text-gray-500">Gen {{ s.gen || '-' }}</div>
           </button>
         </div>
 
-        <div v-show="!isMobile && expanded.has(m.id)" class="mt-2 rounded-lg border border-gray-200 dark:border-neutral-700 overflow-hidden">
-          <div class="bg-gray-50 dark:bg-neutral-900/40 px-3 py-2 text-xs font-medium">
-            Kamar di Maskan {{ m.name }} ({{ m.tipe }})
-          </div>
-          <div class="p-3 space-y-3">
-            <div class="flex flex-wrap items-end gap-2">
-              <div class="flex items-center gap-2">
-                <div>
-                    <p for="no_room">Nomor Kamar</p>
-                    <input id="no_room" v-model="roomForm.number" placeholder="Nomor kamar" class="px-2 py-1 text-xs rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-                </div>
-                <div>
-                    <p for="capacity">Kapasitas</p>
-                    <input id="capacity" v-model.number="roomForm.capacity" type="number" min="0" placeholder="Kapasitas" class="w-24 px-2 py-1 text-xs rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-                </div>
-                <label class="inline-flex items-center gap-1 text-xs">
-                  <input type="checkbox" v-model="roomForm.active" />
-                  Aktif
-                </label>
-                <button @click="quickAddRoom(m)" class="text-xs px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700">Tambah</button>
-              </div>
-
-              <div class="ml-auto flex items-center gap-2">
-                <input v-model.number="genStart" type="number" min="1" placeholder="Mulai" class="w-20 px-2 py-1 text-xs rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-                <input v-model.number="genEnd" type="number" :min="genStart" placeholder="Selesai" class="w-20 px-2 py-1 text-xs rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-                <input v-model="genPrefix" placeholder="Prefix (opsional)" class="w-28 px-2 py-1 text-xs rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-                <button @click="generateRooms(m)" class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
-                  Generate
-                </button>
-              </div>
-            </div>
-
-            <div class="overflow-x-auto">
-              <table class="min-w-full text-xs">
-                <thead>
-                  <tr class="text-left">
-                    <th class="px-3 py-2">Nomor</th>
-                    <th class="px-3 py-2">Kapasitas</th>
-                    <th class="px-3 py-2">PJ</th>
-                    <th class="px-3 py-2">Aktif</th>
-                    <th class="px-3 py-2 w-28">Action</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-neutral-800">
-                  <tr v-for="r in m.rooms" :key="r.id">
-                    <td class="px-3 py-2">{{ r.number }}</td>
-                    <td class="px-3 py-2">{{ r.capacity ?? 0 }}</td>
-                    <td class="px-3 py-2">
-                        <div class="flex items-center gap-2">
-                            <span>{{ displayPjName(r.pj) || '—' }}</span>
-                            <button @click="openRoomEditPj(m, r)" class="text-[11px] px-2 py-0.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Ubah</button>
-                        </div>
-                    </td>
-                    <td class="px-3 py-2">
-                      <span :class="['text-xs px-2 py-0.5 rounded', r.active !== false ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300']">
-                        {{ r.active !== false ? 'Aktif' : 'Nonaktif' }}
-                      </span>
-                    </td>
-                    <td class="px-3 py-2">
-                      <div class="flex items-center gap-1">
-                        <button @click="openRoomEdit(m, r)" class="px-2 py-1 rounded border border-gray-200 hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">Edit</button>
-                        <button @click="openRoomDelete(m, r)" class="px-2 py-1 rounded border border-gray-200 text-rose-600 hover:bg-rose-50 dark:border-neutral-700 dark:hover:bg-rose-900/20">Hapus</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr v-if="!m.rooms.length">
-                    <td colspan="4" class="px-3 py-3 text-gray-500">Belum ada kamar.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </template>
-
-      <template #cell-action="{ row: m }">
-        <div class="flex items-center gap-2">
-          <button @click="openMaskanEdit(m)" class="text-xs px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Edit</button>
-          <button @click="openMaskanDelete(m)" class="text-xs px-2 py-1 rounded border border-gray-200 text-rose-600 hover:bg-rose-50 dark:border-neutral-700 dark:hover:bg-rose-900/20">Hapus</button>
-        </div>
-      </template>
-    </DataTable>
-
-    <ModalShell v-model="showPjMaskan" :title="maskanForPj ? `Ubah Penanggung Jawab - Maskan ${maskanForPj.name}` : 'Ubah Penanggung Jawab'">
-  <div class="space-y-3">
-    <!-- Search santri -->
-    <div>
-      <label class="text-xs text-gray-600 dark:text-neutral-300">Cari Santri</label>
-      <input v-model.trim="pjQuery" placeholder="ketik nama santri…" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-      <div v-if="pjQuery && pjCandidates.length" class="mt-2 max-h-48 overflow-auto rounded border border-gray-200 dark:border-neutral-700 divide-y dark:divide-neutral-800">
-        <button
-          v-for="s in pjCandidates"
-          :key="s.id"
-          @click="selectPjFromSantri(s)"
-          class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
-        >
-          <div class="text-sm font-medium">{{ s.santri }}</div>
-          <div class="text-[11px] text-gray-500">Gen {{ s.gen || '-' }} • {{ (s.kamar||'-') }} {{ (s.maskan||'') }}</div>
-        </button>
+        <div class="text-xs text-gray-600 dark:text-neutral-300">Atau isi manual:</div>
+        <input v-model.trim="ketuaManual.name" placeholder="Nama ketua" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+        <input v-model.trim="ketuaManual.note" placeholder="Catatan (opsional)" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
       </div>
-      <div v-else-if="pjQuery" class="mt-2 text-xs text-gray-500">Tidak ditemukan.</div>
-    </div>
-
-    <!-- Ringkasan pilihan -->
-    <div v-if="pjSelection.santriId" class="flex items-center justify-between text-sm px-3 py-2 rounded border border-emerald-300 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-900/20">
-      <div>Dipilih: <strong>{{ displayPjName(pjSelection) }}</strong> (terhubung)</div>
-      <button @click="clearPjSelection" class="text-xs underline">Hapus pilihan</button>
-    </div>
-
-    <!-- Manual override -->
-    <div>
-      <label class="text-xs text-gray-600 dark:text-neutral-300">Atau isi manual</label>
-      <input v-model.trim="pjSelection.name" placeholder="nama penanggung jawab" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-      <textarea v-model.trim="pjSelection.note" rows="2" placeholder="catatan (opsional)" class="mt-2 w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"></textarea>
-    </div>
-  </div>
-
-  <template #footer>
-    <button @click="showPjMaskan=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Batal</button>
-    <button :disabled="pjSaving" @click="savePjMaskan" class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
-      {{ pjSaving ? 'Menyimpan…' : 'Simpan' }}
-    </button>
-  </template>
-</ModalShell>
-
-
-<ModalShell v-model="showPjRoom" :title="maskanForRoomPj && roomForPj ? `Ubah PJ - Maskan ${maskanForRoomPj.name} / Kamar ${roomForPj.number}` : 'Ubah Penanggung Jawab Kamar'">
-  <div class="space-y-3">
-    <div>
-      <label class="text-xs text-gray-600 dark:text-neutral-300">Cari Santri</label>
-      <input v-model.trim="pjQuery" placeholder="ketik nama santri…" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-      <div v-if="pjQuery && pjCandidates.length" class="mt-2 max-h-48 overflow-auto rounded border border-gray-200 dark:border-neutral-700 divide-y dark:divide-neutral-800">
-        <button
-          v-for="s in pjCandidates"
-          :key="s.id"
-          @click="selectPjFromSantri(s)"
-          class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
-        >
-          <div class="text-sm font-medium">{{ s.santri }}</div>
-          <div class="text-[11px] text-gray-500">Gen {{ s.gen || '-' }} • {{ (s.kamar||'-') }} {{ (s.maskan||'') }}</div>
-        </button>
-      </div>
-      <div v-else-if="pjQuery" class="mt-2 text-xs text-gray-500">Tidak ditemukan.</div>
-    </div>
-
-    <div v-if="pjSelection.santriId" class="flex items-center justify-between text-sm px-3 py-2 rounded border border-emerald-300 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-900/20">
-      <div>Dipilih: <strong>{{ displayPjName(pjSelection) }}</strong> (terhubung)</div>
-      <button @click="clearPjSelection" class="text-xs underline">Hapus pilihan</button>
-    </div>
-
-    <div>
-      <label class="text-xs text-gray-600 dark:text-neutral-300">Atau isi manual</label>
-      <input v-model.trim="pjSelection.name" placeholder="nama penanggung jawab" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-      <textarea v-model.trim="pjSelection.note" rows="2" placeholder="catatan (opsional)" class="mt-2 w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"></textarea>
-    </div>
-  </div>
-
-  <template #footer>
-    <button @click="showPjRoom=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Batal</button>
-    <button :disabled="pjSaving" @click="savePjRoom" class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
-      {{ pjSaving ? 'Menyimpan…' : 'Simpan' }}
-    </button>
-  </template>
-</ModalShell>
-
-
-    <ModalShell v-model="showRoomsModal" :title="activeMaskan ? `Kamar Maskan ${activeMaskan.name} (${activeMaskan.tipe})` : 'Kamar'">
-      <div v-if="activeMaskan">
-        <div class="flex flex-wrap items-end gap-2 mb-3">
-          <div class="flex items-center gap-2">
-            <div>
-                <label for="no_room">Nomor Kamar</label>
-                <input id="no_room" v-model="roomForm.number" placeholder="Nomor kamar" class="px-2 py-1 text-xs rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-            </div>
-            <div>
-                <label for="capacity">Kapasitas</label>
-                <input id="capacity" v-model.number="roomForm.capacity" type="number" min="0" placeholder="Kapasitas" class="w-24 px-2 py-1 text-xs rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-            </div>
-            <label class="inline-flex items-center gap-1 text-xs">
-              <input type="checkbox" v-model="roomForm.active" />
-              Aktif
-            </label>
-            <button @click="quickAddRoom(activeMaskan)" class="text-xs px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700">Tambah</button>
-          </div>
-          <div class="ml-auto flex items-center gap-2">
-            <input v-model.number="genStart" type="number" min="1" placeholder="Mulai" class="w-20 px-2 py-1 text-xs rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-            <input v-model.number="genEnd" type="number" :min="genStart" placeholder="Selesai" class="w-20 px-2 py-1 text-xs rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-            <input v-model="genPrefix" placeholder="Prefix (opsional)" class="w-28 px-2 py-1 text-xs rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-            <button @click="generateRooms(activeMaskan)" class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
-              Generate
-            </button>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto -mx-1">
-          <table class="min-w-full text-xs">
-            <thead>
-              <tr class="text-left">
-                <th class="px-3 py-2">Nomor</th>
-                <th class="px-3 py-2">Kapasitas</th>
-                <th class="px-3 py-2">PJ</th>
-                <th class="px-3 py-2">Aktif</th>
-                <th class="px-3 py-2 w-28">Action</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-neutral-800">
-              <tr v-for="r in activeMaskan.rooms" :key="r.id">
-                <td class="px-3 py-2">{{ r.number }}</td>
-                <td class="px-3 py-2">{{ r.capacity ?? 0 }}</td>
-                <td class="px-3 py-2">
-                    <div class="flex items-center gap-2">
-                        <span>{{ displayPjName(r.pj) || '—' }}</span>
-                        <button @click="openRoomEditPj(m, r)" class="text-[11px] px-2 py-0.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Ubah</button>
-                    </div>
-                </td>
-                <td class="px-3 py-2">
-                  <span :class="['text-xs px-2 py-0.5 rounded', r.active !== false ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300']">
-                    {{ r.active !== false ? 'Aktif' : 'Nonaktif' }}
-                  </span>
-                </td>
-                <td class="px-3 py-2">
-                  <div class="flex items-center gap-1">
-                    <button @click="openRoomEdit(activeMaskan, r)" class="px-2 py-1 rounded border border-gray-200 hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">Edit</button>
-                    <button @click="openRoomDelete(activeMaskan, r)" class="px-2 py-1 rounded border border-gray-200 text-rose-600 hover:bg-rose-50 dark:border-neutral-700 dark:hover:bg-rose-900/20">Hapus</button>
-                  </div>
-                </td>
-              </tr>
-              <tr v-if="!activeMaskan.rooms.length">
-                <td colspan="4" class="px-3 py-3 text-gray-500">Belum ada kamar.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       <template #footer>
-        <button @click="showRoomsModal=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
-          Tutup
+        <button @click="showKetua=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Batal</button>
+        <button :disabled="savingKetua" @click="saveKetua" class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
+          {{ savingKetua ? 'Menyimpan…' : 'Simpan' }}
         </button>
       </template>
     </ModalShell>
 
+    <!-- Modal: Penghuni -->
+    <ModalShell size="2xl" v-model="showResidents" :title="roomForResidents ? `Penghuni Kamar ${roomForResidents.number} • Maskan ${roomForResidents.maskanName}` : 'Penghuni Kamar'">
+      <div v-if="roomForResidents" class="grid sm:grid-cols-2 gap-4">
+        <!-- List current residents -->
+        <div class="space-y-2">
+          <div class="text-xs font-semibold">Penghuni saat ini</div>
+          <div class="max-h-72 overflow-auto rounded border border-gray-200 dark:border-neutral-700 divide-y dark:divide-neutral-800">
+            <div v-for="s in roomForResidents.santri" :key="s.id" class="flex items-center justify-between px-3 py-2 border-b border-gray-200">
+              <div>
+                <div class="text-sm font-medium">{{ s.santri }}</div>
+                <div class="text-[11px] text-gray-500">Gen {{ s.gen || '-' }}</div>
+              </div>
+              <button
+                :disabled="residentsSaving"
+                @click="removeResident(s)"
+                class="text-[11px] px-2 py-1 rounded border border-rose-300 text-rose-700 hover:bg-rose-50 dark:border-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/20 disabled:opacity-60">
+                Hapus
+              </button>
+            </div>
+            <div v-if="!roomForResidents.santri.length" class="px-3 py-2 text-sm text-gray-500">Belum ada santri di kamar ini.</div>
+          </div>
+        </div>
+
+        <!-- Add new resident -->
+        <div class="space-y-2">
+          <div class="text-xs font-semibold">Tambah penghuni</div>
+          <input v-model.trim="addQuery" placeholder="Cari nama santri…" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+          <div class="text-[11px] text-gray-500">Hanya menampilkan santri yang belum di kamar ini & cocok tipe.</div>
+          <div class="max-h-72 overflow-auto rounded border border-gray-200 dark:border-neutral-700 divide-y dark:divide-neutral-800">
+            <div v-for="s in addCandidates" :key="s.id" class="flex border-b border-gray-200 items-center justify-between px-3 py-2">
+              <div>
+                <div class="text-sm font-medium">{{ s.santri }}</div>
+                <div class="text-[11px] text-gray-500">Gen {{ s.gen || '-' }} <span v-if="s.kamar || s.maskan">• sekarang: {{ s.maskan || '-' }} {{ s.kamar || '' }}</span></div>
+              </div>
+              <button
+                :disabled="residentsSaving"
+                @click="addResident(s)"
+                class="text-[11px] px-2 py-1 rounded border border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-900/20 disabled:opacity-60">
+                Tambahkan
+              </button>
+            </div>
+            <div v-if="!addCandidates.length" class="px-3 py-2 text-sm text-gray-500">Tidak ada kandidat.</div>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <button @click="showResidents=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Tutup</button>
+      </template>
+    </ModalShell>
+
+    <!-- Modal: Tambah / Ubah Maskan -->
     <ModalShell v-model="showMaskanForm" :title="maskanFormMode==='create' ? 'Tambah Maskan' : 'Ubah Maskan'">
       <form class="space-y-3" @submit.prevent="submitMaskanForm">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -330,10 +205,11 @@
       </template>
     </ModalShell>
 
+    <!-- Modal: Hapus Maskan -->
     <ModalShell v-model="showMaskanDelete" title="Hapus Maskan">
       <p class="text-sm">
-        Hapus <strong>Maskan {{ maskanCurrent?.name }}</strong> ({{ maskanCurrent?.tipe }})?
-        <br />Tindakan ini juga menghapus <strong>{{ maskanCurrent?.rooms.length || 0 }}</strong> kamar di dalamnya.
+        Hapus <strong>Maskan {{ maskanCurrent?.maskanName || maskanCurrent?.name }}</strong> ({{ maskanCurrent?.tipe }})?
+        <br />Tindakan ini juga menghapus kamar di dalamnya.
       </p>
       <template #footer>
         <button @click="showMaskanDelete=false" class="px-3 py-1.5 rounded border border-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-800">Batal</button>
@@ -343,7 +219,8 @@
       </template>
     </ModalShell>
 
-    <ModalShell v-model="showRoomForm" title="Ubah Kamar">
+    <!-- Modal: Tambah/Ubah Kamar -->
+    <ModalShell v-model="showRoomForm" :title="roomFormMode==='create' ? `Tambah Kamar • Maskan ${maskanForRoom?.name || '-'}` : `Ubah Kamar • Maskan ${maskanForRoom?.name || '-'}`">
       <form class="space-y-3" @submit.prevent="submitRoomForm">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
@@ -354,7 +231,7 @@
             <label class="text-xs">Kapasitas</label>
             <input v-model.number="roomEditForm.capacity" type="number" min="0" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
           </div>
-          <div class="flex items-end gap-2">
+          <div class="flex items-end">
             <label class="inline-flex items-center gap-2 text-xs">
               <input type="checkbox" v-model="roomEditForm.active" />
               Aktif
@@ -366,12 +243,12 @@
       <template #footer>
         <button @click="showRoomForm=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Batal</button>
         <button :disabled="roomSaving" @click="submitRoomForm" class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
-          {{ roomSaving ? 'Menyimpan…' : 'Simpan' }}
+          {{ roomSaving ? 'Menyimpan…' : (roomFormMode==='create' ? 'Tambah' : 'Simpan') }}
         </button>
       </template>
     </ModalShell>
 
-    <!-- Modal Room: Delete -->
+    <!-- Modal: Hapus Kamar -->
     <ModalShell v-model="showRoomDelete" title="Hapus Kamar">
       <p class="text-sm">
         Hapus kamar <strong>{{ roomCurrent?.number }}</strong> dari Maskan {{ maskanForRoom?.name }}?
@@ -387,125 +264,218 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
-import DataTable from '~/components/widget/DataTable.vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import ModalShell from '~/components/widget/ModalShell.vue'
 import { useMaskan, type MaskanRow, type KamarRow } from '~/composables/data/useMaskan'
 import { useSantri } from '~/composables/data/useSantri'
+import { useNuxtApp } from '#app'
+import { ref as dbRef, update as rtdbUpdate } from 'firebase/database'
 
-definePageMeta({ layout: 'app', layoutProps: { title: 'Maskan Kamar' } })
+definePageMeta({ layout: 'app', layoutProps: { title: 'Kamar' } })
 
-const { rows: santriRows, fetchSantri } = useSantri()
-
-const { rows, loading, error,
-  fetchMaskan, createMaskan, updateMaskan, deleteMaskan,
-  createRoom, updateRoom, deleteRoom, batchGenerateRooms
+// data sources
+const {
+  rows: maskanRows,
+  fetchMaskan,
+  createMaskan, updateMaskan, deleteMaskan,
+  createRoom, updateRoom, deleteRoom
 } = useMaskan()
+const { rows: santriRows, fetchSantri, /* optional */ updateSantri } = useSantri() as any
 
 onMounted(async () => { await Promise.all([fetchMaskan(), fetchSantri()]) })
 
+// filters
 const tipeTabs = [
   { label: 'Semua', value: 'ALL' },
   { label: 'Putra', value: 'Putra' },
   { label: 'Putri', value: 'Putri' },
 ] as const
 const activeTipe = ref<typeof tipeTabs[number]['value']>('ALL')
-const filteredMaskan = computed(() =>
-  rows.value.filter(m => activeTipe.value === 'ALL' ? true : m.tipe === activeTipe.value)
+const activeMaskan = ref<'ALL' | string>('ALL')
+const q = ref('')
+
+// maskan options for select
+const maskanOptions = computed(() =>
+  maskanRows.value
+    .map(m => ({ id: m.id, name: m.name }))
+    .sort((a,b)=>a.name.localeCompare(b.name,'id'))
 )
 
-const columns = [
-  { key: 'name', label: 'Maskan', sortable: true },
-  { key: 'tipe', label: 'Tipe', sortable: true },
-  { key: 'pj', label: 'Penanggung Jawab' }, 
-  { key: 'rooms', label: 'Kamar' },
-]
-
-const expanded = ref<Set<string>>(new Set())
-const isMobile = ref(false)
-const showRoomsModal = ref(false)
-const activeMaskan = ref<MaskanRow | null>(null)
-
-function updateIsMobile() {
-  isMobile.value = window.matchMedia('(max-width: 639px)').matches
+// helpers
+function displayPjName(pj?: { name?: string, santriId?: string }) {
+  if (!pj) return ''
+  const found = santriRows.value.find(s => s.id === pj.santriId)
+  return (found?.santri || pj.name || '').trim()
 }
-onMounted(() => {
-  updateIsMobile()
-  window.addEventListener('resize', updateIsMobile)
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateIsMobile)
+function norm(x: any) { return (x ?? '').toString().trim().toLowerCase() }
+function belongsToRoom(s: any, m: MaskanRow, r: KamarRow) {
+  const sMaskan = norm((s.maskan || '').replace(/^maskan\s+/i, ''))
+  const sKamar = norm(s.kamar)
+  return sKamar === norm(r.number) && sMaskan === norm(m.name)
+}
+
+// build flattened room list with residents
+type RoomView = {
+  id: string
+  number: string
+  capacity?: number
+  active?: boolean
+  pj?: { santriId?: string; name?: string; note?: string }
+  maskanId: string
+  maskanName: string
+  tipe: 'Putra' | 'Putri'
+  santri: any[]
+}
+const roomsFlat = computed<RoomView[]>(() => {
+  const out: RoomView[] = []
+  for (const m of maskanRows.value) {
+    for (const r of m.rooms) {
+      const santri = santriRows.value.filter(s => belongsToRoom(s, m, r))
+      out.push({
+        id: r.id,
+        number: r.number,
+        capacity: r.capacity,
+        active: r.active !== false,
+        pj: r.pj,
+        maskanId: m.id,
+        maskanName: m.name,
+        tipe: m.tipe,
+        santri,
+      })
+    }
+  }
+  return out.sort((a,b) => {
+    const n = a.maskanName.localeCompare(b.maskanName, 'id')
+    if (n !== 0) return n
+    const na = Number(a.number), nb = Number(b.number)
+    if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb
+    return a.number.localeCompare(b.number, 'id')
+  })
 })
 
-function openRooms(m: MaskanRow) {
-  if (isMobile.value) {
-    activeMaskan.value = m
-    showRoomsModal.value = true
-  } else {
-    const s = new Set(expanded.value)
-    s.has(m.id) ? s.delete(m.id) : s.add(m.id)
-    expanded.value = s
+// apply filters
+const filteredRooms = computed(() => {
+  const qq = norm(q.value)
+  return roomsFlat.value.filter(r => {
+    if (activeTipe.value !== 'ALL' && r.tipe !== activeTipe.value) return false
+    if (activeMaskan.value !== 'ALL' && r.maskanId !== activeMaskan.value) return false
+    if (!qq) return true
+    const ketua = displayPjName(r.pj).toLowerCase()
+    const hay = [
+      r.number, r.maskanName, ketua,
+      ...r.santri.map((s: any) => (s.santri || '').toLowerCase())
+    ].join(' ')
+    return hay.includes(qq)
+  })
+})
+
+/* -------------------- Modal: Ketua -------------------- */
+const showKetua = ref(false)
+const roomForKetua = ref<RoomView | null>(null)
+const ketuaManual = reactive<{ name?: string; note?: string }>({})
+const savingKetua = ref(false)
+
+function openSetKetua(r: RoomView) {
+  roomForKetua.value = r
+  ketuaManual.name = r.pj?.name || ''
+  ketuaManual.note = r.pj?.note || ''
+  showKetua.value = true
+}
+function selectKetua(s: any) {
+  ketuaManual.name = s.santri
+  saveKetua(s.id)
+}
+async function saveKetua(santriId?: string) {
+  if (!roomForKetua.value) return
+  savingKetua.value = true
+  try {
+    const payload: any = {
+      pj: {
+        santriId: santriId ?? (roomForKetua.value.pj?.santriId || ''),
+        name: ketuaManual.name ?? '',
+        note: ketuaManual.note ?? '',
+      }
+    }
+    await updateRoom(roomForKetua.value.maskanId, roomForKetua.value.id, payload)
+    showKetua.value = false
+  } finally {
+    savingKetua.value = false
   }
 }
 
-// -------- Quick add & generate rooms
-const roomForm = reactive({ number: '', capacity: 0, active: true })
-const genStart = ref<number | null>(1)
-const genEnd = ref<number | null>(10)
-const genPrefix = ref('')
+/* -------------------- Modal: Penghuni -------------------- */
+const showResidents = ref(false)
+const roomForResidents = ref<RoomView | null>(null)
+const addQuery = ref('')
+const residentsSaving = ref(false)
 
-async function quickAddRoom(m: MaskanRow) {
-  const num = (roomForm.number ?? '').toString().trim()
-  if (!num) return
-  // Cegah duplikat nomor
-  if (m.rooms.some(r => String(r.number).trim() === num)) return
-  await createRoom(m.id, { number: num, capacity: Number(roomForm.capacity ?? 0), active: !!roomForm.active, tipe: m.tipe })
-  roomForm.number = ''
+function openResidents(r: RoomView) {
+  roomForResidents.value = r
+  addQuery.value = ''
+  showResidents.value = true
 }
 
-async function generateRooms(m: MaskanRow) {
-  const s = Number(genStart.value ?? 1)
-  const e = Number(genEnd.value ?? s)
-  if (Number.isNaN(s) || Number.isNaN(e) || e < s) return
-  await batchGenerateRooms(m.id, s, e, { prefix: genPrefix.value, capacity: 0, active: true })
-  // keep panel open
-}
-
-const showPjMaskan = ref(false)
-const maskanForPj = ref<MaskanRow | null>(null)
-const showPjRoom = ref(false)
-const maskanForRoomPj = ref<MaskanRow | null>(null)
-const roomForPj = ref<KamarRow | null>(null)
-const pjQuery = ref('')
-const pjSelection = reactive<{ santriId?: string, name?: string, note?: string }>({})
-const pjCandidates = computed(() => {
-  const q = pjQuery.value.trim().toLowerCase()
-  if (!q) return []
+const addCandidates = computed(() => {
+  if (!roomForResidents.value) return []
+  const q = addQuery.value.trim().toLowerCase()
+  const inThisRoom = new Set(roomForResidents.value.santri.map((s:any)=>s.id))
   return santriRows.value
-    .filter(s =>
-      (s.santri || '').toLowerCase().includes(q) ||
-      (s.kamar || '').toLowerCase().includes(q) ||
-      (s.maskan || '').toLowerCase().includes(q)
-    )
-    .slice(0, 12)
+    .filter(s => !inThisRoom.has(s.id))
+    .filter(s => (s.tipe || roomForResidents.value!.tipe)
+                    ? ((s.tipe || roomForResidents.value!.tipe) === roomForResidents.value!.tipe)
+                    : true)
+    .filter(s => !q ? true : (s.santri || '').toLowerCase().includes(q))
+    .slice(0, 30)
 })
 
+async function addResident(s: any) {
+  if (!roomForResidents.value) return
+  residentsSaving.value = true
+  try {
+    await setSantriRoom(s.id, roomForResidents.value.maskanName, roomForResidents.value.number)
+    await fetchSantri()
+  } finally {
+    residentsSaving.value = false
+  }
+}
+
+async function removeResident(s: any) {
+  if (!roomForResidents.value) return
+  residentsSaving.value = true
+  try {
+    await setSantriRoom(s.id, '', '')
+    await fetchSantri()
+  } finally {
+    residentsSaving.value = false
+  }
+}
+
+async function setSantriRoom(santriId: string, maskanName: string, roomNumber: string) {
+  if (typeof updateSantri === 'function') {
+    await updateSantri(santriId, { maskan: maskanName || '', kamar: roomNumber || '' })
+    return
+  }
+  const { $realtimeDb } = useNuxtApp()
+  const multi: Record<string, any> = {}
+  multi[`alberr/santri/${santriId}/maskan`] = maskanName || ''
+  multi[`alberr/santri/${santriId}/kamar`] = roomNumber || ''
+  await rtdbUpdate(dbRef($realtimeDb), multi)
+}
+
+/* -------------------- Modal: Maskan (CRUD) -------------------- */
 const showMaskanForm = ref(false)
 const maskanFormMode = ref<'create'|'edit'>('create')
 const maskanSaving = ref(false)
 const maskanFormError = ref<string | null>(null)
-const maskanCurrent = ref<MaskanRow | null>(null)
-const maskanForm: any = reactive<{ name: string; tipe: 'Putra'|'Putri'; deskripsi?: string }>({
+const maskanCurrent = ref<any>(null)
+const showMaskanDelete = ref(false)
+const maskanDeleting = ref(false)
+
+const maskanForm = reactive<{ name: string; tipe: 'Putra'|'Putri'; deskripsi?: string }>({
   name: '', tipe: 'Putra', deskripsi: ''
 })
 
-function displayPjName(pj?: { name?: string, santriId?: string }) {
-  if (!pj) return ''
-  const fromSantri = santriRows.value.find(s => s.id === pj.santriId)
-  return (fromSantri?.santri || pj.name || '').trim()
-}
-
-function openMaskanCreate() {
+function openAddMaskan() {
   maskanFormMode.value = 'create'
   maskanForm.name = ''
   maskanForm.tipe = 'Putra'
@@ -513,7 +483,14 @@ function openMaskanCreate() {
   maskanFormError.value = null
   showMaskanForm.value = true
 }
-function openMaskanEdit(m: MaskanRow) {
+function openEditMaskanRow(m: any) { // (opsional) jika ingin panggil dari row
+  activeMaskan.value = m.maskanId
+  openEditMaskan()
+}
+function openEditMaskan() {
+  if (activeMaskan.value === 'ALL') return
+  const m = maskanRows.value.find(x => x.id === activeMaskan.value)
+  if (!m) return
   maskanFormMode.value = 'edit'
   maskanCurrent.value = m
   maskanForm.name = m.name
@@ -522,57 +499,16 @@ function openMaskanEdit(m: MaskanRow) {
   maskanFormError.value = null
   showMaskanForm.value = true
 }
-
-function selectPjFromSantri(s: any) {
-  pjSelection.santriId = s.id
-  pjSelection.name = s.santri
-  pjQuery.value = ''
+function openDeleteMaskanRow(m: any) { // (opsional) jika ingin panggil dari row
+  activeMaskan.value = m.maskanId
+  openDeleteMaskan()
 }
-
-function clearPjSelection() {
-  pjSelection.santriId = undefined
-}
-
-function openMaskanEditPj(m: MaskanRow) {
-  maskanForPj.value = m
-  pjQuery.value = ''
-  pjSelection.santriId = m.pj?.santriId
-  pjSelection.name = m.pj?.name || displayPjName(m.pj)
-  pjSelection.note = m.pj?.note
-  showPjMaskan.value = true
-}
-
-function openRoomEditPj(m: MaskanRow, r: KamarRow) {
-  maskanForRoomPj.value = m
-  roomForPj.value = r
-  pjQuery.value = ''
-  pjSelection.santriId = r.pj?.santriId
-  pjSelection.name = r.pj?.name || displayPjName(r.pj)
-  pjSelection.note = r.pj?.note
-  showPjRoom.value = true
-}
-
-const pjSaving = ref(false)
-async function savePjMaskan() {
-  if (!maskanForPj.value?.id) return
-  pjSaving.value = true
-  try {
-    await updateMaskan(maskanForPj.value.id, { pj: { ...pjSelection } })
-    showPjMaskan.value = false
-  } finally {
-    pjSaving.value = false
-  }
-}
-
-async function savePjRoom() {
-  if (!maskanForRoomPj.value?.id || !roomForPj.value?.id) return
-  pjSaving.value = true
-  try {
-    await updateRoom(maskanForRoomPj.value.id, roomForPj.value.id, { pj: { ...pjSelection } })
-    showPjRoom.value = false
-  } finally {
-    pjSaving.value = false
-  }
+function openDeleteMaskan() {
+  if (activeMaskan.value === 'ALL') return
+  const m = maskanRows.value.find(x => x.id === activeMaskan.value)
+  if (!m) return
+  maskanCurrent.value = m
+  showMaskanDelete.value = true
 }
 
 async function submitMaskanForm() {
@@ -582,28 +518,17 @@ async function submitMaskanForm() {
   }
   maskanSaving.value = true
   try {
-    const payload: any = {
+    const payload = {
       name: maskanForm.name.trim(),
       tipe: maskanForm.tipe,
       deskripsi: maskanForm.deskripsi ?? '',
     }
-
-    if ('pj' in maskanForm) {
-      payload.pj = maskanForm.pj
-        ? {
-            santriId: maskanForm.pj.santriId ?? '',
-            name: maskanForm.pj.name ?? '',
-            note: maskanForm.pj.note ?? '',
-          }
-        : null
-    }
-
     if (maskanFormMode.value === 'create') {
-      await createMaskan(payload)
+      const newId = await createMaskan(payload)
+      if (newId) activeMaskan.value = newId
     } else if (maskanCurrent.value?.id) {
       await updateMaskan(maskanCurrent.value.id, payload)
     }
-
     showMaskanForm.value = false
   } catch (e: any) {
     maskanFormError.value = e?.message ?? 'Gagal menyimpan'
@@ -612,36 +537,51 @@ async function submitMaskanForm() {
   }
 }
 
-const showMaskanDelete = ref(false)
-const maskanDeleting = ref(false)
-
-function openMaskanDelete(m: MaskanRow) {
-  maskanCurrent.value = m
-  showMaskanDelete.value = true
-}
-
 async function confirmMaskanDelete() {
   if (!maskanCurrent.value?.id) return
   maskanDeleting.value = true
   try {
     await deleteMaskan(maskanCurrent.value.id)
     showMaskanDelete.value = false
+    activeMaskan.value = 'ALL'
   } finally {
     maskanDeleting.value = false
   }
 }
 
+/* -------------------- Modal: Kamar (CRUD) -------------------- */
 const showRoomForm = ref(false)
+const roomFormMode = ref<'create'|'edit'>('create')
 const roomSaving = ref(false)
 const roomFormError = ref<string | null>(null)
-const roomCurrent = ref<KamarRow | null>(null)
+const showRoomDelete = ref(false)
+const roomDeleting = ref(false)
+
+const roomCurrent = ref<RoomView | null>(null)
 const maskanForRoom = ref<MaskanRow | null>(null)
 const roomEditForm = reactive<{ number: string; capacity: number; active: boolean }>({
   number: '', capacity: 0, active: true
 })
 
-function openRoomEdit(m: MaskanRow, r: KamarRow) {
-  maskanForRoom.value = m
+function getMaskanById(id: string | null) {
+  if (!id) return null
+  return maskanRows.value.find(x => x.id === id) || null
+}
+
+function openRoomCreate(r: RoomView) {
+  maskanForRoom.value = getMaskanById(r.maskanId)
+  if (!maskanForRoom.value) return
+  roomFormMode.value = 'create'
+  roomCurrent.value = null
+  roomEditForm.number = ''
+  roomEditForm.capacity = 0
+  roomEditForm.active = true
+  roomFormError.value = null
+  showRoomForm.value = true
+}
+function openRoomEdit(r: RoomView) {
+  maskanForRoom.value = getMaskanById(r.maskanId)
+  roomFormMode.value = 'edit'
   roomCurrent.value = r
   roomEditForm.number = r.number
   roomEditForm.capacity = Number(r.capacity ?? 0)
@@ -649,27 +589,45 @@ function openRoomEdit(m: MaskanRow, r: KamarRow) {
   roomFormError.value = null
   showRoomForm.value = true
 }
+function openRoomDelete(r: RoomView) {
+  maskanForRoom.value = getMaskanById(r.maskanId)
+  roomCurrent.value = r
+  showRoomDelete.value = true
+}
+
 async function submitRoomForm() {
-  if (!maskanForRoom.value?.id || !roomCurrent.value?.id) return
-  if (!roomEditForm.number.trim()) {
+  if (!maskanForRoom.value) return
+  const num = (roomEditForm.number || '').trim()
+  if (!num) {
     roomFormError.value = 'Nomor kamar wajib diisi.'
     return
   }
-  // Cegah duplikat nomor (kecuali jika nomor tdk berubah)
+  // Cegah duplikat nomor di maskan yang sama
   const dup = maskanForRoom.value.rooms.some(r =>
-    r.id !== roomCurrent.value!.id && String(r.number).trim() === roomEditForm.number.trim()
+    (roomFormMode.value === 'edit' ? r.id !== roomCurrent.value?.id : true) &&
+    String(r.number).trim().toLowerCase() === num.toLowerCase()
   )
   if (dup) {
-    roomFormError.value = 'Nomor kamar sudah ada.'
+    roomFormError.value = 'Nomor kamar sudah ada di maskan ini.'
     return
   }
+
   roomSaving.value = true
   try {
-    await updateRoom(maskanForRoom.value.id, roomCurrent.value.id, {
-      number: roomEditForm.number.trim(),
-      capacity: Number(roomEditForm.capacity ?? 0),
-      active: !!roomEditForm.active,
-    })
+    if (roomFormMode.value === 'create') {
+      await createRoom(maskanForRoom.value.id, {
+        number: num,
+        capacity: Number(roomEditForm.capacity ?? 0),
+        active: !!roomEditForm.active,
+        tipe: maskanForRoom.value.tipe
+      })
+    } else if (roomCurrent.value) {
+      await updateRoom(maskanForRoom.value.id, roomCurrent.value.id, {
+        number: num,
+        capacity: Number(roomEditForm.capacity ?? 0),
+        active: !!roomEditForm.active
+      })
+    }
     showRoomForm.value = false
   } catch (e: any) {
     roomFormError.value = e?.message ?? 'Gagal menyimpan kamar'
@@ -678,13 +636,6 @@ async function submitRoomForm() {
   }
 }
 
-const showRoomDelete = ref(false)
-const roomDeleting = ref(false)
-function openRoomDelete(m: MaskanRow, r: KamarRow) {
-  maskanForRoom.value = m
-  roomCurrent.value = r
-  showRoomDelete.value = true
-}
 async function confirmRoomDelete() {
   if (!maskanForRoom.value?.id || !roomCurrent.value?.id) return
   roomDeleting.value = true

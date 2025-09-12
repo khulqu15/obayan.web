@@ -12,15 +12,11 @@
         <div class="absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)] bg-black/10" />
       </div>
 
-      <!-- Main -->
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 md:pb-24">
         <div class="grid lg:grid-cols-2 gap-10 items-center">
-          <!-- LEFT: copy -->
           <div>
             <div class="inline-flex items-center gap-2 rounded-full px-3 py-1 bg-white/10 ring-1 ring-white/20 backdrop-blur">
-              <ClientOnly>
-                <Icon icon="ph:sparkle" class="size-4 text-white" />
-              </ClientOnly>
+              <ClientOnly><Icon icon="ph:sparkle" class="size-4 text-white" /></ClientOnly>
               <span class="text-xs font-medium tracking-wide text-white/90">{{ c.tagline }}</span>
             </div>
 
@@ -33,26 +29,43 @@
               {{ c.subtitle }}
             </p>
 
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span
+                v-for="b in c.badges"
+                :key="b.label"
+                class="inline-flex items-center gap-2 rounded-full px-3 py-1 bg-white/10 ring-1 ring-white/20 text-xs font-medium text-white/90 backdrop-blur"
+              >
+                <ClientOnly><Icon :icon="b.icon" class="size-4 text-emerald-300" /></ClientOnly>
+                {{ b.label }}
+              </span>
+            </div>
+
             <div class="mt-8 flex flex-col sm:flex-row gap-3">
+              <a
+                :href="c.ctaPPDB.href"
+                class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 focus:ring-offset-transparent"
+              >
+                <ClientOnly><Icon icon="ph:note-pencil" class="size-4" /></ClientOnly>
+                {{ c.ctaPPDB.label }}
+              </a>
+
               <a
                 :href="c.ctaPrimary.href"
                 class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-transparent"
               >
                 {{ c.ctaPrimary.label }}
-                <ClientOnly>
-                  <Icon icon="lucide:arrow-right" class="size-4" />
-                </ClientOnly>
+                <ClientOnly><Icon icon="lucide:arrow-right" class="size-4" /></ClientOnly>
               </a>
+
               <a
                 :href="c.ctaSecondary.href"
                 class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white/90 ring-1 ring-white/30 hover:bg-white/10 focus:outline-hidden"
               >
-                <ClientOnly>
-                  <Icon icon="ph:book-open" class="size-4" />
-                </ClientOnly>
+                <ClientOnly><Icon icon="ph:book-open" class="size-4" /></ClientOnly>
                 {{ c.ctaSecondary.label }}
               </a>
             </div>
+
           </div>
 
           <!-- RIGHT: stats + photos -->
@@ -81,21 +94,16 @@
         </div>
       </div>
 
-      <!-- QUICK INFO -->
       <div class="relative">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-6 md:-mt-10">
           <div class="rounded-2xl bg-white/90 dark:bg-neutral-900 shadow-lg ring-1 ring-black/5 backdrop-blur">
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 lg:divide-x divide-gray-200/70 dark:divide-neutral-800">
               <div v-for="q in c.quicks" :key="q.label" class="flex items-center gap-3 p-4">
-                <ClientOnly>
-                  <Icon :icon="q.icon" class="size-5 text-blue-600 dark:text-blue-500" />
-                </ClientOnly>
-
+                <ClientOnly><Icon :icon="q.icon" class="size-5 text-blue-600 dark:text-blue-500" /></ClientOnly>
                 <div v-if="q.label !== 'Admin'">
                   <p class="text-xs text-gray-500 dark:text-neutral-400">{{ q.label }}</p>
                   <p class="text-sm font-medium text-gray-900 dark:text-neutral-100">{{ q.value }}</p>
                 </div>
-
                 <div v-else>
                   <a :href="`https://wa.me/${c.waIntl}`" target="_blank" rel="noopener">
                     <p class="text-xs text-gray-500 dark:text-neutral-400">{{ q.label }}</p>
@@ -104,7 +112,7 @@
                 </div>
               </div>
             </div>
-          </div> <!-- /card -->
+          </div>
         </div>
       </div>
     </section>
@@ -118,6 +126,7 @@ import { Icon } from '@iconify/vue'
 type Stat = { label: string; value: string }
 type Quick = { label: 'PPDB Berakhir' | 'Jenjang' | 'Admin' | string; value: string; icon: string }
 type CTA = { label: string; href: string }
+type Badge = { label: string; icon: string }
 
 type HeaderHeroProps = {
   brand?: string
@@ -130,12 +139,20 @@ type HeaderHeroProps = {
   waIntl?: string
   ctaPrimary?: CTA
   ctaSecondary?: CTA
+  /** NEW */
+  ctaPPDB?: CTA
+  badges?: Badge[]
   stats?: Stat[]
   quicks?: Quick[]
 }
 
-/** DEFAULTS — fallback jika props tidak diisi (sesuai versi aslinya) */
-const defaults: Required<HeaderHeroProps> = {
+type HeaderHeroComputed = Required<Omit<HeaderHeroProps, 'badges' | 'ctaPPDB'>> & {
+  badges: Badge[]
+  ctaPPDB: CTA
+}
+
+/** DEFAULTS */
+const defaults: HeaderHeroComputed = {
   brand: 'Al-Berr',
   bgImage: '/assets/images/masjid.jpg',
   titleMain: 'Pesantren Pencetak Insan ',
@@ -151,6 +168,14 @@ const defaults: Required<HeaderHeroProps> = {
   waIntl: '6285856376399',
   ctaPrimary: { label: 'Login Wali', href: '/waliLogin' },
   ctaSecondary: { label: 'Pelajari Program', href: '/program' },
+  /** NEW */
+  ctaPPDB: { label: 'Daftar PPDB', href: '/registrationPPDB' },
+  badges: [
+    { label: 'SIAKAD',     icon: 'ph:chalkboard-teacher' },
+    { label: 'App',        icon: 'ph:device-mobile' },
+    { label: 'Attendance', icon: 'ph:qr-code' },
+    { label: 'Academic',   icon: 'ph:graduation-cap' }
+  ],
   stats: [
     { label: 'Santri Putra', value: '1000+' },
     { label: 'Santri Putri', value: '50+' },
@@ -166,8 +191,8 @@ const defaults: Required<HeaderHeroProps> = {
 
 const props = defineProps<HeaderHeroProps>()
 
-/** Merge props + defaults (ringan, menjaga nested) */
-const c = computed<Required<HeaderHeroProps>>(() => ({
+/** Merge props + defaults */
+const c = computed<HeaderHeroComputed>(() => ({
   brand: props.brand ?? defaults.brand,
   bgImage: props.bgImage ?? defaults.bgImage,
   titleMain: props.titleMain ?? defaults.titleMain,
@@ -178,6 +203,9 @@ const c = computed<Required<HeaderHeroProps>>(() => ({
   waIntl: props.waIntl ?? defaults.waIntl,
   ctaPrimary: { ...defaults.ctaPrimary, ...(props.ctaPrimary || {}) },
   ctaSecondary: { ...defaults.ctaSecondary, ...(props.ctaSecondary || {}) },
+  /** NEW */
+  ctaPPDB: { ...defaults.ctaPPDB, ...(props.ctaPPDB || {}) },
+  badges: (props.badges?.length ? props.badges : defaults.badges) as Badge[],
   stats: (props.stats?.length ? props.stats : defaults.stats) as Stat[],
   quicks: (props.quicks?.length ? props.quicks : defaults.quicks) as Quick[]
 }))

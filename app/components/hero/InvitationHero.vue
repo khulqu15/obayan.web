@@ -31,35 +31,42 @@
             <div class="mt-6 flex flex-wrap gap-3">
               <a :href="state.ctaPrimary.href"
                  class="inline-flex items-center gap-2 rounded-xl bg-white text-blue-700 px-5 py-3 text-sm font-semibold hover:bg-white/90">
-                <ClientOnly><Icon icon="ph:student" class="size-4" /></ClientOnly>
+                <ClientOnly>
+                  <Icon v-if="state.ctaPrimary?.icon" :icon="state.ctaPrimary.icon" class="size-4" />
+                </ClientOnly>
                 {{ state.ctaPrimary.label }}
               </a>
               <a :href="state.ctaSecondary.href"
                  class="inline-flex items-center gap-1.5 text-white/90 text-sm font-medium underline-offset-4 hover:underline">
                 {{ state.ctaSecondary.label }}
-                <ClientOnly><Icon icon="ph:arrow-right" class="size-4" /></ClientOnly>
+                <ClientOnly>
+                  <Icon v-if="state.ctaSecondary?.icon" :icon="state.ctaSecondary.icon" class="size-4" />
+                </ClientOnly>
               </a>
             </div>
           </div>
 
-          <img src="/assets/pattern.png" alt="Mosque Pattern" class="absolute bottom-0 w-full opacity-80 -right-[60%]">
+          <img v-if="state.pattern"
+               :src="state.pattern"
+               alt="Background Pattern"
+               class="absolute bottom-0 w-full opacity-80 -right-[60%]">
         </div>
       </div>
 
-      <figure
+      <!-- Hadist -->
+      <figure v-if="state.hadithArabic || state.hadithTranslation || state.hadithSource"
         class="mt-6 sm:mt-8 rounded-2xl border border-gray-200/70 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/70 backdrop-blur p-5 sm:p-6 shadow">
         <blockquote class="text-center">
           <p class="text-lg sm:text-xl font-medium text-gray-900 dark:text-white leading-relaxed">
-            <span class="block text-2xl sm:text-3xl mb-2 font-semibold">مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا
-            سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ</span>
-            <span class="block text-gray-700 dark:text-neutral-300 text-base">
-              “Barangsiapa menempuh jalan untuk mencari ilmu, Allah akan mudahkan baginya jalan menuju Surga.”
+            <span v-if="state.hadithArabic" class="block text-2xl sm:text-3xl mb-2 font-semibold">{{ state.hadithArabic }}</span>
+            <span v-if="state.hadithTranslation" class="block text-gray-700 dark:text-neutral-300 text-base">
+              {{ state.hadithTranslation }}
             </span>
           </p>
         </blockquote>
-        <figcaption class="mt-3 text-center text-sm text-gray-500 dark:text-neutral-400">
+        <figcaption v-if="state.hadithSource" class="mt-3 text-center text-sm text-gray-500 dark:text-neutral-400">
           <ClientOnly><Icon icon="ph:book-open-text" class="inline size-4 me-1 align-[-2px]" /></ClientOnly>
-          HR. Muslim
+          {{ state.hadithSource }}
         </figcaption>
       </figure>
     </div>
@@ -67,90 +74,90 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, onMounted } from 'vue'
+import { reactive, onMounted, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useNuxtApp } from '#app'
+import {
+  ref as dbRef,
+  query, orderByChild, equalTo, onValue, off, Query
+} from 'firebase/database'
 
-type CTA = { label: string; href: string }
+type CTA = { label: string; href: string; icon?: string }
 type Shape = {
-  bg: string
-  eyebrow: string
-  preText: string
-  highlightText: string
-  suffixText: string
-  brandText: string
-  subtitle: string
-  ctaPrimary: CTA
-  ctaSecondary: CTA
+  bg: string; pattern?: string; eyebrow: string;
+  preText: string; highlightText: string; suffixText: string; brandText: string;
+  subtitle: string;
+  hadithArabic?: string; hadithTranslation?: string; hadithSource?: string;
+  ctaPrimary: CTA; ctaSecondary: CTA
 }
+
+const props = defineProps<{ override?: Partial<Shape> }>()
 
 const defaults: Shape = {
   bg: '/assets/images/profile.png',
+  pattern: '/assets/pattern.png',
   eyebrow: 'Ajakan Kebaikan',
   preText: 'Ayo',
   highlightText: 'Mondok',
   suffixText: 'di',
   brandText: 'Ponpes Alberr',
-  subtitle:
-    'Lingkungan yang menumbuhkan adab, ilmu, dan kemandirian. Kurikulum diniyah & formal terpadu, pembinaan tahfidz, serta program kepemimpinan dan pengabdian.',
-  ctaPrimary: { label: 'Al Berr', href: '/profile' },
-  ctaSecondary: { label: 'Pelajari lebih lanjut', href: '/program' }
+  subtitle: 'Lingkungan yang menumbuhkan adab, ilmu, dan kemandirian. Kurikulum diniyah & formal terpadu, pembinaan tahfidz, serta program kepemimpinan dan pengabdian.',
+  hadithArabic: 'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ',
+  hadithTranslation: '“Barangsiapa menempuh jalan untuk mencari ilmu, Allah akan mudahkan baginya jalan menuju Surga.”',
+  hadithSource: 'HR. Muslim',
+  ctaPrimary: { label: 'Al Berr', href: '/profile', icon: 'ph:student' },
+  ctaSecondary: { label: 'Pelajari lebih lanjut', href: '/program', icon: 'ph:arrow-right' }
 }
 
 const state = reactive<Shape>({ ...defaults })
-
-/** Merge util agar nested object (CTA) ikut tergabung */
-function merge(base: Shape, patch: Partial<Shape> = {}): Shape {
+function merge(b: Shape, p: Partial<Shape> = {}): Shape {
   return {
-    bg: patch.bg ?? base.bg,
-    eyebrow: patch.eyebrow ?? base.eyebrow,
-    preText: patch.preText ?? base.preText,
-    highlightText: patch.highlightText ?? base.highlightText,
-    suffixText: patch.suffixText ?? base.suffixText,
-    brandText: patch.brandText ?? base.brandText,
-    subtitle: patch.subtitle ?? base.subtitle,
-    ctaPrimary: { ...base.ctaPrimary, ...(patch.ctaPrimary || {}) },
-    ctaSecondary: { ...base.ctaSecondary, ...(patch.ctaSecondary || {}) }
+    bg: p.bg ?? b.bg,
+    pattern: p.pattern ?? b.pattern,
+    eyebrow: p.eyebrow ?? b.eyebrow,
+    preText: p.preText ?? b.preText,
+    highlightText: p.highlightText ?? b.highlightText,
+    suffixText: p.suffixText ?? b.suffixText,
+    brandText: p.brandText ?? b.brandText,
+    subtitle: p.subtitle ?? b.subtitle,
+    hadithArabic: p.hadithArabic ?? b.hadithArabic,
+    hadithTranslation: p.hadithTranslation ?? b.hadithTranslation,
+    hadithSource: p.hadithSource ?? b.hadithSource,
+    ctaPrimary: { ...b.ctaPrimary, ...(p.ctaPrimary || {}) },
+    ctaSecondary: { ...b.ctaSecondary, ...(p.ctaSecondary || {}) }
   }
 }
 
-/**
- * Ambil konten dari Firestore:
- *   doc: alberr/pages/home
- *   struktur diharapkan: { sections: [{ key: 'InvitationHero'|'InfoHero', props: Shape }, ...] }
- *   fallback: field langsung: invitationHero / infoHero
- */
-async function fetchFromFirebase() {
+const KEY = 'InvitationHero'
+let unsub: (() => void) | null = null
+
+function subscribeFromRTDBByKey() {
   if (typeof window === 'undefined') return
-  try {
-    const { getFirestore, doc, getDoc } = await import('firebase/firestore')
-    const db = getFirestore()
-    const snap = await getDoc(doc(db, 'alberr/pages', 'home'))
+  const { $realtimeDb } = useNuxtApp()
+
+  // /alberr/web/pages/home/sections where each child has { key, enabled, props, ... }
+  const sectionsPath = 'alberr/web/pages/home/sections'
+  const q: Query = query(dbRef($realtimeDb, sectionsPath), orderByChild('key'), equalTo(KEY))
+
+  unsub = onValue(q, (snap) => {
     if (!snap.exists()) return
-
-    const data = snap.data() as any
-    let props: Partial<Shape> | undefined
-
-    // cari di sections[]
-    if (Array.isArray(data.sections)) {
-      const sec = data.sections.find(
-        (s: any) => s?.key === 'InvitationHero' || s?.key === 'InfoHero'
-      )
-      props = sec?.props
+    const obj = snap.val() as Record<string, any>
+    const first = Object.values(obj)[0] as any
+    // optional: cek enabled
+    if (first && (first.enabled ?? true)) {
+      const props = first.props || {}
+      Object.assign(state, merge(defaults, props))
     }
-
-    // fallback langsung di root dokumen
-    if (!props && data.invitationHero) props = data.invitationHero
-    if (!props && data.infoHero) props = data.infoHero
-
-    if (props && typeof props === 'object') {
-      const merged = merge(defaults, props)
-      Object.assign(state, merged)
-    }
-  } catch (e) {
-    // diamkan dan biarkan default (atau log jika perlu)
-    // console.error('[InfoHero] Firebase fetch failed:', e)
-  }
+  })
 }
 
-onMounted(fetchFromFirebase)
+onMounted(() => {
+  if (props.override) {
+    Object.assign(state, merge(defaults, props.override))
+  } else {
+    subscribeFromRTDBByKey()
+  }
+})
+
+onUnmounted(() => { if (unsub) unsub(); })
 </script>

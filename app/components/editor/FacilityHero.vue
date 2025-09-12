@@ -79,7 +79,7 @@
           <div class="sm:col-span-2">
             <label class="text-xs text-gray-500">Gambar {{ gi+1 }}</label>
             <div class="mt-1">
-              <input v-model.trim="g.src" placeholder="URL gambar atau upload…" class="w-full rounded-md border px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
+              <input v-model.trim="g.src" placeholder="URL gambar atau upload…" class="w-full rounded-md border px-3 py-2 text-sm border-gray-200 dark:bg-neutral-900 dark:border-neutral-700">
               <input type="file" accept="image/*" class="text-xs w-full mt-1" @change="(e:any)=>upload(e, `gallery.${gi}`)">
             </div>
             <div class="mt-2">
@@ -91,7 +91,6 @@
             <label class="text-xs text-gray-500">Label & Icon</label>
             <input v-model.trim="g.label" placeholder="Masjid & Aula" class="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
             <div class="mt-2 flex items-center gap-2">
-              <input v-model.trim="g.icon" placeholder="ph:mosque" class="flex-1 rounded-md border px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
               <ClientOnly><Icon v-if="g.icon" :icon="g.icon" class="size-5" /></ClientOnly>
               <button type="button" class="px-2 py-1 text-xs rounded border border-gray-200 hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
                       @click="openIconPicker({ kind:'gallery', index:gi })">
@@ -117,7 +116,7 @@
            class="rounded-lg border border-gray-200 dark:border-neutral-800 p-3">
         <label class="text-xs text-gray-500">Brosur {{ bi+1 }}</label>
         <div class="mt-1">
-          <input v-model.trim="form.brochures[bi]" placeholder="URL gambar atau upload…" class="w-full rounded-md border px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
+          <input v-model.trim="form.brochures[bi]" placeholder="URL gambar atau upload…" class="w-full rounded-md border px-3 py-2 border-gray-200 text-sm dark:bg-neutral-900 dark:border-neutral-700">
           <input type="file" accept="image/*" class="text-xs w-full mt-1" @change="(e)=>upload(e, `brosur.${bi}`)">
         </div>
         <div class="mt-2">

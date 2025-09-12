@@ -146,6 +146,7 @@
                   <EditorInvitationHero v-else-if="s.key === 'InvitationHero'" :section="s" />
                   <EditorFacilityHero v-else-if="s.key === 'HeroFacilityHero'" :section="s" />
                   <EditorBlogHero v-else-if="s.key === 'BlogHero'" :section="s" />
+                  <EditorGirlHero v-else-if="s.key === 'GirlHero'" :section="s" />
                   <EditorNewsPage v-else-if="s.key === 'NewsPage'" :section="s" :pagePath="currentPath" :web="web"/>
                   <EditorGalleryPage v-else-if="s.key === 'GalleryPage'" :section="s" :pagePath="currentPath" :web="web"/>
                   <EditorProfilePage v-else-if="s.key === 'ProfilePage'" :section="s" :pagePath="currentPath" :web="web"/>
@@ -283,6 +284,7 @@ import EditorInvitationHero from '~/components/editor/InvitationHero.vue'
 import EditorFacilityHero from '~/components/editor/FacilityHero.vue'
 import EditorBlogHero from '~/components/editor/BlogHero.vue'
 import EditorNewsPage from '~/components/editor/NewsPage.vue'
+import EditorGirlHero from '~/components/editor/GirlHero.vue'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Website' } })
 

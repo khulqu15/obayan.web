@@ -346,7 +346,10 @@ const ppdbCta = ref({
   image: '/assets/images/activity.jpg',
 })
 
-const ctaButtons = ref([{ label: 'Login Wali', href: '/waliLogin', style: 'primary' as const }])
+const ctaButtons = ref([
+  { label: 'Login Wali', href: '/waliLogin', style: 'primary' as const },
+  { label: 'Registrasi', href: '/registrationPPDB', style: 'primary' as const },
+])
 
 const isMobileOpen = ref(false)
 const isScrolledOrOpen = computed(() => !isTop.value || isMobileOpen.value || showMegaModal.value)
