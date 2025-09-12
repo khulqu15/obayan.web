@@ -1,17 +1,8 @@
 <template>
-  <section class="relative overflow-hidden bg-gradient-to-b from-emerald-50 via-lime-50 to-white dark:from-emerald-900/20 dark:via-lime-900/10 dark:to-neutral-900">
+  <section class="relative overflow-hidden bg-gradient-to-b from-emerald-50 via-blue-50 to-white dark:from-emerald-900/20 dark:via-blue-900/10 dark:to-neutral-900">
     <!-- Playful BG -->
     <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-      <!-- radial glow -->
-      <div class="absolute -top-24 -left-24 w-[48rem] h-[48rem] rounded-full opacity-40 blur-3xl
-                  bg-gradient-to-br from-emerald-300/10 to-lime-300/20 dark:from-emerald-600/30 dark:to-lime-600/30" />
-      <div class="absolute bottom-[-20%] -right-24 w-[46rem] h-[46rem] rounded-full opacity-40 blur-3xl
-                  bg-gradient-to-tr from-emerald-200/20 to-lime-200/30 dark:from-emerald-700/10 dark:to-lime-700/20" />
-      <!-- subtle grid -->
-      <div class="absolute inset-0 [mask-image:radial-gradient(70%_60%_at_50%_40%,#000,transparent_80%)]">
-        <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(0,0,0,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.06)_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] dark:opacity-10"></div>
-      </div>
-    </div>
+     </div>
 
     <div class="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-18">
       <div class="relative grid grid-cols-12 gap-8 items-center rounded-[2rem]
@@ -27,12 +18,12 @@
           </p>
 
           <!-- Title -->
-          <h1 class="mt-2 text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-neutral-900 dark:text-white">
+          <h1 class="mt-2 text-xl sm:text-2xl lg:text-3xl font-bold leading-tight text-neutral-900 dark:text-white">
             {{ state.title }}
           </h1>
 
           <!-- Description -->
-          <p class="mt-4 text-neutral-700/90 dark:text-neutral-300 max-w-2xl leading-relaxed">
+          <p class="mt-2 text-neutral-700/90 dark:text-neutral-300 max-w-2xl leading-relaxed">
             {{ state.description }}
           </p>
 
@@ -43,7 +34,7 @@
               <ClientOnly><Icon icon="ph:sparkle" class="size-3.5" /></ClientOnly> Kemandirian
             </span>
             <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold
-                         bg-lime-100 text-lime-800 dark:bg-lime-900/40 dark:text-lime-200">
+                         bg-blue-100 blue800 dark:bg-blue-900/40 dark:blue200">
               <ClientOnly><Icon icon="ph:check-circle" class="size-3.5" /></ClientOnly> Disiplin
             </span>
             <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold
@@ -51,7 +42,7 @@
               <ClientOnly><Icon icon="ph:book-open-text" class="size-3.5" /></ClientOnly> Tahfidz
             </span>
             <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold
-                         bg-lime-100 text-lime-800 dark:bg-lime-900/40 dark:text-lime-200">
+                         bg-blue-100 blue800 dark:bg-blue-900/40 dark:blue200">
               <ClientOnly><Icon icon="ph:users-three" class="size-3.5" /></ClientOnly> Kepemimpinan
             </span>
           </div>

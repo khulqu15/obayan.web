@@ -237,7 +237,6 @@
       </transition>
     </Teleport>
 
-    <!-- Icon Picker Modal -->
     <Teleport to="body">
       <transition name="fade">
         <div v-if="iconPicker.open" class="fixed inset-0 z-[70]">
