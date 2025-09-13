@@ -193,6 +193,73 @@
             </div>
 
             <form class="p-4 space-y-3 max-h-[80vh] overflow-y-auto scrollbar-none" @submit.prevent="saveClassModal">
+              <!-- ...di dalam <form class="p-4 ..."> -->
+              <div class="grid grid-cols-1 gap-2">
+                <div>
+                  <label class="text-xs text-gray-500 dark:text-neutral-400">Sampul Kelas (opsional)</label>
+
+                  <!-- Preview area -->
+                  <div class="mt-2 flex items-start gap-3">
+                    <!-- Kotak preview 16:9 -->
+                    <div class="relative w-48 rounded-lg overflow-hidden border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900">
+                      <div class="w-full aspect-video">
+                        <img
+                          v-if="classForm.coverPreview"
+                          :src="classForm.coverPreview"
+                          alt="Preview sampul baru"
+                          class="w-full h-full object-cover"
+                        />
+                        <img
+                          v-else-if="classModal.mode==='edit' && classForm.initialCoverUrl && !classForm.removeCover"
+                          :src="classForm.initialCoverUrl"
+                          alt="Sampul saat ini"
+                          class="w-full h-full object-cover"
+                        />
+                        <div v-else class="w-full h-full flex items-center justify-center text-xs text-gray-400">
+                          Tidak ada sampul
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="flex-1 flex flex-col gap-2">
+                      <label class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 cursor-pointer w-fit">
+                        <Icon icon="lucide:upload" class="size-4" />
+                        <span class="text-sm">Pilih Gambar</span>
+                        <input type="file" accept="image/*" class="hidden" @change="onCoverInput" />
+                      </label>
+
+                      <div class="flex items-center gap-2">
+                        <!-- Hapus pilihan file baru -->
+                        <button
+                          v-if="classForm.coverPreview"
+                          type="button"
+                          class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-neutral-700 text-rose-600"
+                          @click="clearNewCover"
+                        >
+                          <Icon icon="lucide:trash-2" class="inline size-4 mr-1 -mt-0.5" /> Batalkan Gambar
+                        </button>
+
+                        <!-- Toggle hapus cover lama (hanya mode edit, saat tidak ada file baru & cover lama ada) -->
+                        <button
+                          v-if="classModal.mode==='edit' && !classForm.coverPreview && classForm.initialCoverUrl"
+                          type="button"
+                          class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-neutral-700"
+                          :class="classForm.removeCover ? 'text-rose-600 border-rose-200/40' : ''"
+                          @click="markRemoveExistingCover"
+                        >
+                          <Icon :icon="classForm.removeCover ? 'lucide:check-circle-2' : 'lucide:trash-2'" class="inline size-4 mr-1 -mt-0.5" />
+                          {{ classForm.removeCover ? 'Akan dihapus' : 'Hapus Sampul' }}
+                        </button>
+                      </div>
+
+                      <p class="text-[11px] text-gray-500 dark:text-neutral-400">
+                        Rekomendasi rasio 16:9. File gambar akan otomatis diunggah saat menyimpan.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label class="text-xs text-gray-500 dark:text-neutral-400">Nama Kelas</label>
@@ -257,7 +324,7 @@
               </div>
 
               <div class="flex items-center justify-end pt-1">
-                <button type="submit" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                <button type="submit" class="px-3 py-1.5 flex items-center rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                   <Icon v-if="savingClass" icon="ph:spinner" class="size-4 animate-spin" />
                   <span>{{ savingClass ? 'Menyimpan…' : (classModal.mode==='create' ? 'Simpan' : 'Update') }}</span>
                 </button>
@@ -428,25 +495,76 @@ async function removeMemberFrom(classId: string, santriId: string) {
   }
 }
 
-/** ===== Modal: Create/Edit Class ===== */
 const classModal = reactive<{ open:boolean; mode:'create'|'edit'; id?:string }>(
   { open:false, mode:'create', id: undefined }
 )
-const classForm = reactive<{ title:string; level:string; category:ClassCategory; room:string; color:string; code:string }>(
-  { title:'', level:'', category:'campuran', room:'', color:'#2563eb', code:'' }
-)
+const classForm = reactive<{
+  title: string
+  level: string
+  category: ClassCategory
+  room: string
+  color: string
+  code: string
+  coverFile: File | null
+  coverPreview: string | null      // URL.createObjectURL untuk file baru
+  initialCoverUrl: string | null   // cover yang sudah ada (saat edit)
+  removeCover: boolean             // hapus cover yang lama
+}>({
+  title:'', level:'', category:'campuran', room:'', color:'#2563eb', code:'',
+  coverFile: null, coverPreview: null, initialCoverUrl: null, removeCover: false
+})
 const savingClass = ref(false)
 
 function resetClassForm() {
-  classForm.title=''; classForm.level=''; classForm.category='campuran'; classForm.room=''; classForm.color='#2563eb'; classForm.code=''
+  classForm.title=''; classForm.level=''; classForm.category='campuran'
+  classForm.room=''; classForm.color='#2563eb'; classForm.code=''
+  if (classForm.coverPreview) URL.revokeObjectURL(classForm.coverPreview)
+  classForm.coverFile = null
+  classForm.coverPreview = null
+  classForm.initialCoverUrl = null
+  classForm.removeCover = false
 }
+
 function openCreateClass() {
-  resetClassForm(); classModal.mode='create'; classModal.open=true; classModal.id=undefined
+  resetClassForm()
+  classModal.mode='create'
+  classModal.open=true
+  classModal.id=undefined
 }
+
 function openEditClass(c: ClassItem) {
-  resetClassForm(); classModal.mode='edit'; classModal.open=true; classModal.id=c.id
-  classForm.title=c.title || ''; classForm.level=c.level || ''; classForm.category=c.category; classForm.room=c.room || ''; classForm.color=c.color || '#2563eb'; classForm.code=c.code || ''
+  resetClassForm()
+  classModal.mode='edit'
+  classModal.open=true
+  classModal.id=c.id
+  classForm.title=c.title || ''
+  classForm.level=c.level || ''
+  classForm.category=c.category
+  classForm.room=c.room || ''
+  classForm.color=c.color || '#2563eb'
+  classForm.code=c.code || ''
+  classForm.initialCoverUrl = c.coverUrl || null
 }
+
+function onCoverInput(ev: Event) {
+  const file = (ev.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  if (classForm.coverPreview) URL.revokeObjectURL(classForm.coverPreview)
+  classForm.coverFile = file
+  classForm.coverPreview = URL.createObjectURL(file)
+  classForm.removeCover = false
+}
+
+function clearNewCover() {
+  if (classForm.coverPreview) URL.revokeObjectURL(classForm.coverPreview)
+  classForm.coverPreview = null
+  classForm.coverFile = null
+}
+
+function markRemoveExistingCover() {
+  classForm.removeCover = !classForm.removeCover
+}
+
 async function saveClassModal() {
   if (savingClass.value) return
   savingClass.value = true
@@ -458,7 +576,8 @@ async function saveClassModal() {
         category: classForm.category,
         room: classForm.room,
         color: classForm.color,
-        code: classForm.code || undefined
+        code: classForm.code || undefined,
+        coverFile: classForm.coverFile || undefined
       })
     } else if (classModal.mode === 'edit' && classModal.id) {
       await updateClass(classModal.id, {
@@ -467,15 +586,21 @@ async function saveClassModal() {
         category: classForm.category,
         room: classForm.room,
         color: classForm.color,
-        code: classForm.code || undefined
+        code: classForm.code || undefined,
+        coverFile: classForm.coverFile || undefined,
+        removeCover: classForm.removeCover
       })
     }
-    classModal.open = false
+    closeClassModal()
   } finally {
     savingClass.value = false
   }
 }
-function closeClassModal(){ classModal.open=false }
+
+function closeClassModal(){
+  if (classForm.coverPreview) URL.revokeObjectURL(classForm.coverPreview)
+  classModal.open=false
+}
 
 async function confirmDeleteClass(c: ClassItem) {
   if (confirm(`Hapus kelas "${c.title}"?`)) {

@@ -325,11 +325,12 @@ const ADMIN_SIDEBAR: SidebarGroup[] = [
     { label: 'Perizinan', href: '/app/izin', icon: 'solar:letter-linear' },
   ]},
   { title: 'Akademik', items: [
-    { label: 'Nilai', href: '#', icon: 'solar:chart-linear' },
-    { label: 'Hafalan', href: '#', icon: 'ooui:italic-arab-keheh-jeem' },
+    { label: 'Nilai', href: '/app/nilai', icon: 'solar:chart-linear' },
+    { label: 'Hafalan', href: '/app/hafalan', icon: 'ooui:italic-arab-keheh-jeem' },
+    { label: 'Guru', href: '/app/teacher', icon: 'tabler:chalkboard-teacher' },
   ]},
   { title: 'Ketertiban', items: [
-    { label: 'Buku Sabar', href: '#', icon: 'dinkie-icons:translate-arabic-latin' },
+    { label: 'Buku Sabar', href: '/app/patience', icon: 'dinkie-icons:translate-arabic-latin' },
   ]},
   { title: 'Keuangan', items: [
     { label: 'Pembayaran', href: '/app/payment', icon: 'akar-icons:money' },

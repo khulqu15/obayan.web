@@ -46,7 +46,8 @@ export type CreateClassPayload = Omit<
   'id' | 'coverUrl' | 'coverPath' | 'archived' | 'createdAt' | 'updatedAt'
 > & { coverFile?: File | null }
 
-export type UpdateClassPayload = Partial<CreateClassPayload> & { archived?: boolean }
+export type UpdateClassPayload =
+  Partial<CreateClassPayload> & { archived?: boolean; removeCover?: boolean }
 
 export type TaskItem = {
   id: string
@@ -263,11 +264,10 @@ export function useClass() {
     try {
       const nodeRef = dref($realtimeDb, `alberr/classes/${id}`)
       let curr: any
-      try {
-        curr = (await get(nodeRef)).val()
-      } catch {}
+      try { curr = (await get(nodeRef)).val() } catch {}
 
       const data: any = { updatedAt: serverTimestamp() }
+
       if (patch.title     !== undefined) data.title    = patch.title?.trim()
       if (patch.level     !== undefined) data.level    = patch.level
       if (patch.section   !== undefined) data.section  = patch.section
@@ -279,6 +279,12 @@ export function useClass() {
         data.code = candidate ? await getUniqueCode(candidate) : await getUniqueCode()
       }
       if (patch.archived  !== undefined) data.archived = !!patch.archived
+
+      if (patch.removeCover && !patch.coverFile) {
+        if (curr?.coverPath) await deleteCover(curr.coverPath)
+        data.coverUrl = null
+        data.coverPath = null
+      }
 
       if (patch.coverFile) {
         if (curr?.coverPath) await deleteCover(curr.coverPath)

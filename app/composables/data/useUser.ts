@@ -53,6 +53,7 @@ export const ALL_SIDEBAR_GROUPS: SidebarGroup[] = [
   { title: 'Akademik', items: [
     { label: 'Nilai', href: '#', icon: 'solar:chart-linear' },
     { label: 'Hafalan', href: '#', icon: 'ooui:italic-arab-keheh-jeem' },
+    { label: 'Guru', href: '/app/teacher', icon: 'tabler:chalkboard-teacher' },
   ]},
   { title: 'Ketertiban', items: [
     { label: 'Buku Sabar', href: '#', icon: 'dinkie-icons:translate-arabic-latin' },
@@ -78,7 +79,7 @@ export const ROLE_DEFAULT_ROUTES: Record<AppRole, string[]> = {
     '/app', '/app/news', '/app/announcement', '/app/agenda',
     '/app/santri', '/app/maskan', '/app/class', '/app/wali',
     '/app/absen', '/app/kunjungan', '/app/picket', '/app/setting-rfid',
-    '/app/faults', '/app/izin',
+    '/app/faults', '/app/izin', '/app/teacher',
     '/app/payment', '/app/report-money',
     '/app/profile', '/app/contact'
   ],

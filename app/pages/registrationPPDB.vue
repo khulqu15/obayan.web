@@ -200,19 +200,19 @@
   focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" placeholder="Contoh: Membaca" />
                 </label>
                 <label class="block">
-                  <span class="text-xs text-gray-600 dark:text-neutral-300">No KK</span>
+                  <span class="text-xs text-gray-600 dark:text-neutral-300">No KK <span class="text-red-600">*</span></span>
                   <input v-model="form.siswa.kk" type="text" inputmode="numeric" class="@apply w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 
   px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 
   focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
                 </label>
                 <label class="block">
-                  <span class="text-xs text-gray-600 dark:text-neutral-300">No NIK</span>
+                  <span class="text-xs text-gray-600 dark:text-neutral-300">No NIK <span class="text-red-600">*</span></span>
                   <input v-model="form.siswa.nik" type="text" inputmode="numeric" class="@apply w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 
   px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 
   focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
                 </label>
                 <label class="block sm:col-span-2">
-                  <span class="text-xs text-gray-600 dark:text-neutral-300">NISN</span>
+                  <span class="text-xs text-gray-600 dark:text-neutral-300">NISN <span class="text-red-600">*</span></span>
                   <input v-model="form.siswa.nisn" type="text" inputmode="numeric" class="@apply w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 
   px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 
   focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
@@ -409,9 +409,9 @@
   px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 
   focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
                     <option>&lt; Rp1.000.000</option>
-                    <option>Rp1.000.000–Rp2.000.000</option>
-                    <option>Rp2.000.001–Rp3.000.000</option>
-                    <option>Rp3.000.001–Rp4.000.000</option>
+                    <option>Rp1.000.000 - Rp2.000.000</option>
+                    <option>Rp2.000.001 - Rp3.000.000</option>
+                    <option>Rp3.000.000 - Rp4.000.000</option>
                     <option>&gt; Rp4.000.000</option>
                   </select>
                 </label>
@@ -643,15 +643,14 @@
               </div>
 
               <!-- ACTIONS -->
-              <div class="mt-6 flex items-center justify-between">
+              <div class="mt-6 flex items-center justify-between flex-wrap">
                 <button :disabled="step===6 || loading" @click="prev"
                         class="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/60 px-4 py-2.5 text-sm font-medium hover:bg-white dark:hover:bg-neutral-800 disabled:opacity-60">
                   <Icon icon="ph:arrow-left" class="size-4" />
                   Kembali
                 </button>
 
-                <div class="flex items-center gap-2">
-                  <p class="text-[12px] text-gray-500 dark:text-neutral-400">Draf tersimpan otomatis.</p>
+                <div class="flex items-center flex-wrap gap-2 lg:justify-end justify-between w-fulls">
                   <button v-if="step<steps.length-1" :disabled="!canNext || loading" @click="next"
                           class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-5 py-2.5 text-sm font-semibold hover:bg-blue-700 disabled:opacity-60">
                     Lanjut
@@ -659,7 +658,8 @@
                   </button>
                   <button v-else :disabled="!canSubmit || loading" @click="submit"
                           class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 text-white px-5 py-2.5 text-sm font-semibold hover:bg-emerald-700 disabled:opacity-60">
-                    <Icon :icon="loading?'ph:loader':'ph:paper-plane-tilt'" class="size-4" :class="loading?'animate-spin':''" />
+                    <Icon v-if="loading" icon="mingcute:loading-fill" class="size-4 animate-spin" />
+                    <Icon v-else icon="ph:paper-plane-tilt" class="size-4" />
                     Kirim Pendaftaran
                   </button>
                 </div>

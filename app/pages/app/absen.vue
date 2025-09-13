@@ -1,37 +1,27 @@
 <template>
-  <!-- GLOBAL BACKGROUND (kotak-kotak + radial gradient 30%) -->
   <section class="relative">
-    <!-- grid dots background -->
     <div class="pointer-events-none absolute inset-0
                 bg-white dark:bg-neutral-950
                 [background-image:radial-gradient(#e5e7eb_1px,transparent_1px)]
                 [background-size:16px_16px] [background-position:0_0]
                 dark:[background-image:radial-gradient(#262626_1px,transparent_1px)]">
     </div>
-    <!-- radial gradient overlay 30% -->
     <div class="pointer-events-none absolute -top-32 -left-40 h-[520px] w-[520px] rounded-full blur-3xl
                 bg-[radial-gradient(closest-side,theme(colors.indigo.400/.3),transparent)]
                 opacity-30"></div>
 
-    <!-- CONTENT -->
     <div class="relative p-6">
       <div class="mb-4 flex items-center justify-between flex-wrap gap-4">
         <div class="flex items-center flex-wrap gap-3">
             <h1 class="text-lg font-semibold">Absensi Santri</h1>
-            <!-- Tabs -->
             <div class="inline-flex rounded-lg border border-gray-200 dark:border-neutral-700 overflow-hidden">
-            <button @click="activeTab='realtime'" :class="['px-3 py-1.5 text-xs', activeTab==='realtime' ? 'bg-blue-600 text-white' : '']">
-                Realtime
-            </button>
-            <button @click="activeTab='history'" :class="['px-3 py-1.5 text-xs', activeTab==='history' ? 'bg-blue-600 text-white' : '']">
-                History
-            </button>
+              <button @click="activeTab='realtime'" :class="['px-3 py-1.5 text-xs', activeTab==='realtime' ? 'bg-blue-600 text-white' : '']">Realtime</button>
+              <button @click="activeTab='history'" :class="['px-3 py-1.5 text-xs', activeTab==='history' ? 'bg-blue-600 text-white' : '']">History</button>
             </div>
-            <!-- Filter tipe -->
             <div class="inline-flex rounded-lg border border-gray-200 dark:border-neutral-700 overflow-hidden">
-            <button @click="activeTipe='ALL'"   :class="['px-3 py-1.5 text-xs', activeTipe==='ALL' ? 'bg-blue-600 text-white' : '']">Semua</button>
-            <button @click="activeTipe='Putra'" :class="['px-3 py-1.5 text-xs', activeTipe==='Putra' ? 'bg-blue-600 text-white' : '']">Putra</button>
-            <button @click="activeTipe='Putri'" :class="['px-3 py-1.5 text-xs', activeTipe==='Putri' ? 'bg-blue-600 text-white' : '']">Putri</button>
+              <button @click="activeTipe='ALL'"   :class="['px-3 py-1.5 text-xs', activeTipe==='ALL' ? 'bg-blue-600 text-white' : '']">Semua</button>
+              <button @click="activeTipe='Putra'" :class="['px-3 py-1.5 text-xs', activeTipe==='Putra' ? 'bg-blue-600 text-white' : '']">Putra</button>
+              <button @click="activeTipe='Putri'" :class="['px-3 py-1.5 text-xs', activeTipe==='Putri' ? 'bg-blue-600 text-white' : '']">Putri</button>
             </div>
         </div>
         <div class="flex items-center gap-2" v-if="activeTab==='realtime'">
@@ -41,13 +31,8 @@
     </div>
 
       <div v-if="activeTab==='realtime'" class="grid grid-cols-1 xl:grid-cols-6 gap-4">
-        <!-- COL 4: Maskan -> Kamar + Progress -->
         <div class="xl:col-span-4 space-y-4">
-          <div
-            v-for="m in maskanRows"
-            :key="m.id"
-            class="rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden shadow-sm bg-white/80 dark:bg-neutral-900/70"
-          >
+          <div  v-for="m in maskanRows"  :key="m.id"  class="rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden shadow-sm bg-white/80 dark:bg-neutral-900/70">
             <div class="flex items-center justify-between px-4 py-3 bg-gray-50/70 dark:bg-neutral-900/60">
               <div>
                 <h3 class="font-semibold">Maskan {{ m.name }} <span class="text-xs text-gray-500">({{ m.tipe }})</span></h3>
@@ -114,19 +99,16 @@
             </div>
           </div>
 
-          <!-- Manual Entry Absen -->
           <div class="rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden shadow-sm bg-white/80 dark:bg-neutral-900/70">
             <div class="px-4 py-3 bg-gray-50/70 dark:bg-neutral-900/60">
               <h3 class="font-semibold">Tambah Absen (Manual)</h3>
             </div>
             <div class="px-4 py-3 space-y-3">
-              <!-- Mode tabs -->
               <div class="inline-flex rounded-lg border border-gray-200 dark:border-neutral-700 overflow-hidden">
                 <button @click="manualMode='santri'" :class="['px-3 py-1.5 text-xs', manualMode==='santri' ? 'bg-blue-600 text-white' : 'bg-transparent']">Pilih Santri</button>
                 <button @click="manualMode='manual'" :class="['px-3 py-1.5 text-xs', manualMode==='manual' ? 'bg-blue-600 text-white' : 'bg-transparent']">Isi Manual</button>
               </div>
 
-              <!-- Pilih Santri -->
               <div v-if="manualMode==='santri'" class="space-y-2">
                 <input v-model.trim="man.q" placeholder="Cari nama/kamar/maskan…" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
                 <div v-if="manCandidates.length" class="max-h-48 overflow-auto rounded border border-gray-200 dark:border-neutral-700 divide-y dark:divide-neutral-800">
@@ -150,7 +132,6 @@
                 <button :disabled="!man.sel" @click="submitManualPicked" class="w-full text-xs px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">Catat Absen</button>
               </div>
 
-              <!-- Isi Manual -->
               <div v-else class="space-y-2">
                 <div class="grid grid-cols-2 gap-2">
                   <div>
@@ -175,7 +156,6 @@
             </div>
           </div>
 
-          <!-- Multi Reset Times -->
           <div class="rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden shadow-sm bg-white/80 dark:bg-neutral-900/70">
             <div class="px-4 py-3 bg-gray-50/70 dark:bg-neutral-900/60">
               <h3 class="font-semibold">Jadwal Reset Harian (Multi Jam)</h3>
@@ -206,112 +186,105 @@
         </div>
       </div>
       <div v-if="activeTab==='history'" class="space-y-4">
-  <!-- Filter tanggal & reload -->
-  <div class="flex flex-wrap items-end gap-2">
-    <div>
-      <label class="text-xs text-gray-600 dark:text-neutral-300">Tanggal</label>
-      <input v-model="histDate" type="date" class="px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-    </div>
-    <div>
-      <label class="text-xs text-gray-600 dark:text-neutral-300">Batas sesi</label>
-      <select v-model.number="histLimit" class="px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700">
-        <option :value="10">10</option>
-        <option :value="20">20</option>
-        <option :value="50">50</option>
-      </select>
-    </div>
-    <button @click="reloadHistory" class="text-xs px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
-      Muat History
-    </button>
-  </div>
-
-  <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-neutral-700">
-    <table class="min-w-full text-sm">
-      <thead class="bg-gray-50 dark:bg-neutral-900/40">
-        <tr class="text-left">
-          <th class="px-3 py-2">Sesi</th>
-          <th class="px-3 py-2">Waktu</th>
-          <th class="px-3 py-2">Total</th>
-          <th class="px-3 py-2">Reset By</th>
-          <th class="px-3 py-2 w-32">Action</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-200 dark:divide-neutral-800">
-        <tr v-for="s in history" :key="s.id">
-          <td class="px-3 py-2 font-medium">{{ s.id }}</td>
-          <td class="px-3 py-2">
-            <div class="text-xs">Mulai: {{ s.meta.startedAt ? formatDate(s.meta.startedAt) : '—' }}</div>
-            <div class="text-xs">Selesai: {{ s.meta.endedAt ? formatDate(s.meta.endedAt) : '—' }}</div>
-          </td>
-          <td class="px-3 py-2">{{ s.meta.total || 0 }}</td>
-          <td class="px-3 py-2 text-xs">{{ s.meta.resetBy || '—' }}</td>
-          <td class="px-3 py-2">
-            <div class="flex items-center gap-2">
-              <button @click="openHistoryDetail(s.id)" class="text-xs px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
-                Detail
-              </button>
-              <button @click="exportHistoryCSV(s.id)" class="text-xs px-2 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700">
-                Export CSV
-              </button>
+      <div class="flex flex-wrap items-end gap-2">
+        <div>
+          <label class="text-xs text-gray-600 dark:text-neutral-300">Tanggal</label>
+          <input v-model="histDate" type="date" class="px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-600 dark:text-neutral-300">Batas sesi</label>
+          <select v-model.number="histLimit" class="px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700">
+            <option :value="10">10</option>
+            <option :value="20">20</option>
+            <option :value="50">50</option>
+          </select>
+        </div>
+        <button @click="reloadHistory" class="text-xs px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
+          Muat History
+        </button>
+      </div>
+      <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-neutral-700">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-50 dark:bg-neutral-900/40">
+            <tr class="text-left">
+              <th class="px-3 py-2">Sesi</th>
+              <th class="px-3 py-2">Waktu</th>
+              <th class="px-3 py-2">Total</th>
+              <th class="px-3 py-2">Reset By</th>
+              <th class="px-3 py-2 w-32">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-neutral-800">
+            <tr v-for="s in history" :key="s.id">
+              <td class="px-3 py-2 font-medium">{{ s.id }}</td>
+              <td class="px-3 py-2">
+                <div class="text-xs">Mulai: {{ s.meta.startedAt ? formatDate(s.meta.startedAt) : '—' }}</div>
+                <div class="text-xs">Selesai: {{ s.meta.endedAt ? formatDate(s.meta.endedAt) : '—' }}</div>
+              </td>
+              <td class="px-3 py-2">{{ s.meta.total || 0 }}</td>
+              <td class="px-3 py-2 text-xs">{{ s.meta.resetBy || '—' }}</td>
+              <td class="px-3 py-2">
+                <div class="flex items-center gap-2">
+                  <button @click="openHistoryDetail(s.id)" class="text-xs px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
+                    Detail
+                  </button>
+                  <button @click="exportHistoryCSV(s.id)" class="text-xs px-2 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700">
+                    Export CSV
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="!history.length">
+              <td colspan="5" class="px-3 py-6 text-center text-gray-500 dark:text-neutral-400">Belum ada history.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ModalShell v-model="showHistDetail" :title="`Detail Sesi ${histDetailId || ''} — ${activeTipe==='ALL' ? 'Semua' : activeTipe}`">
+        <div class="space-y-3">
+          <div class="text-xs text-gray-600 dark:text-neutral-300">Tampilan sesuai filter tipe: <strong>{{ activeTipe }}</strong></div>
+          <div class="rounded border border-gray-200 dark:border-neutral-700 overflow-hidden">
+            <div class="bg-gray-50 dark:bg-neutral-900/40 px-3 py-2 text-xs font-medium">Ringkasan per Maskan</div>
+            <div class="max-h-60 overflow-auto divide-y divide-gray-200 dark:divide-neutral-800">
+              <div v-for="g in groupedByMaskan" :key="g.m" class="px-3 py-2 text-sm flex items-center justify-between">
+                <div class="truncate">Maskan {{ g.m }}</div>
+                <div class="font-semibold">{{ g.count }}</div>
+              </div>
+              <div v-if="!groupedByMaskan.length" class="px-3 py-3 text-sm text-gray-500">Tidak ada data sesuai filter.</div>
             </div>
-          </td>
-        </tr>
-        <tr v-if="!history.length">
-          <td colspan="5" class="px-3 py-6 text-center text-gray-500 dark:text-neutral-400">Belum ada history.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <ModalShell v-model="showHistDetail" :title="`Detail Sesi ${histDetailId || ''} — ${activeTipe==='ALL' ? 'Semua' : activeTipe}`">
-    <div class="space-y-3">
-      <div class="text-xs text-gray-600 dark:text-neutral-300">Tampilan sesuai filter tipe: <strong>{{ activeTipe }}</strong></div>
-  
-      <!-- Ringkas per Maskan -->
-      <div class="rounded border border-gray-200 dark:border-neutral-700 overflow-hidden">
-        <div class="bg-gray-50 dark:bg-neutral-900/40 px-3 py-2 text-xs font-medium">Ringkasan per Maskan</div>
-        <div class="max-h-60 overflow-auto divide-y divide-gray-200 dark:divide-neutral-800">
-          <div v-for="g in groupedByMaskan" :key="g.m" class="px-3 py-2 text-sm flex items-center justify-between">
-            <div class="truncate">Maskan {{ g.m }}</div>
-            <div class="font-semibold">{{ g.count }}</div>
           </div>
-          <div v-if="!groupedByMaskan.length" class="px-3 py-3 text-sm text-gray-500">Tidak ada data sesuai filter.</div>
+          <div class="rounded border border-gray-200 dark:border-neutral-700 overflow-hidden">
+            <div class="bg-gray-50 dark:bg-neutral-900/40 px-3 py-2 text-xs font-medium">Daftar Absen</div>
+            <div class="max-h-72 overflow-auto">
+              <table class="min-w-full text-xs">
+                <thead>
+                  <tr class="text-left">
+                    <th class="px-3 py-2">Nama</th>
+                    <th class="px-3 py-2">Maskan</th>
+                    <th class="px-3 py-2">Kamar</th>
+                    <th class="px-3 py-2">Sumber</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-neutral-800">
+                  <tr v-for="r in filteredRows" :key="r.key">
+                    <td class="px-3 py-2">{{ r.name }}</td>
+                    <td class="px-3 py-2">{{ r.maskan || '-' }}</td>
+                    <td class="px-3 py-2">{{ r.kamar || '-' }}</td>
+                    <td class="px-3 py-2">{{ r.by?.toUpperCase() || 'manual' }}</td>
+                  </tr>
+                  <tr v-if="!filteredRows.length">
+                    <td colspan="4" class="px-3 py-3 text-gray-500">Kosong.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
-  
-      <!-- Daftar baris -->
-      <div class="rounded border border-gray-200 dark:border-neutral-700 overflow-hidden">
-        <div class="bg-gray-50 dark:bg-neutral-900/40 px-3 py-2 text-xs font-medium">Daftar Absen</div>
-        <div class="max-h-72 overflow-auto">
-          <table class="min-w-full text-xs">
-            <thead>
-              <tr class="text-left">
-                <th class="px-3 py-2">Nama</th>
-                <th class="px-3 py-2">Maskan</th>
-                <th class="px-3 py-2">Kamar</th>
-                <th class="px-3 py-2">Sumber</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-neutral-800">
-              <tr v-for="r in filteredRows" :key="r.key">
-                <td class="px-3 py-2">{{ r.name }}</td>
-                <td class="px-3 py-2">{{ r.maskan || '-' }}</td>
-                <td class="px-3 py-2">{{ r.kamar || '-' }}</td>
-                <td class="px-3 py-2">{{ r.by?.toUpperCase() || 'manual' }}</td>
-              </tr>
-              <tr v-if="!filteredRows.length">
-                <td colspan="4" class="px-3 py-3 text-gray-500">Kosong.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <template #footer>
+          <button @click="showHistDetail=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Tutup</button>
+        </template>
+      </ModalShell>
     </div>
-  
-    <template #footer>
-      <button @click="showHistDetail=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Tutup</button>
-    </template>
-  </ModalShell>
-</div>
     </div>
   </section>
 </template>
@@ -360,7 +333,6 @@ async function openHistoryDetail(id: string) {
 }
 
 function tipeForMember(row: any): 'Putra'|'Putri'|'Unknown' {
-  // prioritas: santriId -> lihat santri -> lihat maskan santri -> cek tipe dari daftar maskan
   if (row.santriId) {
     const s = santri.value.find(x => x.id === row.santriId)
     if (s) {
@@ -368,7 +340,6 @@ function tipeForMember(row: any): 'Putra'|'Putri'|'Unknown' {
       return (m?.tipe as any) || 'Unknown'
     }
   }
-  // fallback manual maskan
   if (row.maskan) {
     const m = maskan.value.find(mm => (mm.name||'').toLowerCase().trim() === (row.maskan||'').toLowerCase().trim())
     return (m?.tipe as any) || 'Unknown'
@@ -376,7 +347,6 @@ function tipeForMember(row: any): 'Putra'|'Putri'|'Unknown' {
   return 'Unknown'
 }
 
-// baris untuk tabel detail (terfilter tipe)
 const filteredRows = computed(() => {
   const arr: Array<{ key:string; name:string; maskan?:string; kamar?:string; by?:string; tipe:string }> = []
   for (const [k, v] of Object.entries(histDetailMembers.value || {})) {
@@ -453,6 +423,7 @@ function roomSize(mId: string, roomNumber: string) {
   if (!m) return 0
   return santriInRoom(m.name, roomNumber).length
 }
+
 function presentByMaskan(mId: string) {
   const m = maskan.value.find(x => x.id === mId)
   if (!m) return 0
@@ -467,6 +438,7 @@ function presentByMaskan(mId: string) {
   }
   return count
 }
+
 function presentByRoom(mId: string, roomNumber: string) {
   const m = maskan.value.find(x => x.id === mId)
   if (!m) return 0
@@ -484,12 +456,14 @@ function presentByRoom(mId: string, roomNumber: string) {
   }
   return count
 }
+
 function totalByMaskan(mId:string) {
   const m = maskan.value.find(x => x.id === mId)
   if (!m) return 0
   const key = (m.name || '').toLowerCase().trim()
   return santri.value.filter(s => (s.maskan||'').toLowerCase().trim() === key).length
 }
+
 function roomProgress(mId: string, roomNumber: string) {
   const total = roomSize(mId, roomNumber)
   if (total <= 0) return 0
@@ -577,15 +551,18 @@ function validHHMM(s: string) {
   const [h, m] = s.split(':').map(Number)
   return h! >= 0 && h! < 24 && m! >= 0 && m! < 60
 }
+
 function addResetSlot() {
   const t = (newReset.value || '').trim()
   if (!validHHMM(t)) return
   if (!resetTimes.value.includes(t)) resetTimes.value = [...resetTimes.value, t].sort()
   newReset.value = ''
 }
+
 function removeResetSlot(t: string) {
   resetTimes.value = resetTimes.value.filter(x => x !== t)
 }
+
 async function saveResetTimes() {
   await saveSettings({ resetTimes: resetTimes.value })
 }
@@ -593,6 +570,7 @@ async function saveResetTimes() {
 async function resetNow() {
   await resetSession({ resetBy: 'manual' })
 }
+
 async function reloadAll() {
   await Promise.all([fetchMaskan(), fetchSantri(), fetchCurrent(), fetchSettings()])
 }

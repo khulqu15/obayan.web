@@ -66,6 +66,7 @@
                   <button v-if="row.status!=='returned'" @click="rejectIzin(row.id)" class="text-xs px-2 py-1 rounded border text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Reject</button>
                   <button @click="openEdit(row)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800">Edit</button>
                   <button @click="openDelete(row)" class="text-xs px-2 py-1 rounded border text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
+                  <button @click="printIzin(row)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800">Print (Dot Matrix)</button>
                 </div>
               </template>
             </DataTable>
@@ -414,13 +415,154 @@ const columns = [
   { key: 'status', label: 'Status', sortable: true },
 ]
 
+const SURAT_HEADER = {
+  title: 'Surat Perizinan',
+  pondok: 'Pondok Pesantren ALBERR',
+  alamat: 'Jl. Pesantren Sangarejo Karangjati Pandaan Pasuruan',
+  telp: '0823-3781-5634',
+  logo: '/logo.png'
+}
+
 onMounted(async () => {
   await Promise.all([fetchSantri(), fetchIzin()])
   unsub = subscribeLive(60)
 })
 let unsub: null | (()=>void) = null
 
-// --- Filter tipe Putra/Putri berdasarkan maskan name -> maskan.tipe ---
+function two(n:number){ return String(n).padStart(2,'0') }
+function formatDT(ts?: number){
+  if(!ts) return '—'
+  const d = new Date(ts)
+  return `${two(d.getDate())}/${two(d.getMonth()+1)}/${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`
+}
+function genNomorSurat(row: IzinRow){
+  const d = row.requestedAt ? new Date(row.requestedAt) : new Date()
+  const seg = `${String(d.getFullYear()).slice(-2)}${two(d.getMonth()+1)}${two(d.getDate())}`
+  const suf = (row.id||'').slice(-4).toUpperCase()
+  return `SP/ALBERR/${seg}/${suf}`
+}
+
+function resolveSantriFor(row: IzinRow) {
+  if (row.santriId) {
+    const byId = santri.value.find(s => s.id === row.santriId)
+    if (byId) return byId
+  }
+  const q = (row.name || '').normalize('NFKC').trim().toLowerCase()
+  if (!q) return null
+  return santri.value.find(
+    s => (s.santri || '').normalize('NFKC').trim().toLowerCase() === q
+  ) || null
+}
+
+function findSantriById(id?: string){
+  if(!id) return null
+  return santri.value.find(s => s.id === id) || null
+}
+function pickAlamatTelp(s:any){
+  if(!s) return { alamat:'-', telp:'-' }
+  const alamat = s.alamat || s.address || s.desa || s.kelurahan || s.kecamatan || '-'
+  const telp = s.phone || s.telp || s.hp || s.nohp || s.waliPhone || s.phone_wali || '-'
+  return { alamat: String(alamat), telp: String(telp) }
+}
+
+function buildSuratHTML(row: IzinRow){
+  const s = resolveSantriFor(row)
+  const alamat = s?.alamat?.trim() ? s.alamat : '-'
+  const telp   = s?.nohp?.trim()   ? s.nohp   : '-'
+
+  const noSurat = genNomorSurat(row)
+  const waktuIzin = row.outAt || row.approvedAt || row.requestedAt
+  const waktuKembali = row.returnedAt
+
+  let akun = '-'
+  try {
+    // @ts-ignore - jika ada auth inject
+    const u = (useNuxtApp() as any).$auth?.currentUser
+    akun = u?.displayName || u?.email || '-'
+  } catch {}
+
+  // CSS print ramah dot-matrix (monospace, margin kecil, hitam-putih)
+  const css = `
+  <style>
+    @page { size: A5 portrait; margin: 10mm; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { font-family: "Courier New", Courier, monospace; font-size: 12pt; color:#000; }
+    .wrap { width: 100%; }
+    .hdr { display:flex; align-items:flex-start; gap:16px; }
+    .hdr .txt { flex:1; }
+    .hdr h1 { font-size: 18pt; margin:0; line-height:1.2; font-weight:700; }
+    .hdr h2 { font-size: 14pt; margin:2px 0 4px; font-weight:700; }
+    .hdr .meta { font-size: 10pt; }
+    .logo { width:72px; height:72px; object-fit:contain; }
+    .mt8{ margin-top:8px } .mt12{ margin-top:12px } .mt20{ margin-top:20px }
+    .row { display:flex; gap:8px; margin:2px 0; }
+    .lab { width: 160px; }
+    .val { flex:1; }
+    .hr { border-top:1px dashed #000; margin:8px 0; }
+    .note { text-align:center; margin-top:32px; }
+    .sign { display:flex; justify-content:space-between; margin-top:28px; }
+    .sign .col { width: 32%; text-align:center; }
+    .ttd { margin-top:48px; }
+  </style>`
+
+  const html = `
+  <html><head><meta charset="utf-8">${css}</head>
+  <body onload="window.focus(); setTimeout(()=>window.print(), 200)">
+    <div class="wrap">
+      <div class="hdr">
+        <div class="txt">
+          <h1>${SURAT_HEADER.title}</h1>
+          <h2>${SURAT_HEADER.pondok}</h2>
+          <div class="meta">${SURAT_HEADER.alamat}<br/>No. Telp ${SURAT_HEADER.telp}</div>
+        </div>
+        <img src="${SURAT_HEADER.logo}" class="logo" />
+      </div>
+
+      <div class="mt12">
+        <div class="row"><div class="lab">No</div><div class="val">: ${noSurat}</div></div>
+        <div class="row"><div class="lab">Nama</div><div class="val">: ${row.name || '-'}</div></div>
+        <div class="row"><div class="lab">Kamar  - Maskan</div><div class="val">: ${row.kamar || '-'}  -  ${row.maskan || '-'}</div></div>
+        <div class="row"><div class="lab">Alamat</div><div class="val">: ${alamat}</div></div>
+        <div class="row"><div class="lab">No. Telp</div><div class="val">: ${telp}</div></div>
+        <div class="row"><div class="lab">Keterangan</div><div class="val">: ${row.reason || '-'}</div></div>
+        <div class="row"><div class="lab">Waktu Izin - Waktu Kembali</div><div class="val">: ${formatDT(waktuIzin)}  -  ${formatDT(waktuKembali)}</div></div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="sign">
+        <div class="col">
+          Pengurus Perizinan
+          <div class="ttd">Ttd</div>
+        </div>
+        <div class="col">
+          Wali Santri
+          <div class="ttd">Ttd</div>
+        </div>
+        <div class="col">
+          Akun yang memberi izin<br/><small>(${akun})</small>
+          <div class="ttd">Ttd</div>
+        </div>
+      </div>
+
+      <div class="note">
+        Surat ini harus diserahkan ke Pengurus Perizinan ketika santri kembali ke Pondok
+      </div>
+    </div>
+  </body></html>`
+  return html
+}
+
+/* ================== CETAK ================== */
+function printIzin(row: IzinRow){
+  const html = buildSuratHTML(row)
+  const w = window.open('', '_blank', 'width=900,height=700')
+  if(!w) return alert('Pop-up diblokir, izinkan pop-up untuk mencetak.')
+  w.document.open()
+  w.document.write(html)
+  w.document.close()
+}
+
 function tipeForMaskan(name?: string): 'Putra'|'Putri'|'Unknown' {
   if (!name) return 'Unknown'
   const m = maskan.value.find(x => (x.name||'').toLowerCase().trim() === name.toLowerCase().trim())
@@ -530,7 +672,7 @@ const quick = ref({ name:'', maskan:'', kamar:'', reason:'', urgency:'Normal' as
 async function submitQuick() {
   const n = quick.value.name.trim()
   if (!n) return
-  await createIzin({
+  const id = await createIzin({
     name: n,
     reason: quick.value.reason.trim() || 'Perizinan',
     urgency: quick.value.urgency,
@@ -540,6 +682,9 @@ async function submitQuick() {
     santriId: '',
     status: 'pending'
   })
+  const r = rows.value.find(x => x.id === id)
+  if (r) printIzin(r)
+
   quick.value = { name:'', maskan:'', kamar:'', reason:'', urgency:'Normal' }
 }
 

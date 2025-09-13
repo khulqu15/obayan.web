@@ -47,7 +47,6 @@
             </span>
           </div>
 
-          <!-- CTAs -->
           <div class="mt-7 flex flex-wrap gap-3">
             <a :href="state.ctaLocation.href" target="_blank" rel="noopener"
                class="hs-btn inline-flex items-center gap-2 rounded-2xl bg-emerald-600 text-white px-5 py-3 text-sm font-bold
@@ -79,12 +78,10 @@
           </div>
         </div>
 
-        <!-- Right: image + floating cards -->
         <div class="col-span-12 md:col-span-6 lg:col-span-5">
           <div class="relative aspect-[4/3] rounded-[1.75rem] ring-1 ring-emerald-200/70 dark:ring-neutral-800 bg-white/60 dark:bg-neutral-800/40">
             <img v-if="state.image" :src="state.image" alt="Pondok Putri" class="size-full rounded-[1.75rem] object-cover">
 
-            <!-- corner badge -->
             <div class="absolute left-4 top-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold
                         bg-white/85 dark:bg-neutral-900/70 backdrop-blur border border-neutral-200 dark:border-neutral-700
                         text-neutral-700 dark:text-neutral-300 shadow-sm">
