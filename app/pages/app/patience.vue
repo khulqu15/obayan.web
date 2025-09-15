@@ -90,8 +90,12 @@
         <div>
           <div class="text-gray-500">Ringkasan</div>
           <div class="font-medium">
-            Total Entri: {{ totalEntries }}, Poin (-): <span class="text-rose-600">{{ totalMinus }}</span>,
-            Poin (+): <span class="text-emerald-600">{{ totalPlus }}</span>
+            Total Entri: {{ totalEntries }} • Distribusi:
+            <span>S. Kurang: {{ dist.sangatKurang }}</span> ·
+            <span>Kurang: {{ dist.kurang }}</span> ·
+            <span>Cukup: {{ dist.cukup }}</span> ·
+            <span>Baik: {{ dist.baik }}</span> ·
+            <span>S. Baik: {{ dist.sangatBaik }}</span>
           </div>
         </div>
       </div>
@@ -129,15 +133,27 @@
                     </summary>
 
                     <div class="mt-2 rounded-lg border border-gray-200 dark:border-neutral-700 p-3 space-y-3">
-                      <!-- Isi massal per kamar -->
                       <div class="rounded-lg border border-gray-200 dark:border-neutral-700 p-3 bg-white/50 dark:bg-neutral-900/40">
                         <div class="text-xs font-medium mb-2">Isi Massal (Kamar {{ kg.kamar }})</div>
                         <div class="flex flex-wrap items-center gap-2">
-                          <input v-model.number="getFillFor(kg.key).adab" type="number" placeholder="Adab (±)" class="w-28 px-2 py-1 text-sm rounded border border-gray-200 dark:border-neutral-700"/>
-                          <input v-model.number="getFillFor(kg.key).kedisiplinan" type="number" placeholder="Kedisiplinan (±)" class="w-36 px-2 py-1 text-sm rounded border border-gray-200 dark:border-neutral-700"/>
-                          <input v-model.trim="getFillFor(kg.key).note" type="text" placeholder="Catatan umum (opsional)" class="min-w-[16rem] flex-1 px-2 py-1 text-sm rounded border border-gray-200 dark:border-neutral-700"/>
-                          <button class="px-3 py-1.5 text-xs rounded bg-emerald-600 text-white hover:bg-emerald-700" @click="applyFillFor(kg.key)">Terapkan</button>
-                          <button class="px-3 py-1.5 text-xs rounded border border-gray-200 dark:border-neutral-700" @click="clearFillFor(kg.key)">Reset</button>
+                          <select v-model="getFillFor(kg.key).adab"
+                                  class="px-2 py-1 text-sm rounded border border-gray-200 dark:border-neutral-700">
+                            <option :value="''">Adab: —</option>
+                            <option v-for="opt in RATING_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                          </select>
+                          <select v-model="getFillFor(kg.key).kedisiplinan"
+                                  class="px-2 py-1 text-sm rounded border border-gray-200 dark:border-neutral-700">
+                            <option :value="''">Kedisiplinan: —</option>
+                            <option v-for="opt in RATING_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                          </select>
+                          <input v-model.trim="getFillFor(kg.key).note" type="text"
+                                placeholder="Catatan umum (opsional)"
+                                class="min-w-[16rem] flex-1 px-2 py-1 text-sm rounded border border-gray-200 dark:border-neutral-700"/>
+
+                          <button class="px-3 py-1.5 text-xs rounded bg-emerald-600 text-white hover:bg-emerald-700"
+                                  @click="applyFillFor(kg.key)">Terapkan</button>
+                          <button class="px-3 py-1.5 text-xs rounded border border-gray-200 dark:border-neutral-700"
+                                  @click="clearFillFor(kg.key)">Reset</button>
                         </div>
                       </div>
 
@@ -147,10 +163,9 @@
                           <thead class="bg-gray-50 dark:bg-neutral-900/40">
                             <tr class="text-left">
                               <th class="px-3 py-2 w-64">Santri</th>
-                              <th class="px-3 py-2 w-28 text-center">Adab (±)</th>
-                              <th class="px-3 py-2 w-40 text-center">Kedisiplinan (±)</th>
+                              <th class="px-3 py-2 w-40 text-center">Adab</th>
+                              <th class="px-3 py-2 w-44 text-center">Kedisiplinan</th>
                               <th class="px-3 py-2">Catatan</th>
-                              <th class="px-3 py-2 w-28 text-center">Poin Bulan</th>
                             </tr>
                           </thead>
                           <tbody class="divide-y divide-gray-100 dark:divide-neutral-700">
@@ -159,30 +174,35 @@
                                 <div class="font-medium truncate">{{ s.santri }}</div>
                                 <div class="text-[11px] text-gray-500 truncate">{{ s.maskan || '-' }} • {{ s.kamar || '-' }}</div>
                               </td>
+
                               <td class="px-3 py-2 text-center">
-                                <input v-model.number="getRoomDraft(s.id).adab"
-                                  @input="onDraftChange(s.id)"
-                                  type="number"
-                                  class="w-24 text-center rounded border border-gray-200 dark:border-neutral-700 px-2 py-1"/>
+                                <select v-model="getRoomDraft(s.id).adab"
+                                        @change="onDraftChange(s.id)"
+                                        class="w-36 text-sm rounded border border-gray-200 dark:border-neutral-700 px-2 py-1">
+                                  <option :value="''">—</option>
+                                  <option v-for="opt in RATING_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                                </select>
                               </td>
+
                               <td class="px-3 py-2 text-center">
-                                <input v-model.number="getRoomDraft(s.id).kedisiplinan"
-                                  @input="onDraftChange(s.id)"
-                                  type="number"
-                                  class="w-32 text-center rounded border border-gray-200 dark:border-neutral-700 px-2 py-1"/>
+                                <select v-model="getRoomDraft(s.id).kedisiplinan"
+                                        @change="onDraftChange(s.id)"
+                                        class="w-40 text-sm rounded border border-gray-200 dark:border-neutral-700 px-2 py-1">
+                                  <option :value="''">—</option>
+                                  <option v-for="opt in RATING_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                                </select>
                               </td>
+
                               <td class="px-3 py-2">
                                 <input v-model.trim="getRoomDraft(s.id).note"
-                                  @input="onDraftChange(s.id)"
-                                  type="text" placeholder="Catatan (opsional)"
-                                  class="w-full rounded border border-gray-200 dark:border-neutral-700 px-2 py-1"/>
-                              </td>
-                              <td class="px-3 py-2 text-center font-semibold" :class="(saldoBySantri[s.id]||0)>=0 ? 'text-emerald-600' : 'text-rose-600'">
-                                {{ saldoBySantri[s.id] ?? 0 }}
+                                      @input="onDraftChange(s.id)"
+                                      type="text" placeholder="Catatan (opsional)"
+                                      class="w-full rounded border border-gray-200 dark:border-neutral-700 px-2 py-1"/>
                               </td>
                             </tr>
+
                             <tr v-if="!kg.members.length">
-                              <td colspan="5" class="px-3 py-6 text-center text-gray-500">Tidak ada anggota.</td>
+                              <td colspan="4" class="px-3 py-6 text-center text-gray-500">Tidak ada anggota.</td>
                             </tr>
                           </tbody>
                         </table>
@@ -191,9 +211,7 @@
                       <!-- Aksi kamar -->
                       <div class="flex flex-wrap items-center justify-between gap-2">
                         <div class="text-xs text-gray-500">
-                          Draft kamar ini:
-                          <b :class="calcRoomTotals(kg.key).plus>0 ? 'text-emerald-600' : ''">+{{ calcRoomTotals(kg.key).plus }}</b> /
-                          <b :class="calcRoomTotals(kg.key).minus<0 ? 'text-rose-600' : ''">{{ calcRoomTotals(kg.key).minus }}</b>
+                          Draft kamar ini: <b>{{ countRated(kg.key) }}</b> santri terisi
                         </div>
                         <div class="flex items-center gap-2">
                           <button class="px-3 py-1.5 text-xs rounded border border-gray-200 dark:border-neutral-700" @click="exportRoomCSVFor(kg.key)" :disabled="!kg.members.length">Export CSV</button>
@@ -208,235 +226,6 @@
               </div>
             </details>
           </div>
-        </div>
-      </div>
-    </details>
-
-    <!-- ====== TABLE (desktop) – Per Santri ====== -->
-    <details v-if="mode==='santri'" class="group mt-4 hidden md:block rounded-2xl border border-gray-200 bg-white dark:bg-neutral-800 overflow-hidden" open>
-      <summary class="flex items-center justify-between p-4 cursor-pointer select-none">
-        <div class="font-semibold">Daftar & Input Entri</div>
-        <Icon icon="lucide:chevron-down" class="size-5 text-gray-500 transition group-open:rotate-180"/>
-      </summary>
-
-      <div class="border-t border-gray-200 dark:border-neutral-700 p-4 overflow-auto">
-        <!-- Bar aksi saat ada pilihan -->
-        <div v-if="selectedCount" class="mb-3 flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs dark:border-blue-900/50 dark:bg-blue-900/20">
-          <div><b>{{ selectedCount }}</b> baris dipilih</div>
-          <div class="relative">
-            <button @click="showBulkMenu=!showBulkMenu" class="px-2 py-1 rounded border border-blue-200 dark:border-blue-800">
-              <Icon icon="lucide:more-horizontal" class="size-4"/>
-            </button>
-            <div v-if="showBulkMenu"
-                 class="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-lg dark:bg-neutral-800 dark:border-neutral-700 z-10">
-              <button class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-700 rounded-lg"
-                      @click="saveSelected(); showBulkMenu=false">Simpan Entri (Terpilih)</button>
-              <div class="my-1 border-t dark:border-neutral-700"></div>
-              <button class="w-full text-left px-3 py-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-neutral-700 rounded-lg"
-                      @click="openDeleteMonthSelected(); showBulkMenu=false">Hapus Semua Entri Bulan Ini (Terpilih)</button>
-            </div>
-          </div>
-        </div>
-
-        <table class="min-w-full text-sm">
-          <thead class="bg-gray-50 dark:bg-neutral-900/40">
-            <tr>
-              <th class="px-3 py-2 w-10"><input type="checkbox" :checked="isAllPageSelected" @change="toggleSelectAllPage"></th>
-              <th class="px-3 py-2 text-left w-56">Santri</th>
-              <th class="px-3 py-2 text-left w-40">Maskan/Kamar</th>
-              <th class="px-3 py-2 text-center w-24">Saldo Bulan</th>
-              <th class="px-3 py-2 text-center w-28">Tipe</th>
-              <th class="px-3 py-2 text-center w-36">Kategori</th>
-              <th class="px-3 py-2 text-center w-28">Level</th>
-              <th class="px-3 py-2 text-left">Judul</th>
-              <th class="px-3 py-2 text-center w-24">Poin</th>
-              <th class="px-3 py-2 text-center w-28">Aksi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-neutral-700">
-            <template v-for="s in pagedSantri" :key="s.id">
-              <tr>
-                <td class="px-3 py-2"><input type="checkbox" :checked="isSelected(s.id)" @change="toggleSelect(s.id)"></td>
-
-                <td class="px-3 py-2">
-                  <div class="flex items-center gap-2">
-                    <button class="p-1 rounded border border-gray-200 dark:border-neutral-700" @click="toggleRow(s.id)">
-                      <Icon :icon="rowExpandedId===s.id?'lucide:chevron-up':'lucide:chevron-down'" class="size-4"/>
-                    </button>
-                    <div>
-                      <div class="font-medium truncate">{{ s.santri }}</div>
-                      <div class="text-[11px] text-gray-500 truncate">Jenjang: {{ s.jenjang || '-' }}</div>
-                    </div>
-                  </div>
-                </td>
-
-                <td class="px-3 py-2 text-[12px]">{{ s.maskan || '-' }} · {{ s.kamar || '-' }}</td>
-
-                <td class="px-3 py-2 text-center font-semibold"
-                    :class="saldoBySantri[s.id] >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-                  {{ saldoBySantri[s.id] ?? 0 }}
-                </td>
-
-                <!-- Input cepat entri -->
-                <td class="px-1 py-1 text-center">
-                  <select v-model="draft[s.id].type" class="w-28 text-xs p-1 rounded border border-gray-200 dark:border-neutral-700">
-                    <option value="pelanggaran">Pelanggaran</option>
-                    <option value="keteladanan">Keteladanan</option>
-                  </select>
-                </td>
-                <td class="px-1 py-1 text-center">
-                  <select v-model="draft[s.id].category" class="w-36 text-xs p-1 rounded border border-gray-200 dark:border-neutral-700">
-                    <option v-for="c in categories" :key="c" :value="c">{{ labelCategory(c) }}</option>
-                  </select>
-                </td>
-                <td class="px-1 py-1 text-center">
-                  <select v-model="draft[s.id].severity" class="w-28 text-xs p-1 rounded border border-gray-200 dark:border-neutral-700">
-                    <option>Ringan</option><option>Sedang</option><option>Berat</option>
-                  </select>
-                </td>
-
-                <td class="px-1 py-1 text-left">
-                  <input v-model.trim="draft[s.id].title" placeholder="Judul singkat" class="w-72 text-sm rounded border border-gray-200 dark:border-neutral-700 px-2 py-1"/>
-                </td>
-
-                <td class="px-1 py-1 text-center">
-                  <input v-model.number="draft[s.id].points" type="number" class="w-24 text-center border-gray-200 rounded border dark:border-neutral-700"/>
-                </td>
-
-                <td class="px-3 py-2 text-center">
-                  <div class="flex items-center gap-1 justify-center">
-                    <button class="px-2 py-1 text-xs rounded border border-gray-200 dark:border-neutral-700" @click="saveOne(s.id)">Simpan</button>
-                    <button class="px-2 py-1 text-xs rounded border border-gray-200 dark:border-neutral-700" @click="openEditFirst(s.id)">Edit</button>
-                  </div>
-                </td>
-              </tr>
-
-              <!-- Detail: daftar entri bulan ini untuk santri -->
-              <tr v-show="rowExpandedId===s.id">
-                <td></td>
-                <td colspan="9" class="bg-gray-50 dark:bg-neutral-900/40">
-                  <div class="p-4 space-y-2">
-                    <div v-if="(entriesBySantri.get(s.id)?.length || 0)===0" class="text-sm text-gray-500">Belum ada entri pada bulan ini.</div>
-                    <div v-for="e in entriesBySantri.get(s.id) || []" :key="e.id"
-                         class="rounded-lg border border-gray-200 dark:border-neutral-700 p-3 flex items-start gap-3">
-                      <div class="min-w-0">
-                        <div class="text-sm font-medium truncate">{{ e.title || '(tanpa judul)' }}</div>
-                        <div class="text-[11px] text-gray-500">
-                          {{ new Date(e.createdAt as number).toLocaleString() }} •
-                          <span class="capitalize">{{ e.type }}</span> •
-                          {{ labelCategory(e.category) }} •
-                          {{ e.severity }}
-                        </div>
-                        <div class="text-xs mt-1 whitespace-pre-line">{{ e.desc || '' }}</div>
-                      </div>
-                      <div class="ml-auto text-right">
-                        <div :class="[ 'font-semibold', e.points>=0 ? 'text-emerald-600' : 'text-rose-600' ]">{{ e.points }}</div>
-                        <div class="text-xs mt-1"><span :class="chipStatus(e.status)">{{ labelStatus(e.status) }}</span></div>
-                        <div class="mt-2 flex items-center gap-1 justify-end">
-                          <button class="px-2 py-1 text-[11px] rounded border" @click="toReview(e)" v-if="e.status==='open'">Review</button>
-                          <button class="px-2 py-1 text-[11px] rounded bg-blue-600 text-white" @click="closeCase(e)" v-if="e.status==='review'">Selesai</button>
-                          <button class="px-2 py-1 text-[11px] rounded border text-rose-600" @click="voidCase(e)" v-if="e.status!=='void'">Void</button>
-                          <button class="px-2 py-1 text-[11px] rounded border" @click="openEdit(e)">Edit</button>
-                          <button class="px-2 py-1 text-[11px] rounded border text-rose-600" @click="removeEntry(e)">Hapus</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </template>
-
-            <tr v-if="!pagedSantri.length"><td colspan="10" class="px-3 py-6 text-center text-gray-500">Tidak ada data pada halaman ini.</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- footer controls -->
-      <div class="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2 border-t border-gray-200 dark:border-neutral-700">
-        <div class="text-xs text-gray-500">
-          Term: <b>{{ termKey }}</b> • Periode: <b>{{ bulanLabel[bulan-1] }} {{ tahun }}</b>
-        </div>
-        <div class="flex items-center gap-2">
-          <select v-model.number="pageSize" class="px-2 py-1 text-xs rounded border border-gray-200 dark:border-neutral-700">
-            <option :value="10">10</option><option :value="20">20</option><option :value="50">50</option><option :value="100">100</option>
-          </select>
-          <div class="text-xs">Hal: {{ page }} / {{ totalPages || 1 }}</div>
-          <button class="px-2 py-1 text-xs rounded border border-gray-200 dark:border-neutral-700" :disabled="page<=1" @click="page--">Prev</button>
-          <button class="px-2 py-1 text-xs rounded border border-gray-200 dark:border-neutral-700" :disabled="page>=totalPages" @click="page++">Next</button>
-          <button @click="saveAll" class="px-3 py-1.5 text-xs rounded bg-blue-600 text-white hover:bg-blue-700">Simpan Semua (Halaman)</button>
-        </div>
-      </div>
-    </details>
-
-    <!-- ===== Mobile Cards – Per Santri ===== -->
-    <details v-if="mode==='santri'" class="group mt-4 md:hidden rounded-xl border border-gray-200 bg-white dark:bg-neutral-800" open>
-      <summary class="flex items-center justify-between p-4 cursor-pointer select-none">
-        <div class="font-semibold">Daftar & Input Entri</div>
-        <Icon icon="lucide:chevron-down" class="size-5 text-gray-500 transition group-open:rotate-180"/>
-      </summary>
-
-      <div class="border-t border-gray-200 dark:border-neutral-700 p-4 space-y-3">
-        <div v-for="s in pagedSantri" :key="s.id" class="rounded-xl border border-gray-200 dark:border-neutral-700">
-          <details class="group" open>
-            <summary class="flex items-start justify-between gap-2 p-4 cursor-pointer select-none">
-              <div class="flex items-start gap-2">
-                <input type="checkbox" class="mt-1" :checked="isSelected(s.id)" @change="toggleSelect(s.id)">
-                <div class="min-w-0">
-                  <div class="font-medium truncate">{{ s.santri }}</div>
-                  <div class="text-[11px] text-gray-500">{{ s.maskan || '-' }} • {{ s.kamar || '-' }}</div>
-                  <div class="text-[11px]">Saldo: <b :class="saldoBySantri[s.id] >= 0 ? 'text-emerald-600' : 'text-rose-600'">{{ saldoBySantri[s.id] ?? 0 }}</b></div>
-                </div>
-              </div>
-              <div class="text-right">
-                <div class="text-xs">{{ bulanLabel[bulan-1] }} {{ tahun }}</div>
-              </div>
-            </summary>
-
-            <div class="border-t border-gray-200 dark:border-neutral-700 p-4 space-y-2">
-              <div class="grid grid-cols-2 gap-2">
-                <select v-model="draft[s.id].type" class="text-xs rounded border border-gray-200 dark:border-neutral-700">
-                  <option value="pelanggaran">Pelanggaran</option>
-                  <option value="keteladanan">Keteladanan</option>
-                </select>
-                <select v-model="draft[s.id].category" class="text-xs rounded border border-gray-200 dark:border-neutral-700">
-                  <option v-for="c in categories" :key="c" :value="c">{{ labelCategory(c) }}</option>
-                </select>
-                <select v-model="draft[s.id].severity" class="text-xs rounded border border-gray-200 dark:border-neutral-700">
-                  <option>Ringan</option><option>Sedang</option><option>Berat</option>
-                </select>
-                <input v-model.trim="draft[s.id].title" placeholder="Judul" class="rounded border border-gray-200 dark:border-neutral-700 px-2 py-1"/>
-                <input v-model.number="draft[s.id].points" type="number" placeholder="Poin" class="rounded border border-gray-200 dark:border-neutral-700 px-2 py-1"/>
-              </div>
-              <div class="mt-2 flex items-center justify-end gap-2">
-                <button class="px-2 py-1 text-xs rounded border border-gray-200 dark:border-neutral-700" @click="openEditFirst(s.id)">Modal</button>
-                <button class="px-2 py-1 text-xs rounded bg-blue-600 text-white" @click="saveOne(s.id)">Simpan</button>
-              </div>
-
-              <div class="pt-3">
-                <div class="text-xs text-gray-500 mb-1">Entri bulan ini</div>
-                <div v-for="e in entriesBySantri.get(s.id) || []" :key="e.id" class="rounded border border-gray-200 dark:border-neutral-700 p-2 text-xs flex items-start gap-2">
-                  <div class="min-w-0">
-                    <div class="font-medium truncate">{{ e.title || '(tanpa judul)' }}</div>
-                    <div class="text-[10px] text-gray-500">{{ new Date(e.createdAt as number).toLocaleString() }} • {{ labelCategory(e.category) }} • {{ e.severity }}</div>
-                  </div>
-                  <div class="ml-auto text-right">
-                    <div :class="[ 'font-semibold', e.points>=0 ? 'text-emerald-600' : 'text-rose-600' ]">{{ e.points }}</div>
-                    <div class="mt-1 flex items-center gap-1 justify-end">
-                      <button class="px-2 py-1 rounded border" @click="openEdit(e)">Edit</button>
-                      <button class="px-2 py-1 rounded border text-rose-600" @click="removeEntry(e)">Hapus</button>
-                    </div>
-                  </div>
-                </div>
-                <div v-if="!(entriesBySantri.get(s.id)?.length)" class="text-xs text-gray-500">—</div>
-              </div>
-            </div>
-          </details>
-        </div>
-
-        <div class="flex items-center justify-between mt-2">
-          <button class="px-3 py-1.5 text-xs rounded border border-gray-200 dark:border-neutral-700" :disabled="page<=1" @click="page--">Prev</button>
-          <div class="text-xs">Halaman {{ page }} / {{ totalPages || 1 }}</div>
-          <button class="px-3 py-1.5 text-xs rounded border border-gray-200 dark:border-neutral-700" :disabled="page>=totalPages" @click="page++">Next</button>
         </div>
       </div>
     </details>
@@ -498,8 +287,10 @@
                   <input v-model.trim="form.title" class="mt-1 w-full rounded border border-gray-200 dark:border-neutral-700 px-3 py-2"/>
                 </div>
                 <div>
-                  <label class="text-xs">Poin</label>
-                  <input v-model.number="form.points" type="number" class="mt-1 w-full rounded border border-gray-200 dark:border-neutral-700 px-3 py-2"/>
+                  <label class="text-xs">Penilaian</label>
+                  <select v-model="form.rating" class="mt-1 w-full rounded border border-gray-200 dark:border-neutral-700 px-3 py-2">
+                    <option v-for="opt in RATING_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                  </select>
                 </div>
               </div>
 
@@ -616,7 +407,7 @@ const { rows: santriRows, fetchSantri, subscribeSantri, unsubscribeSantri } = us
 const {
   rows, subscribePatience, unsubscribePatience,
   createPatience, updatePatience, deletePatience,
-  chipStatus, labelStatus, labelCategory, makeTermKey
+  labelCategory, makeTermKey
 } = usePatience()
 
 /* ===== Mode ===== */
@@ -640,7 +431,6 @@ const monthTo   = computed(()=> new Date(tahun.value, bulan.value,   0, 23,59,59
 function reloadMonth(){ subscribePatience({ limit: 5000, from: monthFrom.value, to: monthTo.value, term: termKey.value }) }
 watch([bulan, tahun, termKey], () => reloadMonth())
 
-/* ===== Filters (Santri) ===== */
 const q = ref('')
 const selectedJenjang = ref<'all'|'SD'|'SMP'|'SMA'|'SMK'>('all')
 const selectedMaskan = ref<'all'|string>('all')
@@ -651,8 +441,7 @@ const maskanOptions = computed(()=> {
   return Array.from(s).sort((a,b)=>a.localeCompare(b))
 })
 
-/* ===== Derive: entries bulan & indeks by santri ===== */
-const monthEntries = computed<PatienceEntry[]>(() => rows.value.slice()) // sudah difilter by subscribe (range+term)
+const monthEntries = computed<PatienceEntry[]>(() => rows.value.slice())
 const entriesBySantri = computed<Map<string, PatienceEntry[]>>(() => {
   const m = new Map<string, PatienceEntry[]>()
   for (const e of monthEntries.value) {
@@ -669,10 +458,7 @@ const saldoBySantri = computed<Record<string, number>>(() => {
   return o
 })
 const totalEntries = computed(()=> monthEntries.value.length)
-const totalMinus = computed(()=> monthEntries.value.filter(x=>x.points<0).reduce((a,b)=>a+(b.points||0),0))
-const totalPlus  = computed(()=> monthEntries.value.filter(x=>x.points>0).reduce((a,b)=>a+(b.points||0),0))
 
-/* ===== Santri list + paginate (untuk mode 'santri') ===== */
 const filteredSantri = computed(()=> {
   let list = santriRows.value.slice()
   if (selectedJenjang.value !== 'all') list = list.filter(s => (s.jenjang||'').toUpperCase().includes(selectedJenjang.value))
@@ -685,93 +471,14 @@ const totalFiltered = computed(()=> filteredSantri.value.length)
 
 const pageSize = ref(20)
 const page = ref(1)
-const totalPages = computed(()=> Math.max(1, Math.ceil(filteredSantri.value.length / pageSize.value)))
 watch([filteredSantri, pageSize], ()=> { page.value = 1 })
-const pagedSantri = computed(()=> {
-  const start = (page.value - 1) * pageSize.value
-  return filteredSantri.value.slice(start, start + pageSize.value)
-})
 
-/* ===== Draft entri per-santri (mode 'santri') ===== */
-type DraftEntry = {
-  type: 'pelanggaran'|'keteladanan'
-  category: PatienceCategory
-  severity: 'Ringan'|'Sedang'|'Berat'
-  title: string
-  points: number
-  desc?: string
-  reportedBy?: string
-  handledBy?: string
-  location?: string
-}
-const categories: PatienceCategory[] = ['adab','kedisiplinan','kebersihan','ibadah','akademik','lainnya']
-const draft = reactive<Record<string, DraftEntry>>({})
-function ensureDraftFor(id:string){
-  draft[id] = draft[id] || { type:'pelanggaran', category:'kedisiplinan', severity:'Ringan', title:'', points:0, desc:'', reportedBy:'', handledBy:'', location:'' }
-}
-watch(pagedSantri, ()=> { for (const s of pagedSantri.value) ensureDraftFor(s.id) })
-
-/* Helpers */
+const categories: PatienceCategory[] = ['akademik','kebersihan','ibadah','lainnya']
 function selectedMonthMidTs(){ return new Date(tahun.value, bulan.value-1, 15, 12, 0, 0, 0).getTime() }
 
-/* ===== Selection (mode 'santri') ===== */
 const selected = ref<string[]>([])
-const selectedSet = computed(()=> new Set(selected.value))
 const selectedCount = computed(()=> selected.value.length)
-function isSelected(id:string){ return selectedSet.value.has(id) }
-function toggleSelect(id:string){
-  const i = selected.value.indexOf(id)
-  if (i>=0) selected.value.splice(i,1); else selected.value.push(id)
-}
-const isAllPageSelected = computed(()=> pagedSantri.value.length>0 && pagedSantri.value.every(s=>selectedSet.value.has(s.id)))
-function toggleSelectAllPage(){
-  if (isAllPageSelected.value){
-    selected.value = selected.value.filter(id => !pagedSantri.value.some(s=>s.id===id))
-  } else {
-    const add = pagedSantri.value.map(s=>s.id).filter(id=>!selectedSet.value.has(id))
-    selected.value = selected.value.concat(add)
-  }
-}
-
-/* ===== Row expand (mode 'santri') ===== */
-const rowExpandedId = ref<string|null>(null)
-function toggleRow(id: string){ rowExpandedId.value = rowExpandedId.value === id ? null : id }
-
-/* ===== CRUD cepat (mode 'santri') ===== */
-async function saveOne(id:string){
-  ensureDraftFor(id)
-  const d = draft[id]
-  if (!d.title?.trim() && !Number(d.points)) { return }
-  const s = santriRows.value.find(x=>x.id===id)
-  if (!s) return
-  await createPatience({
-    santriId: id,
-    name: s.santri || 'Santri',
-    type: d.type,
-    category: d.category,
-    severity: d.severity,
-    title: d.title?.trim() || '',
-    desc: d.desc?.trim(),
-    points: Number(d.points||0),
-    reportedBy: d.reportedBy?.trim(),
-    handledBy: d.handledBy?.trim(),
-    location: d.location?.trim(),
-    status: 'open',
-    term: termKey.value,
-    createdAt: selectedMonthMidTs(),
-    evidenceFile: undefined
-  } as any)
-  d.title=''; d.points=0
-}
-async function saveAll(){ for (const s of pagedSantri.value){ await saveOne(s.id) } }
-async function saveSelected(){
-  if (!selectedCount.value) return
-  for (const id of selected.value){ await saveOne(id) }
-}
-
-/* ===== Delete semua entri bulan ini (selected) ===== */
 const showKebab = ref(false)
-const showBulkMenu = ref(false)
 const showDeleteMonth = ref(false)
 const deleteMonthConfirm = ref('')
 const deleting = ref(false)
@@ -794,7 +501,21 @@ async function performDeleteMonthSelected(){
   } finally { deleting.value = false }
 }
 
-/* ===== Modal Edit ===== */
+const RATING_OPTIONS = [
+  { value: 'SANGAT_KURANG', label: 'Sangat Kurang', points: -2 },
+  { value: 'KURANG',        label: 'Kurang',        points: -1 },
+  { value: 'CUKUP',         label: 'Cukup',         points:  0 },
+  { value: 'BAIK',          label: 'Baik',          points:  1 },
+  { value: 'SANGAT_BAIK',   label: 'Sangat Baik',   points:  2 },
+] as const
+type RatingValue = typeof RATING_OPTIONS[number]['value']
+const labelRating = (r?: RatingValue|null) =>
+  RATING_OPTIONS.find(x=>x.value===r)?.label || '-'
+const ratingToPoints = (r?: RatingValue|null) =>
+  RATING_OPTIONS.find(x=>x.value===r)?.points ?? 0
+const pointsToRating = (p: number): RatingValue =>
+  p>=2 ? 'SANGAT_BAIK' : p===1 ? 'BAIK' : p===0 ? 'CUKUP' : p===-1 ? 'KURANG' : 'SANGAT_KURANG'
+
 const showForm = ref(false)
 const formMode = ref<'create'|'edit'>('create')
 const saving = ref(false)
@@ -802,30 +523,25 @@ const editing = ref<PatienceEntry|null>(null)
 const evidenceFile = ref<File|null>(null)
 const form = reactive<any>({
   name:'', santriId:'', type:'pelanggaran',
-  category:'kedisiplinan', severity:'Ringan',
-  title:'', desc:'', points:-1,
+  category:'lainnya', severity:'Ringan',
+  title:'', desc:'', rating:'' as RatingValue|'',
   reportedBy:'', handledBy:'', location:''
 })
-function resetForm(){
-  Object.assign(form, { name:'', santriId:'', type:'pelanggaran', category:'kedisiplinan', severity:'Ringan', title:'', desc:'', points:-1, reportedBy:'', handledBy:'', location:'' })
-  evidenceFile.value = null
-}
+
+const dist = computed(() => {
+  let sangatKurang=0, kurang=0, cukup=0, baik=0, sangatBaik=0
+  for (const e of monthEntries.value) {
+    const r = pointsToRating(Number(e.points||0))
+    if (r==='SANGAT_KURANG') sangatKurang++
+    else if (r==='KURANG') kurang++
+    else if (r==='CUKUP') cukup++
+    else if (r==='BAIK') baik++
+    else if (r==='SANGAT_BAIK') sangatBaik++
+  }
+  return { sangatKurang, kurang, cukup, baik, sangatBaik }
+})
 function onPickEvidence(ev: Event){ evidenceFile.value = (ev.target as HTMLInputElement).files?.[0] || null }
-function openEditFirst(id:string){
-  const first = (entriesBySantri.value.get(id) || [])[0]
-  if (!first) { return }
-  openEdit(first)
-}
-function openEdit(e: PatienceEntry){
-  formMode.value='edit'; resetForm(); editing.value = e
-  Object.assign(form, {
-    santriId: e.santriId, name: e.name, type: e.type,
-    category: e.category, severity: e.severity,
-    title: e.title, desc: e.desc || '', points: e.points,
-    reportedBy: e.reportedBy || '', handledBy: e.handledBy || '', location: e.location || ''
-  })
-  showForm.value = true
-}
+
 function closeForm(){ showForm.value = false }
 async function submitForm(){
   if (!form.name?.trim() || !form.title?.trim()) { return }
@@ -835,7 +551,7 @@ async function submitForm(){
       await updatePatience(editing.value.id, {
         santriId: form.santriId, name: form.name.trim(), type: form.type,
         category: form.category, severity: form.severity,
-        title: form.title.trim(), desc: form.desc?.trim(), points: Number(form.points||0),
+        title: form.title.trim(), desc: form.desc?.trim(),  points: ratingToPoints(form.rating as RatingValue),
         reportedBy: form.reportedBy?.trim(), handledBy: form.handledBy?.trim(), location: form.location?.trim(),
         term: termKey.value,
         evidenceFile: evidenceFile.value || undefined
@@ -845,15 +561,17 @@ async function submitForm(){
   } finally { saving.value = false }
 }
 
-/* ===== Row actions pada detail ===== */
-async function toReview(e: PatienceEntry){ await updatePatience(e.id, { status: 'review' }) }
-async function closeCase(e: PatienceEntry){ await updatePatience(e.id, { status: 'closed' }) }
-async function voidCase(e: PatienceEntry){ if (confirm('Jadikan VOID entri ini?')) await updatePatience(e.id, { status: 'void' }) }
-async function removeEntry(e: PatienceEntry){ if (confirm(`Hapus entri: ${e.title}?`)) await deletePatience(e.id) }
+function countRated(key:string){
+  let n = 0
+  for (const s of membersForKey(key)){
+    const d = roomDraft[s.id]
+    if (d?.rating) n++
+  }
+  return n
+}
 
-/* ===== Export CSV (bulan+term) ===== */
 function exportCSV(){
-  const header = ['term','bulan','tahun','santriId','nama','saldo_bulan','tipe','kategori','level','judul','poin','status','waktu']
+  const header = ['term','bulan','tahun','santriId','nama','rating','tipe','kategori','level','judul','status','waktu']
   const lines = [header.join(',')]
   for (const s of filteredSantri.value){
     const saldo = saldoBySantri.value[s.id] ?? 0
@@ -865,8 +583,9 @@ function exportCSV(){
     } else {
       for (const e of list){
         const cols = [
-          termKey.value, bulanLabel[bulan.value-1], tahun.value, s.id, s.santri||'', saldo,
-          e.type, e.category, e.severity, e.title, e.points, e.status, new Date(e.createdAt as number).toISOString()
+          termKey.value, bulanLabel[bulan.value-1], tahun.value, s.id, s.santri||'',
+          labelRating(pointsToRating(Number(e.points||0))), // rating
+          e.type, e.category, e.severity, e.title, e.status, new Date(e.createdAt as number).toISOString()
         ].map(x => `"${String(x).replace(/"/g,'""')}"`)
         lines.push(cols.join(','))
       }
@@ -877,7 +596,6 @@ function exportCSV(){
   a.href = url; a.download = `patience_${termKey.value}_${tahun.value}-${String(bulan.value).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(url)
 }
 
-/* ===== Autocomplete Santri pada modal ===== */
 const sFocus = ref(false); const sQuery = ref('')
 const norm = (s?: any) => String(s ?? '').normalize('NFKC').trim().toLowerCase()
 const sOptions = computed(() => {
@@ -889,10 +607,8 @@ const sOptions = computed(() => {
 })
 function pickSantri(s:any){ form.santriId = s.id; form.name = s.santri; sQuery.value=''; sFocus.value=false }
 
-/* ====== Tree: Maskan -> Kamar -> Santri (mode 'kamar') ====== */
 type MKRoom = { key:string; kamar:string; members:any[]; count:number }
 type MKTree = { maskan:string; total:number; kamars:MKRoom[] }
-
 const roomKey = (maskan?:string, kamar?:string) => `${(maskan||'').trim()}__${(kamar||'').trim()}`
 
 const maskanKamarTree = computed<MKTree[]>(() => {
@@ -914,36 +630,29 @@ const maskanKamarTree = computed<MKTree[]>(() => {
   return out.sort((a,b)=> a.maskan.localeCompare(b.maskan))
 })
 
-/* Draft per-santri (dipakai di semua kamar) */
-/* ===== Draft per-santri (persisten per-bulan) ===== */
-type RoomDraftItem = { adab:number; kedisiplinan:number; note:string }
+type RoomDraftItem = { adab: RatingValue | ''; kedisiplinan: RatingValue | ''; note: string }
 const roomDraft = reactive<Record<string, RoomDraftItem>>({})
-
 function ensureRoomDraftFor(id:string){
-  // default saat belum ada data dari DB
-  if (!roomDraft[id]) roomDraft[id] = { adab:0, kedisiplinan:0, note:'' }
+  if (!roomDraft[id]) roomDraft[id] = { adab:'', kedisiplinan:'', note:'' }
 }
 function getRoomDraft(id:string){ ensureRoomDraftFor(id); return roomDraft[id] }
 
-/* Sinkronisasi dari DB (re-subscribe saat ganti bulan/term) */
 let _unsubDraft: null | (() => void) = null
 function unsubscribeDraft(){ if (_unsubDraft) { _unsubDraft(); _unsubDraft = null } }
 
 function subscribeDraft(){
   const { $realtimeDb } = useNuxtApp() as any
   unsubscribeDraft()
-  // clear local sebelum isi ulang, biar tidak bawa draft bulan lama
   for (const k of Object.keys(roomDraft)) delete roomDraft[k]
   const ref = dbRef($realtimeDb, draftBasePath.value)
   const h = onValue(ref, (snap) => {
     const v = snap.val() || {}
-    // Isi reaktif dari DB
     for (const k of Object.keys(roomDraft)) delete roomDraft[k]
     for (const id of Object.keys(v)) {
       const it = v[id] || {}
       roomDraft[id] = {
-        adab: Number(it.adab || 0),
-        kedisiplinan: Number(it.kedisiplinan || 0),
+        adab: (it.adab || '') as RatingValue | '',
+        kedisiplinan: (it.kedisiplinan || '') as RatingValue | '',
         note: String(it.note || '')
       }
     }
@@ -952,7 +661,6 @@ function subscribeDraft(){
 }
 watch([monthKey, termKey], () => { subscribeDraft() })
 
-/* Debounced save ke DB per-santri */
 const _saveTimers: Record<string, any> = {}
 function onDraftChange(santriId: string){
   ensureRoomDraftFor(santriId)
@@ -963,15 +671,14 @@ async function saveDraft(santriId: string){
   const { $realtimeDb } = useNuxtApp() as any
   ensureRoomDraftFor(santriId)
   await set(dbRef($realtimeDb, `${draftBasePath.value}/${santriId}`), {
-    adab: Number(roomDraft[santriId].adab || 0),
-    kedisiplinan: Number(roomDraft[santriId].kedisiplinan || 0),
-    note: String(roomDraft[santriId].note || '')
+    adab: roomDraft[santriId]!.adab || '',
+    kedisiplinan: roomDraft[santriId]!.kedisiplinan || '',
+    note: String(roomDraft[santriId]!.note || '')
   })
 }
 
-/* Fill massal per kamar */
-const fillAllRoom = reactive<Record<string, { adab:number; kedisiplinan:number; note:string }>>({})
-function ensureFillKey(key:string){ if (!fillAllRoom[key]) fillAllRoom[key] = { adab:0, kedisiplinan:0, note:'' } }
+const fillAllRoom = reactive<Record<string, { adab: RatingValue|''; kedisiplinan: RatingValue|''; note: string }>>({})
+function ensureFillKey(key:string){ if (!fillAllRoom[key]) fillAllRoom[key] = { adab:'', kedisiplinan:'', note:'' } }
 function getFillFor(key:string){ ensureFillKey(key); return fillAllRoom[key] }
 
 function membersForKey(key:string){
@@ -981,31 +688,19 @@ function membersForKey(key:string){
 
 function applyFillFor(key:string){
   ensureFillKey(key)
-  const fill = fillAllRoom[key]
+  const fill = fillAllRoom[key]!
   for (const s of membersForKey(key)){
     ensureRoomDraftFor(s.id)
-    roomDraft[s.id].adab = Number(fill.adab || 0)
-    roomDraft[s.id].kedisiplinan = Number(fill.kedisiplinan || 0)
-    if (fill.note?.trim()) roomDraft[s.id].note = fill.note.trim()
+    if (fill.adab) roomDraft[s.id]!.adab = fill.adab
+    if (fill.kedisiplinan) roomDraft[s.id]!.kedisiplinan = fill.kedisiplinan
+    if (fill.note?.trim()) roomDraft[s.id]!.note = fill.note.trim()
     onDraftChange(s.id)
   }
 }
-function clearFillFor(key:string){ fillAllRoom[key] = { adab:0, kedisiplinan:0, note:'' } }
+function clearFillFor(key:string){ fillAllRoom[key] = { adab:'', kedisiplinan:'', note:'' } }
 
-/* Ringkasan draft per kamar */
-function calcRoomTotals(key:string){
-  let plus = 0, minus = 0
-  for (const s of membersForKey(key)){
-    const d = roomDraft[s.id] || { adab:0, kedisiplinan:0, note:'' }
-    if (d.adab>0) plus += d.adab; else minus += d.adab
-    if (d.kedisiplinan>0) plus += d.kedisiplinan; else minus += d.kedisiplinan
-  }
-  return { plus, minus }
-}
-
-/* Simpan per kamar */
 const savingRoom = ref(false)
-const typeForPoints = (p:number)=> p>=0 ? 'keteladanan' : 'pelanggaran'
+const typeForPoints = (p:number)=> p>0 ? 'keteladanan' : (p<0 ? 'pelanggaran' : 'keteladanan')
 
 async function saveRoomFor(key:string){
   const members = membersForKey(key)
@@ -1014,40 +709,69 @@ async function saveRoomFor(key:string){
   try{
     const [m,k] = key.split('__')
     for (const s of members){
-      const d = roomDraft[s.id] || { adab:0, kedisiplinan:0, note:'' }
-      const base = {
-        santriId: s.id,
-        name: s.santri || 'Santri',
-        severity: 'Ringan' as const,
-        reportedBy: '', handledBy: '',
-        location: `${m} • ${k}`,
-        term: termKey.value,
-        createdAt: selectedMonthMidTs(),
-        evidenceFile: undefined
+      const d = roomDraft[s.id]
+      if (!d) continue
+
+      // Adab
+      if (d.adab){
+        const pts = ratingToPoints(d.adab as RatingValue)
+        await createPatience({
+          santriId: s.id,
+          name: s.santri || 'Santri',
+          type: typeForPoints(pts),
+          category: 'adab',
+          severity: 'Ringan',
+          title: `Adab — ${labelRating(d.adab as RatingValue)}`,
+          desc: d.note?.trim() || '',
+          points: pts,
+          reportedBy: '',
+          handledBy: '',
+          location: `${m} • ${k}`,
+          status: 'open',
+          term: termKey.value,
+          createdAt: selectedMonthMidTs(),
+          evidenceFile: undefined
+        } as any)
       }
-      if (Number(d.adab)){
-        await createPatience({ ...base, type: typeForPoints(d.adab), category:'adab', title:'Adab', desc:d.note?.trim()||'', points:Number(d.adab) } as any)
-      }
-      if (Number(d.kedisiplinan)){
-        await createPatience({ ...base, type: typeForPoints(d.kedisiplinan), category:'kedisiplinan', title:'Kedisiplinan', desc:d.note?.trim()||'', points:Number(d.kedisiplinan) } as any)
+
+      // Kedisiplinan
+      if (d.kedisiplinan){
+        const pts = ratingToPoints(d.kedisiplinan as RatingValue)
+        await createPatience({
+          santriId: s.id,
+          name: s.santri || 'Santri',
+          type: typeForPoints(pts),
+          category: 'kedisiplinan',
+          severity: 'Ringan',
+          title: `Kedisiplinan — ${labelRating(d.kedisiplinan as RatingValue)}`,
+          desc: d.note?.trim() || '',
+          points: pts,
+          reportedBy: '',
+          handledBy: '',
+          location: `${m} • ${k}`,
+          status: 'open',
+          term: termKey.value,
+          createdAt: selectedMonthMidTs(),
+          evidenceFile: undefined
+        } as any)
       }
     }
-  } catch(e:any){
   } finally { savingRoom.value = false }
 }
 
-/* Export CSV per kamar */
 function exportRoomCSVFor(key:string){
   const members = membersForKey(key); if (!members.length) return
   const [m,k] = key.split('__')
-  const header = ['term','bulan','tahun','maskan','kamar','santriId','nama','adab','kedisiplinan','catatan','saldo_bulan']
+  const header = ['term','bulan','tahun','maskan','kamar','santriId','nama','rating_adab','rating_kedisiplinan','catatan']
   const lines = [header.join(',')]
   for (const s of members){
-    const d = roomDraft[s.id] || { adab:0, kedisiplinan:0, note:'' }
+    const d = roomDraft[s.id] || { adab:'', kedisiplinan:'', note:'' }
     const cols = [
       termKey.value, bulanLabel[bulan.value-1], tahun.value, m, k,
-      s.id, s.santri || '', Number(d.adab||0), Number(d.kedisiplinan||0),
-      (d.note||'').replace(/"/g,'""'), (saldoBySantri.value[s.id] ?? 0)
+      s.id, s.santri || '',
+      d.adab ? labelRating(d.adab as RatingValue) : '',
+      d.kedisiplinan ? labelRating(d.kedisiplinan as RatingValue) : '',
+      (d.note||'').replace(/"/g,'""')
     ].map(x => `"${String(x)}"`)
     lines.push(cols.join(','))
   }
