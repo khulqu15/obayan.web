@@ -89,10 +89,13 @@ export const useIzin = () => {
   async function approveIzin(id: string) { await updateIzin(id, { status:'approved', approvedAt: Date.now() }) }
   async function rejectIzin(id: string)  { const r = rows.value.find(x => x.id === id); if (!r) return; await archiveAndRemove(r, 'rejected') }
   async function markOut(id: string)     { await updateIzin(id, { status:'out', outAt: Date.now() }) }
-  async function markReturned(id: string){
-    const r = rows.value.find(x => x.id === id); if (!r) return
-    await archiveAndRemove({ ...r, status:'returned', returnedAt: Date.now() })
+  async function markReturned(id: string) {
+    await updateIzin(id, {
+      status: 'returned',
+      returnedAt: Date.now()
+    })
   }
+
 
   async function archiveAndRemove(r: IzinRow, finalStatus?: IzinStatus) {
     const { $realtimeDb } = useNuxtApp()

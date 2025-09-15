@@ -89,7 +89,7 @@
               <!-- Action -->
               <template #cell-action="{ row }">
                 <div class="flex flex-wrap gap-1">
-                  <button v-if="row.status!=='returned'" @click="markReturned(row.id)" class="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">Return</button>
+                  <button v-if="row.status!=='returned' && row.status!=='done'" @click="markReturned(row.id)" class="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">Return</button>
                   <button @click="openEdit(row)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800">Edit</button>
                   <button @click="openDelete(row)" class="text-xs px-2 py-1 rounded border text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
                   <button @click="printIzin(row)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800">Print (Dot Matrix)</button>
@@ -98,53 +98,86 @@
             </DataTable>
           </div>
 
-          <!-- HISTORY (daftar sesi) -->
+          <!-- HISTORY: tampilkan hanya yang selesai (returned/done) -->
           <div v-else>
-            <div class="flex items-end gap-2 mb-2">
-              <div>
-                <label class="text-xs text-gray-600 dark:text-neutral-300">Tanggal</label>
-                <input v-model="histDate" type="date" class="px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+            <div class="flex items-center flex-wrap justify-between mb-2">
+              <h3 class="font-semibold">History</h3>
+              <div class="flex items-center justify-end gap-3">
+                <button @click="exportAllHistoryCSV" class="text-xs px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">
+                  Export CSV
+                </button>
+                <button
+                  :disabled="!historyRows.length || deletingAll"
+                  @click="openDeleteAllModal"
+                  class="text-xs px-3 py-1.5 rounded border border-rose-300 text-rose-700 hover:bg-rose-50
+                        dark:border-rose-800 dark:text-rose-300 dark:hover:bg-rose-900/20 disabled:opacity-60"
+                >
+                  {{ deletingAll ? 'Menghapus…' : 'Delete All' }}
+                </button>
               </div>
-              <div>
-                <label class="text-xs text-gray-600 dark:text-neutral-300">Batas sesi</label>
-                <select v-model.number="histLimit" class="px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700">
-                  <option :value="10">10</option>
-                  <option :value="20">20</option>
-                  <option :value="50">50</option>
-                </select>
-              </div>
-              <button @click="reloadHistory" class="text-xs px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Muat History</button>
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-neutral-700">
               <table class="min-w-full text-sm">
                 <thead class="bg-gray-50 dark:bg-neutral-900/40">
                   <tr class="text-left">
-                    <th class="px-3 py-2">Sesi</th>
-                    <th class="px-3 py-2">Total</th>
-                    <th class="px-3 py-2 w-32">Action</th>
+                    <th class="px-3 py-2">Nama</th>
+                    <th class="px-3 py-2">Maskan</th>
+                    <th class="px-3 py-2">Kamar</th>
+                    <th class="px-3 py-2">Status</th>
+                    <th class="px-3 py-2">Keluar</th>
+                    <th class="px-3 py-2">Kembali</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-neutral-800">
-                  <tr v-for="s in history" :key="s.id">
-                    <td class="px-3 py-2 font-medium">{{ s.id }}</td>
-                    <td class="px-3 py-2">{{ s.meta?.total || 0 }}</td>
-                    <td class="px-3 py-2">
-                      <div class="flex items-center gap-2">
-                        <button @click="openHistoryDetail(s.id)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800">Detail</button>
-                        <button @click="exportHistoryCSV(s.id)" class="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">Export CSV</button>
-                      </div>
-                    </td>
+                  <tr v-for="r in historyRows" :key="r.id">
+                    <td class="px-3 py-2">{{ r.name }}</td>
+                    <td class="px-3 py-2">{{ r.maskan || '-' }}</td>
+                    <td class="px-3 py-2">{{ r.kamar || '-' }}</td>
+                    <td class="px-3 py-2">{{ labelStatus(r.status) }}</td>
+                    <td class="px-3 py-2">{{ formatDT(outTs(r)) }}</td>
+                    <td class="px-3 py-2">{{ formatDT(backTs(r)) }}</td>
                   </tr>
-                  <tr v-if="!history.length">
-                    <td colspan="3" class="px-3 py-6 text-center text-gray-500">Belum ada history.</td>
+                  <tr v-if="!historyRows.length">
+                    <td colspan="6" class="px-3 py-6 text-center text-gray-500">Belum ada data.</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
+
         </div>
       </div>
+
+      <ModalShell v-model="showDeleteAllModal" title="Hapus Semua History">
+        <div class="space-y-3 text-sm">
+          <p class="text-rose-600 font-medium">Tindakan ini permanen.</p>
+          <p>
+            Anda akan menghapus <strong>{{ historyRows.length }}</strong> data perizinan
+            yang sudah selesai (<code>returned/done</code>).
+          </p>
+          <ul class="list-disc pl-5 text-gray-600 dark:text-neutral-300">
+            <li>Data yang dihapus tidak bisa dikembalikan.</li>
+            <li>Data aktif (belum kembali) tidak ikut terhapus.</li>
+          </ul>
+        </div>
+        <template #footer>
+          <button
+            @click="showDeleteAllModal=false"
+            class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700
+                  hover:bg-gray-50 dark:hover:bg-neutral-800"
+          >
+            Batal
+          </button>
+          <button
+            :disabled="deletingAll"
+            @click="confirmDeleteAll"
+            class="px-3 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-60"
+          >
+            {{ deletingAll ? 'Menghapus…' : 'Hapus Semua' }}
+          </button>
+        </template>
+      </ModalShell>
 
       <!-- MODAL Create/Edit -->
       <ModalShell v-model="showForm" :title="formMode==='create' ? 'Tambah Izin' : 'Ubah Izin'">
@@ -306,7 +339,6 @@ const columns = [
   { key: 'rfid', label: 'Status RFID' },
   { key: 'waktukeluar', label: 'Waktu Keluar', sortable: true },
   { key: 'waktukembali', label: 'Waktu Kembali', sortable: true },
-  { key: 'action', label: 'Aksi' },
 ]
 
 const SURAT_HEADER = {
@@ -330,6 +362,36 @@ function formatDT(ts?: number){
   const d = new Date(ts)
   return `${two(d.getDate())}/${two(d.getMonth()+1)}/${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`
 }
+
+// === Delete All (History) ===
+const showDeleteAllModal = ref(false)
+const deletingAll = ref(false)
+
+function openDeleteAllModal() {
+  if (!historyRows.value.length) return
+  showDeleteAllModal.value = true
+}
+
+async function confirmDeleteAll() {
+  if (!historyRows.value.length) { showDeleteAllModal.value = false; return }
+  deletingAll.value = true
+  try {
+    // ambil id unik agar aman
+    const ids = Array.from(new Set(historyRows.value.map(r => r.id)))
+    // hapus paralel tapi batasi (kalau perlu sequential, ganti ke for..of await)
+    await Promise.all(ids.map(id => deleteIzin(id)))
+    showDeleteAllModal.value = false
+    // refresh list
+    await fetchIzin()
+  } catch (e) {
+    console.error(e)
+    alert('Gagal menghapus semua history.')
+  } finally {
+    deletingAll.value = false
+  }
+}
+
+
 function toLocalInputValue(ts?: number) {
   if (!ts) return ''
   const d = new Date(ts)
@@ -461,8 +523,10 @@ function tipeForMaskan(name?: string): 'Putra'|'Putri'|'Unknown' {
 const filteredRows = computed(() => {
   return rows.value.filter(r => {
     const t = tipeForMaskan(r.maskan)
-    if (activeTipe.value === 'ALL') return true
-    return t === activeTipe.value
+    if (activeTipe.value !== 'ALL' && t !== activeTipe.value) return false
+    // hanya tampilkan yang masih aktif (bukan returned/done)
+    const st = (r.status || '').toLowerCase()
+    return st !== 'returned' && st !== 'done'
   })
 })
 
@@ -504,22 +568,24 @@ function rfidPill(row: IzinRow) {
 }
 
 // Chips
-function chipStatus(s: IzinStatus) {
+function chipStatus(s: any) {
   const base = 'inline-flex items-center px-2 py-0.5 text-xs rounded'
-  const map: Record<IzinStatus,string> = {
+  const map: Record<string,string> = {
     pending:  `${base} bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-neutral-300`,
     approved: `${base} bg-blue-100 700 dark:bg-blue-900/30 dark:300`,
     out:      `${base} bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300`,
     returned: `${base} bg-blue-100 700 dark:bg-blue-900/30 dark:300`,
+    done:     `${base} bg-blue-100 700 dark:bg-blue-900/30 dark:300`,
     rejected: `${base} bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300`,
   }
-  return map[s]
+  return map[(s||'').toLowerCase()] || map.pending
 }
-function labelStatus(s: IzinStatus) {
-  if (s==='returned') return 'Sudah Kembali'
-  if (s==='approved') return 'Disetujui'
-  if (s==='out') return 'Keluar'
-  if (s==='rejected') return 'Ditolak'
+function labelStatus(s: any) {
+  const v = (s||'').toLowerCase()
+  if (v==='returned' || v==='done') return 'Sudah Kembali'
+  if (v==='approved') return 'Disetujui'
+  if (v==='out') return 'Keluar'
+  if (v==='rejected') return 'Ditolak'
   return 'Menunggu'
 }
 
@@ -595,6 +661,37 @@ function openEdit(r: IzinRow) {
   formError.value = null
   showForm.value = true
 }
+
+function outTs(r: IzinRow) { return (r as any).outAt ?? (r as any).plannedOutAt }
+function backTs(r: IzinRow) { return (r as any).returnedAt ?? (r as any).plannedReturnAt }
+
+// Semua history tanpa filter, urut terbaru: returnedAt > outAt > requestedAt
+const historyRows = computed(() =>
+  rows.value
+    .filter(r => ['returned','done'].includes((r.status || '').toLowerCase()))
+    .sort((a, b) =>
+      ((b as any).returnedAt ?? (b as any).outAt ?? b.requestedAt ?? 0) -
+      ((a as any).returnedAt ?? (a as any).outAt ?? a.requestedAt ?? 0)
+    )
+)
+
+function exportAllHistoryCSV() {
+  const header = ['Nama','Maskan','Kamar','Status','Keluar','Kembali']
+  const lines = [header.join(',')]
+  for (const r of historyRows.value) {
+    const cols = [
+      r.name, r.maskan || '', r.kamar || '', labelStatus(r.status),
+      formatDT(outTs(r)), formatDT(backTs(r))
+    ].map(x => `"${String(x ?? '').replace(/"/g,'""')}"`)
+    lines.push(cols.join(','))
+  }
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = `izin_history_returned.csv`; a.click()
+  URL.revokeObjectURL(url)
+}
+
 
 async function submitForm() {
   // sync datetime
