@@ -34,7 +34,9 @@ export type HafalanEntry = {
   checkedAt?: number
 }
 
-export type CreateHafalanPayload = Omit<HafalanEntry,'id'|'submittedAt'|'audioUrl'|'audioPath'|'predikat'> & { audioFile?: File|null }
+export type CreateHafalanPayload = Omit<HafalanEntry,'id'|'submittedAt'|'audioUrl'|'audioPath'|'predikat'>
+  & { audioFile?: File|null; submittedAt?: number }
+
 export type UpdateHafalanPayload = Partial<Omit<CreateHafalanPayload,'santriId'|'name'|'type'|'meta'>> & {
   meta?: Partial<HafalanEntry['meta']>
 }
@@ -165,7 +167,8 @@ export const useHafalan = () => {
         status: (payload.status || 'pending') as HafalanStatus,
         evaluator: String(payload.evaluator || ''),
         audioUrl, audioPath,
-        submittedAt: serverTimestamp()
+        // ⬇ gunakan override jika ada, kalau tidak pakai serverTimestamp
+        submittedAt: typeof payload.submittedAt === 'number' ? payload.submittedAt : serverTimestamp()
       }
       await set(node, p)
       return id

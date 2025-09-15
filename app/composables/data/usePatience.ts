@@ -143,7 +143,10 @@ export const usePatience = () => {
     } catch { return null }
   }
 
-  async function createPatience(payload: Omit<PatienceEntry, 'id'|'createdAt'|'updatedAt'|'evidenceUrl'|'evidencePath'> & { evidenceFile?: File | null }) {
+  async function createPatience(
+    payload: Omit<PatienceEntry, 'id'|'createdAt'|'updatedAt'|'evidenceUrl'|'evidencePath'> 
+            & { evidenceFile?: File | null, createdAt?: number }
+  ) {
     loading.value = true; error.value = null
     try {
       const listRef = dbRef($realtimeDb, 'alberr/patience/entries')
@@ -168,7 +171,8 @@ export const usePatience = () => {
         term: String(payload.term || ''),
         evidenceUrl, evidencePath,
         status: payload.status || 'open',
-        createdAt: serverTimestamp()
+        // ⬇⬇⬇ perbaikan: boleh override createdAt agar cocok dengan bulan yang dipilih
+        createdAt: typeof payload.createdAt === 'number' ? payload.createdAt : serverTimestamp()
       }
       await set(node, p)
       return id

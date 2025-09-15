@@ -131,7 +131,7 @@
                             <div class="grow">
                               <p class="text-sm text-gray-800 dark:text-neutral-200 font-medium">{{ ppdbCta.title }}</p>
                               <p class="text-sm text-gray-500 dark:text-neutral-500">{{ ppdbCta.desc }}</p>
-                              <a :href="ppdbCta.href" class="mt-2 inline-flex items-center gap-x-1 text-sm font-medium">
+                              <a :href="ppdbCta.href" class="mt-2 inline-flex items-center gap-x-1 text-blue-700 text-sm font-medium">
                                 Daftar sekarang
                                 <ClientOnly><Icon icon="lucide:arrow-right" class="size-4" /></ClientOnly>
                               </a>
@@ -320,6 +320,7 @@ const navLinks = ref<Array<{ label: string; href: string; icon: string }>>([
   { label: 'Tentang', href: '/#information', icon: 'ph:info' },
   { label: 'Fasilitas', href: '/#facility', icon: 'ph:buildings' },
   { label: 'Berita', href: '/#news', icon: 'ph:newspaper' },
+  { label: 'Kitab', href: '/book', icon: 'ion:book-outline' },
   { label: 'Kontak', href: '/#contact', icon: 'ph:phone' },
 ])
 

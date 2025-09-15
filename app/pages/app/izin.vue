@@ -14,8 +14,8 @@
 
     <div class="relative p-6">
       <!-- Header + Tabs + Filter tipe -->
-      <div class="mb-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
+      <div class="mb-4 flex items-center flex-wrap justify-between">
+        <div class="flex items-center flex-wrap gap-3">
           <h1 class="text-lg font-semibold">Perizinan Pulang</h1>
           <div class="inline-flex rounded-lg border border-gray-200 dark:border-neutral-700 overflow-hidden">
             <button @click="activeTab='list'" :class="['px-3 py-1.5 text-xs', activeTab==='list' ? 'bg-blue-600 text-white' : '']">Daftar</button>
@@ -34,7 +34,17 @@
       </div>
 
       <!-- GRID 6 -->
-      <div class="grid grid-cols-1 xl:grid-cols-6 gap-4">
+      <div class="grid grid-cols-1 gap-4">
+                <!-- KANAN: Info filter (RFID feed dihapus) -->
+        <div class="xl:col-span-2 xl:self-start">
+          <div class="xl:sticky xl:top-4">
+            <div class="space-y-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto xl:pr-1">
+              <div class="rounded-xl border border-gray-200 dark:border-neutral-700 p-3 text-xs bg-white/80 dark:bg-neutral-900/70">
+                Menampilkan: <strong>{{ activeTipe }}</strong>. Data ditentukan dari tipe Maskan santri (Putra/Putri).
+              </div>
+            </div>
+          </div>
+        </div>
         <!-- KIRI: LIST / HISTORY -->
         <div class="xl:col-span-4 space-y-4">
           <!-- LIST AKTIF -->
@@ -48,22 +58,38 @@
               <template #cell-requestedAt="{ row }">
                 {{ formatDate(row.requestedAt) }}
               </template>
-              <template #cell-urgency="{ row }">
-                <span :class="chipUrgency(row.urgency)">{{ row.urgency }}</span>
-              </template>
-              <template #cell-status="{ row }">
-                <span :class="chipStatus(row.status)">{{ labelStatus(row.status) }}</span>
-              </template>
+
+              <!-- Santri -->
               <template #cell-santri="{ row }">
                 <div class="font-medium">{{ row.name }}</div>
                 <div class="text-[11px] text-gray-500">Maskan {{ row.maskan || '-' }} • Kamar {{ row.kamar || '-' }}</div>
               </template>
+
+              <!-- Status Izin -->
+              <template #cell-status="{ row }">
+                <span :class="chipStatus(row.status)">{{ labelStatus(row.status) }}</span>
+              </template>
+
+              <!-- Status RFID -->
+              <template #cell-rfid="{ row }">
+                <div class="flex items-center gap-2">
+                  <span :class="rfidPill(row).cls">{{ rfidPill(row).label }}</span>
+                  <span v-if="rfidPill(row).when" class="text-[11px] text-gray-500">• {{ rfidPill(row).when }}</span>
+                </div>
+              </template>
+
+              <!-- Waktu Keluar / Kembali -->
+              <template #cell-waktukeluar="{ row }">
+                {{ formatDT((row as any).plannedOutAt || (row as any).outAt) }}
+              </template>
+              <template #cell-waktukembali="{ row }">
+                {{ formatDT((row as any).plannedReturnAt || (row as any).returnedAt) }}
+              </template>
+
+              <!-- Action -->
               <template #cell-action="{ row }">
                 <div class="flex flex-wrap gap-1">
-                  <button v-if="row.status==='pending'" @click="approveIzin(row.id)" class="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">Approve</button>
-                  <button v-if="row.status==='pending' || row.status==='approved'" @click="markOut(row.id)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800">Out</button>
-                  <button v-if="row.status==='out'" @click="markReturned(row.id)" class="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">Return</button>
-                  <button v-if="row.status!=='returned'" @click="rejectIzin(row.id)" class="text-xs px-2 py-1 rounded border text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Reject</button>
+                  <button v-if="row.status!=='returned'" @click="markReturned(row.id)" class="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">Return</button>
                   <button @click="openEdit(row)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800">Edit</button>
                   <button @click="openDelete(row)" class="text-xs px-2 py-1 rounded border text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
                   <button @click="printIzin(row)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800">Print (Dot Matrix)</button>
@@ -72,7 +98,7 @@
             </DataTable>
           </div>
 
-          <!-- HISTORY SEDERHANA (daftar sesi) -->
+          <!-- HISTORY (daftar sesi) -->
           <div v-else>
             <div class="flex items-end gap-2 mb-2">
               <div>
@@ -118,234 +144,103 @@
             </div>
           </div>
         </div>
-
-        <!-- KANAN: sticky (RFID + Quick Add) -->
-        <div class="xl:col-span-2 xl:self-start">
-          <div class="xl:sticky xl:top-4">
-            <div class="space-y-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto xl:pr-1">
-              <!-- CARD Realtime RFID -->
-              <div class="rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden shadow-sm bg-white/80 dark:bg-neutral-900/70">
-                <div class="px-4 py-3 bg-indigo-50/70 dark:bg-indigo-900/20 flex items-center justify-between">
-                  <div>
-                    <h3 class="font-semibold">RFID Live Feed</h3>
-                    <p class="text-xs text-gray-600 dark:text-neutral-300">Perizinan realtime via RFID</p>
-                  </div>
-                </div>
-                <div class="max-h-[360px] overflow-auto divide-y divide-gray-200 dark:divide-neutral-800">
-                  <div v-for="e in liveSorted" :key="e.id" class="px-4 py-3">
-                    <div class="font-medium">{{ e.name }}</div>
-                    <div class="text-[11px] text-gray-500">
-                      {{ e.action.toUpperCase() }} • {{ e.maskan ? 'Maskan '+e.maskan : '-' }} • {{ e.kamar ? 'Kamar '+e.kamar : '-' }} • {{ (e.by||'').toUpperCase() }}
-                    </div>
-                    <div class="text-[11px] text-gray-500">{{ timeAgo(e.ts) }}</div>
-                  </div>
-                  <div v-if="!liveSorted.length" class="px-4 py-6 text-sm text-gray-500">Belum ada aktivitas.</div>
-                </div>
-              </div>
-
-              <!-- CARD Tambah Manual Cepat -->
-              <div class="rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden shadow-sm bg-white/80 dark:bg-neutral-900/70">
-                    <div class="px-4 py-3 bg-gray-50/70 dark:bg-neutral-900/60">
-                        <h3 class="font-semibold">Tambah Izin (Cepat)</h3>
-                    </div>
-                    <div class="px-4 py-3 space-y-2">
-                        <!-- Nama santri (autocomplete / manual) -->
-                        <div class="relative">
-                        <input
-                            v-model.trim="quick.name"
-                            @focus="quickSantriFocused=true"
-                            @blur="setTimeout(()=>quickSantriFocused=false, 150)"
-                            @input="quickSantriSearch = quick.name"
-                            placeholder="Nama santri (pilih / isi manual)…"
-                            class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"
-                        />
-                        <div
-                            v-if="(quickSantriFocused || quickSantriSearch) && quickSantriOptions.length"
-                            class="absolute z-20 mt-1 w-full rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-lg max-h-56 overflow-auto"
-                        >
-                            <button
-                            v-for="s in quickSantriOptions"
-                            :key="s.id"
-                            type="button"
-                            @mousedown.prevent="pickQuickSantri(s)"
-                            class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hoverbg-neutral-800"
-                            >
-                            <div class="text-sm font-medium truncate">{{ s.santri }}</div>
-                            <div class="text-[11px] text-gray-500 truncate">Maskan {{ s.maskan || '-' }} • Kamar {{ s.kamar || '-' }}</div>
-                            </button>
-                        </div>
-                        </div>
-
-                        <!-- Maskan (combobox / manual) -->
-                        <div class="relative">
-                        <input
-                            v-model.trim="quick.maskan"
-                            @focus="quickMaskanFocused=true"
-                            @blur="setTimeout(()=>quickMaskanFocused=false, 150)"
-                            @input="quickMaskanSearch = quick.maskan"
-                            placeholder="Maskan (pilih / isi manual)…"
-                            class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"
-                        />
-                        <div
-                            v-if="(quickMaskanFocused || quickMaskanSearch) && quickMaskanOptions.length"
-                            class="absolute z-20 mt-1 w-full rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-lg max-h-56 overflow-auto"
-                        >
-                            <button
-                            v-for="m in quickMaskanOptions"
-                            :key="m.id"
-                            type="button"
-                            @mousedown.prevent="pickQuickMaskan(m.name)"
-                            class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
-                            >
-                            <div class="text-sm font-medium">Maskan {{ m.name }}</div>
-                            <div class="text-[11px] text-gray-500">{{ m.tipe }}</div>
-                            </button>
-                        </div>
-                        </div>
-
-                        <!-- Kamar (combobox / manual) -->
-                        <div class="relative">
-                        <input
-                            v-model.trim="quick.kamar"
-                            @focus="quickKamarFocused=true"
-                            @blur="setTimeout(()=>quickKamarFocused=false, 150)"
-                            @input="quickKamarSearch = quick.kamar"
-                            :placeholder="quick.maskan ? 'Kamar (pilih / isi)…' : 'Kamar (isi)…'"
-                            class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"
-                        />
-                        <div
-                            v-if="quick.maskan && (quickKamarFocused || quickKamarSearch) && quickKamarOptions.length"
-                            class="absolute z-20 mt-1 w-full rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-lg max-h-56 overflow-auto"
-                        >
-                            <button
-                            v-for="num in quickKamarOptions"
-                            :key="num"
-                            type="button"
-                            @mousedown.prevent="pickQuickKamar(num)"
-                            class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
-                            >
-                            Kamar {{ num }}
-                            </button>
-                        </div>
-                        </div>
-
-                        <!-- Alasan + Urgensi -->
-                        <input v-model.trim="quick.reason" placeholder="Alasan" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-                        <select v-model="quick.urgency" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700">
-                        <option>Rendah</option><option>Normal</option><option>Tinggi</option><option>Darurat</option>
-                        </select>
-
-                        <button @click="submitQuick" class="w-full text-xs px-3 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">Simpan</button>
-                    </div>
-                </div>
-
-
-              <!-- Info Tipe Filter -->
-              <div class="rounded-xl border border-gray-200 dark:border-neutral-700 p-3 text-xs bg-white/80 dark:bg-neutral-900/70">
-                Menampilkan: <strong>{{ activeTipe }}</strong>. Data ditentukan dari tipe Maskan santri (Putra/Putri).
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- MODAL Create/Edit -->
       <ModalShell v-model="showForm" :title="formMode==='create' ? 'Tambah Izin' : 'Ubah Izin'">
-        <form class="space-y-3" @submit.prevent="submitForm">
+        <form class="space-y-4 max-h-[50vh] overflow-y-auto scrollbar-none" @submit.prevent="submitForm">
+          <!-- SANTRI -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="sm:col-span-2">
-  <label class="text-xs text-gray-600 dark:text-neutral-300">Nama Santri</label>
-  <div class="relative">
-    <input
-      v-model.trim="form.name"
-      @focus="santriFocused=true"
-      @blur="setTimeout(()=>santriFocused=false, 150)"
-      @input="santriSearch = form.name"
-      placeholder="Ketik nama santri…"
-      class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"
-    />
-    <!-- dropdown -->
-    <div
-      v-if="(santriFocused || santriSearch) && santriOptions.length"
-      class="absolute z-20 mt-1 w-full rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-lg max-h-60 overflow-auto"
-    >
-      <button
-        v-for="s in santriOptions"
-        :key="s.id"
-        type="button"
-        @mousedown.prevent="pickFormSantri(s)"
-        class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
-      >
-        <div class="text-sm font-medium truncate">{{ s.santri }}</div>
-        <div class="text-[11px] text-gray-500 truncate">Maskan {{ s.maskan || '-' }} • Kamar {{ s.kamar || '-' }}</div>
-      </button>
-    </div>
-  </div>
-  <!-- hint santriId -->
-  <div class="mt-1 text-[11px] text-gray-500" v-if="form.santriId">SantriID: {{ form.santriId }}</div>
-</div>
+              <label class="text-xs text-gray-600 dark:text-neutral-300">Nama Santri</label>
+              <div class="relative">
+                <input
+                  v-model.trim="form.name"
+                  @focus="santriFocused=true"
+                  @blur="setTimeout(()=>santriFocused=false, 150)"
+                  @input="santriSearch = form.name"
+                  placeholder="Ketik nama santri…"
+                  class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"
+                />
+                <!-- dropdown -->
+                <div
+                  v-if="(santriFocused || santriSearch) && santriOptions.length"
+                  class="absolute z-20 mt-1 w-full rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-lg max-h-60 overflow-auto"
+                >
+                  <button
+                    v-for="s in santriOptions"
+                    :key="s.id"
+                    type="button"
+                    @mousedown.prevent="pickFormSantri(s)"
+                    class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
+                  >
+                    <div class="text-sm font-medium truncate">{{ s.santri }}</div>
+                    <div class="text-[11px] text-gray-500 truncate">Maskan {{ s.maskan || '-' }} • Kamar {{ s.kamar || '-' }}</div>
+                  </button>
+                </div>
+              </div>
+              <div class="mt-1 text-[11px] text-gray-500" v-if="form.santriId">SantriID: {{ form.santriId }}</div>
+            </div>
 
-<!-- ====== MASKAN (COMBOBOX / MANUAL) ====== -->
-<div>
-  <label class="text-xs text-gray-600 dark:text-neutral-300">Maskan</label>
-  <div class="relative">
-    <input
-      v-model.trim="form.maskan"
-      @focus="maskanFocused=true"
-      @blur="setTimeout(()=>maskanFocused=false, 150)"
-      @input="maskanSearch = form.maskan"
-      placeholder="Pilih / isi maskan"
-      class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"
-    />
-    <div
-      v-if="(maskanFocused || maskanSearch) && maskanOptions.length"
-      class="absolute z-20 mt-1 w-full rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-lg max-h-56 overflow-auto"
-    >
-      <button
-        v-for="m in maskanOptions"
-        :key="m.id"
-        type="button"
-        @mousedown.prevent="pickFormMaskan(m.name)"
-        class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
-      >
-        <div class="text-sm font-medium">Maskan {{ m.name }}</div>
-        <div class="text-[11px] text-gray-500">{{ m.tipe }}</div>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ====== KAMAR (COMBOBOX / MANUAL) ====== -->
-<div>
-  <label class="text-xs text-gray-600 dark:text-neutral-300">Kamar</label>
-  <div class="relative">
-    <input
-      v-model.trim="form.kamar"
-      @focus="kamarFocused=true"
-      @blur="setTimeout(()=>kamarFocused=false, 150)"
-      @input="kamarSearch = form.kamar"
-      :placeholder="form.maskan ? 'Pilih / isi kamar untuk Maskan '+form.maskan : 'Isi kamar…'"
-      class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"
-    />
-    <div
-      v-if="form.maskan && (kamarFocused || kamarSearch) && kamarOptions.length"
-      class="absolute z-20 mt-1 w-full rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-lg max-h-56 overflow-auto"
-    >
-      <button
-        v-for="num in kamarOptions"
-        :key="num"
-        type="button"
-        @mousedown.prevent="pickFormKamar(num)"
-        class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
-      >
-        Kamar {{ num }}
-      </button>
-    </div>
-  </div>
-</div>
-          <p v-if="formError" class="text-sm text-rose-600">{{ formError }}</p>
+            <!-- MASKAN-KAMAR (otomatis, hanya tampil) -->
+            <div>
+              <label class="text-xs text-gray-600 dark:text-neutral-300">Maskan</label>
+              <input v-model.trim="form.maskan" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" disabled />
+            </div>
+            <div>
+              <label class="text-xs text-gray-600 dark:text-neutral-300">Kamar</label>
+              <input v-model.trim="form.kamar" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" disabled />
+            </div>
           </div>
+
+          <!-- ALAMAT (otomatis) -->
+          <div>
+            <label class="text-xs text-gray-600 dark:text-neutral-300">Alamat</label>
+            <input v-model.trim="form.alamat" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" disabled />
+          </div>
+
+          <!-- WAKTU -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-600 dark:text-neutral-300">Waktu Keluar</label>
+              <input v-model="plannedOutAtInput" type="datetime-local" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-600 dark:text-neutral-300">Waktu Kembali</label>
+              <input v-model="plannedReturnAtInput" type="datetime-local" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+            </div>
+          </div>
+
+          <!-- PENJEMPUT -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="text-xs text-gray-600 dark:text-neutral-300">Penjemput (Nama)</label>
+              <input v-model.trim="form.penjemputNama" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" placeholder="Nama penjemput…" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-600 dark:text-neutral-300">Hubungan</label>
+              <input v-model.trim="form.penjemputHubungan" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" placeholder="Orang tua/Wali/Kakak…" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-600 dark:text-neutral-300">No. Telp</label>
+              <input v-model.trim="form.penjemputTelp" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" placeholder="08xxxxxxxxxx" />
+            </div>
+          </div>
+
+          <!-- CATATAN -->
+          <div>
+            <label class="text-xs text-gray-600 dark:text-neutral-300">Catatan</label>
+            <textarea v-model.trim="form.note" rows="2" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" placeholder="Catatan tambahan…"></textarea>
+          </div>
+
+          <label class="inline-flex items-center gap-2 text-sm">
+            <input type="checkbox" v-model="form.cetakOtomatis" class="checkbox checkbox-sm" />
+            Cetak surat otomatis setelah simpan
+          </label>
+
+          <p v-if="formError" class="text-sm text-rose-600">{{ formError }}</p>
         </form>
+
         <template #footer>
           <button @click="showForm=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Batal</button>
           <button :disabled="saving" @click="submitForm" class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
@@ -354,7 +249,7 @@
         </template>
       </ModalShell>
 
-      <!-- MODAL History Detail (opsional ringan) -->
+      <!-- MODAL History Detail -->
       <ModalShell v-model="showHistDetail" :title="`Detail Sesi ${histDetailId||''} — ${activeTipe}`">
         <div class="max-h-[70vh] overflow-auto">
           <table class="min-w-full text-xs">
@@ -362,7 +257,6 @@
               <th class="px-3 py-2">Nama</th>
               <th class="px-3 py-2">Maskan</th>
               <th class="px-3 py-2">Kamar</th>
-              <th class="px-3 py-2">Urgensi</th>
               <th class="px-3 py-2">Status</th>
             </tr></thead>
             <tbody class="divide-y divide-gray-200 dark:divide-neutral-800">
@@ -370,11 +264,10 @@
                 <td class="px-3 py-2">{{ r.name }}</td>
                 <td class="px-3 py-2">{{ r.maskan || '-' }}</td>
                 <td class="px-3 py-2">{{ r.kamar || '-' }}</td>
-                <td class="px-3 py-2">{{ r.urgency }}</td>
-                <td class="px-3 py-2">{{ r.status }}</td>
+                <td class="px-3 py-2">{{ labelStatus(r.status) }}</td>
               </tr>
               <tr v-if="!histRowsFiltered.length">
-                <td colspan="5" class="px-3 py-3 text-gray-500">Kosong.</td>
+                <td colspan="4" class="px-3 py-3 text-gray-500">Kosong.</td>
               </tr>
             </tbody>
           </table>
@@ -388,19 +281,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
 import DataTable from '~/components/widget/DataTable.vue'
 import ModalShell from '~/components/widget/ModalShell.vue'
-import { useIzin, type IzinRow, type Urgency, type IzinStatus } from '~/composables/data/useIzin'
+import { useIzin, type IzinRow, type IzinStatus } from '~/composables/data/useIzin'
 import { useMaskan } from '~/composables/data/useMaskan'
 import { useSantri } from '~/composables/data/useSantri'
 import { useAbsensi } from '~/composables/data/useAbsensi'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Perizinan' } })
 
-const { rows, loading, error, fetchIzin, createIzin, updateIzin, deleteIzin,
-        approveIzin, rejectIzin, markOut, markReturned,
-        live, subscribeLive } = useIzin()
+const { rows, fetchIzin, createIzin, updateIzin, deleteIzin,
+        markReturned, live, subscribeLive } = useIzin()
 const { rows: maskan } = useMaskan()
 const { rows: santri, fetchSantri } = useSantri()
 
@@ -410,9 +302,11 @@ const activeTipe = ref<'ALL'|'Putra'|'Putri'>('ALL')
 const columns = [
   { key: 'requestedAt', label: 'Waktu', sortable: true },
   { key: 'santri', label: 'Santri' },
-  { key: 'reason', label: 'Alasan', sortable: true },
-  { key: 'urgency', label: 'Urgensi', sortable: true },
   { key: 'status', label: 'Status', sortable: true },
+  { key: 'rfid', label: 'Status RFID' },
+  { key: 'waktukeluar', label: 'Waktu Keluar', sortable: true },
+  { key: 'waktukembali', label: 'Waktu Kembali', sortable: true },
+  { key: 'action', label: 'Aksi' },
 ]
 
 const SURAT_HEADER = {
@@ -420,14 +314,15 @@ const SURAT_HEADER = {
   pondok: 'Pondok Pesantren ALBERR',
   alamat: 'Jl. Pesantren Sangarejo Karangjati Pandaan Pasuruan',
   telp: '0823-3781-5634',
-  logo: '/logo.png'
+  logo: '/assets/logo.png'
 }
 
+let unsub: null | (()=>void) = null
 onMounted(async () => {
   await Promise.all([fetchSantri(), fetchIzin()])
-  unsub = subscribeLive(60)
+  unsub = subscribeLive(60) // tetap subscribe agar kolom "Status RFID" realtime
 })
-let unsub: null | (()=>void) = null
+onBeforeUnmount(() => { if (unsub) try { unsub() } catch {} })
 
 function two(n:number){ return String(n).padStart(2,'0') }
 function formatDT(ts?: number){
@@ -435,6 +330,22 @@ function formatDT(ts?: number){
   const d = new Date(ts)
   return `${two(d.getDate())}/${two(d.getMonth()+1)}/${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`
 }
+function toLocalInputValue(ts?: number) {
+  if (!ts) return ''
+  const d = new Date(ts)
+  const yyyy = d.getFullYear()
+  const MM = two(d.getMonth()+1)
+  const dd = two(d.getDate())
+  const hh = two(d.getHours())
+  const mm = two(d.getMinutes())
+  return `${yyyy}-${MM}-${dd}T${hh}:${mm}`
+}
+function fromLocalInputValue(s?: string) {
+  if (!s) return undefined
+  const t = Date.parse(s)
+  return Number.isNaN(t) ? undefined : t
+}
+
 function genNomorSurat(row: IzinRow){
   const d = row.requestedAt ? new Date(row.requestedAt) : new Date()
   const seg = `${String(d.getFullYear()).slice(-2)}${two(d.getMonth()+1)}${two(d.getDate())}`
@@ -442,9 +353,9 @@ function genNomorSurat(row: IzinRow){
   return `SP/ALBERR/${seg}/${suf}`
 }
 
-function resolveSantriFor(row: IzinRow) {
-  if (row.santriId) {
-    const byId = santri.value.find(s => s.id === row.santriId)
+function resolveSantriFor(row: IzinRow | (IzinRow & Partial<ExtendedIzinForm>)) {
+  if ((row as any).santriId) {
+    const byId = santri.value.find(s => s.id === (row as any).santriId)
     if (byId) return byId
   }
   const q = (row.name || '').normalize('NFKC').trim().toLowerCase()
@@ -454,34 +365,22 @@ function resolveSantriFor(row: IzinRow) {
   ) || null
 }
 
-function findSantriById(id?: string){
-  if(!id) return null
-  return santri.value.find(s => s.id === id) || null
-}
-function pickAlamatTelp(s:any){
-  if(!s) return { alamat:'-', telp:'-' }
-  const alamat = s.alamat || s.address || s.desa || s.kelurahan || s.kecamatan || '-'
-  const telp = s.phone || s.telp || s.hp || s.nohp || s.waliPhone || s.phone_wali || '-'
-  return { alamat: String(alamat), telp: String(telp) }
-}
-
-function buildSuratHTML(row: IzinRow){
+function buildSuratHTML(row: IzinRow & Partial<ExtendedIzinForm>){
   const s = resolveSantriFor(row)
-  const alamat = s?.alamat?.trim() ? s.alamat : '-'
-  const telp   = s?.nohp?.trim()   ? s.nohp   : '-'
-
+  const alamat = (row.alamat && row.alamat.trim()) ? row.alamat : (s?.alamat?.trim() ? s.alamat : '-')
+  const telp   = row.penjemputTelp?.trim() || s?.nohp?.trim() || '-'
   const noSurat = genNomorSurat(row)
-  const waktuIzin = row.outAt || row.approvedAt || row.requestedAt
-  const waktuKembali = row.returnedAt
+
+  const waktuIzin = row.plannedOutAt || row.outAt || row.requestedAt
+  const waktuKembali = row.plannedReturnAt || row.returnedAt
 
   let akun = '-'
   try {
-    // @ts-ignore - jika ada auth inject
+    // @ts-ignore
     const u = (useNuxtApp() as any).$auth?.currentUser
     akun = u?.displayName || u?.email || '-'
   } catch {}
 
-  // CSS print ramah dot-matrix (monospace, margin kecil, hitam-putih)
   const css = `
   <style>
     @page { size: A5 portrait; margin: 10mm; }
@@ -494,12 +393,10 @@ function buildSuratHTML(row: IzinRow){
     .hdr h2 { font-size: 14pt; margin:2px 0 4px; font-weight:700; }
     .hdr .meta { font-size: 10pt; }
     .logo { width:72px; height:72px; object-fit:contain; }
-    .mt8{ margin-top:8px } .mt12{ margin-top:12px } .mt20{ margin-top:20px }
+    .mt12{ margin-top:12px } .hr { border-top:1px dashed #000; margin:8px 0; }
     .row { display:flex; gap:8px; margin:2px 0; }
-    .lab { width: 160px; }
+    .lab { width: 200px; }
     .val { flex:1; }
-    .hr { border-top:1px dashed #000; margin:8px 0; }
-    .note { text-align:center; margin-top:32px; }
     .sign { display:flex; justify-content:space-between; margin-top:28px; }
     .sign .col { width: 32%; text-align:center; }
     .ttd { margin-top:48px; }
@@ -523,30 +420,23 @@ function buildSuratHTML(row: IzinRow){
         <div class="row"><div class="lab">Nama</div><div class="val">: ${row.name || '-'}</div></div>
         <div class="row"><div class="lab">Kamar  - Maskan</div><div class="val">: ${row.kamar || '-'}  -  ${row.maskan || '-'}</div></div>
         <div class="row"><div class="lab">Alamat</div><div class="val">: ${alamat}</div></div>
+        <div class="row"><div class="lab">Penjemput (Hubungan)</div><div class="val">: ${row.penjemputNama || '-'} (${row.penjemputHubungan || '-'})</div></div>
         <div class="row"><div class="lab">No. Telp</div><div class="val">: ${telp}</div></div>
-        <div class="row"><div class="lab">Keterangan</div><div class="val">: ${row.reason || '-'}</div></div>
-        <div class="row"><div class="lab">Waktu Izin - Waktu Kembali</div><div class="val">: ${formatDT(waktuIzin)}  -  ${formatDT(waktuKembali)}</div></div>
+        <div class="row"><div class="lab">Waktu Keluar - Waktu Kembali</div><div class="val">: ${formatDT(waktuIzin)}  -  ${formatDT(waktuKembali)}</div></div>
+        <div class="row"><div class="lab">Catatan</div><div class="val">: ${row.note || '-'}</div></div>
       </div>
 
       <div class="hr"></div>
 
       <div class="sign">
         <div class="col">
-          Pengurus Perizinan
+          Pengurus Perizinan<br/><small>(${akun})</small>
           <div class="ttd">Ttd</div>
         </div>
         <div class="col">
           Wali Santri
           <div class="ttd">Ttd</div>
         </div>
-        <div class="col">
-          Akun yang memberi izin<br/><small>(${akun})</small>
-          <div class="ttd">Ttd</div>
-        </div>
-      </div>
-
-      <div class="note">
-        Surat ini harus diserahkan ke Pengurus Perizinan ketika santri kembali ke Pondok
       </div>
     </div>
   </body></html>`
@@ -554,7 +444,7 @@ function buildSuratHTML(row: IzinRow){
 }
 
 /* ================== CETAK ================== */
-function printIzin(row: IzinRow){
+function printIzin(row: IzinRow & Partial<ExtendedIzinForm>){
   const html = buildSuratHTML(row)
   const w = window.open('', '_blank', 'width=900,height=700')
   if(!w) return alert('Pop-up diblokir, izinkan pop-up untuk mencetak.')
@@ -576,10 +466,10 @@ const filteredRows = computed(() => {
   })
 })
 
-// --- Live feed helpers ---
+// Live feed helpers (untuk kolom "Status RFID")
 const liveSorted = computed(() => [...live.value].sort((a,b) => (b.ts||0)-(a.ts||0)))
 function timeAgo(ts?: number) {
-  if (!ts) return '—'
+  if (!ts) return ''
   const diff = Date.now() - ts
   const m = Math.floor(diff/60000)
   if (m < 1) return 'baru saja'
@@ -592,49 +482,95 @@ function formatDate(ts?: number) {
   const d = new Date(ts)
   return d.toLocaleString()
 }
-
-// --- Chips style ---
-function chipUrgency(u: Urgency) {
-  const base = 'inline-flex items-center px-2 py-0.5 text-xs rounded'
-  if (u==='Darurat') return `${base} bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300`
-  if (u==='Tinggi')  return `${base} bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300`
-  if (u==='Normal')  return `${base} bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300`
-  return `${base} bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-neutral-300`
+const norm = (s?: any) => String(s ?? '').normalize('NFKC').trim().toLowerCase()
+function latestRFIDEvent(row: IzinRow) {
+  const sid = (row as any).santriId
+  const nm = norm(row.name)
+  return liveSorted.value.find(e =>
+    (sid && (e as any).santriId && (e as any).santriId === sid) || norm((e as any).name) === nm
+  ) || null
 }
+function rfidPill(row: IzinRow) {
+  const e:any = latestRFIDEvent(row)
+  if (!e) return { label: '—', when: '', cls: 'inline-flex items-center px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-neutral-300' }
+  const isReturn = (e.action || '').toLowerCase() === 'return'
+  return {
+    label: isReturn ? 'Kembali' : 'Keluar',
+    when: timeAgo(e.ts),
+    cls: `inline-flex items-center px-2 py-0.5 text-xs rounded ${isReturn
+      ? 'bg-blue-100 700 dark:bg-blue-900/30 dark:300'
+      : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'}`
+  }
+}
+
+// Chips
 function chipStatus(s: IzinStatus) {
   const base = 'inline-flex items-center px-2 py-0.5 text-xs rounded'
   const map: Record<IzinStatus,string> = {
     pending:  `${base} bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-neutral-300`,
-    approved: `${base} bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300`,
+    approved: `${base} bg-blue-100 700 dark:bg-blue-900/30 dark:300`,
     out:      `${base} bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300`,
-    returned: `${base} bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300`,
+    returned: `${base} bg-blue-100 700 dark:bg-blue-900/30 dark:300`,
     rejected: `${base} bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300`,
   }
   return map[s]
 }
 function labelStatus(s: IzinStatus) {
-  if (s==='out') return 'Keluar'
-  if (s==='returned') return 'Kembali'
+  if (s==='returned') return 'Sudah Kembali'
   if (s==='approved') return 'Disetujui'
+  if (s==='out') return 'Keluar'
   if (s==='rejected') return 'Ditolak'
   return 'Menunggu'
 }
 
-// --- Create/Edit Modal ---
+/* ======== FORM (modal) ======== */
+type ExtendedIzinForm = {
+  santriId?: string
+  name: string
+  status: IzinStatus
+  maskan?: string
+  kamar?: string
+  alamat?: string
+  note?: string
+  penjemputNama?: string
+  penjemputHubungan?: string
+  penjemputTelp?: string
+  plannedOutAt?: number
+  plannedReturnAt?: number
+  cetakOtomatis?: boolean
+  // compatibility (backend lama mungkin butuh reason)
+  reason?: string
+}
+
 const showForm = ref(false)
 const formMode = ref<'create'|'edit'>('create')
 const saving = ref(false)
 const formError = ref<string|null>(null)
 const current = ref<IzinRow|null>(null)
 
-const form = ref<{
-  santriId?: string; name: string; reason: string; urgency: Urgency; status: IzinStatus;
-  maskan?: string; kamar?: string; note?: string;
-}>({ name:'', reason:'', urgency:'Normal', status:'pending', santriId:'', maskan:'', kamar:'', note:'' })
+const form = ref<ExtendedIzinForm>({
+  name:'', status:'approved',
+  santriId:'', maskan:'', kamar:'', alamat:'', note:'',
+  penjemputNama:'', penjemputHubungan:'', penjemputTelp:'',
+  plannedOutAt: undefined, plannedReturnAt: undefined, cetakOtomatis: true,
+  reason: 'Izin pulang'
+})
+
+// datetime-local binding (string)
+const plannedOutAtInput = ref<string>('')    // YYYY-MM-DDTHH:mm
+const plannedReturnAtInput = ref<string>('')
 
 function openCreate() {
   formMode.value = 'create'
-  form.value = { name:'', reason:'', urgency:'Normal', status:'pending', santriId:'', maskan:'', kamar:'', note:'' }
+  form.value = {
+    name:'', status:'approved',
+    santriId:'', maskan:'', kamar:'', alamat:'', note:'',
+    penjemputNama:'', penjemputHubungan:'', penjemputTelp:'',
+    plannedOutAt: undefined, plannedReturnAt: undefined, cetakOtomatis: true,
+    reason: 'Izin pulang'
+  }
+  plannedOutAtInput.value = ''
+  plannedReturnAtInput.value = ''
   formError.value = null
   showForm.value = true
 }
@@ -642,163 +578,66 @@ function openEdit(r: IzinRow) {
   current.value = r
   formMode.value = 'edit'
   form.value = {
-    santriId: r.santriId || '',
-    name: r.name, reason: r.reason, urgency: r.urgency, status: r.status,
-    maskan: r.maskan || '', kamar: r.kamar || '', note: r.note || ''
+    santriId: (r as any).santriId || '',
+    name: r.name, status: r.status,
+    maskan: r.maskan || '', kamar: r.kamar || '',
+    alamat: (r as any).alamat || resolveSantriFor(r)?.alamat || '',
+    note: (r as any).note || '',
+    penjemputNama: (r as any).penjemputNama || '',
+    penjemputHubungan: (r as any).penjemputHubungan || '',
+    penjemputTelp: (r as any).penjemputTelp || '',
+    plannedOutAt: (r as any).plannedOutAt, plannedReturnAt: (r as any).plannedReturnAt,
+    cetakOtomatis: true,
+    reason: (r as any).reason || 'Izin pulang'
   }
+  plannedOutAtInput.value = toLocalInputValue(form.value.plannedOutAt)
+  plannedReturnAtInput.value = toLocalInputValue(form.value.plannedReturnAt)
+  formError.value = null
   showForm.value = true
 }
+
 async function submitForm() {
+  // sync datetime
+  form.value.plannedOutAt = fromLocalInputValue(plannedOutAtInput.value)
+  form.value.plannedReturnAt = fromLocalInputValue(plannedReturnAtInput.value)
+
+  // basic validation
   if (!form.value.name?.trim()) { formError.value = 'Nama wajib diisi'; return }
-  if (!form.value.reason?.trim()) { formError.value = 'Alasan wajib diisi'; return }
+  if (!form.value.maskan?.trim()) { formError.value = 'Maskan wajib diisi (otomatis dari santri)'; return }
+  if (!form.value.kamar?.trim())  { formError.value = 'Kamar wajib diisi (otomatis dari santri)'; return }
+  if (form.value.plannedOutAt && form.value.plannedReturnAt && form.value.plannedOutAt > form.value.plannedReturnAt) {
+    formError.value = 'Waktu kembali harus setelah waktu keluar'; return
+  }
+
+  // fallback reason untuk kompatibilitas backend
+  if (!form.value.reason) form.value.reason = form.value.note || 'Izin pulang'
+
   saving.value = true
   try {
     if (formMode.value==='create') {
-      await createIzin({ ...form.value })
+      // langsung Disetujui (tanpa Approve)
+      const id = await createIzin({ ...(form.value as any), status: 'approved' })
+      if (form.value.cetakOtomatis) {
+        const r = rows.value.find(x => x.id === id)
+        if (r) printIzin({ ...r, ...(form.value as any) })
+      }
     } else if (current.value?.id) {
-      await updateIzin(current.value.id, { ...form.value })
+      await updateIzin(current.value.id, { ...(form.value as any) })
     }
     showForm.value = false
   } catch (e:any) {
     formError.value = e?.message ?? 'Gagal menyimpan'
   } finally { saving.value = false }
 }
+
 function openDelete(r: IzinRow) {
   if (confirm(`Hapus izin ${r.name}?`)) deleteIzin(r.id)
 }
 
-// --- Quick add (panel kanan) ---
-const quick = ref({ name:'', maskan:'', kamar:'', reason:'', urgency:'Normal' as Urgency })
-async function submitQuick() {
-  const n = quick.value.name.trim()
-  if (!n) return
-  const id = await createIzin({
-    name: n,
-    reason: quick.value.reason.trim() || 'Perizinan',
-    urgency: quick.value.urgency,
-    maskan: quick.value.maskan.trim(),
-    kamar: quick.value.kamar.trim(),
-    note: '',
-    santriId: '',
-    status: 'pending'
-  })
-  const r = rows.value.find(x => x.id === id)
-  if (r) printIzin(r)
-
-  quick.value = { name:'', maskan:'', kamar:'', reason:'', urgency:'Normal' }
-}
-
-// --- HISTORY sederhana (opsional) ---
-const { history, fetchHistory, readHistorySession } = useAbsensi()
-const histDate = ref<string>(''); const histLimit = ref<number>(20)
-const showHistDetail = ref(false); const histDetailId = ref<string>(''); const histDetail = ref<Record<string, any>>({})
-async function reloadHistory() { await fetchHistory({ limit: histLimit.value, date: histDate.value || undefined }) }
-async function openHistoryDetail(id: string) { histDetailId.value = id; histDetail.value = await readHistorySession(id); showHistDetail.value = true }
-const histRowsFiltered = computed(() => {
-  // filter tipe berdasarkan maskan
-  const arr: any[] = []
-  for (const [key, v] of Object.entries(histDetail.value || {})) {
-    const r = v as any
-    const tipe = tipeForMaskan(r.maskan || (santri.value.find(x=>x.id===r.santriId)?.maskan))
-    if (activeTipe.value!=='ALL' && tipe!==activeTipe.value) continue
-    arr.push({ key, name: r.name, maskan: r.maskan, kamar: r.kamar, urgency: r.urgency, status: r.status })
-  }
-  return arr
-})
-function exportHistoryCSV(id: string) {
-  if (histDetailId.value !== id) { alert('Buka detail sesi dulu untuk export.'); return }
-  const rows = histRowsFiltered.value
-  const header = ['Nama','Maskan','Kamar','Urgensi','Status']
-  const lines = [header.join(',')]
-  for (const r of rows) {
-    const line = [r.name, r.maskan||'', r.kamar||'', r.urgency||'', r.status||''].map(x => `"${String(x).replace(/"/g,'""')}"`).join(',')
-    lines.push(line)
-  }
-  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob); const a = document.createElement('a')
-  a.href = url; a.download = `izin_${id}_${activeTipe.value.toLowerCase()}.csv`; a.click(); URL.revokeObjectURL(url)
-}
-
-// ============ AUTOCOMPLETE HELPERS (FORM + QUICK ADD) ============
-const norm = (s?: any) => String(s ?? '').normalize('NFKC').trim().toLowerCase()
-
-// Cari maskan by "nama"
-function maskanByName(name?: string) {
-  if (!name) return null
-  return maskan.value.find(m => norm(m.name) === norm(name)) || null
-}
-// List room untuk maskan by "nama"
-function roomsOfByMaskanName(name?: string) {
-  const m = maskanByName(name)
-  return (m?.rooms ?? []).map(r => r.number)
-}
-
-// ======== Modal Form: Autocomplete Santri, Maskan, Kamar ========
-const santriSearch = ref('')                 // query untuk santri
-const santriFocused = ref(false)
+// ============ AUTOCOMPLETE (SANTRI) ============
+const santriSearch = ref(''), santriFocused = ref(false)
 const santriOptions = computed(() => {
   const q = norm(santriSearch.value)
-  if (!q) return []
-  // cari by nama / maskan / kamar
-  return santri.value
-    .filter(s =>
-      norm(s.santri).includes(q) ||
-      norm(s.maskan).includes(q) ||
-      norm(s.kamar).includes(q)
-    )
-    .slice(0, 20)  // batasi 20
-})
-
-function pickFormSantri(s: any) {
-  // isi field form dari santri terpilih
-  form.value.santriId = s.id
-  form.value.name     = s.santri
-  form.value.maskan   = s.maskan || ''
-  form.value.kamar    = s.kamar || ''
-  // reset query
-  santriSearch.value = ''
-  santriFocused.value = false
-}
-
-// Autocomplete maskan (pakai nama maskan)
-const maskanSearch = ref('')
-const maskanFocused = ref(false)
-const maskanOptions = computed(() => {
-  const q = norm(maskanSearch.value || form.value.maskan)
-  if (!q) return maskan.value.slice(0, 30)
-  return maskan.value.filter(m => norm(m.name).includes(q)).slice(0, 30)
-})
-function pickFormMaskan(name: string) {
-  form.value.maskan = name || ''
-  maskanSearch.value = ''
-  maskanFocused.value = false
-  // opsional: kosongkan kamar kalau sebelumnya bukan bagian dari maskan ini
-  if (form.value.kamar) {
-    const rooms = roomsOfByMaskanName(form.value.maskan)
-    if (!rooms.includes(form.value.kamar)) form.value.kamar = ''
-  }
-}
-
-// Autocomplete kamar: tergantung maskan terpilih
-const kamarSearch = ref('')
-const kamarFocused = ref(false)
-const kamarOptions = computed(() => {
-  const list = roomsOfByMaskanName(form.value.maskan)
-  const q = norm(kamarSearch.value || form.value.kamar)
-  if (!q) return list.slice(0, 50)
-  return list.filter(n => norm(n).includes(q)).slice(0, 50)
-})
-function pickFormKamar(num: string) {
-  form.value.kamar = String(num)
-  kamarSearch.value = ''
-  kamarFocused.value = false
-}
-
-// ======== Quick Add (panel kanan): Autocomplete opsional ========
-const quickSantriSearch = ref('')
-const quickSantriFocused = ref(false)
-const quickSantriOptions = computed(() => {
-  const q = norm(quickSantriSearch.value)
   if (!q) return []
   return santri.value
     .filter(s =>
@@ -808,45 +647,50 @@ const quickSantriOptions = computed(() => {
     )
     .slice(0, 20)
 })
-function pickQuickSantri(s:any) {
-  quick.value.name   = s.santri
-  quick.value.maskan = s.maskan || ''
-  quick.value.kamar  = s.kamar || ''
-  quickSantriSearch.value = ''
-  quickSantriFocused.value = false
+function pickFormSantri(s: any) {
+  form.value.santriId = s.id
+  form.value.name     = s.santri
+  form.value.maskan   = s.maskan || ''
+  form.value.kamar    = s.kamar || ''
+  form.value.alamat   = s.alamat || ''
+  // prefill penjemput default dari wali
+  if (!form.value.penjemputNama && s.walisantri) form.value.penjemputNama = s.walisantri
+  if (!form.value.penjemputHubungan) form.value.penjemputHubungan = 'Wali'
+  if (!form.value.penjemputTelp && (s.nohp || s.phone)) form.value.penjemputTelp = s.nohp || s.phone
+  santriSearch.value = ''
+  santriFocused.value = false
 }
 
-// Quick: maskan/kamar juga bisa autocomplete
-const quickMaskanSearch = ref('')
-const quickMaskanFocused = ref(false)
-const quickMaskanOptions = computed(() => {
-  const q = norm(quickMaskanSearch.value || quick.value.maskan)
-  if (!q) return maskan.value.slice(0, 30)
-  return maskan.value.filter(m => norm(m.name).includes(q)).slice(0, 30)
-})
-function pickQuickMaskan(name: string) {
-  quick.value.maskan = name || ''
-  quickMaskanSearch.value = ''
-  quickMaskanFocused.value = false
-  if (quick.value.kamar) {
-    const rooms = roomsOfByMaskanName(quick.value.maskan)
-    if (!rooms.includes(quick.value.kamar)) quick.value.kamar = ''
+/* ======== HISTORY ======== */
+const { history, fetchHistory, readHistorySession } = useAbsensi()
+const histDate = ref<string>(''); const histLimit = ref<number>(20)
+const showHistDetail = ref(false); const histDetailId = ref<string>(''); const histDetail = ref<Record<string, any>>({})
+async function reloadHistory() { await fetchHistory({ limit: histLimit.value, date: histDate.value || undefined }) }
+async function openHistoryDetail(id: string) { histDetailId.value = id; histDetail.value = await readHistorySession(id); showHistDetail.value = true }
+const histRowsFiltered = computed(() => {
+  const arr: any[] = []
+  for (const [key, v] of Object.entries(histDetail.value || {})) {
+    const r = v as any
+    const tipe = tipeForMaskan(r.maskan || (santri.value.find(x=>x.id===r.santriId)?.maskan))
+    if (activeTipe.value!=='ALL' && tipe!==activeTipe.value) continue
+    arr.push({ key, name: r.name, maskan: r.maskan, kamar: r.kamar, status: r.status })
   }
-}
-
-const quickKamarSearch = ref('')
-const quickKamarFocused = ref(false)
-const quickKamarOptions = computed(() => {
-  const list = roomsOfByMaskanName(quick.value.maskan)
-  const q = norm(quickKamarSearch.value || quick.value.kamar)
-  if (!q) return list.slice(0, 50)
-  return list.filter(n => norm(n).includes(q)).slice(0, 50)
+  return arr
 })
-function pickQuickKamar(num: string) {
-  quick.value.kamar = String(num)
-  quickKamarSearch.value = ''
-  quickKamarFocused.value = false
+function exportHistoryCSV(id: string) {
+  if (histDetailId.value !== id) { alert('Buka detail sesi dulu untuk export.'); return }
+  const rows = histRowsFiltered.value
+  const header = ['Nama','Maskan','Kamar','Status']
+  const lines = [header.join(',')]
+  for (const r of rows) {
+    const line = [r.name, r.maskan||'', r.kamar||'', labelStatus(r.status)].map(x => `"${String(x).replace(/"/g,'""')}"`).join(',')
+    lines.push(line)
+  }
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob); const a = document.createElement('a')
+  a.href = url; a.download = `izin_${id}_${activeTipe.value.toLowerCase()}.csv`; a.click(); URL.revokeObjectURL(url)
 }
 
-
+/* ======== UTIL ======== */
+function reloadAll(){ fetchIzin() }
 </script>

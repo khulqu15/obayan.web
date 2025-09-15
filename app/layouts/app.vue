@@ -32,7 +32,7 @@
 
             <li class="inline-flex items-center gap-1.5 relative text-gray-500 pe-3 last:pe-0 last:after:hidden after:absolute after:top-1/2 after:end-0 after:inline-block after:w-px after:h-3.5 after:bg-gray-300 after:rounded-full after:-translate-y-1/2 after:rotate-12 dark:text-neutral-200 dark:after:bg-neutral-700">
               <div class="h-8">
-                <div class="hs-dropdown inline-flex [--strategy:absolute] [--auto-close:inside] [--placement:bottom-right] relative text-start">
+                <div class="hs-dropdown inline-flex [--strategy:absolute] [--placement:bottom-right] relative text-start">
                   <button id="acct-btn" type="button" class="p-0.5 inline-flex shrink-0 items-center gap-x-3 text-start rounded-full hover:bg-gray-200 focus:outline-hidden focus:bg-gray-200 dark:hover:bg-neutral-800 dark:hover:text-neutral-200 dark:focus:bg-neutral-800 dark:focus:text-neutral-200 dark:text-neutral-500" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">
                     <img class="shrink-0 size-7 rounded-full" :src="user.avatar" alt="Avatar">
                   </button>
@@ -78,6 +78,7 @@
                           type="button"
                           class="w-full text-left flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-50 focus:outline-hidden dark:text-red-400 dark:hover:bg-red-950/30"
                           data-hs-overlay="#logout-modal"
+                          @click.stop.prevent="openLogoutModal"
                         >
                           <Icon :icon="item.icon" class="size-4" />
                           {{ item.label }}
@@ -220,54 +221,56 @@
         </div>
       </div>
     </main>
-    <div
-      id="logout-modal"
-      class="hs-overlay fixed inset-0 z-[90] hidden"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="logout-title"
-    >
-      <!-- Backdrop -->
-      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-
-      <!-- Card -->
-      <div class="relative mx-auto my-8 w-[92%] max-w-md">
-        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
-          <div class="p-5 sm:p-6">
-            <div class="flex items-start gap-4">
-              <div class="shrink-0 rounded-xl bg-red-100 p-3 dark:bg-red-900/30">
-                <Icon icon="lucide:log-out" class="size-6 text-red-600 dark:text-red-400" />
+    <Teleport to="body">
+      <div
+        id="logout-modal"
+        class="hs-overlay fixed inset-0 z-[90] hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logout-title"
+      >
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+  
+        <!-- Card -->
+        <div class="relative mx-auto my-8 w-[92%] max-w-md">
+          <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+            <div class="p-5 sm:p-6">
+              <div class="flex items-start gap-4">
+                <div class="shrink-0 rounded-xl bg-red-100 p-3 dark:bg-red-900/30">
+                  <Icon icon="lucide:log-out" class="size-6 text-red-600 dark:text-red-400" />
+                </div>
+                <div class="min-w-0">
+                  <h3 id="logout-title" class="text-base font-semibold text-gray-800 dark:text-neutral-100">
+                    Konfirmasi Keluar
+                  </h3>
+                  <p class="mt-1 text-sm text-gray-600 dark:text-neutral-400">
+                    Anda akan keluar dari dashboard. Pastikan tidak ada perubahan yang belum disimpan.
+                  </p>
+                </div>
               </div>
-              <div class="min-w-0">
-                <h3 id="logout-title" class="text-base font-semibold text-gray-800 dark:text-neutral-100">
-                  Konfirmasi Keluar
-                </h3>
-                <p class="mt-1 text-sm text-gray-600 dark:text-neutral-400">
-                  Anda akan keluar dari dashboard. Pastikan tidak ada perubahan yang belum disimpan.
-                </p>
+  
+              <div class="mt-5 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  class="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:outline-hidden dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  data-hs-overlay="#logout-modal"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-hidden"
+                  @click="doLogout"
+                >
+                  Keluar
+                </button>
               </div>
-            </div>
-
-            <div class="mt-5 flex items-center justify-end gap-2">
-              <button
-                type="button"
-                class="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:outline-hidden dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                data-hs-overlay="#logout-modal"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-hidden"
-                @click="doLogout"
-              >
-                Keluar
-              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Teleport>
 
   </div>
 </template>
@@ -276,8 +279,8 @@
 import { ref, watch, onMounted, computed, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import AppLoading from '~/components/AppLoading.vue'
-import { onAuthStateChanged } from 'firebase/auth'
-import { ref as dbRef, onValue, get } from 'firebase/database'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { ref as dbRef, onValue, get, off } from 'firebase/database'
 
 /* Nuxt runtime */
 const route = useRoute()
@@ -315,6 +318,7 @@ const ADMIN_SIDEBAR: SidebarGroup[] = [
     { label: 'Wali Santri', href: '/app/wali', icon: 'lucide:user-round' },
   ]},
   { title: 'Rutinitas', items: [
+    { label: 'Galeri', href: '/app/gallery', icon: 'streamline-flex:gallery' },
     { label: 'Absensi Harian', href: '/app/absen', icon: 'hugeicons:note-03' },
     { label: 'Kunjungan', href: '/app/kunjungan', icon: 'material-symbols:parent-child-dining-outline-rounded' },
     { label: 'Jadwal Piket', href: '/app/picket', icon: 'lucide:calendar-days' },
@@ -325,6 +329,7 @@ const ADMIN_SIDEBAR: SidebarGroup[] = [
     { label: 'Perizinan', href: '/app/izin', icon: 'solar:letter-linear' },
   ]},
   { title: 'Akademik', items: [
+    { label: 'Buku / Kitab', href: '/app/book', icon: 'ion:book-outline' },
     { label: 'Nilai', href: '/app/nilai', icon: 'solar:chart-linear' },
     { label: 'Hafalan', href: '/app/hafalan', icon: 'ooui:italic-arab-keheh-jeem' },
     { label: 'Guru', href: '/app/teacher', icon: 'tabler:chalkboard-teacher' },
@@ -372,6 +377,7 @@ const rawSidebar = computed<SidebarGroup[]>(
   () => getSidebarForRole(tokenUser.value?.role, route.path)
 )
 const aclReady   = ref(false)
+let aclRef: ReturnType<typeof dbRef> | null = null  
 
 const normalize = (p: string) => { try { const u = new URL(p, 'http://x'); return u.pathname.replace(/\/+$/,'') || '/' } catch { return p.replace(/\/+$/,'') || '/' } }
 
@@ -386,6 +392,11 @@ const hasAccessTo = (path: string) => {
   return ok
 }
 
+function openLogoutModal() {
+  // @ts-ignore
+  window?.HSOverlay?.open?.('#logout-modal')
+}
+
 const allMenuPaths = computed(() => rawSidebar.value.flatMap(g => g.items.map(i => i.href)))
 const firstAllowedPath = computed<string | null>(() => {
   const role = tokenUser.value?.role
@@ -396,15 +407,20 @@ const firstAllowedPath = computed<string | null>(() => {
   for (const p of allMenuPaths.value) if (isAllowed(p, allowed)) return p
   return null
 })
+
 function enforceRouteAccess(p: string) {
   if (!(p.startsWith('/app') || p.startsWith('/wali'))) return
   if (!aclReady.value) return
-  if (!tokenUser.value) return
+  if (!tokenUser.value) {
+    if (p !== '/cakAdmin') router.replace('/cakAdmin')
+    return
+  }
   if (hasAccessTo(p)) return
   const fallback = firstAllowedPath.value
     || (tokenUser.value?.role === 'wali' ? '/wali' : '/cakAdmin')
   if (p !== fallback) router.replace(fallback)
 }
+
 
 const effectiveAllowedRoutes = computed<string[]>(() => {
   const role = tokenUser.value?.role
@@ -459,7 +475,7 @@ const accountMenu = computed<AccountItem[]>(() => {
   const base = (tokenUser.value?.role === 'wali' || route.path.startsWith('/wali')) ? '/wali' : '/app'
   return [
     { label: 'Profile',  icon: 'lucide:user',       href: `${base}/profile` },
-    { label: 'Settings', icon: 'lucide:settings-2', href: `#` },
+    { label: 'Settings', icon: 'lucide:settings-2', href: `${base}/setting` },
     { label: 'Logout',   icon: 'lucide:log-out',    href: '#' },
   ]
 })
@@ -506,11 +522,20 @@ const user = computed(() => ({
   email: tokenUser.value?.email || sessionUser.value?.email || '-',
   avatar: sessionUser.value?.avatar || '/assets/pp.jpg'
 }))
-function doLogout() {
-  localStorage.removeItem('alberr:auth')
-  sessionStorage.removeItem('alberr:auth')
-  window.location.href = '/'
+
+async function doLogout() {
+  try { if (aclRef) off(aclRef) } catch {}
+  try { await signOut($auth) } catch (e) { /* optional: console.warn(e) */ }
+
+  localStorage.removeItem(AUTH_KEY)
+  sessionStorage.removeItem(AUTH_KEY)
+  tokenUser.value = null
+  const m = document.getElementById('logout-modal')
+  if (m) m.classList.add('hidden')
+
+  router.replace('/cakAdmin')
 }
+
 
 function coerceRoutes(v: any): string[] {
   if (Array.isArray(v)) return v.map(String)
@@ -549,7 +574,8 @@ async function startAclWatcher(uidHint?: string | null) {
     })
   }
   if (!uid) { aclReady.value = true; return }
-  const r = dbRef($realtimeDb, `/alberr/users/${uid}/allowedRoutes`)
+  aclRef = dbRef($realtimeDb, `/alberr/users/${uid}/allowedRoutes`)
+  const r = aclRef
   try {
     const snap = await get(r)
     console.log('ACL snapshot', snap.exists() ? snap.val() : '(no data)')
@@ -562,6 +588,10 @@ async function startAclWatcher(uidHint?: string | null) {
 }
 
 onMounted(async () => {
+  // @ts-ignore
+  window?.HSDropdown?.autoInit?.()
+  // @ts-ignore
+  window?.HSOverlay?.autoInit?.()
   try {
     const raw = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
     if (!raw) throw new Error('no token')
@@ -593,6 +623,13 @@ onMounted(async () => {
   }
 })
 
+watch(() => route.fullPath, async () => {
+  await nextTick()
+  // @ts-ignore
+  window?.HSDropdown?.autoInit?.()
+  // @ts-ignore
+  window?.HSOverlay?.autoInit?.()
+})
 watch(tokenUser, () => { if (aclReady.value && route.path.startsWith('/app')) enforceRouteAccess(route.path) })
 watch(() => route.fullPath, () => { rightOpen.value = false; enforceRouteAccess(route.path) })
 </script>

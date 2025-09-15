@@ -279,7 +279,7 @@ import { Icon } from '@iconify/vue'
 import { ref as dbRef, onValue, off, set } from 'firebase/database'
 import { ref as sRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 
-useHead({ title: 'Navbar Editor | Ponpes ALBERR', link: [{ rel: 'icon', href: '/logo1.png' }] })
+useHead({ title: 'Navbar Editor | Ponpes ALBERR', link: [{ rel: 'icon', href: '/assets/logo.png' }] })
 definePageMeta({ layout: 'app', layoutProps: { title: 'Navbar' } })
 
 export type NavLink = { label: string; href: string; icon: string }
