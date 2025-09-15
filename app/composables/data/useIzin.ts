@@ -8,7 +8,13 @@ export type Urgency = 'Rendah'|'Normal'|'Tinggi'|'Darurat'
 export type IzinStatus = 'pending'|'approved'|'rejected'|'out'|'returned'
 export type IzinRow = {
   id: string; santriId?: string; name: string; reason: string; urgency: Urgency; status: IzinStatus;
-  maskan?: string; kamar?: string; note?: string; requestedAt: number; approvedAt?: number; outAt?: number; returnedAt?: number
+  maskan?: string; kamar?: string; note?: string; requestedAt: number; approvedAt?: number; outAt?: number; returnedAt?: number;
+  alamat?: string;
+  penjemputNama?: string;
+  penjemputHubungan?: string;
+  penjemputTelp?: string;
+  plannedOutAt?: number;
+  plannedReturnAt?: number;
 }
 export type LiveIzinEvent = {
   id: string; uid?: string; santriId?: string; name: string; maskan?: string; kamar?: string; action: 'request'|'out'|'return'; by: 'rfid'|'manual'; deviceId?: string; ts?: number
@@ -43,11 +49,27 @@ export const useIzin = () => {
       const snap = await get(child(dbRef($realtimeDb), 'alberr/izin/current'))
       const val = snap.val() || {}
       const arr: IzinRow[] = Object.entries<any>(val).map(([id, v]) => ({
-        id, santriId: v.santriId || '', name: String(v.name || 'Santri Fulan'), reason: String(v.reason || 'RFID Request'),
-        urgency: (v.urgency || 'Normal'), status: (v.status || 'pending'),
-        maskan: String(v.maskan || ''), kamar: String(v.kamar || ''), note: String(v.note || ''),
-        requestedAt: Number(v.requestedAt || 0), approvedAt: v.approvedAt ? +v.approvedAt : undefined, outAt: v.outAt ? +v.outAt : undefined, returnedAt: v.returnedAt ? +v.returnedAt : undefined,
+        id,
+        santriId: v.santriId || '',
+        name: String(v.name || 'Santri Fulan'),
+        reason: String(v.reason || 'RFID Request'),
+        urgency: (v.urgency || 'Normal'),
+        status: (v.status || 'pending'),
+        maskan: String(v.maskan || ''),
+        kamar: String(v.kamar || ''),
+        note: String(v.note || ''),
+        alamat: String(v.alamat || ''),
+        penjemputNama: String(v.penjemputNama || ''),
+        penjemputHubungan: String(v.penjemputHubungan || ''),
+        penjemputTelp: String(v.penjemputTelp || ''),
+        plannedOutAt: v.plannedOutAt ? +v.plannedOutAt : undefined,
+        plannedReturnAt: v.plannedReturnAt ? +v.plannedReturnAt : undefined,
+        requestedAt: Number(v.requestedAt || 0),
+        approvedAt: v.approvedAt ? +v.approvedAt : undefined,
+        outAt: v.outAt ? +v.outAt : undefined,
+        returnedAt: v.returnedAt ? +v.returnedAt : undefined,
       }))
+
       rows.value = arr.sort((a,b) => (b.requestedAt||0) - (a.requestedAt||0))
     } catch (e:any) { console.error(e); error.value = e?.message ?? 'Gagal memuat perizinan' }
     finally { loading.value = false }
@@ -56,20 +78,37 @@ export const useIzin = () => {
   async function createIzin(payload: Omit<IzinRow,'id'|'requestedAt'|'status'> & { status?: IzinStatus }) {
     const { $realtimeDb } = useNuxtApp()
     const node = push(dbRef($realtimeDb, 'alberr/izin/current'))
-    const p = {
-      santriId: String(payload.santriId || ''), name: String(payload.name || 'Santri Fulan'),
-      reason: String(payload.reason || 'RFID Request'), urgency: (payload.urgency || 'Normal') as Urgency,
-      status: (payload.status || 'pending') as IzinStatus, maskan: String(payload.maskan || ''), kamar: String(payload.kamar || ''), note: String(payload.note || ''), requestedAt: serverTimestamp(),
+
+    const p: any = {
+      santriId: String(payload.santriId || ''),
+      name: String(payload.name || 'Santri Fulan'),
+      reason: String(payload.reason || 'RFID Request'),
+      urgency: (payload.urgency || 'Normal') as Urgency,
+      status: (payload.status || 'pending') as IzinStatus,
+      maskan: String(payload.maskan || ''),
+      kamar: String(payload.kamar || ''),
+      note: String(payload.note || ''),
+      requestedAt: serverTimestamp(),
     }
+
+    if (payload.alamat !== undefined) p.alamat = String(payload.alamat || '')
+    if (payload.penjemputNama !== undefined) p.penjemputNama = String(payload.penjemputNama || '')
+    if (payload.penjemputHubungan !== undefined) p.penjemputHubungan = String(payload.penjemputHubungan || '')
+    if (payload.penjemputTelp !== undefined) p.penjemputTelp = String(payload.penjemputTelp || '')
+    if (payload.plannedOutAt !== undefined) p.plannedOutAt = Number(payload.plannedOutAt) || 0
+    if (payload.plannedReturnAt !== undefined) p.plannedReturnAt = Number(payload.plannedReturnAt) || 0
+
     await set(node, p)
     await pushLive({ action:'request', by:'manual', name:p.name, santriId:p.santriId, maskan:p.maskan, kamar:p.kamar })
     await fetchIzin()
     return node.key
   }
+
   async function updateIzin(id: string, patch: Partial<Omit<IzinRow,'id'>>) {
     const { $realtimeDb } = useNuxtApp()
     const node = dbRef($realtimeDb, `alberr/izin/current/${id}`)
-    const u:any = {}
+    const u: any = {}
+
     if (patch.santriId !== undefined) u.santriId = String(patch.santriId || '')
     if (patch.name !== undefined) u.name = String(patch.name || 'Santri Fulan')
     if (patch.reason !== undefined) u.reason = String(patch.reason || 'RFID Request')
@@ -78,12 +117,22 @@ export const useIzin = () => {
     if (patch.maskan !== undefined) u.maskan = String(patch.maskan || '')
     if (patch.kamar !== undefined) u.kamar = String(patch.kamar || '')
     if (patch.note !== undefined) u.note = String(patch.note || '')
+    if (patch.alamat !== undefined) u.alamat = String(patch.alamat || '')
+    if (patch.penjemputNama !== undefined) u.penjemputNama = String(patch.penjemputNama || '')
+    if (patch.penjemputHubungan !== undefined) u.penjemputHubungan = String(patch.penjemputHubungan || '')
+    if (patch.penjemputTelp !== undefined) u.penjemputTelp = String(patch.penjemputTelp || '')
+    if (patch.plannedOutAt !== undefined) u.plannedOutAt = Number(patch.plannedOutAt) || 0
+    if (patch.plannedReturnAt !== undefined) u.plannedReturnAt = Number(patch.plannedReturnAt) || 0
+
     if (patch.requestedAt !== undefined) u.requestedAt = Number(patch.requestedAt) || 0
     if (patch.approvedAt !== undefined) u.approvedAt = Number(patch.approvedAt) || 0
     if (patch.outAt !== undefined) u.outAt = Number(patch.outAt) || 0
     if (patch.returnedAt !== undefined) u.returnedAt = Number(patch.returnedAt) || 0
-    await update(node, u); await fetchIzin()
+
+    await update(node, u)
+    await fetchIzin()
   }
+
   async function deleteIzin(id: string) { const { $realtimeDb } = useNuxtApp(); await remove(dbRef($realtimeDb, `alberr/izin/current/${id}`)); await fetchIzin() }
 
   async function approveIzin(id: string) { await updateIzin(id, { status:'approved', approvedAt: Date.now() }) }
@@ -102,11 +151,29 @@ export const useIzin = () => {
     const pad = (n:number)=> String(n).padStart(2,'0'); const d = new Date()
     const sess = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}`
     const node = dbRef($realtimeDb, `alberr/izin/history/${sess}/${r.id}`)
-    const payload:any = {
-      santriId: r.santriId || '', name: r.name || 'Santri Fulan', reason: r.reason || 'RFID Request', urgency: r.urgency || 'Normal',
-      status: finalStatus || r.status, maskan: r.maskan || '', kamar: r.kamar || '', note: r.note || '',
-      requestedAt: r.requestedAt || 0, approvedAt: r.approvedAt || 0, outAt: r.outAt || 0, returnedAt: finalStatus==='returned' ? Date.now() : (r.returnedAt || 0),
+    const payload: any = {
+      santriId: r.santriId || '',
+      name: r.name || 'Santri Fulan',
+      reason: r.reason || 'RFID Request',
+      urgency: r.urgency || 'Normal',
+      status: finalStatus || r.status,
+      maskan: r.maskan || '',
+      kamar: r.kamar || '',
+      note: r.note || '',
+
+      alamat: r.alamat || '',
+      penjemputNama: r.penjemputNama || '',
+      penjemputHubungan: r.penjemputHubungan || '',
+      penjemputTelp: r.penjemputTelp || '',
+      plannedOutAt: r.plannedOutAt || 0,
+      plannedReturnAt: r.plannedReturnAt || 0,
+
+      requestedAt: r.requestedAt || 0,
+      approvedAt: r.approvedAt || 0,
+      outAt: r.outAt || 0,
+      returnedAt: finalStatus === 'returned' ? Date.now() : (r.returnedAt || 0),
     }
+
     await set(node, payload); await remove(dbRef($realtimeDb, `alberr/izin/current/${r.id}`)); await fetchIzin()
   }
 

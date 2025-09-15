@@ -127,6 +127,7 @@
                     <th class="px-3 py-2">Status</th>
                     <th class="px-3 py-2">Keluar</th>
                     <th class="px-3 py-2">Kembali</th>
+                    <th class="px-3 py-2">Catatan</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-neutral-800">
@@ -137,6 +138,7 @@
                     <td class="px-3 py-2">{{ labelStatus(r.status) }}</td>
                     <td class="px-3 py-2">{{ formatDT(outTs(r)) }}</td>
                     <td class="px-3 py-2">{{ formatDT(backTs(r)) }}</td>
+                    <td class="px-3 py-2">{{ r.note || '-' }}</td>
                   </tr>
                   <tr v-if="!historyRows.length">
                     <td colspan="6" class="px-3 py-6 text-center text-gray-500">Belum ada data.</td>
@@ -339,6 +341,7 @@ const columns = [
   { key: 'rfid', label: 'Status RFID' },
   { key: 'waktukeluar', label: 'Waktu Keluar', sortable: true },
   { key: 'waktukembali', label: 'Waktu Kembali', sortable: true },
+  { key: 'note', label: 'Catatan', sortable: true },
 ]
 
 const SURAT_HEADER = {
@@ -445,8 +448,10 @@ function buildSuratHTML(row: IzinRow & Partial<ExtendedIzinForm>){
 
   const css = `
   <style>
-    @page { size: A5 portrait; margin: 10mm; }
+    /* 27 cm (lebar) x 12 cm (tinggi) */
+    @page { size: 270mm 120mm; margin: 10mm; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body { width: 270mm; height: 120mm; } /* cegah shrink-to-fit */
     body { font-family: "Courier New", Courier, monospace; font-size: 12pt; color:#000; }
     .wrap { width: 100%; }
     .hdr { display:flex; align-items:flex-start; gap:16px; }
@@ -508,7 +513,7 @@ function buildSuratHTML(row: IzinRow & Partial<ExtendedIzinForm>){
 /* ================== CETAK ================== */
 function printIzin(row: IzinRow & Partial<ExtendedIzinForm>){
   const html = buildSuratHTML(row)
-  const w = window.open('', '_blank', 'width=900,height=700')
+  const w = window.open('', '_blank', 'width=1100,height=520')
   if(!w) return alert('Pop-up diblokir, izinkan pop-up untuk mencetak.')
   w.document.open()
   w.document.write(html)

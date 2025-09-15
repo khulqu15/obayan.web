@@ -69,6 +69,7 @@
           </div>
         </div>
       </div>
+
     </div>
 
     <!-- ====== COLLAPSE: Info Periode ====== -->
@@ -96,8 +97,123 @@
       </div>
     </details>
 
-    <!-- ====== TABLE (desktop) – default OPEN ====== -->
-    <details class="group mt-4 hidden md:block rounded-2xl border border-gray-200 bg-white dark:bg-neutral-800 overflow-hidden" open>
+    <!-- ====== PER KAMAR (LIST KOLLAPS) ====== -->
+    <details v-if="mode==='kamar'" class="group mt-4 rounded-2xl border border-gray-200 bg-white dark:bg-neutral-800 overflow-hidden" open>
+      <summary class="flex items-center justify-between p-4 cursor-pointer select-none">
+        <div class="font-semibold">Input Cepat Per Kamar</div>
+        <Icon icon="lucide:chevron-down" class="size-5 text-gray-500 transition group-open:rotate-180"/>
+      </summary>
+
+      <div class="border-t border-gray-200 dark:border-neutral-700 p-4 space-y-4">
+        <div class="text-xs text-gray-500">
+          Term: <b>{{ termKey }}</b> • Periode: <b>{{ bulanLabel[bulan-1] }} {{ tahun }}</b>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 dark:border-neutral-700 divide-y dark:divide-neutral-700">
+          <div v-for="mg in maskanKamarTree" :key="mg.maskan" class="p-0">
+            <details class="group" open>
+              <summary class="flex items-center justify-between px-4 py-3 cursor-pointer">
+                <div class="font-semibold">{{ mg.maskan || '(Tanpa Maskan)' }}</div>
+                <div class="text-xs text-gray-500">{{ mg.total }} kamar</div>
+              </summary>
+
+              <div class="pb-2">
+                <div v-for="kg in mg.kamars" :key="kg.key" class="px-4 py-2">
+                  <details class="group">
+                    <summary class="flex items-center justify-between cursor-pointer rounded-lg px-3 py-2 border border-gray-200 dark:border-neutral-700 bg-gray-50/60 dark:bg-neutral-900/40">
+                      <div class="flex items-center gap-2">
+                        <span class="font-medium">Kamar {{ kg.kamar || '(?)' }}</span>
+                        <span class="text-xs text-gray-500">• {{ kg.count }} santri</span>
+                      </div>
+                      <Icon icon="lucide:chevron-down" class="size-4 text-gray-500 transition group-open:rotate-180"/>
+                    </summary>
+
+                    <div class="mt-2 rounded-lg border border-gray-200 dark:border-neutral-700 p-3 space-y-3">
+                      <!-- Isi massal per kamar -->
+                      <div class="rounded-lg border border-gray-200 dark:border-neutral-700 p-3 bg-white/50 dark:bg-neutral-900/40">
+                        <div class="text-xs font-medium mb-2">Isi Massal (Kamar {{ kg.kamar }})</div>
+                        <div class="flex flex-wrap items-center gap-2">
+                          <input v-model.number="getFillFor(kg.key).adab" type="number" placeholder="Adab (±)" class="w-28 px-2 py-1 text-sm rounded border border-gray-200 dark:border-neutral-700"/>
+                          <input v-model.number="getFillFor(kg.key).kedisiplinan" type="number" placeholder="Kedisiplinan (±)" class="w-36 px-2 py-1 text-sm rounded border border-gray-200 dark:border-neutral-700"/>
+                          <input v-model.trim="getFillFor(kg.key).note" type="text" placeholder="Catatan umum (opsional)" class="min-w-[16rem] flex-1 px-2 py-1 text-sm rounded border border-gray-200 dark:border-neutral-700"/>
+                          <button class="px-3 py-1.5 text-xs rounded bg-emerald-600 text-white hover:bg-emerald-700" @click="applyFillFor(kg.key)">Terapkan</button>
+                          <button class="px-3 py-1.5 text-xs rounded border border-gray-200 dark:border-neutral-700" @click="clearFillFor(kg.key)">Reset</button>
+                        </div>
+                      </div>
+
+                      <!-- Tabel anggota kamar -->
+                      <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-neutral-700">
+                        <table class="min-w-full text-sm">
+                          <thead class="bg-gray-50 dark:bg-neutral-900/40">
+                            <tr class="text-left">
+                              <th class="px-3 py-2 w-64">Santri</th>
+                              <th class="px-3 py-2 w-28 text-center">Adab (±)</th>
+                              <th class="px-3 py-2 w-40 text-center">Kedisiplinan (±)</th>
+                              <th class="px-3 py-2">Catatan</th>
+                              <th class="px-3 py-2 w-28 text-center">Poin Bulan</th>
+                            </tr>
+                          </thead>
+                          <tbody class="divide-y divide-gray-100 dark:divide-neutral-700">
+                            <tr v-for="s in kg.members" :key="s.id">
+                              <td class="px-3 py-2">
+                                <div class="font-medium truncate">{{ s.santri }}</div>
+                                <div class="text-[11px] text-gray-500 truncate">{{ s.maskan || '-' }} • {{ s.kamar || '-' }}</div>
+                              </td>
+                              <td class="px-3 py-2 text-center">
+                                <input v-model.number="getRoomDraft(s.id).adab"
+                                  @input="onDraftChange(s.id)"
+                                  type="number"
+                                  class="w-24 text-center rounded border border-gray-200 dark:border-neutral-700 px-2 py-1"/>
+                              </td>
+                              <td class="px-3 py-2 text-center">
+                                <input v-model.number="getRoomDraft(s.id).kedisiplinan"
+                                  @input="onDraftChange(s.id)"
+                                  type="number"
+                                  class="w-32 text-center rounded border border-gray-200 dark:border-neutral-700 px-2 py-1"/>
+                              </td>
+                              <td class="px-3 py-2">
+                                <input v-model.trim="getRoomDraft(s.id).note"
+                                  @input="onDraftChange(s.id)"
+                                  type="text" placeholder="Catatan (opsional)"
+                                  class="w-full rounded border border-gray-200 dark:border-neutral-700 px-2 py-1"/>
+                              </td>
+                              <td class="px-3 py-2 text-center font-semibold" :class="(saldoBySantri[s.id]||0)>=0 ? 'text-emerald-600' : 'text-rose-600'">
+                                {{ saldoBySantri[s.id] ?? 0 }}
+                              </td>
+                            </tr>
+                            <tr v-if="!kg.members.length">
+                              <td colspan="5" class="px-3 py-6 text-center text-gray-500">Tidak ada anggota.</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <!-- Aksi kamar -->
+                      <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="text-xs text-gray-500">
+                          Draft kamar ini:
+                          <b :class="calcRoomTotals(kg.key).plus>0 ? 'text-emerald-600' : ''">+{{ calcRoomTotals(kg.key).plus }}</b> /
+                          <b :class="calcRoomTotals(kg.key).minus<0 ? 'text-rose-600' : ''">{{ calcRoomTotals(kg.key).minus }}</b>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <button class="px-3 py-1.5 text-xs rounded border border-gray-200 dark:border-neutral-700" @click="exportRoomCSVFor(kg.key)" :disabled="!kg.members.length">Export CSV</button>
+                          <button class="px-3 py-1.5 text-xs rounded bg-blue-600 text-white hover:bg-blue-700" @click="saveRoomFor(kg.key)" :disabled="!kg.members.length || savingRoom">
+                            {{ savingRoom ? 'Menyimpan…' : 'Simpan Kamar Ini' }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </details>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- ====== TABLE (desktop) – Per Santri ====== -->
+    <details v-if="mode==='santri'" class="group mt-4 hidden md:block rounded-2xl border border-gray-200 bg-white dark:bg-neutral-800 overflow-hidden" open>
       <summary class="flex items-center justify-between p-4 cursor-pointer select-none">
         <div class="font-semibold">Daftar & Input Entri</div>
         <Icon icon="lucide:chevron-down" class="size-5 text-gray-500 transition group-open:rotate-180"/>
@@ -252,8 +368,8 @@
       </div>
     </details>
 
-    <!-- ===== Mobile Cards (default OPEN) ===== -->
-    <details class="group mt-4 md:hidden rounded-xl border border-gray-200 bg-white dark:bg-neutral-800" open>
+    <!-- ===== Mobile Cards – Per Santri ===== -->
+    <details v-if="mode==='santri'" class="group mt-4 md:hidden rounded-xl border border-gray-200 bg-white dark:bg-neutral-800" open>
       <summary class="flex items-center justify-between p-4 cursor-pointer select-none">
         <div class="font-semibold">Daftar & Input Entri</div>
         <Icon icon="lucide:chevron-down" class="size-5 text-gray-500 transition group-open:rotate-180"/>
@@ -325,7 +441,7 @@
       </div>
     </details>
 
-    <!-- ===== Modal: Create/Edit (pakai yang lama, dipakai saat Edit entri) ===== -->
+    <!-- ===== Modal: Create/Edit (dipakai saat Edit entri) ===== -->
     <teleport to="body">
       <div v-if="showForm" class="fixed inset-0 z-[90]">
         <div class="absolute inset-0 bg-black/40" @click="closeForm"></div>
@@ -490,6 +606,8 @@ import { Icon } from '@iconify/vue'
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useSantri } from '~/composables/data/useSantri'
 import { usePatience, type PatienceEntry, type PatienceCategory } from '~/composables/data/usePatience'
+import { useNuxtApp } from '#app'
+import { ref as dbRef, onValue, off, set } from 'firebase/database'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Buku Sabar' } })
 
@@ -501,6 +619,9 @@ const {
   chipStatus, labelStatus, labelCategory, makeTermKey
 } = usePatience()
 
+/* ===== Mode ===== */
+const mode = ref<'kamar'|'santri'>('kamar')
+
 /* ===== Term & Bulan ===== */
 const tahunAwal = ref<number>(new Date().getMonth() >= 6 ? new Date().getFullYear() : new Date().getFullYear()-1)
 const semester = ref<'Ganjil'|'Genap'>(new Date().getMonth() >= 6 ? 'Ganjil' : 'Genap')
@@ -510,6 +631,9 @@ const now = new Date()
 const bulanLabel = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
 const bulan = ref<number>(now.getMonth()+1)
 const tahun = ref<number>(now.getFullYear())
+
+const monthKey = computed(() => `${tahun.value}-${String(bulan.value).padStart(2,'0')}`)
+const draftBasePath = computed(() => `alberr/patience/drafts/${termKey.value}/${monthKey.value}`)
 
 const monthFrom = computed(()=> new Date(tahun.value, bulan.value-1, 1, 0,0,0,0).getTime())
 const monthTo   = computed(()=> new Date(tahun.value, bulan.value,   0, 23,59,59,999).getTime())
@@ -548,7 +672,7 @@ const totalEntries = computed(()=> monthEntries.value.length)
 const totalMinus = computed(()=> monthEntries.value.filter(x=>x.points<0).reduce((a,b)=>a+(b.points||0),0))
 const totalPlus  = computed(()=> monthEntries.value.filter(x=>x.points>0).reduce((a,b)=>a+(b.points||0),0))
 
-/* ===== Santri list + paginate ===== */
+/* ===== Santri list + paginate (untuk mode 'santri') ===== */
 const filteredSantri = computed(()=> {
   let list = santriRows.value.slice()
   if (selectedJenjang.value !== 'all') list = list.filter(s => (s.jenjang||'').toUpperCase().includes(selectedJenjang.value))
@@ -568,7 +692,7 @@ const pagedSantri = computed(()=> {
   return filteredSantri.value.slice(start, start + pageSize.value)
 })
 
-/* ===== Draft entri per-santri (input cepat) ===== */
+/* ===== Draft entri per-santri (mode 'santri') ===== */
 type DraftEntry = {
   type: 'pelanggaran'|'keteladanan'
   category: PatienceCategory
@@ -590,7 +714,7 @@ watch(pagedSantri, ()=> { for (const s of pagedSantri.value) ensureDraftFor(s.id
 /* Helpers */
 function selectedMonthMidTs(){ return new Date(tahun.value, bulan.value-1, 15, 12, 0, 0, 0).getTime() }
 
-/* ===== Selection ===== */
+/* ===== Selection (mode 'santri') ===== */
 const selected = ref<string[]>([])
 const selectedSet = computed(()=> new Set(selected.value))
 const selectedCount = computed(()=> selected.value.length)
@@ -609,15 +733,15 @@ function toggleSelectAllPage(){
   }
 }
 
-/* ===== Row expand ===== */
+/* ===== Row expand (mode 'santri') ===== */
 const rowExpandedId = ref<string|null>(null)
 function toggleRow(id: string){ rowExpandedId.value = rowExpandedId.value === id ? null : id }
 
-/* ===== CRUD cepat ===== */
+/* ===== CRUD cepat (mode 'santri') ===== */
 async function saveOne(id:string){
   ensureDraftFor(id)
   const d = draft[id]
-  if (!d.title?.trim() && !Number(d.points)) { alert('Isi minimal judul atau poin.'); return }
+  if (!d.title?.trim() && !Number(d.points)) { return }
   const s = santriRows.value.find(x=>x.id===id)
   if (!s) return
   await createPatience({
@@ -634,19 +758,14 @@ async function saveOne(id:string){
     location: d.location?.trim(),
     status: 'open',
     term: termKey.value,
-    createdAt: selectedMonthMidTs(),   // penting: simpan ke bulan yang dipilih
+    createdAt: selectedMonthMidTs(),
     evidenceFile: undefined
   } as any)
-  // reset ringan
   d.title=''; d.points=0
 }
-
-async function saveAll(){
-  for (const s of pagedSantri.value){ await saveOne(s.id) }
-}
-
+async function saveAll(){ for (const s of pagedSantri.value){ await saveOne(s.id) } }
 async function saveSelected(){
-  if (!selectedCount.value) return alert('Pilih minimal satu santri.')
+  if (!selectedCount.value) return
   for (const id of selected.value){ await saveOne(id) }
 }
 
@@ -657,12 +776,11 @@ const showDeleteMonth = ref(false)
 const deleteMonthConfirm = ref('')
 const deleting = ref(false)
 function openDeleteMonthSelected(){
-  if (!selectedCount.value) { alert('Pilih santri dulu.'); return }
+  if (!selectedCount.value) { return }
   deleteMonthConfirm.value = ''
   showDeleteMonth.value = true
 }
 function closeDeleteMonth(){ if (!deleting.value) showDeleteMonth.value = false }
-
 async function performDeleteMonthSelected(){
   if (deleteMonthConfirm.value.toUpperCase()!=='HAPUS' || deleting.value) return
   deleting.value = true
@@ -672,13 +790,11 @@ async function performDeleteMonthSelected(){
       for (const e of list){ await deletePatience(e.id) }
     }
     showDeleteMonth.value = false
-    alert('Semua entri bulan ini untuk santri terpilih telah dihapus.')
   } catch(e:any){
-    alert('Gagal menghapus sebagian entri: ' + (e?.message || e))
   } finally { deleting.value = false }
 }
 
-/* ===== Edit via modal (pakai form bawaan) ===== */
+/* ===== Modal Edit ===== */
 const showForm = ref(false)
 const formMode = ref<'create'|'edit'>('create')
 const saving = ref(false)
@@ -697,7 +813,7 @@ function resetForm(){
 function onPickEvidence(ev: Event){ evidenceFile.value = (ev.target as HTMLInputElement).files?.[0] || null }
 function openEditFirst(id:string){
   const first = (entriesBySantri.value.get(id) || [])[0]
-  if (!first) { alert('Belum ada entri pada bulan ini.'); return }
+  if (!first) { return }
   openEdit(first)
 }
 function openEdit(e: PatienceEntry){
@@ -712,7 +828,7 @@ function openEdit(e: PatienceEntry){
 }
 function closeForm(){ showForm.value = false }
 async function submitForm(){
-  if (!form.name?.trim() || !form.title?.trim()) { alert('Nama & Judul wajib.'); return }
+  if (!form.name?.trim() || !form.title?.trim()) { return }
   saving.value = true
   try {
     if (formMode.value==='edit' && editing.value) {
@@ -773,12 +889,181 @@ const sOptions = computed(() => {
 })
 function pickSantri(s:any){ form.santriId = s.id; form.name = s.santri; sQuery.value=''; sFocus.value=false }
 
+/* ====== Tree: Maskan -> Kamar -> Santri (mode 'kamar') ====== */
+type MKRoom = { key:string; kamar:string; members:any[]; count:number }
+type MKTree = { maskan:string; total:number; kamars:MKRoom[] }
+
+const roomKey = (maskan?:string, kamar?:string) => `${(maskan||'').trim()}__${(kamar||'').trim()}`
+
+const maskanKamarTree = computed<MKTree[]>(() => {
+  const map = new Map<string, { maskan:string; kamars: Map<string, MKRoom> }>()
+  for (const s of santriRows.value) {
+    const m = (s.maskan||'').trim()
+    const k = (s.kamar||'').trim()
+    if (!map.has(m)) map.set(m, { maskan: m, kamars: new Map() })
+    const mk = map.get(m)!
+    const key = roomKey(m,k)
+    if (!mk.kamars.has(key)) mk.kamars.set(key, { key, kamar:k, members:[], count:0 })
+    const room = mk.kamars.get(key)!; room.members.push(s); room.count++
+  }
+  const out: MKTree[] = []
+  for (const { maskan, kamars } of map.values()) {
+    const arr = Array.from(kamars.values()).sort((a,b)=> a.kamar.localeCompare(b.kamar))
+    out.push({ maskan, kamars: arr, total: arr.length })
+  }
+  return out.sort((a,b)=> a.maskan.localeCompare(b.maskan))
+})
+
+/* Draft per-santri (dipakai di semua kamar) */
+/* ===== Draft per-santri (persisten per-bulan) ===== */
+type RoomDraftItem = { adab:number; kedisiplinan:number; note:string }
+const roomDraft = reactive<Record<string, RoomDraftItem>>({})
+
+function ensureRoomDraftFor(id:string){
+  // default saat belum ada data dari DB
+  if (!roomDraft[id]) roomDraft[id] = { adab:0, kedisiplinan:0, note:'' }
+}
+function getRoomDraft(id:string){ ensureRoomDraftFor(id); return roomDraft[id] }
+
+/* Sinkronisasi dari DB (re-subscribe saat ganti bulan/term) */
+let _unsubDraft: null | (() => void) = null
+function unsubscribeDraft(){ if (_unsubDraft) { _unsubDraft(); _unsubDraft = null } }
+
+function subscribeDraft(){
+  const { $realtimeDb } = useNuxtApp() as any
+  unsubscribeDraft()
+  // clear local sebelum isi ulang, biar tidak bawa draft bulan lama
+  for (const k of Object.keys(roomDraft)) delete roomDraft[k]
+  const ref = dbRef($realtimeDb, draftBasePath.value)
+  const h = onValue(ref, (snap) => {
+    const v = snap.val() || {}
+    // Isi reaktif dari DB
+    for (const k of Object.keys(roomDraft)) delete roomDraft[k]
+    for (const id of Object.keys(v)) {
+      const it = v[id] || {}
+      roomDraft[id] = {
+        adab: Number(it.adab || 0),
+        kedisiplinan: Number(it.kedisiplinan || 0),
+        note: String(it.note || '')
+      }
+    }
+  })
+  _unsubDraft = () => off(ref, 'value', h)
+}
+watch([monthKey, termKey], () => { subscribeDraft() })
+
+/* Debounced save ke DB per-santri */
+const _saveTimers: Record<string, any> = {}
+function onDraftChange(santriId: string){
+  ensureRoomDraftFor(santriId)
+  if (_saveTimers[santriId]) clearTimeout(_saveTimers[santriId])
+  _saveTimers[santriId] = setTimeout(() => saveDraft(santriId), 400)
+}
+async function saveDraft(santriId: string){
+  const { $realtimeDb } = useNuxtApp() as any
+  ensureRoomDraftFor(santriId)
+  await set(dbRef($realtimeDb, `${draftBasePath.value}/${santriId}`), {
+    adab: Number(roomDraft[santriId].adab || 0),
+    kedisiplinan: Number(roomDraft[santriId].kedisiplinan || 0),
+    note: String(roomDraft[santriId].note || '')
+  })
+}
+
+/* Fill massal per kamar */
+const fillAllRoom = reactive<Record<string, { adab:number; kedisiplinan:number; note:string }>>({})
+function ensureFillKey(key:string){ if (!fillAllRoom[key]) fillAllRoom[key] = { adab:0, kedisiplinan:0, note:'' } }
+function getFillFor(key:string){ ensureFillKey(key); return fillAllRoom[key] }
+
+function membersForKey(key:string){
+  const [m,k] = key.split('__'); const mg = maskanKamarTree.value.find(x=>x.maskan===m)
+  const kg = mg?.kamars.find(x=>x.key===key); return kg?.members || []
+}
+
+function applyFillFor(key:string){
+  ensureFillKey(key)
+  const fill = fillAllRoom[key]
+  for (const s of membersForKey(key)){
+    ensureRoomDraftFor(s.id)
+    roomDraft[s.id].adab = Number(fill.adab || 0)
+    roomDraft[s.id].kedisiplinan = Number(fill.kedisiplinan || 0)
+    if (fill.note?.trim()) roomDraft[s.id].note = fill.note.trim()
+    onDraftChange(s.id)
+  }
+}
+function clearFillFor(key:string){ fillAllRoom[key] = { adab:0, kedisiplinan:0, note:'' } }
+
+/* Ringkasan draft per kamar */
+function calcRoomTotals(key:string){
+  let plus = 0, minus = 0
+  for (const s of membersForKey(key)){
+    const d = roomDraft[s.id] || { adab:0, kedisiplinan:0, note:'' }
+    if (d.adab>0) plus += d.adab; else minus += d.adab
+    if (d.kedisiplinan>0) plus += d.kedisiplinan; else minus += d.kedisiplinan
+  }
+  return { plus, minus }
+}
+
+/* Simpan per kamar */
+const savingRoom = ref(false)
+const typeForPoints = (p:number)=> p>=0 ? 'keteladanan' : 'pelanggaran'
+
+async function saveRoomFor(key:string){
+  const members = membersForKey(key)
+  if (!members.length) return
+  savingRoom.value = true
+  try{
+    const [m,k] = key.split('__')
+    for (const s of members){
+      const d = roomDraft[s.id] || { adab:0, kedisiplinan:0, note:'' }
+      const base = {
+        santriId: s.id,
+        name: s.santri || 'Santri',
+        severity: 'Ringan' as const,
+        reportedBy: '', handledBy: '',
+        location: `${m} • ${k}`,
+        term: termKey.value,
+        createdAt: selectedMonthMidTs(),
+        evidenceFile: undefined
+      }
+      if (Number(d.adab)){
+        await createPatience({ ...base, type: typeForPoints(d.adab), category:'adab', title:'Adab', desc:d.note?.trim()||'', points:Number(d.adab) } as any)
+      }
+      if (Number(d.kedisiplinan)){
+        await createPatience({ ...base, type: typeForPoints(d.kedisiplinan), category:'kedisiplinan', title:'Kedisiplinan', desc:d.note?.trim()||'', points:Number(d.kedisiplinan) } as any)
+      }
+    }
+  } catch(e:any){
+  } finally { savingRoom.value = false }
+}
+
+/* Export CSV per kamar */
+function exportRoomCSVFor(key:string){
+  const members = membersForKey(key); if (!members.length) return
+  const [m,k] = key.split('__')
+  const header = ['term','bulan','tahun','maskan','kamar','santriId','nama','adab','kedisiplinan','catatan','saldo_bulan']
+  const lines = [header.join(',')]
+  for (const s of members){
+    const d = roomDraft[s.id] || { adab:0, kedisiplinan:0, note:'' }
+    const cols = [
+      termKey.value, bulanLabel[bulan.value-1], tahun.value, m, k,
+      s.id, s.santri || '', Number(d.adab||0), Number(d.kedisiplinan||0),
+      (d.note||'').replace(/"/g,'""'), (saldoBySantri.value[s.id] ?? 0)
+    ].map(x => `"${String(x)}"`)
+    lines.push(cols.join(','))
+  }
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob); const a = document.createElement('a')
+  a.href = url; a.download = `patience_room_${m}_${k}_${tahun.value}-${String(bulan.value).padStart(2,'0')}.csv`
+  a.click(); URL.revokeObjectURL(url)
+}
+
 /* ===== Lifecycle ===== */
 onMounted(async () => {
   subscribeSantri(); await fetchSantri()
   reloadMonth()
+  subscribeDraft()
 })
-onUnmounted(() => { unsubscribeSantri(); unsubscribePatience() })
+onUnmounted(() => { unsubscribeSantri(); unsubscribePatience(); unsubscribeDraft() })
 </script>
 
 <style scoped>
