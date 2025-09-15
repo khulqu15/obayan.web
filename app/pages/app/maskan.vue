@@ -43,58 +43,135 @@
     </div>
 
     <!-- Table -->
-    <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-neutral-700">
-      <table class="min-w-full text-xs">
-        <thead class="bg-gray-50 dark:bg-neutral-900/40">
-          <tr class="text-left">
-            <th class="px-3 py-2">Maskan</th>
-            <th class="px-3 py-2">Kamar</th>
-            <th class="px-3 py-2">Ketua</th>
-            <th class="px-3 py-2">Kapasitas</th>
-            <th class="px-3 py-2">Penghuni</th>
-            <th class="px-3 py-2">Aktif</th>
-            <th class="px-3 py-2 w-56">Aksi</th>
+    <div class="overflow-auto max-h-[70vh] rounded-xl border border-gray-200 dark:border-neutral-700 bg-white/60 dark:bg-neutral-900/40">
+      <table class="min-w-full text-xs sm:text-sm">
+        <colgroup>
+          <col class="w-[18%]">
+          <col class="w-[10%]">
+          <col class="w-[22%]">
+          <col class="w-[22%]">
+          <col class="w-[10%]">
+          <col class="w-[18%]">
+        </colgroup>
+
+        <thead class="bg-gray-50/80 dark:bg-neutral-900/60 sticky top-0 z-10 backdrop-blur">
+          <tr class="text-left text-[11px] uppercase tracking-wide text-gray-500 dark:text-neutral-400">
+            <th class="px-3 py-3">Maskan</th>
+            <th class="px-3 py-3">Kamar</th>
+            <th class="px-3 py-3">Ketua</th>
+            <th class="px-3 py-3">Terisi</th>
+            <th class="px-3 py-3">Status</th>
+            <th class="px-3 py-3 text-right">Aksi</th>
           </tr>
         </thead>
+
         <tbody class="divide-y divide-gray-200 dark:divide-neutral-800">
-          <tr v-for="r in filteredRooms" :key="r.maskanId + ':' + r.id">
-            <td class="px-3 py-2">Maskan {{ r.maskanName }} <span class="text-[11px] ml-1 text-gray-500">({{ r.tipe }})</span></td>
-            <td class="px-3 py-2 font-semibold">{{ r.number }}</td>
-            <td class="px-3 py-2">
+          <tr
+            v-for="r in filteredRooms"
+            :key="rowKey(r)"
+            class="hover:bg-gray-50/70 dark:hover:bg-neutral-900/40 transition-colors">
+            <!-- Maskan -->
+            <td class="px-3 py-3 align-middle">
+              <div class="font-medium">Maskan {{ r.maskanName }}</div>
+              <div class="text-[11px] text-gray-500 dark:text-neutral-400">{{ r.tipe }}</div>
+            </td>
+
+            <!-- Kamar -->
+            <td class="px-3 py-3 align-middle">
+              <div class="font-semibold text-base tabular-nums">{{ r.number }}</div>
+            </td>
+
+            <!-- Ketua -->
+            <td class="px-3 py-3 align-middle">
               <div class="flex items-center gap-2">
-                <span>{{ displayPjName(r.pj) || '—' }}</span>
-                <button @click="openSetKetua(r)" class="text-[11px] px-2 py-0.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Ubah</button>
-              </div>
-            </td>
-            <td class="px-3 py-2">{{ r.capacity ?? 0 }}</td>
-            <td class="px-3 py-2">
-              <span>{{ r.santri.length }} santri</span>
-            </td>
-            <td class="px-3 py-2">
-              <span :class="['px-2 py-0.5 rounded', r.active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300']">
-                {{ r.active ? 'Aktif' : 'Nonaktif' }}
-              </span>
-            </td>
-            <td class="px-3 py-2">
-              <div class="flex flex-wrap items-center gap-1.5">
-                <button @click="openResidents(r)" class="px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Penghuni</button>
-                <button @click="openSetKetua(r)" class="px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Ketua</button>
-                <button @click="openRoomEdit(r)" class="px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Edit Kamar</button>
-                <button @click="openRoomDelete(r)" class="px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus Kamar</button>
+                <span class="truncate max-w-[14rem]">{{ displayPjName(r.pj) || '—' }}</span>
                 <button
-                  class="px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 disabled:opacity-50"
-                  @click="openRoomCreate(r)">
-                  + Tambah Kamar
+                  class="inline-flex items-center justify-center rounded-md border border-gray-200 dark:border-neutral-700 p-1 hover:bg-gray-50 dark:hover:bg-neutral-800"
+                  @click="openSetKetua(r)"
+                  title="Ubah ketua">
+                  <svg class="size-4" viewBox="0 0 24 24" fill="none"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" stroke="currentColor" stroke-width="1.5"/></svg>
                 </button>
               </div>
             </td>
+
+            <!-- Terisi (x/y + progress) -->
+            <td class="px-3 py-3 align-middle">
+              <div class="flex items-center gap-3">
+                <span class="tabular-nums text-sm">{{ capacityStat(r).text }}</span>
+                <div v-if="capacityStat(r).pct != null" class="flex-1 h-2 rounded-full bg-gray-100 dark:bg-neutral-800 overflow-hidden">
+                  <div class="h-full rounded-full"
+                      :class="capacityStat(r).pct < 80 ? 'bg-emerald-500' : (capacityStat(r).pct < 100 ? 'bg-amber-500' : 'bg-rose-500')"
+                      :style="{ width: capacityStat(r).pct + '%' }"></div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Status -->
+            <td class="px-3 py-3 align-middle">
+              <span :class="[
+                  'px-2 py-0.5 rounded text-xs font-medium',
+                  r.active
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                ]">
+                {{ r.active ? 'Aktif' : 'Nonaktif' }}
+              </span>
+            </td>
+
+            <!-- Aksi: tombol utama + kebab menu -->
+            <td class="px-3 py-3 align-middle">
+              <div class="relative flex justify-end items-center gap-1.5" data-row-menu>
+                <!-- tombol utama -->
+                <button
+                  @click="openResidents(r)"
+                  class="px-2.5 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700">
+                  Penghuni
+                </button>
+
+                <!-- kebab trigger -->
+                <button
+                  @click.stop="toggleMenu(rowKey(r))"
+                  class="px-2 py-1.5 rounded-md border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800"
+                  :aria-expanded="openMenuId===rowKey(r)">
+                  <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+
+                <!-- dropdown -->
+                <div
+                  v-show="openMenuId===rowKey(r)"
+                  class="absolute right-0 top-full mt-2 w-48 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-lg overflow-hidden z-20"
+                  @keydown.esc.stop="closeMenu()"
+                >
+                  <button @click="openSetKetua(r); closeMenu()"
+                          class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-800">
+                    Set Ketua
+                  </button>
+                  <button @click="openRoomEdit(r); closeMenu()"
+                          class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-800">
+                    Edit Kamar
+                  </button>
+                  <button @click="openRoomCreate(r); closeMenu()"
+                          class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-neutral-800">
+                    Tambah Kamar
+                  </button>
+                  <button @click="openRoomDelete(r); closeMenu()"
+                          class="w-full text-left px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">
+                    Hapus Kamar
+                  </button>
+                </div>
+              </div>
+            </td>
           </tr>
+
           <tr v-if="!filteredRooms.length">
-            <td colspan="7" class="px-3 py-6 text-center text-gray-500">Tidak ada data kamar.</td>
+            <td colspan="6" class="px-3 py-10 text-center text-gray-500">
+              Tidak ada data kamar yang cocok.
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
+
 
     <!-- Modal: Set Ketua -->
     <ModalShell size="2xl" v-model="showKetua" :title="roomForKetua ? `Ubah Ketua Kamar ${roomForKetua.number} • Maskan ${roomForKetua.maskanName}` : 'Ubah Ketua Kamar'">
@@ -264,7 +341,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import ModalShell from '~/components/widget/ModalShell.vue'
 import { useMaskan, type MaskanRow, type KamarRow } from '~/composables/data/useMaskan'
 import { useSantri } from '~/composables/data/useSantri'
@@ -282,7 +359,14 @@ const {
 } = useMaskan()
 const { rows: santriRows, fetchSantri, /* optional */ updateSantri } = useSantri() as any
 
-onMounted(async () => { await Promise.all([fetchMaskan(), fetchSantri()]) })
+onMounted(async () => { 
+  await Promise.all([fetchMaskan(), fetchSantri()]) 
+  document.addEventListener('click', onDocClick)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onDocClick)
+})
 
 // filters
 const tipeTabs = [
@@ -312,6 +396,29 @@ function belongsToRoom(s: any, m: MaskanRow, r: KamarRow) {
   const sMaskan = norm((s.maskan || '').replace(/^maskan\s+/i, ''))
   const sKamar = norm(s.kamar)
   return sKamar === norm(r.number) && sMaskan === norm(m.name)
+}
+
+function rowKey(r: RoomView) {
+  return `${r.maskanId}:${r.id}`
+}
+function capacityStat(r: RoomView) {
+  const cap = Number(r.capacity || 0)
+  const used = Number(r.santri?.length || 0)
+  if (!cap) return { text: String(used), pct: null as number | null }
+  const pct = Math.min(100, Math.round((used / cap) * 100))
+  return { text: `${used}/${cap}`, pct }
+}
+
+const openMenuId = ref<string | null>(null)
+function toggleMenu(id: string) {
+  openMenuId.value = openMenuId.value === id ? null : id
+}
+function closeMenu() {
+  openMenuId.value = null
+}
+function onDocClick(e: MouseEvent) {
+  const t = e.target as HTMLElement
+  if (!t.closest('[data-row-menu]')) closeMenu()
 }
 
 // build flattened room list with residents

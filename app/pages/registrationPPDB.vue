@@ -28,20 +28,23 @@
               <Icon icon="ph:trash" class="size-4" />
               Reset Draf
             </button>
+            <span :class="isFormClosed
+              ? 'inline-flex items-center gap-2 rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 px-3 py-2 text-xs font-semibold'
+              : 'inline-flex items-center gap-2 rounded-lg bg-emerald-100 700 dark:bg-emerald-900/30 dark:300 px-3 py-2 text-xs font-semibold'">
+              <Icon :icon="isFormClosed ? 'ph:lock' : 'ph:lock-open'" class="size-4" />
+              {{ isFormClosed ? 'Ditutup' : 'Dibuka' }}
+            </span>
           </div>
         </div>
       </header>
 
       <div class="grid lg:grid-cols-12 gap-6 items-start">
-        <!-- LEFT: FORM CARD -->
-        <section class="lg:col-span-8">
+        <section v-if="!isFormClosed" class="lg:col-span-8">
           <div class="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/60 backdrop-blur shadow-xl">
-            <!-- Stepper -->
             <div class="border-b border-gray-200 dark:border-neutral-800 p-4">
               <div class="flex flex-wrap items-center gap-2">
                 <button
                   v-for="(s,i) in steps" :key="s.key"
-                  @click="go(i)"
                   class="group relative px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition"
                   :class="[
                     i === step ? 'bg-blue-600 text-white' :
@@ -60,9 +63,7 @@
               </div>
             </div>
 
-            <!-- BODY -->
             <div class="p-5 sm:p-7">
-              <!-- STEP COVER: Himbauan + Brosur -->
               <section v-if="step===0" class="relative mt-4">
                 <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
                   <div class="absolute -top-24 -left-24 w-[42rem] h-[42rem] rounded-full opacity-30 blur-3xl bg-gradient-to-br from-emerald-200 to-lime-200 dark:from-emerald-900/40 dark:to-lime-900/30" />
@@ -108,7 +109,7 @@
                           aria-haspopup="dialog"
                           aria-expanded="false"
                           aria-controls="hs-ppdb-brochure"
-                          data-hs-overlay="#hs-ppdb-brochure"
+                          @click="brochureOpen = true"
                           class="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white/80 backdrop-blur px-4 py-2.5 text-sm font-semibold text-gray-800 shadow-2xs hover:bg-white focus:outline-hidden dark:bg-neutral-800/70 dark:border-neutral-700 dark:text-neutral-100">
                           <Icon icon="lucide:download" class="size-4" />
                           Lihat Brosur
@@ -589,21 +590,68 @@
           </div>
         </section>
 
-        <!-- Overlay: PPDB Brochure Viewer -->
+        <section v-else class="lg:col-span-8">
+          <div class="relative rounded-3xl border border-rose-200/60 dark:border-rose-900/40 bg-white/85 dark:bg-neutral-900/80 backdrop-blur-xl shadow-[0_14px_60px_rgba(244,63,94,.18)] overflow-hidden">
+            <div aria-hidden="true" class="absolute -top-24 -right-24 w-[42rem] h-[42rem] rounded-full opacity-30 blur-3xl bg-gradient-to-br from-rose-200 to-amber-200 dark:from-rose-900/40 dark:to-amber-900/30"></div>
+
+            <div class="p-6 sm:p-10 relative z-[10]">
+              <div class="flex items-start gap-4">
+                <div class="size-12 grid place-items-center rounded-2xl bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">
+                  <Icon icon="ph:lock" class="size-6" />
+                </div>
+                <div class="flex-1">
+                  <h2 class="text-2xl sm:text-3xl font-bold">Pendaftaran Ditutup</h2>
+                  <p class="mt-1 text-sm text-gray-600 dark:text-neutral-400">{{ closedReason }}</p>
+
+                  <div v-if="autoEnabled && autoAtMs && !isAutoDue" class="mt-3 inline-flex items-center gap-2 text-xs px-2 py-1 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                    <Icon icon="ph:timer" class="size-4" /> Hitung Mundur: {{ countdownText }}
+                  </div>
+
+                  <div class="mt-5 grid sm:grid-cols-2 gap-3">
+                    <a :href="waUrl" target="_blank"
+                      class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 text-white px-4 py-2.5 text-sm font-semibold hover:bg-emerald-700">
+                      <Icon icon="ph:whatsapp-logo" class="size-4" /> Hubungi Panitia
+                    </a>
+                    <button
+                      v-if="ppdbBrochureImages.length"
+                      type="button"
+                      aria-haspopup="dialog"
+                      aria-expanded="false"
+                      aria-controls="hs-ppdb-brochure"
+                      @click="brochureOpen = true"
+                      class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white/80 backdrop-blur px-4 py-2.5 text-sm font-semibold text-gray-800 shadow-2xs hover:bg-white focus:outline-hidden dark:bg-neutral-800/70 dark:border-neutral-700 dark:text-neutral-100">
+                      <Icon icon="lucide:download" class="size-4" />
+                      Lihat Brosur
+                    </button>
+                  </div>
+
+                  <p class="mt-4 text-[12px] text-gray-500 dark:text-neutral-400">Status ini diperbarui <b>real-time</b>. Silakan cek kembali berkala.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <div
-          id="hs-ppdb-brochure"
-          class="hs-overlay hidden size-full fixed top-0 start-0 z-80 overflow-x-hidden overflow-y-auto"
-          role="dialog" tabindex="-1" aria-labelledby="hs-ppdb-brochure-label"
+          v-show="brochureOpen"
+          class="fixed inset-0 z-[999] overflow-y-auto"
+          role="dialog" aria-modal="true" aria-labelledby="hs-ppdb-brochure-label"
+          @keydown.esc="brochureOpen = false"
         >
-          <div class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-500 mt-0 opacity-0 ease-out transition-all md:max-w-5xl md:w-full m-3 md:mx-auto">
+          <div class="fixed inset-0 bg-black/50" @click="brochureOpen = false"></div>
+
+          <div class="relative md:max-w-5xl md:w-full m-3 md:mx-auto mt-7">
             <div class="relative flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl overflow-hidden dark:bg-neutral-900 dark:border-neutral-800">
-              <!-- Close -->
               <div class="absolute top-2 end-2">
-                <button type="button" class="size-8 inline-flex justify-center items-center rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 focus:outline-hidden dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-300" aria-label="Close" data-hs-overlay="#hs-ppdb-brochure">
+                <button type="button"
+                  class="size-8 inline-flex justify-center items-center rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 focus:outline-hidden dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-300"
+                  aria-label="Close"
+                  @click="brochureOpen = false">
                   <span class="sr-only">Close</span>
                   <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
                 </button>
               </div>
+
 
               <!-- Header -->
               <div class="px-5 sm:px-8 pt-6 pb-3 border-b border-gray-200 dark:border-neutral-800">
@@ -738,15 +786,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useRoute } from '#imports'
 import { useSeoMeta, useHead, useRuntimeConfig, useNuxtApp } from '#app'
 
 /** ===== Configurable ===== */
 const PPDB_YEAR = 2025
-const waText = '+62 812-3456-7890'
-const waUrl  = 'https://wa.me/6281234567890'
+const waText = '082131690186'
+const waUrl  = 'https://wa.me/6282131690186'
 const ppdbBrochureImages = ref<string[]>(['/assets/images/brochures/1.jpg','/assets/images/brochures/2.jpg'])
 
 /** ===== SEO ===== */
@@ -927,6 +975,8 @@ const canSubmit = computed(() => validStep(5))
 const DRAFT_KEY = 'ppdb_registration_v2_santrirow'
 onMounted(() => {
   try {
+    subscribePPDBSettings()
+    startTicker()
     const raw = localStorage.getItem(DRAFT_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
@@ -977,7 +1027,7 @@ async function sha256Hex(input: string){ const enc=new TextEncoder().encode(inpu
 
 /** ===== Firebase ===== */
 import { getApps } from 'firebase/app'
-import { set, push, ref as dbRef, serverTimestamp } from 'firebase/database'
+import { set, push, ref as dbRef, serverTimestamp, onValue } from 'firebase/database'
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 function storageSafe() {
@@ -1033,7 +1083,105 @@ async function copy(text: string){
   try { await navigator.clipboard.writeText(text) } catch {}
 }
 
+const TZ_JKT = 'Asia/Jakarta'
+type PpdbSettings = { isClosed?: boolean; autoCloseEnabled?: boolean; autoCloseAt?: string; notice?: string }
+const ppdbSettings = ref<PpdbSettings>({})
+
+const isClosedManual   = computed(() => !!ppdbSettings.value.isClosed)
+const autoEnabled      = computed(() => !!ppdbSettings.value.autoCloseEnabled)
+function toMs(v:any): number | null {
+  if (!v && v !== 0) return null
+  if (typeof v === 'number') return v > 1e12 ? v : v * 1000     // detik → ms
+  if (typeof v === 'string') {
+    let s = v.trim()
+    if (/^\d{10,13}$/.test(s)) return s.length > 10 ? Number(s) : Number(s) * 1000
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) s += 'T23:59:59+07:00'   // hanya yyyy-mm-dd → 23:59:59 WIB
+    else if (/^\d{4}-\d{2}-\d{2}\s+\d/.test(s)) s = s.replace(' ', 'T') // " " → "T"
+    if (!/[zZ]|[+-]\d{2}:\d{2}$/.test(s)) s += ' +07:00'        // tanpa zona → WIB
+    const ms = Date.parse(s)
+    return Number.isNaN(ms) ? null : ms
+  }
+  if (typeof v === 'object' && v?.seconds) return v.seconds * 1000 // Firebase Timestamp
+  return null
+}
+const autoAtMs = computed(() => toMs(ppdbSettings.value.autoCloseAt))
+const nowTick = ref(Date.now())
+let _ticker: any = null
+function startTicker(){ _ticker = setInterval(() => nowTick.value = Date.now(), 1000) }
+
+function formatInJktMs(iso: string){
+  try {
+    const d = new Date(iso)
+    return new Intl.DateTimeFormat('id-ID', { timeZone: TZ_JKT, dateStyle: 'full', timeStyle: 'short' }).format(d)
+  } catch { return '' }
+}
+
+const serverOffsetMs = ref(0)
+onBeforeUnmount(() => { _unsubs.forEach(fn => fn?.()) })
+const nowMs = computed(() => nowTick.value + serverOffsetMs.value)
+
+// fallback otomatis: tutup sesuai timeline (30 Mar PPDB_YEAR 23:59:59 WIB)
+const fallbackHardStopMs = computed(() => Date.parse(`${PPDB_YEAR}-03-30T23:59:59+07:00`))
+
+const isAutoDue = computed(() =>
+  autoEnabled.value && !!autoAtMs.value ? nowMs.value >= (autoAtMs.value as number) : false
+)
+const isFormClosed = computed(() =>
+  isClosedManual.value || isAutoDue.value
+)
+const closedReason = computed(() => {
+  if (isClosedManual.value) return 'Pendaftaran ditutup oleh panitia.'
+  if (isAutoDue.value && autoAtMs.value) return `Pendaftaran ditutup otomatis pada ${formatInJktMs(autoAtMs.value)}.`
+  if (nowMs.value >= fallbackHardStopMs.value) return `Pendaftaran ditutup otomatis sesuai timeline (${formatInJktMs(fallbackHardStopMs.value)}).`
+  return ''
+})
+
+const brochureOpen = ref(false)
+
+watch(brochureOpen, (v) => {
+  document.body.style.overflow = v ? 'hidden' : ''
+})
+
+const _unsubs: Array<() => void> = []
+function subscribePPDBSettings(){
+  try {
+    const { $realtimeDb } = useNuxtApp() as any
+    if (!$realtimeDb) return
+    const paths = ['alberr/form/pendaftaran']
+    paths.forEach(p => {
+      const off = onValue(dbRef($realtimeDb, p), snap => {
+        const v = snap.val()
+        console.info('[PPDB settings]', p, v)
+        if (v && typeof v === 'object') ppdbSettings.value = { ...ppdbSettings.value, ...v }
+      })
+      _unsubs.push(off)
+    })
+    const offOffset = onValue(dbRef($realtimeDb, '.info/serverTimeOffset'), snap => {
+      serverOffsetMs.value = Number(snap.val() || 0)
+    })
+    _unsubs.push(offOffset)
+  } catch {}
+}
+
+watch([ppdbSettings, isFormClosed], () => {
+  console.info('[PPDB] merged settings =', ppdbSettings.value, '→ closed =', isFormClosed.value)
+})
+
+const countdownText = computed(() => {
+  if (!autoEnabled.value || !autoAtMs.value) return '—'
+  const t = (autoAtMs.value as number) - nowMs.value
+  if (t <= 0) return '00:00:00'
+  const sec = Math.floor(t / 1000)
+  const d = Math.floor(sec / 86400)
+  const h = Math.floor((sec % 86400) / 3600)
+  const m = Math.floor((sec % 3600) / 60)
+  const s = sec % 60
+  const pad = (n:number) => String(n).padStart(2,'0')
+  return d > 0 ? `${d}h ${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(h)}:${pad(m)}:${pad(s)}`
+})
+
 async function submit(){
+  if (isFormClosed.value) { feedback.value = 'Maaf, pendaftaran sudah ditutup.'; ok.value = false; return }
   if (!canSubmit.value) return
   const fileErr = validateFileSizes()
   if (fileErr){ feedback.value = fileErr; ok.value = false; return }

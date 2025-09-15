@@ -311,6 +311,9 @@ const ADMIN_SIDEBAR: SidebarGroup[] = [
     { label: 'Pengumuman', href: '/app/announcement', icon: 'lucide:info' },
     { label: 'Agenda', href: '/app/agenda', icon: 'solar:calendar-line-duotone' },
   ]},
+  { title: 'Form', items: [
+    { label: 'Registrasi', href: '/app/registration', icon: 'fluent:form-24-regular' },
+  ]},
   { title: 'Kesantrian', items: [
     { label: 'Santri', href: '/app/santri', icon: 'lucide:users' },
     { label: 'Maskan Kamar', href: '/app/maskan', icon: 'lucide:bed' },

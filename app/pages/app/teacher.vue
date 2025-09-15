@@ -23,32 +23,53 @@
             v-model="q"
             type="search"
             placeholder="Cari nama/NIP/NUPTK/mapel…"
-            class="w-full pl-8 pr-3 py-2 text-sm rounded-xl border border-emerald-100 bg-white/90 backdrop-blur focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:bg-neutral-800 dark:border-neutral-700"
+            class="w-full pl-8 pr-3 py-2 text-sm rounded-xl border border-gray-100 bg-white/90 backdrop-blur focus:outline-none focus:ring-2 focus:ring-gray-500/30 dark:bg-neutral-800 dark:border-neutral-700"
           />
         </div>
 
-        <select v-model="fJenjang" class="w-full sm:w-auto px-3 py-2 text-sm rounded-xl border border-emerald-100 bg-white/90 backdrop-blur dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+        <select v-model="fJenjang" class="w-full sm:w-auto px-3 py-2 text-sm rounded-xl border border-gray-100 bg-white/90 backdrop-blur dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-gray-500/30">
           <option value="all">Semua Jenjang</option>
           <option v-for="j in JENJANGS" :key="j" :value="j">{{ j }}</option>
         </select>
 
-        <select v-model="fStatus" class="w-full sm:w-auto px-3 py-2 text-sm rounded-xl border border-emerald-100 bg-white/90 backdrop-blur dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+        <select v-model="fStatus" class="w-full sm:w-auto px-3 py-2 text-sm rounded-xl border border-gray-100 bg-white/90 backdrop-blur dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-gray-500/30">
           <option value="all">Semua Status</option>
           <option v-for="s in STATUSES" :key="s" :value="s">{{ s }}</option>
         </select>
 
-        <select v-model="fMapel" class="w-full sm:w-auto px-3 py-2 text-sm rounded-xl border border-emerald-100 bg-white/90 backdrop-blur dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+        <select v-model="fMapel" class="w-full sm:w-auto px-3 py-2 text-sm rounded-xl border border-gray-100 bg-white/90 backdrop-blur dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-gray-500/30">
           <option value="all">Semua Mapel</option>
           <option v-for="m in SUBJECTS_ID" :key="m" :value="m">{{ m }}</option>
         </select>
 
-        <select v-model="fAktif" class="w-full sm:w-auto px-3 py-2 text-sm rounded-xl border border-emerald-100 bg-white/90 backdrop-blur dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+        <select v-model="fAktif" class="w-full sm:w-auto px-3 py-2 text-sm rounded-xl border border-gray-100 bg-white/90 backdrop-blur dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-gray-500/30">
           <option value="all">Semua</option>
           <option value="aktif">Aktif</option>
           <option value="nonaktif">Nonaktif</option>
         </select>
 
-        <button @click="openCreate" class="inline-flex items-center justify-center gap-x-2 rounded-xl bg-emerald-600 text-white px-3 py-2 text-sm font-medium hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 active:scale-[.98] transition-all">
+        <button
+          @click="exportCsv()"
+          class="inline-flex items-center justify-center gap-x-2 rounded-xl border border-gray-200 bg-white/90 px-3 py-2 text-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700">
+          <Icon icon="lucide:download" class="size-4" />
+          Export CSV
+        </button>
+
+        <label
+          class="inline-flex items-center justify-center gap-x-2 rounded-xl border border-gray-200 bg-white/90 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700">
+          <Icon icon="lucide:upload" class="size-4" />
+          Import CSV
+          <input id="importCsvInput" type="file" accept=".csv" class="hidden" @change="onImportCsv" />
+        </label>
+
+        <button
+          @click="downloadExampleCsv()"
+          class="inline-flex items-center justify-center gap-x-2 rounded-xl border border-gray-200 bg-white/90 px-3 py-2 text-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700">
+          <Icon icon="lucide:file-down" class="size-4" />
+          Contoh CSV
+        </button>
+
+        <button @click="openCreate" class="inline-flex items-center justify-center gap-x-2 rounded-xl bg-emerald-600 text-white px-3 py-2 text-sm font-medium hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500/40 active:scale-[.98] transition-all">
           <Icon icon="lucide:plus" class="size-4" />
           Tambah Guru
         </button>
@@ -60,7 +81,7 @@
       <div
         v-for="t in filtered"
         :key="t.id"
-        class="group rounded-3xl border border-emerald-100/70 bg-white/90 dark:bg-neutral-800/90 dark:border-emerald-900/30 shadow-xs hover:shadow-lg transition-all hover:-translate-y-0.5 overflow-hidden backdrop-blur supports-[backdrop-filter]:bg-white/70"
+        class="group rounded-3xl border border-gray-100/70 bg-white/90 dark:bg-neutral-800/90 dark:border-gray-900/30 shadow-xs hover:shadow-lg transition-all hover:-translate-y-0.5 overflow-hidden backdrop-blur supports-[backdrop-filter]:bg-white/70"
       >
         <div class="flex">
           <!-- Photo / avatar -->
@@ -73,7 +94,7 @@
               <span
                 class="text-[10px] px-1.5 py-0.5 rounded-md ring-1"
                 :class="t.aktif !== false
-                  ? 'bg-emerald-100 700 ring-emerald-200 dark:bg-emerald-900/30 dark:300 dark:ring-emerald-900/40'
+                  ? 'bg-emerald-100 700 ring-gray-200 dark:bg-emerald-900/30 dark:300 dark:ring-gray-900/40'
                   : 'bg-rose-100 text-rose-700 ring-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:ring-rose-900/40'"
               >
                 {{ t.aktif !== false ? 'Aktif' : 'Nonaktif' }}
@@ -98,10 +119,10 @@
                 </p>
               </div>
               <div class="flex items-center gap-1.5">
-                <button class="px-2 py-1.5 text-xs rounded-md border border-emerald-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700" @click="openEdit(t)" aria-label="Edit">
+                <button class="px-2 py-1.5 text-xs rounded-md border border-gray-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700" @click="openEdit(t)" aria-label="Edit">
                   Edit
                 </button>
-                <button class="px-2 py-1.5 text-xs rounded-md border border-blue-200/60 600 hover:bg-blue-50 dark:border-blue-900/30 dark:hover:bg-blue-900/20" @click="openBindFromCard(t)" aria-label="Bind RFID">
+                <button class="px-2 py-1.5 text-xs rounded-md border border-gray-200/60 600 hover:bg-blue-50 dark:border-gray-900/30 dark:hover:bg-blue-900/20" @click="openBindFromCard(t)" aria-label="Bind RFID">
                   RFID
                 </button>
                 <button class="px-2 py-1.5 text-xs rounded-md border border-rose-200/60 text-rose-600 hover:bg-rose-50 dark:border-rose-900/30 dark:hover:bg-rose-900/20" @click="openDeleteData(t)" aria-label="Hapus">
@@ -123,7 +144,7 @@
               <span
                 v-for="m in t.mapelLain"
                 :key="m"
-                class="hs-tooltip inline-flex items-center rounded-full bg-emerald-50 700 ring-1 ring-emerald-100 dark:bg-emerald-900/20 dark:300 dark:ring-emerald-900/30 px-2 py-0.5 text-[10px]"
+                class="hs-tooltip inline-flex items-center rounded-full bg-emerald-50 700 ring-1 ring-gray-100 dark:bg-emerald-900/20 dark:300 dark:ring-gray-900/30 px-2 py-0.5 text-[10px]"
               >
                 <span class="hs-tooltip-toggle">{{ m }}</span>
                 <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 invisible transition px-2 py-1 text-[10px] rounded-lg bg-neutral-900 text-white ml-1">Mapel tambahan</span>
@@ -133,7 +154,7 @@
         </div>
       </div>
 
-      <div v-if="!filtered.length" class="col-span-full p-6 text-sm text-gray-600 border border-dashed border-emerald-200 rounded-2xl bg-emerald-50/40 dark:bg-neutral-800 dark:text-neutral-400 dark:border-emerald-900/30">
+      <div v-if="!filtered.length" class="col-span-full p-6 text-sm text-gray-600 border border-dashed border-gray-200 rounded-2xl bg-emerald-50/40 dark:bg-neutral-800 dark:text-neutral-400 dark:border-gray-900/30">
         Data guru belum ada / tidak ditemukan.
       </div>
     </div>
@@ -143,12 +164,12 @@
       <div v-if="modal.open" class="fixed inset-0 z-[90]">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" @click="closeModal"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4">
-          <div class="w-full max-w-4xl rounded-3xl border border-emerald-100/70 bg-white/95 shadow-2xl ring-1 ring-black/5 dark:bg-neutral-800 dark:border-neutral-700">
-            <div class="sticky top-0 z-10 p-4 border-b border-emerald-100/70 bg-white/90 backdrop-blur dark:bg-neutral-800/90 dark:border-neutral-700 flex items-center justify-between rounded-t-3xl">
+          <div class="w-full max-w-4xl rounded-3xl border border-gray-100/70 bg-white/95 shadow-2xl ring-1 ring-black/5 dark:bg-neutral-800 dark:border-neutral-700">
+            <div class="sticky top-0 z-10 p-4 border-b border-gray-100/70 bg-white/90 backdrop-blur dark:bg-neutral-800/90 dark:border-neutral-700 flex items-center justify-between rounded-t-3xl">
               <h3 class="font-semibold">
                 {{ modal.mode === 'create' ? 'Tambah Guru' : 'Edit Guru' }}
               </h3>
-              <button class="p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40" @click="closeModal" aria-label="Tutup">
+              <button class="p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500/40" @click="closeModal" aria-label="Tutup">
                 <Icon icon="lucide:x" class="size-4" />
               </button>
             </div>
@@ -160,7 +181,7 @@
                 <div class="sm:row-span-2">
                   <label class="text-xs text-gray-500 dark:text-neutral-400">Foto (thumbnail)</label>
                   <div class="mt-2 flex items-start gap-3">
-                    <div class="relative w-28 rounded-xl overflow-hidden border border-emerald-100/70 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900">
+                    <div class="relative w-28 rounded-xl overflow-hidden border border-gray-100/70 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900">
                       <div class="w-full aspect-[3/4]">
                         <img v-if="form.photoPreview" :src="form.photoPreview" class="w-full h-full object-cover" alt="Preview foto baru" />
                         <img v-else-if="modal.mode==='edit' && form.initialPhotoUrl && !form.removePhoto" :src="form.initialPhotoUrl" class="w-full h-full object-cover" alt="Foto saat ini" />
@@ -173,7 +194,7 @@
                     </div>
 
                     <div class="flex-1 flex flex-col gap-2">
-                      <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-emerald-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700 cursor-pointer w-fit">
+                      <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700 cursor-pointer w-fit">
                         <Icon icon="lucide:upload" class="size-4" />
                         <span class="text-sm">Pilih Foto</span>
                         <input type="file" accept="image/*" class="hidden" @change="onPhotoInput" />
@@ -206,11 +227,11 @@
                   <div class="grid gap-2 sm:grid-cols-2">
                     <div>
                       <label class="text-xs text-gray-500 dark:text-neutral-400">Nama Lengkap</label>
-                      <input v-model.trim="form.nama" type="text" required class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                      <input v-model.trim="form.nama" type="text" required class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                     </div>
                     <div>
                       <label class="text-xs text-gray-500 dark:text-neutral-400">Jenis Kelamin</label>
-                      <select v-model="form.gender" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                      <select v-model="form.gender" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30">
                         <option :value="null">-</option>
                         <option value="L">Laki-laki</option>
                         <option value="P">Perempuan</option>
@@ -223,13 +244,13 @@
                   <div class="grid gap-2 sm:grid-cols-2">
                     <div>
                       <label class="text-xs text-gray-500 dark:text-neutral-400">Jenjang</label>
-                      <select v-model="form.jenjang" required class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                      <select v-model="form.jenjang" required class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30">
                         <option v-for="j in JENJANGS" :key="j" :value="j">{{ j }}</option>
                       </select>
                     </div>
                     <div>
                       <label class="text-xs text-gray-500 dark:text-neutral-400">Mapel Utama</label>
-                      <select v-model="form.mapelUtama" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                      <select v-model="form.mapelUtama" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30">
                         <option :value="''">-</option>
                         <option v-for="m in SUBJECTS_ID" :key="m" :value="m">{{ m }}</option>
                       </select>
@@ -242,60 +263,60 @@
               <div class="grid md:grid-cols-3 gap-3">
                 <div>
                   <label>NIP</label>
-                  <input v-model.trim="form.nip" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.nip" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>NUPTK</label>
-                  <input v-model.trim="form.nuptk" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.nuptk" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>NIK</label>
-                  <input v-model.trim="form.nik" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.nik" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>Tempat Lahir</label>
-                  <input v-model.trim="form.tempatLahir" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.tempatLahir" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>Tanggal Lahir</label>
-                  <input v-model="form.tanggalLahirStr" type="date" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model="form.tanggalLahirStr" type="date" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>Agama</label>
-                  <select v-model="form.agama" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                  <select v-model="form.agama" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30">
                     <option :value="null">-</option>
                     <option v-for="a in AGAMAS" :key="a" :value="a">{{ a }}</option>
                   </select>
                 </div>
                 <div class="md:col-span-3">
                   <label>Alamat</label>
-                  <input v-model.trim="form.alamat" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.alamat" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>No Hp</label>
-                  <input v-model.trim="form.phone" type="tel" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.phone" type="tel" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>Email</label>
-                  <input v-model.trim="form.email" type="email" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.email" type="email" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>Status Kepegawaian</label>
-                  <select v-model="form.statusKepegawaian" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                  <select v-model="form.statusKepegawaian" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30">
                     <option v-for="s in STATUSES" :key="s" :value="s">{{ s }}</option>
                   </select>
                 </div>
                 <div>
                   <label>Tanggal Mulai</label>
-                  <input v-model="form.tglMulaiStr" type="date" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model="form.tglMulaiStr" type="date" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>Tanggal Selesai</label>
-                  <input v-model="form.tglSelesaiStr" type="date" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model="form.tglSelesaiStr" type="date" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div class="flex items-end gap-3">
                   <label class="inline-flex items-center gap-2">
-                    <input type="checkbox" v-model="form.aktif" class="rounded border-emerald-200 600 focus:ring-emerald-500" />
+                    <input type="checkbox" v-model="form.aktif" class="rounded border-gray-200 600 focus:ring-gray-500" />
                     Aktif
                   </label>
                 </div>
@@ -311,12 +332,12 @@
                       type="text"
                       readonly
                       placeholder="Belum terpasang"
-                      class="mt-1 w-full rounded-xl border bg-gray-50 dark:bg-neutral-900/70 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                      class="mt-1 w-full rounded-xl border bg-gray-50 dark:bg-neutral-900/70 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-gray-500/30"
                     />
                     <button
                       type="button"
                       @click="openBindFromForm()"
-                      class="px-3 py-2 rounded-xl border border-blue-200/60 600 hover:bg-blue-50 dark:border-blue-900/30 dark:hover:bg-blue-900/20 text-sm inline-flex items-center gap-1"
+                      class="px-3 py-2 rounded-xl border border-gray-200/60 600 hover:bg-blue-50 dark:border-gray-900/30 dark:hover:bg-blue-900/20 text-sm inline-flex items-center gap-1"
                     >
                       <Icon icon="mdi:nfc-variant" class="size-4" /> Bind
                     </button>
@@ -336,7 +357,7 @@
               <div class="grid md:grid-cols-3 gap-3">
                 <div>
                   <label>Pendidikan Terakhir</label>
-                  <select v-model="form.pendidikanTerakhir" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                  <select v-model="form.pendidikanTerakhir" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30">
                     <option value="D3">D3</option>
                     <option value="S1">S1</option>
                     <option value="S2">S2</option>
@@ -345,38 +366,38 @@
                 </div>
                 <div>
                   <label>Jurusan</label>
-                  <input v-model.trim="form.jurusan" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.jurusan" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>Institusi</label>
-                  <input v-model.trim="form.institusi" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.institusi" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>Tahun Lulus</label>
-                  <input v-model.trim="form.tahunLulus" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.tahunLulus" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>Sertifikat Pendidik</label>
-                  <input v-model.trim="form.sertifikatPendidik" type="text" placeholder="No. sertifikat (jika ada)" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.sertifikatPendidik" type="text" placeholder="No. sertifikat (jika ada)" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>PPG Tahun</label>
-                  <input v-model.trim="form.ppgTahun" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.ppgTahun" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>Golongan</label>
-                  <input v-model.trim="form.golongan" type="text" placeholder="Contoh: III/a" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.golongan" type="text" placeholder="Contoh: III/a" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
                 <div>
                   <label>Pangkat</label>
-                  <input v-model.trim="form.pangkat" type="text" placeholder="Contoh: Penata Muda" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                  <input v-model.trim="form.pangkat" type="text" placeholder="Contoh: Penata Muda" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500/30" />
                 </div>
 
                 <div class="md:col-span-3">
                   <label class="text-xs text-gray-500 dark:text-neutral-400">Jabatan</label>
                   <div class="mt-2 grid sm:grid-cols-3 gap-2">
-                    <label v-for="j in JABATANS" :key="j" class="inline-flex items-center gap-2 text-sm rounded-xl px-2 py-1 ring-1 ring-emerald-100/70 dark:ring-neutral-700">
-                      <input type="checkbox" :value="j" v-model="form.jabatan" class="rounded border-emerald-200 600 focus:ring-emerald-500" />
+                    <label v-for="j in JABATANS" :key="j" class="inline-flex items-center gap-2 text-sm rounded-xl px-2 py-1 ring-1 ring-gray-100/70 dark:ring-neutral-700">
+                      <input type="checkbox" :value="j" v-model="form.jabatan" class="rounded border-gray-200 600 focus:ring-gray-500" />
                       {{ j }}
                     </label>
                   </div>
@@ -385,8 +406,8 @@
                 <div class="md:col-span-3">
                   <label class="text-xs text-gray-500 dark:text-neutral-400">Mapel Lain (opsional)</label>
                   <div class="mt-2 grid sm:grid-cols-3 gap-2">
-                    <label v-for="m in SUBJECTS_ID" :key="m" class="inline-flex items-center gap-2 text-sm rounded-xl px-2 py-1 ring-1 ring-emerald-100/70 dark:ring-neutral-700">
-                      <input type="checkbox" :value="m" v-model="form.mapelLain" class="rounded border-emerald-200 600 focus:ring-emerald-500" />
+                    <label v-for="m in SUBJECTS_ID" :key="m" class="inline-flex items-center gap-2 text-sm rounded-xl px-2 py-1 ring-1 ring-gray-100/70 dark:ring-neutral-700">
+                      <input type="checkbox" :value="m" v-model="form.mapelLain" class="rounded border-gray-200 600 focus:ring-gray-500" />
                       {{ m }}
                     </label>
                   </div>
@@ -394,7 +415,7 @@
               </div>
 
               <div class="flex items-center justify-end pt-1">
-                <button type="submit" class="px-3 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 active:scale-[.98] transition-all">
+                <button type="submit" class="px-3 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500/40 active:scale-[.98] transition-all">
                   <Icon v-if="saving" icon="ph:spinner" class="size-4 animate-spin" />
                   <span>{{ saving ? 'Menyimpan…' : (modal.mode==='create' ? 'Simpan' : 'Update') }}</span>
                 </button>
@@ -454,8 +475,8 @@
       <div v-if="rfidModal.open" class="fixed inset-0 z-[96]">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeRfidModal()"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4">
-          <div class="w-full max-w-md rounded-2xl border border-emerald-200/70 bg-white/95 dark:bg-neutral-800 dark:border-emerald-900/30 shadow-xl overflow-hidden">
-            <div class="p-4 border-b border-emerald-200/70 dark:border-emerald-900/30 flex items-center gap-2">
+          <div class="w-full max-w-md rounded-2xl border border-gray-200/70 bg-white/95 dark:bg-neutral-800 dark:border-gray-900/30 shadow-xl overflow-hidden">
+            <div class="p-4 border-b border-gray-200/70 dark:border-gray-900/30 flex items-center gap-2">
               <Icon icon="mdi:nfc-variant" class="size-5 600" />
               <h3 class="font-semibold">Binding RFID</h3>
             </div>
@@ -465,7 +486,7 @@
                 <span class="absolute inset-0 rounded-full animate-ping bg-emerald-400/30"></span>
                 <span class="absolute inset-2 rounded-full animate-ping bg-emerald-400/30"></span>
                 <span class="absolute inset-4 rounded-full animate-ping bg-emerald-400/30"></span>
-                <div class="relative size-24 rounded-full flex items-center justify-center bg-emerald-50 dark:bg-neutral-700 ring-1 ring-emerald-200/70 dark:ring-emerald-900/40 animate-pulse">
+                <div class="relative size-24 rounded-full flex items-center justify-center bg-emerald-50 dark:bg-neutral-700 ring-1 ring-gray-200/70 dark:ring-gray-900/40 animate-pulse">
                   <Icon :icon="rfidModal.status==='done' ? 'lucide:check-circle-2' : (rfidModal.status==='timeout' ? 'lucide:timer' : 'mdi:nfc-variant')" class="size-10 600" />
                 </div>
               </div>
@@ -618,6 +639,250 @@ function confirmDeleteAvatar(){
   form.removePhoto = true
   form.photoPreview = null
   modalDeleteAvatar.open = false
+}
+
+const CSV_HEADERS = [
+  'id','nama','gender','agama','tempatLahir','tanggalLahir',
+  'alamat','phone','email','nip','nuptk','nik',
+  'jenjang','mapelUtama','mapelLain','jabatan',
+  'pendidikanTerakhir','jurusan','institusi','tahunLulus','sertifikatPendidik','ppgTahun','golongan','pangkat',
+  'statusKepegawaian','tglMulai','tglSelesai','aktif','rfidUid'
+] as const
+
+type CsvRow = Partial<Record<(typeof CSV_HEADERS)[number], string>>
+
+function fmtDate(ts?: number|null){
+  if(!ts) return ''
+  const d = new Date(ts)
+  if (Number.isNaN(d.getTime())) return ''
+  const y = d.getFullYear()
+  const m = String(d.getMonth()+1).padStart(2,'0')
+  const da = String(d.getDate()).padStart(2,'0')
+  return `${y}-${m}-${da}` // YYYY-MM-DD
+}
+function csvEscape(v: any){
+  const s = (v ?? '').toString()
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s
+}
+
+function toCsvLine(arr: any[]){ return arr.map(csvEscape).join(',') }
+
+function downloadBlob(filename: string, content: string, mime='text/csv;charset=utf-8'){
+  const blob = new Blob([content], { type: mime })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  setTimeout(()=>URL.revokeObjectURL(url), 1000)
+}
+
+function arraysJoin(list?: (string|number)[] | null){
+  if(!list || !list.length) return ''
+  return list.map(x => String(x)).join('|') // gunakan pemisah '|'
+}
+
+function exportCsv(){
+  const rows = filtered.value || []
+  const head = toCsvLine(CSV_HEADERS as any)
+
+  const lines = rows.map((t: any) => {
+    const obj: CsvRow = {
+      id: t.id,
+      nama: t.nama ?? '',
+      gender: t.gender ?? '',
+      agama: t.agama ?? '',
+      tempatLahir: t.tempatLahir ?? '',
+      tanggalLahir: fmtDate(t.tanggalLahir),
+      alamat: t.alamat ?? '',
+      phone: t.phone ?? '',
+      email: t.email ?? '',
+      nip: t.nip ?? '',
+      nuptk: t.nuptk ?? '',
+      nik: t.nik ?? '',
+      jenjang: t.jenjang ?? '',
+      mapelUtama: t.mapelUtama ?? '',
+      mapelLain: arraysJoin(t.mapelLain),
+      jabatan: arraysJoin(t.jabatan),
+      pendidikanTerakhir: t.pendidikanTerakhir ?? '',
+      jurusan: t.jurusan ?? '',
+      institusi: t.institusi ?? '',
+      tahunLulus: t.tahunLulus ?? '',
+      sertifikatPendidik: t.sertifikatPendidik ?? '',
+      ppgTahun: t.ppgTahun ?? '',
+      golongan: t.golongan ?? '',
+      pangkat: t.pangkat ?? '',
+      statusKepegawaian: t.statusKepegawaian ?? '',
+      tglMulai: fmtDate(t.tglMulai),
+      tglSelesai: fmtDate(t.tglSelesai),
+      aktif: (t.aktif !== false) ? '1' : '0',
+      rfidUid: (t as any).rfidUid ?? ''
+    }
+    return toCsvLine((CSV_HEADERS as any).map((k:string)=>obj[k] ?? ''))
+  })
+
+  const bom = '\uFEFF' // supaya Excel nyaman
+  const csv = bom + [head, ...lines].join('\n')
+  const y = new Date()
+  const fn = `guru_export_${y.getFullYear()}-${String(y.getMonth()+1).padStart(2,'0')}-${String(y.getDate()).padStart(2,'0')}.csv`
+  downloadBlob(fn, csv)
+}
+
+function downloadExampleCsv(){
+  const example = [
+    CSV_HEADERS.join(','),
+    // Baris contoh 1 (buat guru aktif, mapelLain & jabatan pakai pemisah '|')
+    [
+      '', 'Ahmad Fauzi','L','Islam','Malang','1986-03-12',
+      'Jl. Melati No. 5','081234567890','ahmad@example.com','198603122018031001','1234567890123456','3578xxxxxxxxxxxx',
+      'SMP','Matematika','Fisika|TIK','Guru|Wali Kelas',
+      'S1','Pendidikan Matematika','UM','2008','1234/PPG','2016','III/a','Penata Muda',
+      'PNS','2012-07-01','','1','A1B2C3D4'
+    ].map(csvEscape).join(','),
+    // Baris contoh 2 (nonaktif, minimal kolom)
+    [
+      '', 'Siti Rahma','P','Islam','','',
+      '','', '','', '','',
+      'SD','','','','S1','','','','','','','',
+      'Honorer','','','0',''
+    ].map(csvEscape).join(','),
+  ].join('\n')
+
+  const bom = '\uFEFF'
+  downloadBlob('contoh_import_guru.csv', bom + example)
+}
+
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = []
+  let i = 0, cur: string[] = [], cell = '', inQ = false
+  while (i < text.length) {
+    const ch = text[i]
+    if (inQ) {
+      if (ch === '"') {
+        if (text[i+1] === '"') { cell += '"'; i += 2; continue }
+        inQ = false; i++; continue
+      } else { cell += ch; i++; continue }
+    } else {
+      if (ch === '"') { inQ = true; i++; continue }
+      if (ch === ',') { cur.push(cell); cell=''; i++; continue }
+      if (ch === '\r') { i++; continue }
+      if (ch === '\n') { cur.push(cell); rows.push(cur); cur=[]; cell=''; i++; continue }
+      cell += ch; i++; continue
+    }
+  }
+  cur.push(cell)
+  rows.push(cur)
+  return rows.filter(r => r.some(x => (x||'').trim() !== ''))
+}
+
+function toBool(v: any){
+  const s = String(v ?? '').trim().toLowerCase()
+  if (['1','true','ya','aktif','y'].includes(s)) return true
+  if (['0','false','tidak','nonaktif','n'].includes(s)) return false
+  return s ? true : false
+}
+
+function toTsDate(s: string|undefined|null){
+  if(!s) return null
+  const t = String(s).trim()
+  if (!t) return null
+  // dukung YYYY-MM-DD atau DD/MM/YYYY
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return new Date(t+'T00:00:00').getTime()
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(t)) {
+    const [dd,mm,yy] = t.split('/')
+    return new Date(`${yy}-${mm}-${dd}T00:00:00`).getTime()
+  }
+  const ms = Date.parse(t)
+  return Number.isNaN(ms) ? null : ms
+}
+
+function splitList(s: string|undefined|null){
+  if(!s) return []
+  // dukung pemisah '|' atau ';'
+  return String(s).split(/[|;]/).map(v=>v.trim()).filter(Boolean)
+}
+
+async function onImportCsv(ev: Event){
+  const file = (ev.target as HTMLInputElement).files?.[0]
+  ;(ev.target as HTMLInputElement).value = '' // reset agar bisa pilih file sama lagi
+  if(!file) return
+
+  try{
+    const text = await file.text()
+    const rows = parseCsv(text)
+    if(!rows.length){ alert('File kosong.'); return }
+
+    // header
+    const header = rows[0].map(h => h.trim())
+    const idx: Record<string, number> = {}
+    CSV_HEADERS.forEach(h => { idx[h] = header.indexOf(h) })
+
+    // validasi minimal kolom 'nama' & 'jenjang'
+    if (idx['nama'] === -1 || idx['jenjang'] === -1) {
+      alert('Header CSV wajib memuat minimal kolom: nama, jenjang.')
+      return
+    }
+
+    let created = 0, updated = 0, failed = 0
+    for (let r = 1; r < rows.length; r++){
+      const row = rows[r]
+      const val = (key: (typeof CSV_HEADERS)[number]) => {
+        const i = idx[key]; return i >= 0 ? (row[i] ?? '').trim() : ''
+      }
+
+      const id = val('id')
+      const payload: any = {
+        nama: val('nama'),
+        gender: val('gender') || undefined,
+        agama: val('agama') || undefined,
+        tempatLahir: val('tempatLahir'),
+        tanggalLahir: toTsDate(val('tanggalLahir')),
+        alamat: val('alamat'),
+        phone: val('phone'),
+        email: val('email'),
+        nip: val('nip'),
+        nuptk: val('nuptk'),
+        nik: val('nik'),
+        jenjang: (val('jenjang') as any) || 'SD',
+        mapelUtama: val('mapelUtama'),
+        mapelLain: splitList(val('mapelLain')),
+        jabatan: splitList(val('jabatan')).length ? splitList(val('jabatan')) : ['Guru'],
+        pendidikanTerakhir: (val('pendidikanTerakhir') as any) || undefined,
+        jurusan: val('jurusan'),
+        institusi: val('institusi'),
+        tahunLulus: val('tahunLulus'),
+        sertifikatPendidik: val('sertifikatPendidik'),
+        ppgTahun: val('ppgTahun'),
+        golongan: val('golongan'),
+        pangkat: val('pangkat'),
+        statusKepegawaian: (val('statusKepegawaian') as any) || undefined,
+        tglMulai: toTsDate(val('tglMulai')),
+        tglSelesai: toTsDate(val('tglSelesai')),
+        aktif: toBool(val('aktif')),
+        rfidUid: val('rfidUid') || undefined
+      }
+
+      try{
+        if (id) {
+          await updateTeacher(id, payload)
+          updated++
+        } else {
+          await createTeacher(payload)
+          created++
+        }
+      } catch(e){
+        console.error('Import row gagal:', e, row)
+        failed++
+      }
+    }
+
+    alert(`Import selesai.\nBaru: ${created}\nUpdate: ${updated}\nGagal: ${failed}`)
+  } catch(e:any){
+    console.error(e)
+    alert('Gagal memproses CSV: ' + (e?.message || 'Unknown error'))
+  }
 }
 
 /** ===== Delete Data Modal ===== */
