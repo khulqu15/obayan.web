@@ -9,9 +9,10 @@
           <div class="relative">
             <img :src="avatarPreview || user.avatar" alt="Avatar"
                  class="size-24 sm:size-28 rounded-2xl ring-4 ring-white dark:ring-neutral-800 object-cover">
-            <button type="button"
+            <button
+              type="button"
               class="absolute -right-2 -bottom-2 p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700"
-              aria-haspopup="dialog" aria-controls="modal-avatar" data-hs-overlay="#modal-avatar">
+              @click="showAvatarModal = true">
               <Icon icon="lucide:camera" class="size-4" />
             </button>
           </div>
@@ -245,36 +246,101 @@
       </div>
     </div>
 
-    <!-- Modal Avatar -->
-    <div id="modal-avatar" class="hs-overlay hidden fixed inset-0 z-60 overflow-y-auto pointer-events-none">
-      <div class="m-4 sm:m-8 pointer-events-auto">
-        <div class="mx-auto max-w-lg rounded-2xl border bg-white shadow-xl dark:bg-neutral-800 dark:border-neutral-700">
-          <div class="p-4 border-b dark:border-neutral-700 flex items-center justify-between">
-            <h4 class="font-semibold">Ubah Foto Profil</h4>
-            <button type="button" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700" data-hs-overlay="#modal-avatar">
-              <Icon icon="lucide:x" class="size-4" />
-            </button>
-          </div>
-          <div class="p-4 space-y-3">
-            <input ref="fileInput" type="file" accept="image/*" @change="onPickAvatar" class="block w-full text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 dark:file:bg-neutral-700 dark:file:text-neutral-200" />
-            <div v-if="avatarPreview" class="rounded-xl overflow-hidden border dark:border-neutral-700">
-              <img :src="avatarPreview" class="w-full h-56 object-cover" alt="Preview">
+    <!-- Modal Avatar (v-show, no hs-overlay) -->
+    <Transition name="fade">
+      <div v-show="showAvatarModal" class="fixed inset-0 z-60">
+        <!-- backdrop -->
+        <div class="absolute inset-0 bg-black/50"></div>
+
+        <!-- dialog -->
+        <div class="relative m-4 pt-24 sm:m-8">
+          <div class="mx-auto max-w-3xl rounded-2xl border bg-white shadow-xl dark:bg-neutral-800 dark:border-neutral-700">
+            <div class="p-4 border-b dark:border-neutral-700 flex items-center justify-between">
+              <h4 class="font-semibold">Ubah Foto Profil</h4>
+              <button type="button" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700"
+                      @click="showAvatarModal = false">
+                <Icon icon="lucide:x" class="size-4" />
+              </button>
             </div>
-          </div>
-          <div class="p-4 border-t dark:border-neutral-700 flex items-center justify-end gap-2">
-            <button class="px-3 py-1.5 rounded-lg border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700" data-hs-overlay="#modal-avatar">Batal</button>
-            <button class="px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700" @click="uploadAvatar" data-hs-overlay="#modal-avatar" :disabled="uploadingAvatar">
-              {{ uploadingAvatar ? 'Mengunggah…' : 'Simpan' }}
-            </button>
+
+            <div class="p-4 space-y-4">
+              <!-- Picker -->
+              <div class="flex flex-col sm:flex-row gap-3">
+                <input
+                  ref="fileInput"
+                  type="file"
+                  accept="image/*"
+                  @change="onPickAvatar"
+                  class="block w-full text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 dark:file:bg-neutral-700 dark:file:text-neutral-200" />
+
+                <div class="flex items-center gap-2">
+                  <label class="text-xs text-gray-500 dark:text-neutral-400">Ukuran</label>
+                  <select v-model.number="crop.size"
+                          class="py-2 px-3 rounded-lg border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 text-sm">
+                    <option v-for="s in [256,384,512,768,1024]" :key="s" :value="s">{{ s }}×{{ s }}</option>
+                  </select>
+                </div>
+
+                <div class="flex-1 flex items-center gap-3">
+                  <label class="text-xs text-gray-500 dark:text-neutral-400">Zoom</label>
+                  <input type="range" min="1" max="5" step="0.01" v-model.number="crop.scale"
+                        @input="clampOffsets()" class="w-full accent-gray-700">
+                  <button type="button" class="px-2 py-1 text-xs rounded-md border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                          @click="resetCrop" :disabled="!crop.src">Reset</button>
+                  <button type="button" class="px-2 py-1 text-xs rounded-md border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                          @click="fitCrop" :disabled="!crop.src">Fit</button>
+                </div>
+              </div>
+
+              <!-- Cropper (drag to pan) -->
+              <div
+                ref="cropBoxEl"
+                class="relative mx-auto w-full max-w-xl aspect-square rounded-xl border border-gray-200 bg-gray-50 overflow-hidden select-none touch-none dark:bg-neutral-900 dark:border-neutral-700"
+                @pointerdown="onDragStart"
+                @pointermove="onDragMove"
+                @pointerup="onDragEnd"
+                @pointercancel="onDragEnd"
+                @pointerleave="onDragEnd">
+
+                <img
+                  v-if="crop.src"
+                  :src="crop.src"
+                  :style="imageStyle"
+                  class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 will-change-transform pointer-events-none rounded" />
+
+                <div v-else class="absolute inset-0 grid place-items-center text-sm text-gray-500 dark:text-neutral-400">
+                  Pilih gambar untuk mulai crop
+                </div>
+
+                <div class="absolute inset-3 border-2 border-dashed border-gray-400/70 rounded-xl pointer-events-none"></div>
+              </div>
+
+              <p class="text-xs text-gray-500 dark:text-neutral-400">
+                Tips: seret gambar untuk mengatur posisi. Gunakan slider untuk zoom. Hasil akan dipotong <strong>persegi (1:1)</strong>.
+              </p>
+            </div>
+
+            <div class="p-4 border-t dark:border-neutral-700 flex items-center justify-end gap-2">
+              <button class="px-3 py-1.5 rounded-lg border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                      @click="cancelAvatar(); showAvatarModal = false">
+                Batal
+              </button>
+              <button class="px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                      @click="handleUploadAvatar"
+                      :disabled="uploadingAvatar || !crop.src">
+                {{ uploadingAvatar ? 'Mengunggah…' : 'Simpan' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Transition>
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed, onMounted } from 'vue'
+import { reactive, ref, computed, onMounted, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import { child, get, set, update, remove, ref as dbRef } from 'firebase/database'
 import { getAuth, signInWithEmailAndPassword, updatePassword } from 'firebase/auth'
@@ -319,12 +385,186 @@ const audits   = ref<AuditRow[]>([])
 
 // ===== Avatar upload =====
 const fileInput = ref<HTMLInputElement | null>(null)
-const avatarPreview = ref<string | null>(null)
-const uploadingAvatar = ref(false)
-const onPickAvatar = (e: Event) => {
-  const f = (e.target as HTMLInputElement).files?.[0]; if (!f) return
-  avatarPreview.value = URL.createObjectURL(f)
+async function onPickAvatar(e: Event) {
+  const f = (e.target as HTMLInputElement).files?.[0]
+  if (!f) return
+  // buat object URL & baca dimensi natural
+  const url = URL.createObjectURL(f)
+  crop.src = url
+  avatarPreview.value = url // preview sementara di header
+  const img = new Image()
+  img.onload = async () => {
+    crop.naturalW = img.naturalWidth
+    crop.naturalH = img.naturalHeight
+    await nextTick()
+    computeBaseFit()
+  }
+  img.src = url
 }
+
+function getCropSourceRect() {
+  const c = cropBoxEl.value?.clientWidth || crop.size
+  const displayW = crop.naturalW * crop.baseFit * crop.scale
+  const displayH = crop.naturalH * crop.baseFit * crop.scale
+  const imgLeft = (c - displayW) / 2 + crop.offsetX
+  const imgTop  = (c - displayH) / 2 + crop.offsetY
+
+  const sx = (-imgLeft) / displayW * crop.naturalW
+  const sy = (-imgTop)  / displayH * crop.naturalH
+  const sWidth  = c / displayW * crop.naturalW
+  const sHeight = c / displayH * crop.naturalH
+
+  return { sx, sy, sWidth, sHeight }
+}
+
+const cropBoxEl = ref<HTMLDivElement | null>(null)
+const avatarPreview = ref<string | null>(null)         // tetap dipakai di header (preview sementara)
+const uploadingAvatar = ref(false)
+
+const crop = reactive({
+  src: '' as string,              // objectURL dari file terpilih
+  naturalW: 0,
+  naturalH: 0,
+  baseFit: 1,                     // scale agar image cover aspek square container
+  scale: 1,                       // multiplier tambahan (zoom)
+  offsetX: 0,                     // geser dari pusat (px, pada container)
+  offsetY: 0,
+  dragging: false,
+  lastX: 0,
+  lastY: 0,
+  size: 512                       // output size (px)
+})
+
+async function uploadAvatarCropped() {
+  if (!crop.src || !sessionUser.value?.uid) return
+  uploadingAvatar.value = true
+  try {
+    // draw ke canvas square (size x size)
+    const canvas = document.createElement('canvas')
+    canvas.width = crop.size
+    canvas.height = crop.size
+    const ctx = canvas.getContext('2d')!
+    const img = await new Promise<HTMLImageElement>((res) => {
+      const i = new Image()
+      i.onload = () => res(i)
+      i.src = crop.src
+    })
+    const { sx, sy, sWidth, sHeight } = getCropSourceRect()
+    ctx.imageSmoothingQuality = 'high'
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height)
+
+    // konversi → Blob WebP (lebih kecil), fallback PNG bila tak didukung
+    const blob: Blob = await new Promise((res) => {
+      if (canvas.toBlob) {
+        canvas.toBlob((b) => res(b as Blob), 'image/webp', 0.92)
+      } else {
+        // @ts-ignore
+        res(canvas.msToBlob?.() || new Blob())
+      }
+    })
+
+    // Upload ke Firebase Storage
+    const { getStorage, ref: sRef, uploadBytesResumable, getDownloadURL } = await import('firebase/storage')
+    const storage = getStorage()
+    const filename = `avatar_${Date.now()}_${crop.size}.webp`
+    const path = `alberr/users/${sessionUser.value.uid}/${filename}`
+    const task = uploadBytesResumable(sRef(storage, path), blob, { contentType: 'image/webp' })
+
+    await new Promise<void>((resolve, reject) => {
+      task.on('state_changed', () => {}, reject, async () => {
+        const url = await getDownloadURL(task.snapshot.ref)
+        user.avatar = url
+        profileFormUpdateFromUser()
+        await update(dbRef($realtimeDb, `alberr/users/${sessionUser.value.uid}`), {
+          avatar: url, updatedAt: Date.now()
+        })
+        resolve()
+      })
+    })
+
+    // bersihkan preview & input
+    avatarPreview.value = null
+    if (fileInput.value) fileInput.value.value = ''
+    // reset crop (supaya buka modal lagi mulai fresh)
+    crop.src = ''
+  } catch (e) {
+    console.error(e)
+  } finally {
+    uploadingAvatar.value = false
+  }
+}
+
+function cancelAvatar() {
+  // tidak menyimpan; biarkan avatar lama, bersihkan preview sementara
+  avatarPreview.value = null
+  if (fileInput.value) fileInput.value.value = ''
+  crop.src = ''
+}
+
+const imageStyle = computed(() => {
+  // ukuran tampil (setelah baseFit * scale), dipakai hanya untuk transform
+  const c = cropBoxEl.value?.clientWidth || 0
+  const displayW = crop.naturalW * crop.baseFit * crop.scale
+  const displayH = crop.naturalH * crop.baseFit * crop.scale
+  return {
+    width: `${displayW}px`,
+    height: `${displayH}px`,
+    transform: `translate(calc(-50% + ${crop.offsetX}px), calc(-50% + ${crop.offsetY}px))`
+  }
+})
+
+function resetCrop() {
+  crop.scale = 1
+  crop.offsetX = 0
+  crop.offsetY = 0
+  clampOffsets()
+}
+function fitCrop() {
+  computeBaseFit()
+  clampOffsets()
+}
+
+function onDragStart(e: PointerEvent) {
+  if (!crop.src) return
+  ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
+  crop.dragging = true
+  crop.lastX = e.clientX
+  crop.lastY = e.clientY
+}
+function onDragMove(e: PointerEvent) {
+  if (!crop.dragging) return
+  const dx = e.clientX - crop.lastX
+  const dy = e.clientY - crop.lastY
+  crop.offsetX += dx
+  crop.offsetY += dy
+  crop.lastX = e.clientX
+  crop.lastY = e.clientY
+  clampOffsets()
+}
+function onDragEnd() { crop.dragging = false }
+
+function clampOffsets() {
+  const c = cropBoxEl.value?.clientWidth || 0
+  const displayW = crop.naturalW * crop.baseFit * crop.scale
+  const displayH = crop.naturalH * crop.baseFit * crop.scale
+  const maxX = Math.max(0, (displayW - c) / 2)
+  const maxY = Math.max(0, (displayH - c) / 2)
+  crop.offsetX = Math.max(-maxX, Math.min(maxX, crop.offsetX))
+  crop.offsetY = Math.max(-maxY, Math.min(maxY, crop.offsetY))
+}
+
+function computeBaseFit() {
+  const box = cropBoxEl.value
+  if (!box || !crop.naturalW || !crop.naturalH) return
+  const c = box.clientWidth
+  crop.baseFit = Math.max(c / crop.naturalW, c / crop.naturalH) // cover square
+  crop.scale = 1
+  crop.offsetX = 0
+  crop.offsetY = 0
+  clampOffsets()
+}
+
 const uploadAvatar = async () => {
   if (!avatarPreview.value || !sessionUser.value?.uid) return
   const inputEl = fileInput.value
@@ -512,6 +752,13 @@ async function copyApiKey() {
   try { if (apiKey.value) await navigator.clipboard.writeText(apiKey.value) } catch {}
 }
 
+const showAvatarModal = ref(false)
+
+async function handleUploadAvatar() {
+  await uploadAvatarCropped()
+  showAvatarModal.value = false
+}
+
 // ===== Sessions ops =====
 async function revokeSession(id: string) {
   if (!sessionUser.value?.uid) return
@@ -590,3 +837,8 @@ const roleLabel = computed(() => {
 })
 const accessLabel = computed(() => (sessionUser.value?.allowedRoutes?.length ? 'Scoped' : 'Full'))
 </script>
+
+<style>
+.fade-enter-active,.fade-leave-active{transition:opacity .15s ease}
+.fade-enter-from,.fade-leave-to{opacity:0}
+</style>

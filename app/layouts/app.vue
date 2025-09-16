@@ -276,7 +276,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed, nextTick } from 'vue'
+import { ref, watch, onMounted, computed, nextTick, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import AppLoading from '~/components/AppLoading.vue'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
@@ -299,6 +299,32 @@ const titlePage = 'Ponpes ALBERR | Pesantren Inovatif & Informatif'
 const description = 'Selamat datang di Ponpes ALBERR Pandaan: KMI/Diniyah, Tahfidz, MTs/MA, kegiatan santri, dan PPDB online.'
 useSeoMeta({ title: titlePage, description, ogTitle: titlePage, ogDescription: description, ogType: 'website', ogUrl: url.value, ogImage: '/assets/logo.png', twitterCard: 'summary_large_image', themeColor: '#0ea5e9', robots: 'index, follow' })
 useHead({ link: [{ rel: 'canonical', href: url.value }] })
+
+let profileRef: ReturnType<typeof dbRef> | null = null
+
+function applyProfile(uid: string, v: any) {
+  // update sessionUser agar computed `user` langsung kebaca di header & sidebar
+  sessionUser.value = {
+    ...(sessionUser.value || {}),
+    uid,
+    name: v?.displayName || v?.name || sessionUser.value?.name || tokenUser.value?.name || 'Pengguna',
+    email: v?.email || sessionUser.value?.email || tokenUser.value?.email || '-',
+    avatar: v?.avatar || sessionUser.value?.avatar || '/assets/pp.jpg',
+  }
+}
+
+async function startProfileWatcher(uid?: string | null) {
+  if (!uid) return
+  try { if (profileRef) off(profileRef) } catch {}
+  profileRef = dbRef($realtimeDb, `/alberr/users/${uid}`)
+
+  try {
+    const snap = await get(profileRef)
+    if (snap.exists()) applyProfile(uid, snap.val())
+  } catch { /* noop */ }
+
+  onValue(profileRef, (s) => applyProfile(uid, s.val()), { onlyOnce: false })
+}
 
 /* Sidebar data */
 type Item = { label: string; href: string; icon?: string }
@@ -526,6 +552,11 @@ const user = computed(() => ({
   avatar: sessionUser.value?.avatar || '/assets/pp.jpg'
 }))
 
+onUnmounted(() => {
+  try { if (aclRef) off(aclRef) } catch {}
+  try { if (profileRef) off(profileRef) } catch {}     // ⬅️
+})
+
 async function doLogout() {
   try { if (aclRef) off(aclRef) } catch {}
   try { await signOut($auth) } catch (e) { /* optional: console.warn(e) */ }
@@ -533,6 +564,7 @@ async function doLogout() {
   localStorage.removeItem(AUTH_KEY)
   sessionStorage.removeItem(AUTH_KEY)
   tokenUser.value = null
+  sessionUser.value = {} as any 
   const m = document.getElementById('logout-modal')
   if (m) m.classList.add('hidden')
 
@@ -615,6 +647,7 @@ onMounted(async () => {
 
     await nextTick()
     await startAclWatcher(tokenUser.value?.uid)
+    await startProfileWatcher(tokenUser.value?.uid)
   } catch {
     localStorage.removeItem(AUTH_KEY)
     if (!route.path.startsWith('/auth') && route.path !== '/' && route.path !== '/cakAdmin') {
