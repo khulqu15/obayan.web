@@ -345,23 +345,74 @@
       </ModalShell>
 
       <ModalShell v-model="showDocs" title="Dokumen Pendaftar">
-        <div v-if="docState.loading" class="text-sm text-slate-500">Memuat dokumen…</div>
-        <div v-else-if="!docState.dok || allDocEmpty" class="text-sm text-slate-500">Tidak ada dokumen.</div>
-        <div v-else class="grid sm:grid-cols-2 gap-3">
-          <div v-for="item in docItems" :key="item.key" class="rounded-lg border border-slate-200 dark:border-neutral-800 p-3">
-            <div class="flex items-center justify-between">
-              <div class="text-sm font-medium">{{ item.label }}</div>
-              <a v-if="item.url" :href="item.url" target="_blank"
-                 class="text-xs underline decoration-dotted">Buka</a>
+        <div class="space-y-3">
+          <div v-if="docState.loading" class="text-sm text-slate-500">Memuat dokumen…</div>
+
+          <div v-else-if="!docTabs.length" class="text-sm text-slate-500">
+            Tidak ada dokumen.
+          </div>
+
+          <div v-else>
+            <!-- Tabs -->
+            <div class="overflow-x-auto">
+              <nav class="flex items-center gap-1 border-b border-slate-200 dark:border-neutral-800">
+                <button
+                  v-for="(t, i) in docTabs"
+                  :key="t.key"
+                  @click="activeDocTab = i"
+                  class="px-3 py-2 text-sm -mb-px rounded-t-lg"
+                  :class="activeDocTab === i
+                    ? 'border-b-2 border-slate-800 dark:border-neutral-200 text-slate-900 dark:text-neutral-100 font-medium'
+                    : 'text-slate-500 dark:text-neutral-400 hover:text-slate-700 dark:hover:text-neutral-200'"
+                >
+                  {{ t.label }}
+                </button>
+              </nav>
             </div>
-            <div v-if="item.isImage" class="mt-2">
-              <img :src="item.url" alt="" class="rounded-md max-h-64 object-contain w-full" @error="() => {}" />
+
+            <!-- Viewer -->
+            <div class="mt-3 rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+              <div class="p-2">
+                <div v-if="currentTab.isImage" class="w-full h-[60vh] grid place-items-center">
+                  <img :src="currentTab.url" alt="" class="max-h-full max-w-full object-contain rounded-md" @error="() => {}" />
+                </div>
+
+                <div v-else-if="currentTab.isPdf" class="w-full h-[60vh]">
+                  <iframe
+                    :src="currentTab.viewerUrl"
+                    class="w-full h-full rounded-md"
+                    allowfullscreen
+                    loading="lazy"
+                  ></iframe>
+                </div>
+
+                <div v-else class="p-4 text-sm text-slate-600 dark:text-neutral-300">
+                  File tidak dapat dipratinjau. 
+                  <a :href="currentTab.url" target="_blank" class="underline decoration-dotted">Buka di tab baru</a>.
+                </div>
+              </div>
+
+              <!-- Actions bawah viewer -->
+              <div class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 dark:border-neutral-800 px-3 py-2 text-xs">
+                <div class="min-w-0 truncate text-slate-500 dark:text-neutral-400">
+                  Sumber: 
+                  <a :href="currentTab.url" target="_blank" class="underline decoration-dotted">{{ currentTab.url }}</a>
+                </div>
+                <div class="flex items-center gap-2">
+                  <a :href="currentTab.url" target="_blank" class="px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Buka</a>
+                  <a :href="currentTab.url" download class="px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">
+                    Unduh
+                  </a>
+                </div>
+              </div>
             </div>
-            <div v-else class="mt-2 text-xs text-slate-500">PDF / Non-gambar</div>
           </div>
         </div>
+
         <template #footer>
-          <button @click="showDocs=false" class="px-3 py-1.5 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Tutup</button>
+          <button @click="showDocs=false" class="px-3 py-1.5 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">
+            Tutup
+          </button>
         </template>
       </ModalShell>
 
@@ -569,10 +620,46 @@ async function confirmDelete(){
 /** ===== Dokumen Modal ===== */
 const showDocs = ref(false)
 const docState = reactive<{ loading: boolean; dok: any | null }>({ loading: false, dok: null })
-const allDocEmpty = computed(() => {
+const activeDocTab = ref(0)
+
+function buildViewerUrl(url: string) {
+  const s = String(url || '')
+  if (!s) return ''
+  if (s.includes('drive.google.com')) {
+    const m = s.match(/\/file\/d\/([^/]+)\//)
+    if (m?.[1]) return `https://drive.google.com/file/d/${m[1]}/preview`
+    const id = s.match(/[?&]id=([^&]+)/)?.[1]
+    if (id) return `https://drive.google.com/file/d/${id}/preview`
+  }
+  if (/\.pdf(\?|$)/i.test(s)) return s
+  return s
+}
+
+const docTabs = computed(() => {
   const d = docState.dok || {}
-  return !d.kkUrl && !d.akteUrl && !d.raportUrl && !d.fotoUrl
+  const raw = [
+    { key: 'kkUrl',     label: 'Kartu Keluarga',  url: d.kkUrl || '' },
+    { key: 'akteUrl',   label: 'Akte Kelahiran',  url: d.akteUrl || '' },
+    { key: 'raportUrl', label: 'Raport Terakhir', url: d.raportUrl || '' },
+    { key: 'fotoUrl',   label: 'Pas Foto 3x4',    url: d.fotoUrl || '' },
+  ].filter(it => !!it.url)
+
+  return raw.map(it => {
+    const url = String(it.url)
+    const isImage = /\.(png|jpe?g|webp|gif|bmp|svg)(\?|$)/i.test(url)
+    const isPdf   = /\.pdf(\?|$)/i.test(url) || url.includes('drive.google.com')
+    return {
+      ...it,
+      isImage,
+      isPdf,
+      viewerUrl: isImage ? url : buildViewerUrl(url)
+    }
+  })
 })
+
+const currentTab = computed(() => docTabs.value[activeDocTab.value] || { url:'', isImage:false, isPdf:false, viewerUrl:'', label:'-' })
+const allDocEmpty = computed(() => !docTabs.value.length)
+
 const docItems = computed(() => {
   const d = docState.dok || {}
   const items = [
@@ -586,13 +673,16 @@ const docItems = computed(() => {
     isImage: /\.(jpg|jpeg|png|webp|gif)$/i.test(String(it.url || ''))
   }))
 })
+
 async function openDocs(id: string){
   showDocs.value = true
+  activeDocTab.value = 0
   docState.loading = true
   docState.dok = null
   try {
     const full = await getSantriById(id)
     docState.dok = full?.dokumen || null
+    if (activeDocTab.value >= docTabs.value.length) activeDocTab.value = 0
   } finally {
     docState.loading = false
   }
