@@ -130,11 +130,11 @@
               <div v-if="step===1" class="grid sm:grid-cols-2 gap-4">
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Nama Lengkap (Sesuai Akta) <span class="text-red-600">*</span></span>
-                  <input v-model="form.siswa.nama" type="text" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" required />
+                  <input v-model="form.siswa.nama" type="text" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" required />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Jenis Kelamin <span class="text-red-600">*</span></span>
-                  <select v-model="form.siswa.jk" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" required>
+                  <select v-model="form.siswa.jk" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" required>
                     <option value="" disabled>Pilih</option>
                     <option value="L">Laki-laki</option>
                     <option value="P">Perempuan</option>
@@ -142,39 +142,39 @@
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Tempat Lahir <span class="text-red-600">*</span></span>
-                  <input v-model="form.siswa.tmpLahir" type="text" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" required />
+                  <input v-model="form.siswa.tmpLahir" type="text" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" required />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Tanggal Lahir <span class="text-red-600">*</span></span>
-                  <input v-model="form.siswa.tglLahir" type="date" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" required />
+                  <input v-model="form.siswa.tglLahir" type="date" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" required />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Tinggi Badan (cm)</span>
-                  <input v-model="form.siswa.tinggi" type="number" min="0" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.siswa.tinggi" type="number" min="0" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Berat Badan (kg)</span>
-                  <input v-model="form.siswa.berat" type="number" min="0" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.siswa.berat" type="number" min="0" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Cita-cita</span>
-                  <input v-model="form.siswa.cita" type="text" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" placeholder="Contoh: Dokter" />
+                  <input v-model="form.siswa.cita" type="text" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" placeholder="Contoh: Dokter" />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Hobi</span>
-                  <input v-model="form.siswa.hobi" type="text" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" placeholder="Contoh: Membaca" />
+                  <input v-model="form.siswa.hobi" type="text" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" placeholder="Contoh: Membaca" />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">No KK <span class="text-red-600">*</span></span>
-                  <input v-model="form.siswa.kk" type="text" inputmode="numeric" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.siswa.kk" type="text" inputmode="numeric" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">No NIK <span class="text-red-600">*</span></span>
-                  <input v-model="form.siswa.nik" type="text" inputmode="numeric" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.siswa.nik" type="text" inputmode="numeric" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
                 <label class="block sm:col-span-2">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">NISN <span class="text-red-600">*</span></span>
-                  <input v-model="form.siswa.nisn" type="text" inputmode="numeric" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.siswa.nisn" type="text" inputmode="numeric" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
               </div>
 
@@ -182,41 +182,41 @@
               <div v-else-if="step===2" class="grid sm:grid-cols-2 gap-4">
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Jalan / Gang / No. Rumah <span class="text-red-600">*</span></span>
-                  <input v-model="form.alamat.jalan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" required />
+                  <input v-model="form.alamat.jalan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" required />
                 </label>
                 <div class="grid grid-cols-2 gap-3">
                   <label class="block">
                     <span class="text-xs text-gray-600 dark:text-neutral-300">RT</span>
-                    <input v-model="form.alamat.rt" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                    <input v-model="form.alamat.rt" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                   </label>
                   <label class="block">
                     <span class="text-xs text-gray-600 dark:text-neutral-300">RW</span>
-                    <input v-model="form.alamat.rw" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                    <input v-model="form.alamat.rw" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                   </label>
                 </div>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Dusun</span>
-                  <input v-model="form.alamat.dusun" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.alamat.dusun" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Desa/Kelurahan <span class="text-red-600">*</span></span>
-                  <input v-model="form.alamat.desa" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" required />
+                  <input v-model="form.alamat.desa" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" required />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Kecamatan <span class="text-red-600">*</span></span>
-                  <input v-model="form.alamat.kec" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" required />
+                  <input v-model="form.alamat.kec" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" required />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Kabupaten/Kota <span class="text-red-600">*</span></span>
-                  <input v-model="form.alamat.kab" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" required />
+                  <input v-model="form.alamat.kab" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" required />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Provinsi <span class="text-red-600">*</span></span>
-                  <input v-model="form.alamat.prov" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" required />
+                  <input v-model="form.alamat.prov" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" required />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Kode Pos</span>
-                  <input v-model="form.alamat.kodepos" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.alamat.kodepos" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
 
                 <div class="sm:col-span-2">
@@ -264,11 +264,11 @@
 
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Nama Sekolah Asal</span>
-                  <input v-model="form.pendidikan.sekolah" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" placeholder="SD/MI/SMP/MTs" />
+                  <input v-model="form.pendidikan.sekolah" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" placeholder="SD/MI/SMP/MTs" />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Alamat Sekolah Asal</span>
-                  <input v-model="form.pendidikan.alamatSekolah" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.pendidikan.alamatSekolah" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
 
                 <div class="sm:col-span-2">
@@ -291,11 +291,11 @@
 
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Nama Lembaga Non-Formal</span>
-                  <input v-model="form.pendidikan.nfNama" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.pendidikan.nfNama" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Alamat Lembaga Non-Formal</span>
-                  <input v-model="form.pendidikan.nfAlamat" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.pendidikan.nfAlamat" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
               </div>
 
@@ -307,30 +307,30 @@
                 </div>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Nama Ayah <span class="text-red-600">*</span></span>
-                  <input v-model="form.ortu.ayah.nama" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" required />
+                  <input v-model="form.ortu.ayah.nama" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" required />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Status</span>
-                  <select v-model="form.ortu.ayah.status" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+                  <select v-model="form.ortu.ayah.status" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition">
                     <option>Hidup</option>
                     <option>Meninggal</option>
                   </select>
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Pendidikan Terakhir</span>
-                  <select v-model="form.ortu.ayah.pendidikan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+                  <select v-model="form.ortu.ayah.pendidikan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition">
                     <option>Tidak Sekolah</option><option>SD</option><option>SMP</option><option>SMA</option><option>D1/D2</option><option>S1</option><option>S2</option><option>S3</option>
                   </select>
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Pekerjaan</span>
-                  <select v-model="form.ortu.ayah.pekerjaan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+                  <select v-model="form.ortu.ayah.pekerjaan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition">
                     <option>Tidak Bekerja</option><option>Petani</option><option>PNS/ASN</option><option>TNI/POLRI</option><option>Guru</option><option>Swasta</option><option>Wiraswasta</option><option>Pengusaha</option><option>Peternak</option><option>Lainnya</option>
                   </select>
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Penghasilan Per Bulan</span>
-                  <select v-model="form.ortu.ayah.penghasilan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+                  <select v-model="form.ortu.ayah.penghasilan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition">
                     <option>&lt; Rp1.000.000</option>
                     <option>Rp1.000.000 - Rp2.000.000</option>
                     <option>Rp2.000.001 - Rp3.000.000</option>
@@ -345,30 +345,30 @@
                 </div>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Nama Ibu <span class="text-red-600">*</span></span>
-                  <input v-model="form.ortu.ibu.nama" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" required />
+                  <input v-model="form.ortu.ibu.nama" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" required />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Status</span>
-                  <select v-model="form.ortu.ibu.status" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+                  <select v-model="form.ortu.ibu.status" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition">
                     <option>Hidup</option>
                     <option>Meninggal</option>
                   </select>
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Pendidikan Terakhir</span>
-                  <select v-model="form.ortu.ibu.pendidikan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+                  <select v-model="form.ortu.ibu.pendidikan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition">
                     <option>Tidak Sekolah</option><option>SD</option><option>SMP</option><option>SMA</option><option>D1/D2</option><option>S1</option><option>S2</option><option>S3</option>
                   </select>
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Pekerjaan</span>
-                  <select v-model="form.ortu.ibu.pekerjaan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+                  <select v-model="form.ortu.ibu.pekerjaan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition">
                     <option>Tidak Bekerja</option><option>Petani</option><option>PNS/ASN</option><option>TNI/POLRI</option><option>Guru</option><option>Swasta</option><option>Wiraswasta</option><option>Pengusaha</option><option>Peternak</option><option>Lainnya</option>
                   </select>
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Penghasilan Per Bulan</span>
-                  <select v-model="form.ortu.ibu.penghasilan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+                  <select v-model="form.ortu.ibu.penghasilan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition">
                     <option>&lt; Rp1.000.000</option>
                     <option>Rp1.000.000–Rp2.000.000</option>
                     <option>Rp2.000.001–Rp3.000.000</option>
@@ -380,11 +380,11 @@
                 <!-- Kontak & Wali -->
                 <label class="block sm:col-span-2">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Nomor HP 1 (WA aktif, masuk grup) <span class="text-red-600">*</span></span>
-                  <input v-model="form.ortu.hp1" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" required placeholder="*08xxxxxxxxxx" />
+                  <input v-model="form.ortu.hp1" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" required placeholder="*08xxxxxxxxxx" />
                 </label>
                 <label class="block sm:col-span-2">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Nomor HP 2 (Opsional)</span>
-                  <input v-model="form.ortu.hp2" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.ortu.hp2" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
 
                 <div class="sm:col-span-2 pt-2">
@@ -392,30 +392,30 @@
                 </div>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Nama Wali</span>
-                  <input v-model="form.wali.nama" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.wali.nama" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Status</span>
-                  <select v-model="form.wali.status" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+                  <select v-model="form.wali.status" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition">
                     <option>Hidup</option>
                     <option>Meninggal</option>
                   </select>
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Pendidikan Terakhir</span>
-                  <select v-model="form.wali.pendidikan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+                  <select v-model="form.wali.pendidikan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition">
                     <option>Tidak Sekolah</option><option>SD</option><option>SMP</option><option>SMA</option><option>D1/D2</option><option>S1</option><option>S2</option><option>S3</option>
                   </select>
                 </label>
                 <label class="block">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Pekerjaan</span>
-                  <select v-model="form.wali.pekerjaan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+                  <select v-model="form.wali.pekerjaan" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition">
                     <option>Tidak Bekerja</option><option>Petani</option><option>PNS/ASN</option><option>TNI/POLRI</option><option>Guru</option><option>Swasta</option><option>Wiraswasta</option><option>Pengusaha</option><option>Peternak</option><option>Lainnya</option>
                   </select>
                 </label>
                 <label class="block sm:col-span-2">
                   <span class="text-xs text-gray-600 dark:text-neutral-300">Nomor HP Wali (Opsional)</span>
-                  <input v-model="form.wali.hp" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition" />
+                  <input v-model="form.wali.hp" class="w-full rounded-lg border border-gray-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-gray-200 transition" />
                 </label>
               </div>
 
@@ -1214,13 +1214,17 @@ async function submit(){
     }
     const [kkUrl, akteUrl, raportUrl, fotoUrl] = await Promise.all([ up('kk'), up('akte'), up('raport'), up('foto') ])
 
+    // ===== Tambahan: gender + tipe konsisten =====
+    const gender = (form.siswa.jk || '').toUpperCase() === 'P' ? 'P' : 'L'
+    const tipe   = gender === 'P' ? 'Putri' : 'Putra'
+
     // Credentials
     const username    = genUsername(form.siswa.nama, regId)
     const publicToken = 'pub_' + randomBase62(24)
     const secretToken = 'sec_' + randomBase62(48)
     const secretHash  = 'sha256:' + await sha256Hex(secretToken)
 
-    // ====== Bentuk data sesuai SantriRow (untuk santri.vue) ======
+    // ===== SantriRow minimum untuk listing admin =====
     const santriRow = {
       id: regId,
       gen: String(PPDB_YEAR),
@@ -1229,19 +1233,25 @@ async function submit(){
       nohp: (form.ortu.hp1 || '').trim(),
       kuotaKunjunganBulanIni: 0,
       kamar: '-',
-      maskan: '-', // dipakai oleh cell-kamar di santri.vue
+      maskan: '-',
       jenjang: jenjangFromStatus(form.pendidikan.status),
       alamat: alamatSingkat.value,
-      status: 'nonaktif' // default: belum aktif hingga diverifikasi admin
-    }
+      status: 'nonaktif',
+      // === Tambahan penting ===
+      gender,    // 'L' | 'P'
+      tipe       // 'Putra' | 'Putri'
+    } as const
 
-    // Rekam lengkap (node utama) — aman untuk dilihat admin
+    // ===== Node utama lengkap (dibaca admin + arsip) =====
     const record = {
       ...santriRow,
       username,
       publicToken,
       ppdbCode: code,
       createdAt: serverTimestamp(),
+      // dokumen TERSIMPAN di node utama
+      dokumen: { kkUrl, akteUrl, raportUrl, fotoUrl },
+      // semua detail sekolah & wali juga TERSIMPAN di bawah ppdb
       ppdb: {
         siswa: form.siswa,
         alamat: form.alamat,
@@ -1249,14 +1259,12 @@ async function submit(){
         ortu: form.ortu,
         wali: form.wali,
       },
-      dokumen: { kkUrl, akteUrl, raportUrl, fotoUrl },
       meta: { ua: navigator.userAgent, tz: Intl.DateTimeFormat().resolvedOptions().timeZone }
     }
 
-    // Tulis utama (dibaca oleh useSantri() → santri.vue)
     await set(dbRef($realtimeDb, `alberr/santri/${regId}`), record)
 
-    // Index ringan (opsional)
+    // ===== Index ringan untuk kebutuhan list/filters cepat =====
     await set(dbRef($realtimeDb, `alberr/santriIndex/${regId}`), {
       id: regId,
       gen: santriRow.gen,
@@ -1266,10 +1274,15 @@ async function submit(){
       kamar: santriRow.kamar,
       jenjang: santriRow.jenjang,
       status: santriRow.status,
-      username, publicToken
+      username, publicToken,
+      // === Tambahan penting di index ===
+      gender,                 // untuk split Putra/Putri cepat
+      tipe,                   // Putra | Putri
+      sekolah: form.pendidikan.sekolah || '',    // ringkas data sekolah
+      waliNama: primaryWaliName(),               // ringkas data wali
+      dokumenCount: [kkUrl, akteUrl, raportUrl, fotoUrl].filter(Boolean).length
     })
 
-    // Secret hash — disimpan terpisah
     await set(dbRef($realtimeDb, `alberr/credentials/${regId}`), {
       secretHash,
       createdAt: serverTimestamp(),
@@ -1281,10 +1294,6 @@ async function submit(){
     regInfo.value = { id: regId, code }
     receipt.value = { username, publicToken }
 
-    // Admin only (DevTools)
-    console.info('[PPDB] SECRET TOKEN (simpan aman, hanya admin!):', { regId, secretToken })
-
-    // Hapus draf
     localStorage.removeItem(DRAFT_KEY)
   } catch (e:any) {
     console.error(e)

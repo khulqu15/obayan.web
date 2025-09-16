@@ -1,291 +1,376 @@
+<!-- /pages/app/registration.vue -->
 <template>
   <div class="relative">
-    <!-- Soft Deco -->
+    <!-- Background deco ringan -->
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
       <div class="absolute inset-0 bg-white dark:bg-neutral-950
-                  [background-image:radial-gradient(theme(colors.blue.100)_1px,transparent_1px)]
+                  [background-image:radial-gradient(theme(colors.slate.200)_1px,transparent_1px)]
                   [background-size:18px_18px] [background-position:0_0]
-                  dark:[background-image:radial-gradient(theme(colors.emerald.900/.25)_1px,transparent_1px)]"></div>
+                  dark:[background-image:radial-gradient(theme(colors.zinc.800/.35)_1px,transparent_1px)]"></div>
       <div class="absolute -top-32 -left-40 h-[520px] w-[520px] rounded-full blur-3xl
-                  bg-[radial-gradient(closest-side,theme(colors.blue.300/.35),transparent)]
-                  opacity-30"></div>
+                  bg-[radial-gradient(closest-side,theme(colors.emerald.300/.30),transparent)]"></div>
       <div class="absolute -bottom-24 -right-40 h-[520px] w-[520px] rounded-full blur-3xl
-                  bg-[radial-gradient(closest-side,theme(colors.emerald.300/.35),transparent)]
-                  opacity-30"></div>
+                  bg-[radial-gradient(closest-side,theme(colors.violet.300/.30),transparent)]"></div>
     </div>
 
     <div class="p-6 space-y-6">
       <!-- HEADER -->
-      <div class="flex items-start justify-between gap-4">
+      <div class="flex items-start flex-wrap justify-between gap-4">
         <div>
-          <div class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide 700 dark:400">
+          <div class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-400">
             <Icon icon="ph:student" class="size-4" />
-            PPDB • {{ thisYear }}/{{ thisYear + 1 }}
+            PPDB • {{ selectedYear }}/{{ Number(selectedYear) + 1 }}
           </div>
-          <h1 class="text-xl sm:text-2xl font-bold mt-1">Pendaftaran Santri Baru</h1>
-          <p class="text-sm text-gray-600 dark:text-neutral-300">Kelola calon santri & status pendaftaran (buka/tutup).</p>
+          <h1 class="text-xl sm:text-2xl font-bold mt-1">Pendaftaran Santri — Admin</h1>
+          <p class="text-sm text-slate-600 dark:text-neutral-300">Kelola calon/diterima & lihat dokumen pendaftar. Terbagi Putra & Putri.</p>
         </div>
 
         <div class="shrink-0 flex items-center gap-2">
           <NuxtLink
             to="/registrationPPDB"
-            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700">
+            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700">
             <Icon icon="ph:link-simple" class="size-4" /> Buka Form
           </NuxtLink>
           <button @click="copy(formUrl)"
-                  class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white text-xs font-medium hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800">
+                  class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-neutral-700 bg-white text-xs font-medium hover:bg-slate-50 dark:bg-neutral-900 dark:hover:bg-neutral-800">
             <Icon icon="ph:copy" class="size-4" /> Salin Link
           </button>
         </div>
       </div>
 
-      <!-- STATUS CARD -->
-      <section
-        class="rounded-2xl border border-emerald-200/60 dark:border-emerald-900/40 bg-white/85 dark:bg-neutral-900/80 backdrop-blur-xl shadow-[0_14px_60px_rgba(16,185,129,.12)]">
-        <div class="p-4 sm:p-6">
-          <div class="flex items-center justify-between flex-wrap gap-3">
-            <div class="flex items-center gap-3">
-              <div class="size-10 grid place-items-center rounded-2xl bg-emerald-100 700 dark:bg-emerald-900/40 dark:300">
-                <Icon :icon="isClosed ? 'ph:lock' : 'ph:lock-open'" class="size-5" />
+      <!-- FILTER BAR -->
+      <section class="rounded-2xl border border-slate-200/70 dark:border-neutral-800 bg-white/85 dark:bg-neutral-900/80 backdrop-blur">
+        <div class="p-4 sm:p-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="flex items-center gap-2">
+            <label class="text-xs text-slate-500 dark:text-neutral-400">Tahun</label>
+            <select v-model="selectedYear"
+                    class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm">
+              <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-xs text-slate-500 dark:text-neutral-400">Jenjang</label>
+            <select v-model="filters.jenjang"
+                    class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm">
+              <option value="semua">Semua</option>
+              <option v-for="j in jenjangOptions" :key="j" :value="j">{{ j }}</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <input v-model="filters.q" placeholder="Cari nama / wali / alamat / kamar / no HP…"
+                   class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm" />
+          </div>
+        </div>
+      </section>
+
+      <!-- GRID PUTRA / PUTRI -->
+      <div class="grid lg:grid-cols-2 gap-6 items-start">
+        <!-- PUTRA COLUMN -->
+        <section class="space-y-4 overflow-x-auto w-full">
+          <header class="flex items-center gap-2">
+            <div class="size-8 grid place-items-center rounded-xl bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-300">♂</div>
+            <h2 class="text-base sm:text-lg font-semibold">Putra ({{ selectedYear }})</h2>
+          </header>
+
+          <!-- Calon Putra -->
+          <div class="rounded-2xl border border-slate-200 dark:border-neutral-800 bg-white/85 dark:bg-neutral-900/80 backdrop-blur">
+            <div class="p-4 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-neutral-800">
+              <h3 class="font-semibold text-sm sm:text-base">Calon Putra</h3>
+              <div class="flex items-center gap-2">
+                <button @click="approveBulk(calonPutraFiltered.map(r=>r.id))"
+                        :disabled="!calonPutraFiltered.length || savingBulk"
+                        class="text-xs px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60">
+                  Terima Semua ({{ calonPutraFiltered.length }})
+                </button>
+                <button @click="exportCSV(calonPutraFiltered, `calon_putra_${selectedYear}.csv`)"
+                        class="text-xs px-3 py-1.5 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">
+                  Export CSV
+                </button>
               </div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <h3 class="font-semibold">Status Pendaftaran</h3>
-                  <span :class="badgeClass">
-                    {{ isClosed ? 'Ditutup' : 'Dibuka' }}
+            </div>
+            <div class="p-3">
+              <DataTable
+                title="Calon Putra"
+                :rows="calonPutraFiltered"
+                :columns="columnsCalon"
+                :show-actions="true"
+                :rowKey="(r) => r.id"
+              >
+                <template #cell-nohp="{ row }">
+                  <a v-if="row.nohp" :href="`tel:${row.nohp}`" class="underline decoration-dotted">{{ row.nohp }}</a>
+                  <span v-else class="text-slate-400">-</span>
+                </template>
+                <template #cell-status="{ row }">
+                  <span class="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                    Calon
                   </span>
-                </div>
-                <p class="text-xs text-gray-600 dark:text-neutral-400">
-                  {{ statusCaption }}
-                </p>
+                </template>
+                <template #cell-kamar="{ row }">
+                  {{ row.kamar || '-' }} <span v-if="row.maskan">- {{ row.maskan }}</span>
+                </template>
+                <template #cell-action="{ row }">
+                  <div class="flex items-center flex-wrap gap-2">
+                    <button @click="approve(row.id)"
+                            class="text-xs px-2 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700">Terima</button>
+                    <button @click="openDocs(row.id)"
+                            class="text-xs px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Dokumen</button>
+                    <button @click="openEdit(row)"
+                            class="text-xs px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Edit</button>
+                    <button @click="openConfirm(row)"
+                            class="text-xs px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
+                  </div>
+                </template>
+              </DataTable>
+            </div>
+          </div>
+
+          <!-- Diterima Putra -->
+          <div class="rounded-2xl border border-slate-200 dark:border-neutral-800 bg-white/85 dark:bg-neutral-900/80 backdrop-blur">
+            <div class="p-4 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-neutral-800">
+              <h3 class="font-semibold text-sm sm:text-base">Santri Baru Putra</h3>
+              <div class="flex items-center gap-2">
+                <button @click="revertBulk(baruPutraFiltered.map(r=>r.id))"
+                        :disabled="!baruPutraFiltered.length || savingBulkRevert"
+                        class="text-xs px-3 py-1.5 rounded bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-60">
+                  Jadikan Calon Semua ({{ baruPutraFiltered.length }})
+                </button>
+                <button @click="exportCSV(baruPutraFiltered, `santri_putra_${selectedYear}.csv`)"
+                        class="text-xs px-3 py-1.5 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Export CSV</button>
               </div>
             </div>
-
-            <!-- Switches -->
-            <div class="flex items-center flex-wrap gap-3">
-              <label class="inline-flex items-center gap-2">
-                <input type="checkbox" class="shrink-0 hs-tooltip-toggle relative w-11 h-6 bg-gray-200 rounded-full cursor-pointer transition-colors ease-in-out duration-200
-                      focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-600
-                      dark:bg-neutral-700"
-                       :checked="!isClosed"
-                       @change="toggleManual(!$event.target.checked)">
-                <span class="text-sm">Buka/Tutup (Manual)</span>
-              </label>
-
-              <label class="inline-flex items-center gap-2">
-                <input type="checkbox" class="shrink-0 hs-tooltip-toggle relative w-11 h-6 bg-gray-200 rounded-full cursor-pointer transition-colors ease-in-out duration-200
-                      focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-600
-                      dark:bg-neutral-700"
-                       :checked="settings.autoCloseEnabled"
-                       @change="saveSettings({ autoCloseEnabled: $event.target.checked })">
-                <span class="text-sm">Tutup Otomatis</span>
-              </label>
+            <div class="p-3">
+              <DataTable
+                title="Santri Baru Putra"
+                :rows="baruPutraFiltered"
+                :columns="columnsBaru"
+                :show-actions="true"
+                :rowKey="(r) => r.id"
+              >
+                <template #cell-nohp="{ row }">
+                  <a v-if="row.nohp" :href="`tel:${row.nohp}`" class="underline decoration-dotted">{{ row.nohp }}</a>
+                  <span v-else class="text-slate-400">-</span>
+                </template>
+                <template #cell-status="{ row }">
+                  <span class="text-xs px-2 py-0.5 rounded bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
+                    Diterima
+                  </span>
+                </template>
+                <template #cell-kamar="{ row }">
+                  {{ row.kamar || '-' }} <span v-if="row.maskan">- {{ row.maskan }}</span>
+                </template>
+                <template #cell-action="{ row }">
+                  <div class="flex items-center flex-wrap gap-2">
+                    <button @click="revertToCalon(row.id)"
+                            class="text-xs px-2 py-1 rounded bg-amber-600 text-white hover:bg-amber-700">Jadikan Calon</button>
+                    <button @click="openDocs(row.id)"
+                            class="text-xs px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Dokumen</button>
+                    <button @click="openEdit(row)"
+                            class="text-xs px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Edit</button>
+                    <button @click="openConfirm(row)"
+                            class="text-xs px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
+                  </div>
+                </template>
+              </DataTable>
             </div>
           </div>
+        </section>
 
-          <!-- Scheduler -->
-          <div class="mt-4 grid sm:grid-cols-2 gap-3">
-            <div class="rounded-xl border border-gray-200 dark:border-neutral-800 p-3">
-              <label class="block text-xs text-gray-500 dark:text-neutral-400 mb-1">Tanggal Tutup (otomatis)</label>
-              <input type="datetime-local"
-                     :value="autoCloseLocal"
-                     @change="onChangeAutoClose($event)"
-                     class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm" />
-            </div>
+        <!-- PUTRI COLUMN -->
+        <section class="space-y-4">
+          <header class="flex items-center gap-2">
+            <div class="size-8 grid place-items-center rounded-xl bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-300">♀</div>
+            <h2 class="text-base sm:text-lg font-semibold">Putri ({{ selectedYear }})</h2>
+          </header>
 
-            <div class="rounded-xl border border-gray-200 dark:border-neutral-800 p-3 bg-emerald-50/50 dark:bg-neutral-800/40">
-              <div class="flex items-center gap-2 text-sm font-semibold">
-                <Icon icon="ph:timer" class="size-4 700 dark:300" />
-                Hitung Mundur
+          <!-- Calon Putri -->
+          <div class="rounded-2xl border border-slate-200 dark:border-neutral-800 bg-white/85 dark:bg-neutral-900/80 backdrop-blur">
+            <div class="p-4 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-neutral-800">
+              <h3 class="font-semibold text-sm sm:text-base">Calon Putri</h3>
+              <div class="flex items-center gap-2">
+                <button @click="approveBulk(calonPutriFiltered.map(r=>r.id))"
+                        :disabled="!calonPutriFiltered.length || savingBulk"
+                        class="text-xs px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60">
+                  Terima Semua ({{ calonPutriFiltered.length }})
+                </button>
+                <button @click="exportCSV(calonPutriFiltered, `calon_putri_${selectedYear}.csv`)"
+                        class="text-xs px-3 py-1.5 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">
+                  Export CSV
+                </button>
               </div>
-              <p class="mt-1 text-lg font-bold"
-                 :class="isClosed ? 'text dark:text-rose-400' : '700 dark:300'">
-                {{ countdownText }}
-              </p>
-              <p class="text-[11px] text-gray-500 dark:text-neutral-400">Akan menutup otomatis jika diaktifkan.</p>
+            </div>
+            <div class="p-3">
+              <DataTable
+                title="Calon Putri"
+                :rows="calonPutriFiltered"
+                :columns="columnsCalon"
+                :show-actions="true"
+                :rowKey="(r) => r.id"
+              >
+                <template #cell-nohp="{ row }">
+                  <a v-if="row.nohp" :href="`tel:${row.nohp}`" class="underline decoration-dotted">{{ row.nohp }}</a>
+                  <span v-else class="text-slate-400">-</span>
+                </template>
+                <template #cell-status="{ row }">
+                  <span class="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                    Calon
+                  </span>
+                </template>
+                <template #cell-kamar="{ row }">
+                  {{ row.kamar || '-' }} <span v-if="row.maskan">- {{ row.maskan }}</span>
+                </template>
+                <template #cell-action="{ row }">
+                  <div class="flex items-center flex-wrap gap-2">
+                    <button @click="approve(row.id)"
+                            class="text-xs px-2 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700">Terima</button>
+                    <button @click="openDocs(row.id)"
+                            class="text-xs px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Dokumen</button>
+                    <button @click="openEdit(row)"
+                            class="text-xs px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Edit</button>
+                    <button @click="openConfirm(row)"
+                            class="text-xs px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
+                  </div>
+                </template>
+              </DataTable>
             </div>
           </div>
-        </div>
-      </section>
 
-      <!-- DATA CALON SANTRI -->
-      <section class="space-y-3">
-        <div class="flex items-center flex-wrap gap-3 justify-between">
-          <h2 class="text-base font-semibold">Calon Santri ({{ thisYear }})</h2>
-          <div class="flex flex-wrap items-center gap-2">
-            <input v-model="filtersCalon.q" placeholder="Cari nama / wali / alamat…"
-                   class="w-52 text-xs px-3 py-1.5 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-            <select v-model="filtersCalon.jenjang" class="text-xs px-2 py-1.5 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700">
-              <option value="semua">Semua Jenjang</option>
-              <option v-for="j in jenjangOptionsCalon" :key="j" :value="j">{{ j }}</option>
-            </select>
-            <button @click="approveSelected"
-                    :disabled="savingBulk || selectedCalon.size===0"
-                    class="text-xs px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60">
-              Terima Terpilih ({{ selectedCalon.size }})
-            </button>
-            <button @click="approveAllFiltered"
-                    :disabled="savingBulk || filteredCalon.length===0"
-                    class="text-xs px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
-              Terima Semua ({{ filteredCalon.length }})
-            </button>
-            <button @click="exportCSV(filteredCalon, `calon_santri_${thisYear}.csv`)"
-                    class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Export CSV</button>
-            <button @click="exportExcel(filteredCalon, `calon_santri_${thisYear}.xlsx`)"
-                    class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Export Excel</button>
-          </div>
-        </div>
-
-        <DataTable
-          title="Calon Santri"
-          :rows="filteredCalon"
-          :columns="columns"
-          :rowKey="(r) => r.id"
-        >
-        <template #cell-_sel="{ row }">
-        <input type="checkbox"
-                class="rounded border-gray-300 dark:border-neutral-700"
-                :checked="isSelectedCalon(row.id)"
-                @change="toggleSelectCalon(row.id, $event.target.checked)" />
-        </template>
-          <template #cell-nohp="{ row }">
-            <a v-if="row.nohp" :href="`tel:${row.nohp}`" class="600 hover:underline">{{ row.nohp }}</a>
-            <span v-else class="text-gray-400">-</span>
-          </template>
-
-          <template #cell-status="{ row }">
-            <span class="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-              Calon
-            </span>
-          </template>
-
-          <template #cell-kamar="{row}">
-            {{ row.kamar || '-' }} <span v-if="row.maskan">- {{ row.maskan }}</span>
-          </template>
-
-          <template #cell-action="{ row }">
-            <div class="flex items-center flex-wrap gap-2">
-              <button @click="approve(row)"
-                      class="text-xs px-2 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700">Terima</button>
-              <button @click="openEdit(row)"
-                      class="text-xs px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Edit</button>
-              <button @click="openConfirm(row)"
-                      class="text-xs px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
+          <!-- Diterima Putri -->
+          <div class="rounded-2xl border border-slate-200 dark:border-neutral-800 bg-white/85 dark:bg-neutral-900/80 backdrop-blur">
+            <div class="p-4 flex items-center justify-between gap-3 border-b border-slate-100 dark:border-neutral-800">
+              <h3 class="font-semibold text-sm sm:text-base">Santri Baru Putri</h3>
+              <div class="flex items-center gap-2">
+                <button @click="revertBulk(baruPutriFiltered.map(r=>r.id))"
+                        :disabled="!baruPutriFiltered.length || savingBulkRevert"
+                        class="text-xs px-3 py-1.5 rounded bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-60">
+                  Jadikan Calon Semua ({{ baruPutriFiltered.length }})
+                </button>
+                <button @click="exportCSV(baruPutriFiltered, `santri_putri_${selectedYear}.csv`)"
+                        class="text-xs px-3 py-1.5 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Export CSV</button>
+              </div>
             </div>
-          </template>
-        </DataTable>
-      </section>
-
-      <section class="space-y-3">
-        <div class="flex items-center flex-wrap gap-3 justify-between">
-          <h2 class="text-base font-semibold">Santri Baru ({{ thisYear }})</h2>
-          <div class="flex flex-wrap items-center gap-2">
-            <input v-model="filtersBaru.q" placeholder="Cari nama / wali / alamat…"
-                   class="w-52 text-xs px-3 py-1.5 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
-            <select v-model="filtersBaru.jenjang" class="text-xs px-2 py-1.5 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700">
-              <option value="semua">Semua Jenjang</option>
-              <option v-for="j in jenjangOptionsBaru" :key="j" :value="j">{{ j }}</option>
-            </select>
-            <button @click="revertSelectedBaru"
-                    :disabled="savingBulkRevert || selectedBaru.size===0"
-                    class="text-xs px-3 py-1.5 rounded bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-60">
-            Jadikan Calon Terpilih ({{ selectedBaru.size }})
-            </button>
-            <button @click="revertAllFilteredBaru"
-                    :disabled="savingBulkRevert || filteredBaru.length===0"
-                    class="text-xs px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
-            Jadikan Calon Semua ({{ filteredBaru.length }})
-            </button>
-            <button @click="exportCSV(filteredBaru, `santri_baru_${thisYear}.csv`)"
-                    class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Export CSV</button>
-            <button @click="exportExcel(filteredBaru, `santri_baru_${thisYear}.xlsx`)"
-                    class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Export Excel</button>
-          </div>
-        </div>
-
-        <DataTable
-          title="Santri Baru"
-          :rows="filteredBaru"
-          :columns="columnsBaru"
-          :rowKey="(r) => r.id"
-        >
-          <template #cell-nohp="{ row }">
-            <a v-if="row.nohp" :href="`tel:${row.nohp}`" class="600 hover:underline">{{ row.nohp }}</a>
-            <span v-else class="text-gray-400">-</span>
-          </template>
-
-          <template #cell-status="{ row }">
-            <span class="text-xs px-2 py-0.5 rounded bg-emerald-100 700 dark:bg-emerald-900/30 dark:300">
-              Diterima
-            </span>
-          </template>
-
-          <template #cell-kamar="{row}">
-            {{ row.kamar || '-' }} <span v-if="row.maskan">- {{ row.maskan }}</span>
-          </template>
-
-          <template #cell-action="{ row }">
-            <div class="flex items-center flex-wrap gap-2">
-              <button @click="onRevertToCalon(row)"
-                      class="text-xs px-2 py-1 rounded bg-amber-600 text-white hover:bg-amber-700">Jadikan Calon</button>
-              <button @click="openEdit(row)"
-                      class="text-xs px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Edit</button>
-              <button @click="openConfirm(row)"
-                      class="text-xs px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
+            <div class="p-3">
+              <DataTable
+                title="Santri Baru Putri"
+                :rows="baruPutriFiltered"
+                :columns="columnsBaru"
+                :rowKey="(r) => r.id"
+                :show-actions="true"
+              >
+                <template #cell-nohp="{ row }">
+                  <a v-if="row.nohp" :href="`tel:${row.nohp}`" class="underline decoration-dotted">{{ row.nohp }}</a>
+                  <span v-else class="text-slate-400">-</span>
+                </template>
+                <template #cell-status="{ row }">
+                  <span class="text-xs px-2 py-0.5 rounded bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
+                    Diterima
+                  </span>
+                </template>
+                <template #cell-kamar="{ row }">
+                  {{ row.kamar || '-' }} <span v-if="row.maskan">- {{ row.maskan }}</span>
+                </template>
+                <template #cell-action="{ row }">
+                  <div class="flex items-center flex-wrap gap-2">
+                    <button @click="revertToCalon(row.id)"
+                            class="text-xs px-2 py-1 rounded bg-amber-600 text-white hover:bg-amber-700">Jadikan Calon</button>
+                    <button @click="openDocs(row.id)"
+                            class="text-xs px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Dokumen</button>
+                    <button @click="openEdit(row)"
+                            class="text-xs px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Edit</button>
+                    <button @click="openConfirm(row)"
+                            class="text-xs px-2 py-1 rounded border border-slate-200 dark:border-neutral-700 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
+                  </div>
+                </template>
+              </DataTable>
             </div>
-          </template>
-        </DataTable>
-      </section>
+          </div>
+        </section>
+      </div>
 
+      <!-- MODALS -->
       <ModalShell v-model="showForm" :title="formMode === 'edit' ? 'Ubah Data' : 'Tambah Pendaftar'">
-        <form class="space-y-3" @submit.prevent="saveRow">
+        <form class="space-y-3 max-h-[60vh] overflow-y-auto scrollbar-none" @submit.prevent="saveRow">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="text-xs text-gray-600 dark:text-neutral-300">Gen</label>
-              <input v-model.trim="form.gen" required class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+              <label class="text-xs text-slate-600 dark:text-neutral-300">Gen</label>
+              <input v-model.trim="form.gen" required class="w-full px-3 py-2 rounded border border-slate-200 dark:bg-neutral-900 dark:border-neutral-700" />
             </div>
             <div>
-              <label class="text-xs text-gray-600 dark:text-neutral-300">Nama Santri</label>
-              <input v-model.trim="form.santri" required class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+              <label class="text-xs text-slate-600 dark:text-neutral-300">Nama Santri</label>
+              <input v-model.trim="form.santri" required class="w-full px-3 py-2 rounded border border-slate-200 dark:bg-neutral-900 dark:border-neutral-700" />
             </div>
             <div>
-              <label class="text-xs text-gray-600 dark:text-neutral-300">Wali</label>
-              <input v-model.trim="form.walisantri" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+              <label class="text-xs text-slate-600 dark:text-neutral-300">Wali</label>
+              <input v-model.trim="form.walisantri" class="w-full px-3 py-2 rounded border border-slate-200 dark:bg-neutral-900 dark:border-neutral-700" />
             </div>
             <div>
-              <label class="text-xs text-gray-600 dark:text-neutral-300">No. HP</label>
-              <input v-model.trim="form.nohp" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+              <label class="text-xs text-slate-600 dark:text-neutral-300">No. HP</label>
+              <input v-model.trim="form.nohp" class="w-full px-3 py-2 rounded border border-slate-200 dark:bg-neutral-900 dark:border-neutral-700" />
             </div>
             <div>
-              <label class="text-xs text-gray-600 dark:text-neutral-300">Kamar</label>
-              <input v-model.trim="form.kamar" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+              <label class="text-xs text-slate-600 dark:text-neutral-300">Kamar</label>
+              <input v-model.trim="form.kamar" class="w-full px-3 py-2 rounded border border-slate-200 dark:bg-neutral-900 dark:border-neutral-700" />
             </div>
             <div>
-              <label class="text-xs text-gray-600 dark:text-neutral-300">Jenjang</label>
-              <input v-model.trim="form.jenjang" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+              <label class="text-xs text-slate-600 dark:text-neutral-300">Jenjang</label>
+              <input v-model.trim="form.jenjang" class="w-full px-3 py-2 rounded border border-slate-200 dark:bg-neutral-900 dark:border-neutral-700" />
             </div>
             <div class="sm:col-span-2">
-              <label class="text-xs text-gray-600 dark:text-neutral-300">Alamat</label>
+              <label class="text-xs text-slate-600 dark:text-neutral-300">Alamat</label>
               <textarea v-model.trim="form.alamat" rows="2"
-                        class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"></textarea>
+                        class="w-full px-3 py-2 rounded border border-slate-200 dark:bg-neutral-900 dark:border-neutral-700"></textarea>
+            </div>
+            <div>
+              <label class="text-xs text-slate-600 dark:text-neutral-300">Gender (L/P)</label>
+              <input v-model.trim="form.gender" maxlength="1"
+                     class="w-full px-3 py-2 rounded border border-slate-200 dark:bg-neutral-900 dark:border-neutral-700"
+                     placeholder="L atau P" />
+            </div>
+            <div>
+              <label class="text-xs text-slate-600 dark:text-neutral-300">Status</label>
+              <select v-model="form.status"
+                      class="w-full px-3 py-2 rounded border border-slate-200 dark:bg-neutral-900 dark:border-neutral-700">
+                <option value="nonaktif">nonaktif (Calon)</option>
+                <option value="">(Kosong) = Diterima</option>
+              </select>
             </div>
           </div>
           <p v-if="formError" class="text-sm text-rose-600">{{ formError }}</p>
         </form>
         <template #footer>
-          <button @click="showForm=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Batal</button>
-          <button :disabled="saving" @click="saveRow" class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
+          <button @click="showForm=false" class="px-3 py-1.5 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Batal</button>
+          <button :disabled="saving" @click="saveRow" class="px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60">
             {{ saving ? 'Menyimpan…' : (formMode === 'edit' ? 'Update' : 'Simpan') }}
           </button>
         </template>
       </ModalShell>
 
+      <ModalShell v-model="showDocs" title="Dokumen Pendaftar">
+        <div v-if="docState.loading" class="text-sm text-slate-500">Memuat dokumen…</div>
+        <div v-else-if="!docState.dok || allDocEmpty" class="text-sm text-slate-500">Tidak ada dokumen.</div>
+        <div v-else class="grid sm:grid-cols-2 gap-3">
+          <div v-for="item in docItems" :key="item.key" class="rounded-lg border border-slate-200 dark:border-neutral-800 p-3">
+            <div class="flex items-center justify-between">
+              <div class="text-sm font-medium">{{ item.label }}</div>
+              <a v-if="item.url" :href="item.url" target="_blank"
+                 class="text-xs underline decoration-dotted">Buka</a>
+            </div>
+            <div v-if="item.isImage" class="mt-2">
+              <img :src="item.url" alt="" class="rounded-md max-h-64 object-contain w-full" @error="() => {}" />
+            </div>
+            <div v-else class="mt-2 text-xs text-slate-500">PDF / Non-gambar</div>
+          </div>
+        </div>
+        <template #footer>
+          <button @click="showDocs=false" class="px-3 py-1.5 rounded border border-slate-200 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800">Tutup</button>
+        </template>
+      </ModalShell>
+
       <ModalShell v-model="showConfirm" title="Hapus Data">
-        <p class="text-sm text-gray-700 dark:text-neutral-200">
+        <p class="text-sm text-slate-700 dark:text-neutral-200">
           Hapus data <strong>{{ current?.santri }}</strong>? Tindakan ini tidak dapat dibatalkan.
         </p>
         <template #footer>
-          <button @click="showConfirm=false" class="px-3 py-1.5 rounded border border-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-800">Batal</button>
+          <button @click="showConfirm=false" class="px-3 py-1.5 rounded border border-slate-200 hover:bg-slate-50 dark:hover:bg-neutral-800">Batal</button>
           <button :disabled="deleting" @click="confirmDelete" class="px-3 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-60">
             {{ deleting ? 'Menghapus…' : 'Hapus' }}
           </button>
@@ -296,37 +381,39 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, reactive, ref } from 'vue'
-import { useRoute, useRuntimeConfig } from '#imports'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRuntimeConfig } from '#imports'
 import { Icon } from '@iconify/vue'
 import DataTable from '~/components/widget/DataTable.vue'
 import ModalShell from '~/components/widget/ModalShell.vue'
-import { usePendaftaran, type PendaftaranRow, type PendaftaranSettings } from '~/composables/data/usePendaftaran'
+import { useSantri, type SantriRow } from '~/composables/data/useSantri'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Pendaftaran' } })
-const TZ_JKT = 'Asia/Jakarta'
 
 /** ===== Composable ===== */
-const {
-  calonRows, baruRows, loading, error,
-  fetchAll, approveCalon, revertToCalon: revertToCalonApi, updateRow, createRow, deleteRow,
-  settings, fetchSettings, saveSettings
-} = usePendaftaran()
+const { rows, fetchSantri, updateSantri, deleteSantri, getSantriById } = useSantri()
 
 /** ===== Header helpers ===== */
-const thisYear = tzYearFromMs(Date.now())
-const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-const route = useRoute()
 const config = useRuntimeConfig()
-const formUrl = computed(() => new URL('/registrationPPDB', config.public.siteUrl || window?.location?.origin || '').toString())
+const formUrl = computed(() =>
+  new URL('/registrationPPDB', config.public.siteUrl || window?.location?.origin || '').toString()
+)
 async function copy(t: string){ try { await navigator.clipboard.writeText(t) } catch {} }
 
 /** ===== Filters ===== */
-type Filters = { q: string, jenjang: string }
-const filtersCalon = reactive<Filters>({ q: '', jenjang: 'semua' })
-const filtersBaru  = reactive<Filters>({ q: '', jenjang: 'semua' })
+const filters = reactive<{ q: string; jenjang: string }>({ q: '', jenjang: 'semua' })
+const yearOptions = computed(() => {
+  const ys = Array.from(new Set((rows.value || []).map(r => String(r.gen || '').trim()).filter(Boolean)))
+  // urut desc
+  return ys.sort((a,b) => Number(b) - Number(a))
+})
+const selectedYear = ref<string>('')
+onMounted(async () => {
+  await fetchSantri()
+  selectedYear.value = yearOptions.value[0] || new Date().getFullYear().toString()
+})
 
-function matchSearch(r: PendaftaranRow, q: string) {
+function matchSearch(r: SantriRow, q: string) {
   if (!q) return true
   const s = q.toLowerCase()
   const hay = [
@@ -334,260 +421,133 @@ function matchSearch(r: PendaftaranRow, q: string) {
   ].map(v => String(v || '').toLowerCase()).join(' | ')
   return hay.includes(s)
 }
-function matchJenjang(r: PendaftaranRow, jj: string) {
+function matchJenjang(r: SantriRow, jj: string) {
   if (jj === 'semua') return true
   return String(r.jenjang || '').toLowerCase() === jj.toLowerCase()
 }
 
-const selectedBaru = ref<Set<string>>(new Set())
-function isSelectedBaru(id: string) { return selectedBaru.value.has(id) }
-function toggleSelectBaru(id: string, checked: boolean) {
-  const s = new Set(selectedBaru.value)
-  checked ? s.add(id) : s.delete(id)
-  selectedBaru.value = s
-}
+/** ===== Gender & Status logic ===== */
+/* Default: jika gender bukan 'P', dianggap PUTRA */
+const isPutri = (r: SantriRow) => String((r as any).gender).toUpperCase() === 'P'
+const isPutra = (r: SantriRow) => !isPutri(r)
+/* Status: calon jika 'nonaktif'; diterima jika bukan 'nonaktif' (termasuk kosong) */
+const isCalon = (r: SantriRow) => String(r.status).toLowerCase() === 'nonaktif'
+const isBaru  = (r: SantriRow) => !isCalon(r)
 
-const savingBulkRevert = ref(false)
-async function revertSelectedBaru() {
-  const ids = Array.from(selectedBaru.value)
-  if (!ids.length) { alert('Pilih minimal satu santri baru.'); return }
-  savingBulkRevert.value = true
-  try {
-    for (const id of ids) await revertToCalonApi(id)
-    selectedBaru.value.clear()
-    await fetchAll()
-  } finally { savingBulkRevert.value = false }
-}
-
-async function revertAllFilteredBaru() {
-  const ids = filteredBaru.value.map(r => r.id)
-  if (!ids.length) { alert('Tidak ada data pada filter saat ini.'); return }
-  if (!confirm(`Jadikan calon semua (${ids.length}) santri baru pada hasil filter?`)) return
-  savingBulkRevert.value = true
-  try {
-    for (const id of ids) await revertToCalonApi(id)
-    selectedBaru.value.clear()
-    await fetchAll()
-  } finally { savingBulkRevert.value = false }
-}
-
-const filteredCalon = computed(() => (calonRows.value || [])
-  .filter((r: any) => matchSearch(r, filtersCalon.q))
-  .filter((r: any) => matchJenjang(r, filtersCalon.jenjang))
+/** ===== Base filtered by Year+Query+Jenjang ===== */
+const baseFiltered = computed(() =>
+  (rows.value || [])
+    .filter(r => String(r.gen || '') === String(selectedYear.value || ''))
+    .filter(r => matchSearch(r, filters.q))
+    .filter(r => matchJenjang(r, filters.jenjang))
 )
-const filteredBaru = computed(() => (baruRows.value || [])
-  .filter((r: any) => matchSearch(r, filtersBaru.q))
-  .filter((r: any) => matchJenjang(r, filtersBaru.jenjang))
-)
-const jenjangOptionsCalon = computed(() => uniqueNonEmpty(calonRows.value.map((r: any) => r.jenjang)))
-const jenjangOptionsBaru  = computed(() => uniqueNonEmpty(baruRows.value.map((r: any) => r.jenjang)))
-function uniqueNonEmpty(arr: (string|number|undefined|null)[]) { return [...new Set(arr.map(v => String(v || '').trim()).filter(Boolean))] }
+
+const jenjangOptions = computed(() => {
+  const arr = (rows.value || [])
+    .filter(r => String(r.gen || '') === String(selectedYear.value || ''))
+    .map(r => String(r.jenjang || '').trim())
+    .filter(Boolean)
+  return Array.from(new Set(arr))
+})
+
+/** ===== Split: Putra/Putri → Calon/Baru ===== */
+const putraFiltered = computed(() => baseFiltered.value.filter(isPutra))
+const putriFiltered = computed(() => baseFiltered.value.filter(isPutri))
+
+const calonPutraFiltered = computed(() => putraFiltered.value.filter(isCalon))
+const baruPutraFiltered  = computed(() => putraFiltered.value.filter(isBaru))
+const calonPutriFiltered = computed(() => putriFiltered.value.filter(isCalon))
+const baruPutriFiltered  = computed(() => putriFiltered.value.filter(isBaru))
 
 /** ===== Columns ===== */
-const columns = [
-  { key: '_sel', label: '', sortable: false },
+const columnsCommon = [
   { key: 'gen', label: 'Gen', sortable: true },
   { key: 'santri', label: 'Santri', sortable: true },
-  { key: 'walisantri', label: 'Wali Santri', sortable: true },
+  { key: 'walisantri', label: 'Wali', sortable: true },
   { key: 'nohp', label: 'No. HP', sortable: true },
   { key: 'kamar', label: 'Kamar', sortable: true },
   { key: 'alamat', label: 'Alamat', sortable: true },
-  { key: 'status', label: 'Status', sortable: true },
   { key: 'jenjang', label: 'Jenjang', sortable: true },
+  { key: 'status', label: 'Status', sortable: true },
 ]
-const columnsBaru = [
-  { key: '_selB', label: '', sortable: false },
-  ...columns.filter(c => c.key !== '_sel')
-]
+const columnsCalon = columnsCommon
+const columnsBaru  = columnsCommon
 
-async function approveMany(ids: string[]) {
-  for (const id of ids) await approveCalon(id)
-}
-
-/** ===== Export helpers (CSV/Excel) ===== */
-const csvHeaders = ['gen','santri','walisantri','nohp','kamar','alamat','status','jenjang'] as const
-type CsvRow = Record<(typeof csvHeaders)[number], string|number|null|undefined>
-function mapRowToCsv(r: PendaftaranRow): CsvRow {
-  return {
-    gen: r.gen ?? '', santri: r.santri ?? '', walisantri: r.walisantri ?? '', nohp: r.nohp ?? '',
-    kamar: r.kamar ?? '', alamat: r.alamat ?? '', status: r.status ?? '', jenjang: r.jenjang ?? ''
-  }
-}
-function toCSV(rows: PendaftaranRow[]) {
-  const esc = (v: any) => { const s = String(v ?? ''); const needs = /[",\n]/.test(s); const x = s.replace(/"/g, '""'); return needs ? `"${x}"` : x }
-  const head = csvHeaders.join(',')
-  const body = rows.map((r: any) => csvHeaders.map(h => esc((mapRowToCsv(r) as any)[h])).join(',')).join('\n')
-  return head + '\n' + body
-}
-
-const selectedCalon = ref<Set<string>>(new Set())
-function isSelectedCalon(id: string) { return selectedCalon.value.has(id) }
-function toggleSelectCalon(id: string, checked: boolean) {
-  const s = new Set(selectedCalon.value)
-  checked ? s.add(id) : s.delete(id)
-  selectedCalon.value = s
-}
-
+/** ===== Bulk actions ===== */
 const savingBulk = ref(false)
-async function approveSelected() {
-  const ids = Array.from(selectedCalon.value)
-  if (!ids.length) { alert('Pilih minimal satu calon.'); return }
+async function approveBulk(ids: string[]) {
+  if (!ids.length) return
   savingBulk.value = true
   try {
-    for (const id of ids) await approveCalon(id)
-    selectedCalon.value.clear()
-    await fetchAll()
-  } finally { savingBulk.value = false }
+    for (const id of ids) {
+      // remove 'status' → diterima
+      await updateSantri(id, { status: null as any }, { refresh: false })
+    }
+  } finally {
+    savingBulk.value = false
+    await fetchSantri()
+  }
 }
-async function approveAllFiltered() {
-  const ids = filteredCalon.value.map(r => r.id)
-  if (!ids.length) { alert('Tidak ada data pada filter saat ini.'); return }
-  if (!confirm(`Terima semua (${ids.length}) calon pada hasil filter?`)) return
-  savingBulk.value = true
+
+const savingBulkRevert = ref(false)
+async function revertBulk(ids: string[]) {
+  if (!ids.length) return
+  savingBulkRevert.value = true
   try {
-    for (const id of ids) await approveCalon(id)
-    selectedCalon.value.clear()
-    await fetchAll()
-  } finally { savingBulk.value = false }
-}
-
-async function onRevertToCalon(row: PendaftaranRow) {
-  await (revertToCalon as any)(row.id) // panggil fungsi dari composable
-}
-
-function downloadBlob(filename: string, blob: Blob) {
-  const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url)
-}
-function exportCSV(source: PendaftaranRow[], filename: string) {
-  const csv = toCSV(source); const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); downloadBlob(filename, blob)
-}
-async function exportExcel(source: PendaftaranRow[], filename: string) {
-  try {
-    // @ts-ignore
-    const XLSX = (await import('xlsx')).default || (await import('xlsx'))
-    const data = source.map((r: any) => mapRowToCsv(r))
-    const ws = XLSX.utils.json_to_sheet(data, { header: csvHeaders as any })
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Data'); XLSX.writeFile(wb, filename)
-  } catch { exportCSV(source, filename.replace(/\.xlsx$/i, '.csv')) }
-}
-
-function toInputValueInTZ(iso: string | null, tz = TZ_JKT) {
-  if (!iso) return ''
-  const d = new Date(iso)
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit',
-    hour:'2-digit', minute:'2-digit', hour12:false
-  }).formatToParts(d)
-  const get = (t:string)=>parts.find(p=>p.type===t)?.value || '00'
-  const y=get('year'), m=get('month'), day=get('day'), hh=get('hour'), mm=get('minute')
-  return `${y}-${m}-${day}T${hh}:${mm}`
-}
-
-function isoFromJktLocal(inputValue: string) {
-  const [date, time] = inputValue.split('T')
-  const [y, m, d] = date!.split('-').map(Number)
-  const [hh, mm] = time!.split(':').map(Number)
-  const utcMs = Date.UTC(y!, m!-1, d, hh! - 7, mm)
-  return new Date(utcMs).toISOString()
-}
-
-
-
-/** ===== Settings & Status ===== */
-const isClosed = computed(() => !!settings.value.isClosed)
-const autoCloseLocal = computed(() => toInputValueInTZ(settings.value.autoCloseAt, TZ_JKT))
-function onChangeAutoClose(e: Event){
-  const v = (e.target as HTMLInputElement).value
-  if (!v) return saveSettings({ autoCloseAt: null })
-  saveSettings({ autoCloseAt: isoFromJktLocal(v) })
-}
-
-function toggleManual(closeNow: boolean){
-  // if closeNow === true berarti user menggeser switch ke "Tutup"
-  saveSettings({ isClosed: closeNow })
-}
-function tzYearFromMs(ms: number) {
-  return Number(new Intl.DateTimeFormat('en-CA', { timeZone: TZ_JKT, year:'numeric' }).format(new Date(ms)))
-}
-const badgeClass = computed(() =>
-  isClosed.value
-    ? 'inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
-    : 'inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 700 dark:bg-emerald-900/30 dark:300'
-)
-const statusCaption = computed(() => {
-  if (isClosed.value) return 'Pendaftaran ditutup. Form publik sebaiknya dinonaktifkan.'
-  if (settings.value.autoCloseEnabled && settings.value.autoCloseAt) {
-    const d = new Date(settings.value.autoCloseAt)
-    return `Terbuka • akan tutup otomatis ${d.toLocaleString()}`
-  }
-  return 'Terbuka • tutup otomatis tidak aktif'
-})
-
-/** ===== Countdown & auto-close worker ===== */
-const nowTick = ref(Date.now())
-let intervalId: any = null
-const countdownText = computed(() => {
-  if (!settings.value.autoCloseEnabled || !settings.value.autoCloseAt) {
-    return isClosed.value ? 'Ditutup' : '—'
-  }
-  const t = +new Date(settings.value.autoCloseAt) - nowTick.value
-  if (t <= 0) return '00:00:00'
-  const sec = Math.floor(t/1000)
-  const h = Math.floor(sec/3600)
-  const m = Math.floor((sec%3600)/60)
-  const s = sec%60
-  const pad = (n:number)=>String(n).padStart(2,'0')
-  if (h >= 24) {
-    const d = Math.floor(h/24); const rh = h % 24
-    return `${d}d ${pad(rh)}:${pad(m)}:${pad(s)}`
-  }
-  return `${pad(h)}:${pad(m)}:${pad(s)}`
-})
-
-async function checkAutoClose(){
-  if (!settings.value.autoCloseEnabled || !settings.value.autoCloseAt) return
-  if (isClosed.value) return
-  const due = +new Date(settings.value.autoCloseAt)
-  if (Date.now() >= due) {
-    await saveSettings({ isClosed: true })
+    for (const id of ids) {
+      await updateSantri(id, { status: 'nonaktif', kamar: '-', maskan: '' }, { refresh: false })
+    }
+  } finally {
+    savingBulkRevert.value = false
+    await fetchSantri()
   }
 }
 
-onMounted(async () => {
-  await Promise.all([fetchSettings(), fetchAll()])
-  intervalId = setInterval(() => {
-    nowTick.value = Date.now()
-    checkAutoClose()
-  }, 1000)
-})
-onBeforeUnmount(() => { if (intervalId) clearInterval(intervalId) })
+/** ===== Row actions ===== */
+async function approve(id: string) {
+  await updateSantri(id, { status: null as any })
+}
+async function revertToCalon(id: string) {
+  await updateSantri(id, { status: 'nonaktif', kamar: '-', maskan: '' })
+}
 
-/** ===== CRUD helpers ===== */
+/** ===== CRUD (Edit/Delete) ===== */
 const showForm = ref(false)
 const formMode = ref<'create' | 'edit'>('create')
 const formError = ref<string | null>(null)
 const saving = ref(false)
-const current = ref<PendaftaranRow | null>(null)
-const form = reactive<Omit<PendaftaranRow, 'id'>>({
-  gen: String(thisYear), santri: '', walisantri: '', nohp: '', kamar: '', alamat: '', status: 'nonaktif', jenjang: ''
+const current = ref<SantriRow | null>(null)
+const form = reactive<Omit<SantriRow, 'id'>>({
+  gen: new Date().getFullYear().toString(), santri: '', walisantri: '', nohp: '',
+  kamar: '', alamat: '', status: 'nonaktif', jenjang: '', maskan: '', gender: 'L'
 })
-function openEdit(r: PendaftaranRow) {
+
+function openEdit(r: SantriRow) {
   formMode.value = 'edit'; current.value = r
-  form.gen = r.gen || String(thisYear); form.santri = r.santri
-  form.walisantri = r.walisantri || ''; form.nohp = r.nohp || ''
-  form.kamar = r.kamar || ''; form.alamat = r.alamat || ''
-  form.status = r.status || 'nonaktif'; form.jenjang = r.jenjang || ''
+  form.gen = String(r.gen || '')
+  form.santri = r.santri || ''
+  form.walisantri = r.walisantri || ''
+  form.nohp = r.nohp || ''
+  form.kamar = r.kamar || ''
+  form.alamat = r.alamat || ''
+  form.status = String(r.status ?? '')
+  form.jenjang = r.jenjang || ''
+  form.maskan = r.maskan || ''
+  form.gender = (r as any).gender || ''
   formError.value = null; showForm.value = true
 }
+
 async function saveRow(){
   if (!form.santri?.trim()) { formError.value = 'Nama santri wajib diisi.'; return }
   if (!form.gen?.trim())     { formError.value = 'Gen wajib diisi.'; return }
   saving.value = true
   try {
     if (formMode.value === 'edit' && current.value?.id) {
-      await updateRow(current.value.id, { ...form })
+      await updateSantri(current.value.id, { ...form })
     } else {
-      await createRow({ ...form })
+      // gunakan createSantri jika butuh tambah data baru
+      // (tidak diekspor dari useSantri di snippet ini; bisa ditambahkan jika perlu)
+      formError.value = 'Mode tambah belum diaktifkan.'
     }
     showForm.value = false
   } catch (e:any) {
@@ -596,16 +556,66 @@ async function saveRow(){
     saving.value = false
   }
 }
+
 const showConfirm = ref(false)
 const deleting = ref(false)
-function openConfirm(r: PendaftaranRow){ current.value = r; showConfirm.value = true }
+function openConfirm(r: SantriRow){ current.value = r; showConfirm.value = true }
 async function confirmDelete(){
   if (!current.value?.id) return
   deleting.value = true
-  try { await deleteRow(current.value.id); showConfirm.value = false } finally { deleting.value = false }
+  try { await deleteSantri(current.value.id); showConfirm.value = false } finally { deleting.value = false }
 }
 
-async function approve(row: PendaftaranRow){
-  await approveCalon(row.id)
+/** ===== Dokumen Modal ===== */
+const showDocs = ref(false)
+const docState = reactive<{ loading: boolean; dok: any | null }>({ loading: false, dok: null })
+const allDocEmpty = computed(() => {
+  const d = docState.dok || {}
+  return !d.kkUrl && !d.akteUrl && !d.raportUrl && !d.fotoUrl
+})
+const docItems = computed(() => {
+  const d = docState.dok || {}
+  const items = [
+    { key:'kkUrl',    label:'Kartu Keluarga', url: d.kkUrl || '' },
+    { key:'akteUrl',  label:'Akte Kelahiran', url: d.akteUrl || '' },
+    { key:'raportUrl',label:'Raport Terakhir', url: d.raportUrl || '' },
+    { key:'fotoUrl',  label:'Pas Foto 3x4', url: d.fotoUrl || '' },
+  ]
+  return items.map(it => ({
+    ...it,
+    isImage: /\.(jpg|jpeg|png|webp|gif)$/i.test(String(it.url || ''))
+  }))
+})
+async function openDocs(id: string){
+  showDocs.value = true
+  docState.loading = true
+  docState.dok = null
+  try {
+    const full = await getSantriById(id)
+    docState.dok = full?.dokumen || null
+  } finally {
+    docState.loading = false
+  }
+}
+
+/** ===== CSV Export (ringkas) ===== */
+const csvHeaders = ['gen','santri','walisantri','nohp','kamar','alamat','status','jenjang'] as const
+function mapRowToCsv(r: SantriRow){
+  return {
+    gen: r.gen ?? '', santri: r.santri ?? '', walisantri: r.walisantri ?? '', nohp: r.nohp ?? '',
+    kamar: r.kamar ?? '', alamat: r.alamat ?? '', status: r.status ?? '', jenjang: r.jenjang ?? ''
+  } as Record<(typeof csvHeaders)[number], any>
+}
+function toCSV(source: SantriRow[]){
+  const esc = (v:any) => { const s=String(v??''); const needs=/[",\n]/.test(s); const x=s.replace(/"/g,'""'); return needs?`"${x}"`:x }
+  const head = csvHeaders.join(',')
+  const body = source.map(r => csvHeaders.map(h => esc(mapRowToCsv(r)[h])).join(',')).join('\n')
+  return head + '\n' + body
+}
+function downloadBlob(filename: string, blob: Blob) {
+  const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url)
+}
+function exportCSV(source: SantriRow[], filename: string) {
+  const csv = toCSV(source); const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); downloadBlob(filename, blob)
 }
 </script>
