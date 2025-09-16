@@ -8,11 +8,11 @@
           class="text-xs px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">
           + Tambah Maskan
         </button>
-        <NuxtLink
-          to="/app/maskan"
+        <button
+          @click="openMaskanManager"
           class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
           Kelola Struktur Maskan
-        </NuxtLink>
+        </button>
       </div>
     </div>
 
@@ -173,7 +173,6 @@
     </div>
 
 
-    <!-- Modal: Set Ketua -->
     <ModalShell size="2xl" v-model="showKetua" :title="roomForKetua ? `Ubah Ketua Kamar ${roomForKetua.number} • Maskan ${roomForKetua.maskanName}` : 'Ubah Ketua Kamar'">
       <div v-if="roomForKetua" class="space-y-3">
         <p class="text-xs text-gray-600 dark:text-neutral-300">Pilih dari penghuni kamar ini:</p>
@@ -188,7 +187,6 @@
             <div class="text-[11px] text-gray-500">Gen {{ s.gen || '-' }}</div>
           </button>
         </div>
-
         <div class="text-xs text-gray-600 dark:text-neutral-300">Atau isi manual:</div>
         <input v-model.trim="ketuaManual.name" placeholder="Nama ketua" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
         <input v-model.trim="ketuaManual.note" placeholder="Catatan (opsional)" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
@@ -201,10 +199,8 @@
       </template>
     </ModalShell>
 
-    <!-- Modal: Penghuni -->
     <ModalShell size="2xl" v-model="showResidents" :title="roomForResidents ? `Penghuni Kamar ${roomForResidents.number} • Maskan ${roomForResidents.maskanName}` : 'Penghuni Kamar'">
       <div v-if="roomForResidents" class="grid sm:grid-cols-2 gap-4">
-        <!-- List current residents -->
         <div class="space-y-2">
           <div class="text-xs font-semibold">Penghuni saat ini</div>
           <div class="max-h-72 overflow-auto rounded border border-gray-200 dark:border-neutral-700 divide-y dark:divide-neutral-800">
@@ -223,8 +219,6 @@
             <div v-if="!roomForResidents.santri.length" class="px-3 py-2 text-sm text-gray-500">Belum ada santri di kamar ini.</div>
           </div>
         </div>
-
-        <!-- Add new resident -->
         <div class="space-y-2">
           <div class="text-xs font-semibold">Tambah penghuni</div>
           <input v-model.trim="addQuery" placeholder="Cari nama santri…" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
@@ -238,7 +232,7 @@
               <button
                 :disabled="residentsSaving"
                 @click="addResident(s)"
-                class="text-[11px] px-2 py-1 rounded border border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-900/20 disabled:opacity-60">
+                class="text-[11px] px-2 py-1 rounded border border-emerald-300 w-full px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900700 hover:bg-emerald-50 dark:border-emerald-900/40 dark:w-full px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900300 dark:hover:bg-emerald-900/20 disabled:opacity-60">
                 Tambahkan
               </button>
             </div>
@@ -246,13 +240,11 @@
           </div>
         </div>
       </div>
-
       <template #footer>
         <button @click="showResidents=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Tutup</button>
       </template>
     </ModalShell>
 
-    <!-- Modal: Tambah / Ubah Maskan -->
     <ModalShell v-model="showMaskanForm" :title="maskanFormMode==='create' ? 'Tambah Maskan' : 'Ubah Maskan'">
       <form class="space-y-3" @submit.prevent="submitMaskanForm">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -272,22 +264,177 @@
             <textarea v-model.trim="maskanForm.deskripsi" rows="2" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"></textarea>
           </div>
         </div>
+        <div v-if="maskanFormMode==='edit'" class="rounded-xl border border-amber-300 dark:border-amber-900/40 bg-amber-50/60 dark:bg-amber-900/10 p-3">
+          <label class="inline-flex items-start gap-2 text-sm">
+            <input type="checkbox" v-model="renameCascade" />
+            <span>
+              Perbarui nama maskan pada <b>semua santri</b> yang saat ini ter-set ke
+              <b>Maskan {{ renameOldName }}</b> menjadi <b>Maskan {{ maskanForm.name || '(kosong)' }}</b>.
+              <div class="text-[11px] mt-1 text-amber-700">
+                Perubahan ini menyentuh <b>{{ renameAffectedCount }}</b> santri.
+              </div>
+            </span>
+          </label>
+        </div>
         <p v-if="maskanFormError" class="text-sm text-rose-600">{{ maskanFormError }}</p>
       </form>
       <template #footer>
         <button @click="showMaskanForm=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Batal</button>
         <button :disabled="maskanSaving" @click="submitMaskanForm" class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
-          {{ maskanSaving ? 'Menyimpan…' : 'Simpan' }}
+          {{ maskanSaving ? 'Menyimpan…' : (maskanFormMode==='create' ? 'Tambah' : 'Simpan') }}
         </button>
       </template>
     </ModalShell>
 
+    <!-- Modal: Maskan Manager -->
+    <ModalShell size="3xl" v-model="showMaskanManager" title="Kelola Struktur Maskan">
+      <div class="space-y-4">
+        <!-- Tabs + Actions -->
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="inline-flex p-1 rounded-2xl bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700">
+            <button
+              v-for="t in tipeTabs"
+              :key="t.value"
+              @click="activeTipeMgr = t.value"
+              class="px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
+              :class="activeTipeMgr===t.value
+                      ? 'bg-white dark:bg-neutral-900 shadow-sm'
+                      : 'text-gray-600 dark:text-neutral-300 hover:bg-white/50 dark:hover:bg-neutral-700/50'">
+              {{ t.label }}
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button @click="openAddMaskan" class="text-xs px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">+ Maskan</button>
+            <button @click="fetchMaskan" class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
+              Muat Ulang
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid Cards -->
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div
+            v-for="m in maskanRowsMgr"
+            :key="m.id"
+            class="group rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-900/50 shadow-sm hover:shadow-md transition-all">
+
+            <!-- Header ala Duolingo (gradient biru/emerald) -->
+            <div
+              class="rounded-t-2xl px-4 py-3 text-white"
+              :class="m.tipe==='Putra'
+                      ? 'bg-gradient-to-r from-blue-600 to-emerald-500'
+                      : 'bg-gradient-to-r from-emerald-600 to-blue-500'">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-sm/5 font-semibold">Maskan {{ m.name }}</div>
+                  <div class="text-[11px]/4 opacity-90">{{ m.tipe }}</div>
+                </div>
+                <!-- Icon -->
+                <svg class="size-5 opacity-90" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zm2-4h12l2 4H4l2-4z" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Body: stats + actions -->
+            <div class="p-4 space-y-3">
+              <!-- Stats -->
+              <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="rounded-lg bg-gray-50 dark:bg-neutral-800 p-2">
+                  <div class="text-[11px] text-gray-500 dark:text-neutral-400">Kamar</div>
+                  <div class="font-semibold">{{ maskanStat(m).rooms }}</div>
+                </div>
+                <div class="rounded-lg bg-gray-50 dark:bg-neutral-800 p-2">
+                  <div class="text-[11px] text-gray-500 dark:text-neutral-400">Kapasitas</div>
+                  <div class="font-semibold">{{ maskanStat(m).capacity }}</div>
+                </div>
+                <div class="rounded-lg bg-gray-50 dark:bg-neutral-800 p-2">
+                  <div class="text-[11px] text-gray-500 dark:text-neutral-400">Terisi</div>
+                  <div class="font-semibold">{{ maskanStat(m).occupied }}</div>
+                </div>
+              </div>
+
+              <!-- Progress -->
+              <div v-if="maskanStat(m).pct!=null" class="flex items-center gap-3">
+                <span class="text-xs tabular-nums">{{ maskanStat(m).occupied }}/{{ maskanStat(m).capacity }}</span>
+                <div class="flex-1 h-2 rounded-full bg-gray-100 dark:bg-neutral-800 overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-[width]"
+                    :class="maskanStat(m).pct < 80 ? 'bg-emerald-500' : (maskanStat(m).pct < 100 ? 'bg-amber-500' : 'bg-rose-500')"
+                    :style="{ width: maskanStat(m).pct + '%' }" />
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex flex-wrap gap-1.5">
+                <button @click="openMaskanEdit(m)" class="text-[11px] px-2.5 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Edit</button>
+                <button @click="openBlankRoomCreate(m)" class="text-[11px] px-2.5 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">+ Kamar</button>
+                <button @click="toggleGenForm(m.id)" class="text-[11px] px-2.5 py-1.5 rounded border border-emerald-300 w-full px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900700 hover:bg-emerald-50 dark:border-emerald-900/40 dark:w-full px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900300 dark:hover:bg-emerald-900/20">
+                  Batch Generate
+                </button>
+                <button @click="openMaskanDelete(m)" class="text-[11px] px-2.5 py-1.5 rounded border border-rose-300 text-rose-700 hover:bg-rose-50 dark:border-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/20">Hapus</button>
+              </div>
+
+              <!-- Batch Generate form (collapse) -->
+              <div v-show="showGenFor===m.id" class="rounded-xl border border-emerald-300/50 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-900/10 p-3 space-y-2">
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 items-end">
+                  <div>
+                    <label class="text-[11px] text-gray-600 dark:text-neutral-300">Prefix</label>
+                    <input v-model.trim="genForm.prefix" class="w-full px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900" placeholder="A- / K-" />
+                  </div>
+                  <div>
+                    <label class="text-[11px] text-gray-600 dark:text-neutral-300">Start</label>
+                    <input v-model.number="genForm.start" type="number" min="1" class="w-full px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900" />
+                  </div>
+                  <div>
+                    <label class="text-[11px] text-gray-600 dark:text-neutral-300">End</label>
+                    <input v-model.number="genForm.end" type="number" min="1" class="w-full px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900" />
+                  </div>
+                  <div>
+                    <label class="text-[11px] text-gray-600 dark:text-neutral-300">Capacity</label>
+                    <input v-model.number="genForm.capacity" type="number" min="0" class="w-full px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900" />
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input id="gen-active" type="checkbox" v-model="genForm.active" />
+                    <label for="gen-active" class="text-[12px]">Aktif</label>
+                  </div>
+                </div>
+                <div class="flex justify-end gap-2">
+                  <button @click="cancelGenForm" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800 text-xs">Batal</button>
+                  <button :disabled="genSaving" @click="doBatchGenerate(m)" class="px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60 text-xs">
+                    {{ genSaving ? 'Menggenerate…' : 'Generate' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="!maskanRowsMgr.length" class="text-sm text-gray-500 dark:text-neutral-400 p-8 text-center col-span-full">
+            Belum ada maskan pada filter ini.
+          </div>
+        </div>
+      </div>
+    </ModalShell>
+
     <!-- Modal: Hapus Maskan -->
     <ModalShell v-model="showMaskanDelete" title="Hapus Maskan">
-      <p class="text-sm">
-        Hapus <strong>Maskan {{ maskanCurrent?.maskanName || maskanCurrent?.name }}</strong> ({{ maskanCurrent?.tipe }})?
-        <br />Tindakan ini juga menghapus kamar di dalamnya.
-      </p>
+      <div class="rounded-xl border border-rose-300 dark:border-rose-900/40 bg-rose-50/70 dark:bg-rose-900/10 p-3 text-rose-800 dark:text-rose-200">
+        <div class="font-semibold">Tindakan ini permanen.</div>
+        <ul class="list-disc pl-5 text-sm mt-1 space-y-1">
+          <li>Semua kamar / room di dalam <b>Maskan {{ maskanCurrent?.name }}</b> akan dihapus.</li>
+          <li>Jumlah kamar: <b>{{ maskanCurrent?.rooms?.length || 0 }}</b></li>
+          <li>Santri yang saat ini ditempatkan di maskan ini: <b>{{ deleteAffectedSantriCount }}</b></li>
+        </ul>
+      </div>
+
+      <div class="mt-3">
+        <label class="inline-flex items-start gap-2 text-sm">
+          <input type="checkbox" v-model="clearResidentsOnDelete" />
+          <span>Kosongkan penempatan santri (set <code>maskan</code> & <code>kamar</code> menjadi kosong) untuk seluruh santri di maskan ini sebelum penghapusan.</span>
+        </label>
+      </div>
+
       <template #footer>
         <button @click="showMaskanDelete=false" class="px-3 py-1.5 rounded border border-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-800">Batal</button>
         <button :disabled="maskanDeleting" @click="confirmMaskanDelete" class="px-3 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-60">
@@ -295,6 +442,7 @@
         </button>
       </template>
     </ModalShell>
+
 
     <!-- Modal: Tambah/Ubah Kamar -->
     <ModalShell v-model="showRoomForm" :title="roomFormMode==='create' ? `Tambah Kamar • Maskan ${maskanForRoom?.name || '-'}` : `Ubah Kamar • Maskan ${maskanForRoom?.name || '-'}`">
@@ -355,9 +503,96 @@ const {
   rows: maskanRows,
   fetchMaskan,
   createMaskan, updateMaskan, deleteMaskan,
-  createRoom, updateRoom, deleteRoom
+  createRoom, updateRoom, deleteRoom,
+  batchGenerateRooms
 } = useMaskan()
 const { rows: santriRows, fetchSantri, /* optional */ updateSantri } = useSantri() as any
+
+const showMaskanManager = ref(false)
+const activeTipeMgr = ref<typeof tipeTabs[number]['value']>('ALL')
+const renameCascade = ref(true)
+const renameOldName = ref('')
+
+const renameAffectedCount = computed(() => {
+  if (!renameOldName.value) return 0
+  const oldN = norm(renameOldName.value).replace(/^maskan\s+/i, '')
+  return santriRows.value.filter((s:any) =>
+    norm(s.maskan).replace(/^maskan\s+/i, '') === oldN
+  ).length
+})
+
+function openMaskanManager() {
+  activeTipeMgr.value = 'ALL'
+  showMaskanManager.value = true
+}
+
+const maskanRowsMgr = computed(() => {
+  return maskanRows.value.filter(m => activeTipeMgr.value==='ALL' ? true : m.tipe===activeTipeMgr.value)
+})
+
+function maskanStat(m: MaskanRow) {
+  const rooms = m.rooms.length
+  const capacity = m.rooms.reduce((a, r) => a + Number(r.capacity || 0), 0)
+  const occupied = santriRows.value.filter((s:any) =>
+    m.rooms.some(r => belongsToRoom(s, m, r))
+  ).length
+  const pct = capacity ? Math.min(100, Math.round((occupied / capacity) * 100)) : null
+  return { rooms, capacity, occupied, pct }
+}
+
+function openMaskanEdit(m: MaskanRow) {
+  activeMaskan.value = m.id
+  openEditMaskan()
+}
+function openMaskanDelete(m: MaskanRow) {
+  activeMaskan.value = m.id
+  openDeleteMaskan()
+}
+
+function openBlankRoomCreate(m: MaskanRow) {
+  maskanForRoom.value = m
+  roomFormMode.value = 'create'
+  roomCurrent.value = null
+  roomEditForm.number = ''
+  roomEditForm.capacity = 0
+  roomEditForm.active = true
+  roomFormError.value = null
+  showRoomForm.value = true
+}
+
+const showGenFor = ref<string | null>(null)
+const genSaving = ref(false)
+const genForm = reactive({
+  prefix: '',
+  start: 1,
+  end: 10,
+  capacity: 0,
+  active: true,
+})
+
+function toggleGenForm(id: string) {
+  showGenFor.value = showGenFor.value === id ? null : id
+}
+function cancelGenForm() {
+  showGenFor.value = null
+}
+
+async function doBatchGenerate(m: MaskanRow) {
+  if (!m?.id) return
+  genSaving.value = true
+  try {
+    await batchGenerateRooms(m.id, Number(genForm.start || 1), Number(genForm.end || 0), {
+      prefix: genForm.prefix || '',
+      capacity: Number(genForm.capacity || 0),
+      active: !!genForm.active,
+      tipeInherit: true,
+    })
+    await fetchMaskan()
+    showGenFor.value = null
+  } finally {
+    genSaving.value = false
+  }
+}
 
 onMounted(async () => { 
   await Promise.all([fetchMaskan(), fetchSantri()]) 
@@ -595,6 +830,7 @@ function openEditMaskanRow(m: any) { // (opsional) jika ingin panggil dari row
   openEditMaskan()
 }
 function openEditMaskan() {
+  showMaskanManager.value = false
   if (activeMaskan.value === 'ALL') return
   const m = maskanRows.value.find(x => x.id === activeMaskan.value)
   if (!m) return
@@ -604,17 +840,38 @@ function openEditMaskan() {
   maskanForm.tipe = m.tipe
   maskanForm.deskripsi = m.deskripsi ?? ''
   maskanFormError.value = null
+  renameOldName.value = m.name
+  renameCascade.value = true
   showMaskanForm.value = true
 }
 function openDeleteMaskanRow(m: any) { // (opsional) jika ingin panggil dari row
   activeMaskan.value = m.maskanId
   openDeleteMaskan()
 }
+
+async function renameSantriMaskan(oldName: string, newName: string) {
+  const { $realtimeDb } = useNuxtApp()
+  const multi: Record<string, any> = {}
+
+  const oldN = norm(oldName).replace(/^maskan\s+/i, '')
+  for (const s of santriRows.value) {
+    if (norm(s.maskan).replace(/^maskan\s+/i, '') === oldN) {
+      multi[`alberr/santri/${s.id}/maskan`] = newName
+      // kamar tetap dipertahankan
+    }
+  }
+  if (Object.keys(multi).length) {
+    await rtdbUpdate(dbRef($realtimeDb), multi)
+  }
+}
+
 function openDeleteMaskan() {
+  showMaskanManager.value = false
   if (activeMaskan.value === 'ALL') return
   const m = maskanRows.value.find(x => x.id === activeMaskan.value)
   if (!m) return
   maskanCurrent.value = m
+  clearResidentsOnDelete.value = true
   showMaskanDelete.value = true
 }
 
@@ -625,16 +882,24 @@ async function submitMaskanForm() {
   }
   maskanSaving.value = true
   try {
+    const newName = maskanForm.name.trim()
     const payload = {
-      name: maskanForm.name.trim(),
+      name: newName,
       tipe: maskanForm.tipe,
       deskripsi: maskanForm.deskripsi ?? '',
     }
+
     if (maskanFormMode.value === 'create') {
       const newId = await createMaskan(payload)
       if (newId) activeMaskan.value = newId
     } else if (maskanCurrent.value?.id) {
+      const oldName = renameOldName.value
       await updateMaskan(maskanCurrent.value.id, payload)
+      if (renameCascade.value && oldName && newName &&
+          norm(oldName) !== norm(newName)) {
+        await renameSantriMaskan(oldName, newName)
+        await fetchSantri()
+      }
     }
     showMaskanForm.value = false
   } catch (e: any) {
@@ -644,10 +909,38 @@ async function submitMaskanForm() {
   }
 }
 
+const clearResidentsOnDelete = ref(true)
+const deleteAffectedSantriCount = computed(() => {
+  if (!maskanCurrent.value) return 0
+  const target = norm(maskanCurrent.value.name).replace(/^maskan\s+/i, '')
+  return santriRows.value.filter((s:any) =>
+    norm(s.maskan).replace(/^maskan\s+/i, '') === target
+  ).length
+})
+
+async function clearSantriForMaskan(m: MaskanRow) {
+  const { $realtimeDb } = useNuxtApp()
+  const multi: Record<string, any> = {}
+  const target = norm(m.name).replace(/^maskan\s+/i, '')
+  for (const s of santriRows.value) {
+    if (norm(s.maskan).replace(/^maskan\s+/i, '') === target) {
+      multi[`alberr/santri/${s.id}/maskan`] = ''
+      multi[`alberr/santri/${s.id}/kamar`] = ''
+    }
+  }
+  if (Object.keys(multi).length) {
+    await rtdbUpdate(dbRef($realtimeDb), multi)
+  }
+}
+
 async function confirmMaskanDelete() {
   if (!maskanCurrent.value?.id) return
   maskanDeleting.value = true
   try {
+    if (clearResidentsOnDelete.value) {
+      await clearSantriForMaskan(maskanCurrent.value)
+      await fetchSantri()
+    }
     await deleteMaskan(maskanCurrent.value.id)
     showMaskanDelete.value = false
     activeMaskan.value = 'ALL'
@@ -656,7 +949,6 @@ async function confirmMaskanDelete() {
   }
 }
 
-/* -------------------- Modal: Kamar (CRUD) -------------------- */
 const showRoomForm = ref(false)
 const roomFormMode = ref<'create'|'edit'>('create')
 const roomSaving = ref(false)
