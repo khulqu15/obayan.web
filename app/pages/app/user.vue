@@ -21,6 +21,7 @@
       v-else
       title="Semua User"
       :rows="rows"
+      :show-actions="true"
       :columns="columns"
       :rowKey="(r) => r.uid"
     >

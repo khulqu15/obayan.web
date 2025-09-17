@@ -52,16 +52,20 @@
 
     <div class="rounded-2xl border border-gray-200 bg-white shadow-xs dark:bg-neutral-800 dark:border-neutral-700">
       <div class="px-4 sm:px-6 pt-4">
-        <nav class="hs-tab inline-flex rounded-lg border border-gray-200 p-0.5 bg-gray-50 text-sm dark:bg-neutral-900 dark:border-neutral-700" role="tablist">
-          <button type="button" class="px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900 dark:text-neutral-300 dark:hover:text-white hs-tab-active:bg-white hs-tab-active:text-gray-900 dark:hs-tab-active:bg-neutral-200" data-hs-tab="#tab-overview" aria-controls="tab-overview" aria-selected="true" role="tab">Overview</button>
-          <button type="button" class="px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900 dark:text-neutral-300 dark:hover:text-white hs-tab-active:bg-white hs-tab-active:text-gray-900 dark:hs-tab-active:bg-neutral-200" data-hs-tab="#tab-security" aria-controls="tab-security" role="tab">Security</button>
-          <button type="button" class="px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900 dark:text-neutral-300 dark:hover:text-white hs-tab-active:bg-white hs-tab-active:text-gray-900 dark:hs-tab-active:bg-neutral-200" data-hs-tab="#tab-activity" aria-controls="tab-activity" role="tab">Aktivitas</button>
+        <nav class="inline-flex rounded-lg border border-gray-200 p-0.5 bg-gray-50 text-sm dark:bg-neutral-900 dark:border-neutral-700"
+             role="tablist">
+          <button type="button" :class="tabBtn('overview')"  @click="activeTab='overview'"
+                  role="tab" :aria-selected="activeTab==='overview'" aria-controls="tab-overview">Overview</button>
+          <button type="button" :class="tabBtn('security')"  @click="activeTab='security'"
+                  role="tab" :aria-selected="activeTab==='security'" aria-controls="tab-security">Security</button>
+          <button type="button" :class="tabBtn('activity')"  @click="activeTab='activity'"
+                  role="tab" :aria-selected="activeTab==='activity'" aria-controls="tab-activity">Aktivitas</button>
         </nav>
       </div>
 
       <div class="px-4 sm:px-6 pb-6">
         <!-- OVERVIEW -->
-        <div id="tab-overview" role="tabpanel" class="pt-4">
+        <div id="tab-overview" role="tabpanel" class="pt-4" v-show="activeTab==='overview'">
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <form @submit.prevent="saveProfile" class="lg:col-span-2 p-4 rounded-xl border border-gray-200 bg-white shadow-2xs dark:bg-neutral-800 dark:border-neutral-700 space-y-4">
               <h3 class="font-semibold">Informasi Profil</h3>
@@ -129,7 +133,7 @@
         </div>
 
         <!-- SECURITY -->
-        <div id="tab-security" role="tabpanel" class="hidden pt-4">
+        <div id="tab-security" role="tabpanel" class="pt-4" v-show="activeTab==='security'">
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <form @submit.prevent="changePassword" class="lg:col-span-2 p-4 rounded-xl border border-gray-200 bg-white shadow-2xs dark:bg-neutral-800 dark:border-neutral-700 space-y-4">
               <h3 class="font-semibold">Ubah Password</h3>
@@ -207,7 +211,7 @@
         </div>
 
         <!-- ACTIVITY -->
-        <div id="tab-activity" role="tabpanel" class="hidden pt-4">
+        <div id="tab-activity" role="tabpanel" class="pt-4" v-show="activeTab==='activity'">
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div class="lg:col-span-2 p-4 rounded-xl border border-gray-200 bg-white shadow-2xs dark:bg-neutral-800 dark:border-neutral-700">
               <h3 class="font-semibold mb-3">Log Aktivitas</h3>
@@ -246,101 +250,110 @@
       </div>
     </div>
 
-    <!-- Modal Avatar (v-show, no hs-overlay) -->
+
     <Transition name="fade">
       <div v-show="showAvatarModal" class="fixed inset-0 z-60">
         <!-- backdrop -->
         <div class="absolute inset-0 bg-black/50"></div>
 
-        <!-- dialog -->
-        <div class="relative m-4 pt-24 sm:m-8">
-          <div class="mx-auto max-w-3xl rounded-2xl border bg-white shadow-xl dark:bg-neutral-800 dark:border-neutral-700">
-            <div class="p-4 border-b dark:border-neutral-700 flex items-center justify-between">
-              <h4 class="font-semibold">Ubah Foto Profil</h4>
-              <button type="button" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700"
-                      @click="showAvatarModal = false">
-                <Icon icon="lucide:x" class="size-4" />
-              </button>
-            </div>
-
-            <div class="p-4 space-y-4">
-              <!-- Picker -->
-              <div class="flex flex-col sm:flex-row gap-3">
-                <input
-                  ref="fileInput"
-                  type="file"
-                  accept="image/*"
-                  @change="onPickAvatar"
-                  class="block w-full text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 dark:file:bg-neutral-700 dark:file:text-neutral-200" />
-
-                <div class="flex items-center gap-2">
-                  <label class="text-xs text-gray-500 dark:text-neutral-400">Ukuran</label>
-                  <select v-model.number="crop.size"
-                          class="py-2 px-3 rounded-lg border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 text-sm">
-                    <option v-for="s in [256,384,512,768,1024]" :key="s" :value="s">{{ s }}×{{ s }}</option>
-                  </select>
-                </div>
-
-                <div class="flex-1 flex items-center gap-3">
-                  <label class="text-xs text-gray-500 dark:text-neutral-400">Zoom</label>
-                  <input type="range" min="1" max="5" step="0.01" v-model.number="crop.scale"
+        <!-- dialog (centered & max-h) -->
+        <div class="absolute inset-0 p-4 sm:p-8 flex items-center justify-center">
+          <div class="w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-2xl border bg-white shadow-xl dark:bg-neutral-800 dark:border-neutral-700 flex flex-col">
+             <div class="p-4 border-b dark:border-neutral-700 flex items-center justify-between">
+               <h4 class="font-semibold">Ubah Foto Profil</h4>
+               <button type="button" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700"
+                       @click="showAvatarModal = false">
+                 <Icon icon="lucide:x" class="size-4" />
+               </button>
+             </div>
+ 
+            <div class="p-4 space-y-4 overflow-y-auto">
+               <!-- Picker -->
+               <div class="flex flex-col sm:flex-row gap-3">
+                 <input
+                   ref="fileInput"
+                   type="file"
+                   accept="image/*"
+                   @change="onPickAvatar"
+                   class="block w-full text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 dark:file:bg-neutral-700 dark:file:text-neutral-200" />
+ 
+                 <div class="flex items-center gap-2">
+                   <label class="text-xs text-gray-500 dark:text-neutral-400">Ukuran</label>
+                   <select v-model.number="crop.size"
+                           class="py-2 px-3 rounded-lg border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900 text-sm">
+                     <option v-for="s in [256,384,512,768,1024]" :key="s" :value="s">{{ s }}×{{ s }}</option>
+                   </select>
+                 </div>
+ 
+                 <div class="flex-1 flex items-center gap-3">
+                    <label class="text-xs text-gray-500 dark:text-neutral-400">Zoom</label>
+                    <input :min="minScale" :max="maxScale" type="range" step="0.01" v-model.number="crop.scale"
                         @input="clampOffsets()" class="w-full accent-gray-700">
-                  <button type="button" class="px-2 py-1 text-xs rounded-md border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
-                          @click="resetCrop" :disabled="!crop.src">Reset</button>
-                  <button type="button" class="px-2 py-1 text-xs rounded-md border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
-                          @click="fitCrop" :disabled="!crop.src">Fit</button>
+                    <button type="button" class="px-2 py-1 text-xs rounded-md border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                        @click="resetCrop" :disabled="!crop.src">Reset</button>
+                    <button type="button" class="px-2 py-1 text-xs rounded-md border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                        @click="fitCrop" :disabled="!crop.src">Fit</button>
+                    <button type="button" class="px-2 py-1 text-xs rounded-md border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                        @click="centerCrop" :disabled="!crop.src">Center</button>
+                 </div>
+               </div>
+ 
+               <!-- Cropper (drag / pinch / wheel) -->
+               <div
+                  ref="cropBoxEl"
+                  class="relative mx-auto w-full max-w-[560px] aspect-square rounded-xl border border-gray-200 bg-gray-50 overflow-hidden select-none touch-none dark:bg-neutral-900 dark:border-neutral-700"
+                  @pointerdown="onDragStart"
+                  @pointermove="onDragMove"
+                  @pointerup="onDragEnd"
+                  @pointercancel="onDragEnd"
+                  @pointerleave="onDragEnd"
+                  @wheel.prevent="onWheel">
+ 
+                 <img
+                   v-if="crop.src"
+                   :src="crop.src"
+                   :style="imageStyle"
+                   class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 will-change-transform pointer-events-none rounded" />
+ 
+                 <div v-else class="absolute inset-0 grid place-items-center text-sm text-gray-500 dark:text-neutral-400">
+                   Pilih gambar untuk mulai crop
+                 </div>
+ 
+                <!-- overlay grid: rule-of-thirds -->
+                <div class="absolute inset-0 pointer-events-none">
+                  <div class="absolute inset-3 rounded-xl border-2 border-dashed border-gray-400/70"></div>
+                  <div class="absolute inset-3 grid grid-cols-3 grid-rows-3 rounded-xl overflow-hidden">
+                    <div class="border-r border-gray-300/50"></div><div class="border-r border-gray-300/50"></div><div></div>
+                    <div class="border-t border-gray-300/50"></div><div class="border-t border-gray-300/50"></div><div class="border-t border-gray-300/50"></div>
+                  </div>
                 </div>
-              </div>
-
-              <!-- Cropper (drag to pan) -->
-              <div
-                ref="cropBoxEl"
-                class="relative mx-auto w-full max-w-xl aspect-square rounded-xl border border-gray-200 bg-gray-50 overflow-hidden select-none touch-none dark:bg-neutral-900 dark:border-neutral-700"
-                @pointerdown="onDragStart"
-                @pointermove="onDragMove"
-                @pointerup="onDragEnd"
-                @pointercancel="onDragEnd"
-                @pointerleave="onDragEnd">
-
-                <img
-                  v-if="crop.src"
-                  :src="crop.src"
-                  :style="imageStyle"
-                  class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 will-change-transform pointer-events-none rounded" />
-
-                <div v-else class="absolute inset-0 grid place-items-center text-sm text-gray-500 dark:text-neutral-400">
-                  Pilih gambar untuk mulai crop
-                </div>
-
-                <div class="absolute inset-3 border-2 border-dashed border-gray-400/70 rounded-xl pointer-events-none"></div>
-              </div>
-
-              <p class="text-xs text-gray-500 dark:text-neutral-400">
-                Tips: seret gambar untuk mengatur posisi. Gunakan slider untuk zoom. Hasil akan dipotong <strong>persegi (1:1)</strong>.
-              </p>
-            </div>
-
-            <div class="p-4 border-t dark:border-neutral-700 flex items-center justify-end gap-2">
-              <button class="px-3 py-1.5 rounded-lg border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
-                      @click="cancelAvatar(); showAvatarModal = false">
-                Batal
-              </button>
-              <button class="px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
-                      @click="handleUploadAvatar"
-                      :disabled="uploadingAvatar || !crop.src">
-                {{ uploadingAvatar ? 'Mengunggah…' : 'Simpan' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Transition>
-
+               </div>
+ 
+               <p class="text-xs text-gray-500 dark:text-neutral-400">
+                 Tips: seret gambar untuk mengatur posisi. Gunakan slider untuk zoom. Hasil akan dipotong <strong>persegi (1:1)</strong>.
+               </p>
+             </div>
+ 
+             <div class="p-4 border-t dark:border-neutral-700 flex items-center justify-end gap-2">
+               <button class="px-3 py-1.5 rounded-lg border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                       @click="cancelAvatar(); showAvatarModal = false">
+                 Batal
+               </button>
+               <button class="px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                       @click="handleUploadAvatar"
+                       :disabled="uploadingAvatar || !crop.src">
+                 {{ uploadingAvatar ? 'Mengunggah…' : 'Simpan' }}
+               </button>
+             </div>
+           </div>
+         </div>
+       </div>
+     </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed, onMounted, nextTick } from 'vue'
+import { reactive, ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import { child, get, set, update, remove, ref as dbRef } from 'firebase/database'
 import { getAuth, signInWithEmailAndPassword, updatePassword } from 'firebase/auth'
@@ -376,6 +389,7 @@ const profileForm = reactive({
 const prefs = reactive({ emailNotif: true, pushNotif: true, lang: 'id' })
 const twoFAEnabled = ref(false)
 const apiKey = ref<string>('')
+const activeTab = ref<'overview'|'security'|'activity'>('overview')
 
 // ===== Sessions & audits =====
 type SessionRow = { id: string; device: string; browser: string; ip: string; location: string; time: string; icon: string }
@@ -398,12 +412,22 @@ async function onPickAvatar(e: Event) {
     crop.naturalH = img.naturalHeight
     await nextTick()
     computeBaseFit()
+    centerCrop()
   }
   img.src = url
 }
 
+const tabBtn = (key: 'overview'|'security'|'activity') =>
+  `px-3 py-1.5 rounded-md transition ${
+    activeTab.value===key
+      ? 'bg-white text-gray-900 dark:bg-neutral-200'
+      : 'text-gray-600 hover:text-gray-900 dark:text-neutral-300 dark:hover:text-white'
+  }`
+
 function getCropSourceRect() {
-  const c = cropBoxEl.value?.clientWidth || crop.size
+  const cw = cropBoxEl.value?.clientWidth  || crop.size
+  const ch = cropBoxEl.value?.clientHeight || crop.size
+  const c  = Math.min(cw, ch)
   const displayW = crop.naturalW * crop.baseFit * crop.scale
   const displayH = crop.naturalH * crop.baseFit * crop.scale
   const imgLeft = (c - displayW) / 2 + crop.offsetX
@@ -434,6 +458,9 @@ const crop = reactive({
   lastY: 0,
   size: 512                       // output size (px)
 })
+
+const minScale = computed(() => 1)
+const maxScale = 5
 
 async function uploadAvatarCropped() {
   if (!crop.src || !sessionUser.value?.uid) return
@@ -510,7 +537,7 @@ const imageStyle = computed(() => {
   return {
     width: `${displayW}px`,
     height: `${displayH}px`,
-    transform: `translate(calc(-50% + ${crop.offsetX}px), calc(-50% + ${crop.offsetY}px))`
+    transform: `translate(calc(-0% + ${crop.offsetX}px), calc(-0% + ${crop.offsetY}px))`
   }
 })
 
@@ -524,15 +551,45 @@ function fitCrop() {
   computeBaseFit()
   clampOffsets()
 }
-
-function onDragStart(e: PointerEvent) {
-  if (!crop.src) return
-  ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
-  crop.dragging = true
-  crop.lastX = e.clientX
-  crop.lastY = e.clientY
+function centerCrop() { 
+  crop.offsetX = 0
+  crop.offsetY = 0
+  clampOffsets()
 }
+function onDragStart(e: PointerEvent) {
+  if (!crop.src) return;
+  (e.target as HTMLElement).setPointerCapture?.(e.pointerId)
+  activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+  if (activePointers.size === 1) {
+    crop.dragging = true
+    crop.lastX = e.clientX
+    crop.lastY = e.clientY
+  } else if (activePointers.size === 2) {
+    // mulai pinch
+    const pts = [...activePointers.values()]
+    pinchStartDist = Math.hypot(pts[0]!.x - pts[1]!.x, pts[0]!.y - pts[1]!.y)
+    pinchStartScale = crop.scale
+    const box = cropBoxEl.value!
+    const rect = box.getBoundingClientRect()
+    pinchCenter = { x: (pts[0]!.x + pts[1]!.x)/2 - rect.left, y: (pts[0]!.y + pts[1]!.y)/2 - rect.top }
+    crop.dragging = false
+  }
+}
+
 function onDragMove(e: PointerEvent) {
+  if (!crop.src) return
+  if (activePointers.has(e.pointerId)) {
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+  }
+  if (activePointers.size === 2) {
+    const pts = [...activePointers.values()]
+    const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y)
+    if (pinchStartDist > 0) {
+      const scale = pinchStartScale * (dist / pinchStartDist)
+      zoomAtContainerPoint(pinchCenter.x, pinchCenter.y, scale)
+    }
+    return
+  }
   if (!crop.dragging) return
   const dx = e.clientX - crop.lastX
   const dy = e.clientY - crop.lastY
@@ -542,10 +599,18 @@ function onDragMove(e: PointerEvent) {
   crop.lastY = e.clientY
   clampOffsets()
 }
-function onDragEnd() { crop.dragging = false }
 
+function onDragEnd(e?: PointerEvent) {
+  crop.dragging = false
+  if (e?.pointerId != null) activePointers.delete(e.pointerId)
+  if (activePointers.size < 2) {
+    pinchStartDist = 0
+  }
+}
 function clampOffsets() {
-  const c = cropBoxEl.value?.clientWidth || 0
+  const cw = cropBoxEl.value?.clientWidth  || 0
+  const ch = cropBoxEl.value?.clientHeight || 0
+  const c  = Math.min(cw, ch)
   const displayW = crop.naturalW * crop.baseFit * crop.scale
   const displayH = crop.naturalH * crop.baseFit * crop.scale
   const maxX = Math.max(0, (displayW - c) / 2)
@@ -554,16 +619,63 @@ function clampOffsets() {
   crop.offsetY = Math.max(-maxY, Math.min(maxY, crop.offsetY))
 }
 
+function clampScale() {
+  crop.scale = Math.min(maxScale, Math.max(minScale.value, crop.scale))
+}
+
+function zoomAtContainerPoint(px: number, py: number, nextScale: number) {
+  const box = cropBoxEl.value
+  if (!box || !crop.src) return
+  nextScale = Math.min(maxScale, Math.max(minScale.value, nextScale))
+
+  const cw = box.clientWidth
+  const ch = box.clientHeight
+  const displayW = crop.naturalW * crop.baseFit * crop.scale
+  const displayH = crop.naturalH * crop.baseFit * crop.scale
+  const left = (cw - displayW) / 2 + crop.offsetX
+  const top  = (ch - displayH) / 2 + crop.offsetY
+  const u = (px - left) / displayW
+  const v = (py - top)  / displayH
+
+  const newDisplayW = crop.naturalW * crop.baseFit * nextScale
+  const newDisplayH = crop.naturalH * crop.baseFit * nextScale
+  // offset baru agar titik (px,py) tetap ke posisi gambar yang sama
+  crop.offsetX = (px - cw/2) + (0.5 - u) * newDisplayW
+  crop.offsetY = (py - ch/2) + (0.5 - v) * newDisplayH
+  crop.scale = nextScale
+  clampOffsets()
+}
+
+
 function computeBaseFit() {
   const box = cropBoxEl.value
   if (!box || !crop.naturalW || !crop.naturalH) return
-  const c = box.clientWidth
-  crop.baseFit = Math.max(c / crop.naturalW, c / crop.naturalH) // cover square
-  crop.scale = 1
-  crop.offsetX = 0
-  crop.offsetY = 0
+  const c = Math.min(box.clientWidth, box.clientHeight) // safety
+  const prevDisplayW = crop.naturalW * crop.baseFit * crop.scale
+  const prevDisplayH = crop.naturalH * crop.baseFit * crop.scale
+  const prev = { c, prevDisplayW, prevDisplayH, offsetX: crop.offsetX, offsetY: crop.offsetY }
+
+  // cover square container
+  crop.baseFit = Math.max(c / crop.naturalW, c / crop.naturalH)
+  // pertahankan center relatif ketika container berubah
+  const newDisplayW = crop.naturalW * crop.baseFit * crop.scale
+  const newDisplayH = crop.naturalH * crop.baseFit * crop.scale
+  const kx = newDisplayW && prev.prevDisplayW ? newDisplayW / prev.prevDisplayW : 1
+  const ky = newDisplayH && prev.prevDisplayH ? newDisplayH / prev.prevDisplayH : 1
+  crop.offsetX = prev.offsetX * kx
+  crop.offsetY = prev.offsetY * ky
+  clampScale()
   clampOffsets()
 }
+
+let ro: ResizeObserver | null = null
+onMounted(() => {
+  if (cropBoxEl.value) {
+    ro = new ResizeObserver(() => computeBaseFit())
+    ro.observe(cropBoxEl.value)
+  }
+})
+onUnmounted(() => { ro?.disconnect(); ro = null })
 
 const uploadAvatar = async () => {
   if (!avatarPreview.value || !sessionUser.value?.uid) return
@@ -609,6 +721,24 @@ function applyFormToUser() {
   user.location = profileForm.location
   user.bio = profileForm.bio
 }
+
+function onWheel(e: WheelEvent) {
+  if (!crop.src) return
+  const box = cropBoxEl.value
+  if (!box) return
+  const rect = box.getBoundingClientRect()
+  const px = e.clientX - rect.left
+  const py = e.clientY - rect.top
+  const delta = -e.deltaY
+  const factor = delta > 0 ? 1.07 : 0.93
+  zoomAtContainerPoint(px, py, crop.scale * factor)
+}
+
+// Pinch zoom dengan 2 pointer
+const activePointers = new Map<number, {x:number,y:number}>()
+let pinchStartDist = 0
+let pinchStartScale = 1
+let pinchCenter = { x: 0, y: 0 }
 
 // ===== Load data awal =====
 const savingProfile = ref(false)

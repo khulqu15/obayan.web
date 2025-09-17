@@ -26,6 +26,7 @@
       title="Daftar Maskan (Piket)"
       :rows="maskanRows"
       :columns="columns"
+      :show-actions="true"
       :rowKey="(r)=>r.id"
     >
       <template #cell-name="{ row: m }">
@@ -366,7 +367,6 @@ const columns = [
   { key: 'name', label: 'Maskan', sortable: true },
   { key: 'tipe', label: 'Tipe', sortable: true },
   { key: 'piket', label: 'Piket' },
-  { key: 'action', label: 'Action' },
 ]
 
 // helpers

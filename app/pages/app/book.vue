@@ -18,15 +18,15 @@
         <div class="relative sm:w-72 w-full">
           <Icon icon="lucide:search" class="size-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input v-model="q" type="search" placeholder="Cari judul/penulis/tag…"
-                 class="w-full pl-8 pr-3 py-2 text-sm rounded-xl border border-emerald-100 bg-white/90 backdrop-blur focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:bg-neutral-800 dark:border-neutral-700" />
+                 class="w-full pl-8 pr-3 py-2 text-sm rounded-xl border border-gray-100 bg-white/90 backdrop-blur focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:bg-neutral-800 dark:border-neutral-700" />
         </div>
 
-        <select v-model="fCategory" class="w-full sm:w-auto px-3 py-2 text-sm rounded-xl border border-emerald-100 bg-white/90 backdrop-blur dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+        <select v-model="fCategory" class="w-full sm:w-auto px-3 py-2 text-sm rounded-xl border border-gray-100 bg-white/90 backdrop-blur dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
           <option value="all">Semua Kategori</option>
           <option v-for="c in BOOK_CATEGORIES" :key="c" :value="c">{{ c }}</option>
         </select>
 
-        <select v-model="fAktif" class="w-full sm:w-auto px-3 py-2 text-sm rounded-xl border border-emerald-100 bg-white/90 backdrop-blur dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+        <select v-model="fAktif" class="w-full sm:w-auto px-3 py-2 text-sm rounded-xl border border-gray-100 bg-white/90 backdrop-blur dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
           <option value="all">Semua</option>
           <option value="aktif">Aktif</option>
           <option value="nonaktif">Nonaktif</option>
@@ -43,7 +43,7 @@
     <!-- LIST -->
     <div class="mt-5 grid grid-cols-1 xl:grid-cols-2 gap-3 md:gap-4">
       <div v-for="b in filtered" :key="b.id"
-           class="group rounded-3xl border border-emerald-100/70 bg-white/90 dark:bg-neutral-800/90 dark:border-emerald-900/30 shadow-xs hover:shadow-lg transition-all hover:-translate-y-0.5 overflow-hidden backdrop-blur">
+           class="group rounded-3xl border border-gray-100/70 bg-white/90 dark:bg-neutral-800/90 dark:border-gray-900/30 shadow-xs hover:shadow-lg transition-all hover:-translate-y-0.5 overflow-hidden backdrop-blur">
         <div class="flex">
           <!-- Cover -->
           <div class="relative w-24 shrink-0">
@@ -79,7 +79,7 @@
                 <a v-if="b.pdfUrl" :href="b.pdfUrl" target="_blank" class="px-2 py-1.5 text-xs rounded-md border border-blue-200/60 700 hover:bg-blue-50 dark:border-blue-900/30 dark:300 dark:hover:bg-blue-900/20">
                   PDF
                 </a>
-                <button class="px-2 py-1.5 text-xs rounded-md border border-emerald-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700" @click="openEdit(b)">Edit</button>
+                <button class="px-2 py-1.5 text-xs rounded-md border border-gray-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700" @click="openEdit(b)">Edit</button>
                 <button class="px-2 py-1.5 text-xs rounded-md border border-rose-200/60 text-rose-600 hover:bg-rose-50 dark:border-rose-900/30 dark:hover:bg-rose-900/20" @click="askDelete(b)">Hapus</button>
               </div>
             </div>
@@ -89,7 +89,7 @@
         </div>
       </div>
 
-      <div v-if="!filtered.length" class="col-span-full p-6 text-sm text-gray-600 border border-dashed border-emerald-200 rounded-2xl bg-emerald-50/40 dark:bg-neutral-800 dark:text-neutral-400 dark:border-emerald-900/30">
+      <div v-if="!filtered.length" class="col-span-full p-6 text-sm text-gray-600 border border-dashed border-gray-200 rounded-2xl bg-emerald-50/40 dark:bg-neutral-800 dark:text-neutral-400 dark:border-gray-900/30">
         Belum ada data / tidak ditemukan.
       </div>
     </div>
@@ -99,8 +99,8 @@
       <div v-if="modal.open" class="fixed inset-0 z-[90]">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" @click="closeModal"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4">
-          <div class="w-full max-w-3xl rounded-3xl border border-emerald-100/70 bg-white/95 shadow-2xl ring-1 ring-black/5 dark:bg-neutral-800 dark:border-neutral-700">
-            <div class="sticky top-0 z-10 p-4 border-b border-emerald-100/70 bg-white/90 backdrop-blur dark:bg-neutral-800/90 dark:border-neutral-700 flex items-center justify-between rounded-t-3xl">
+          <div class="w-full max-w-3xl rounded-3xl border border-gray-100/70 bg-white/95 shadow-2xl ring-1 ring-black/5 dark:bg-neutral-800 dark:border-neutral-700">
+            <div class="sticky top-0 z-10 p-4 border-b border-gray-100/70 bg-white/90 backdrop-blur dark:bg-neutral-800/90 dark:border-neutral-700 flex items-center justify-between rounded-t-3xl">
               <h3 class="font-semibold">{{ modal.mode === 'create' ? 'Tambah Buku' : 'Edit Buku' }}</h3>
               <button class="p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-neutral-700" @click="closeModal">
                 <Icon icon="lucide:x" class="size-4" />
@@ -113,7 +113,7 @@
                 <div>
                   <label class="text-xs text-gray-500 dark:text-neutral-400">Cover</label>
                   <div class="mt-2 flex items-start gap-3">
-                    <div class="relative w-24 rounded-xl overflow-hidden border border-emerald-100/70 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900">
+                    <div class="relative w-24 rounded-xl overflow-hidden border border-gray-100/70 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900">
                       <div class="w-full aspect-[3/4]">
                         <img v-if="form.coverPreview" :src="form.coverPreview" class="w-full h-full object-cover" />
                         <img v-else-if="modal.mode==='edit' && form.initialCoverUrl && !form.removeCover" :src="form.initialCoverUrl" class="w-full h-full object-cover" />
@@ -125,7 +125,7 @@
                     </div>
 
                     <div class="flex-1 flex flex-col gap-2">
-                      <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-emerald-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700 cursor-pointer w-fit">
+                      <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700 cursor-pointer w-fit">
                         <Icon icon="lucide:upload" class="size-4" />
                         <span class="text-sm">Pilih Cover</span>
                         <input type="file" accept="image/*" class="hidden" @change="onCoverInput" />
@@ -154,31 +154,31 @@
                   <div class="grid gap-2 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                       <label class="text-xs text-gray-500 dark:text-neutral-400">Judul</label>
-                      <input v-model.trim="form.title" required type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                      <input v-model.trim="form.title" required type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
                     </div>
                     <div>
                       <label class="text-xs text-gray-500 dark:text-neutral-400">Penulis</label>
-                      <input v-model.trim="form.author" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
+                      <input v-model.trim="form.author" type="text" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
                     </div>
                     <div>
                       <label class="text-xs text-gray-500 dark:text-neutral-400">Kategori</label>
-                      <select v-model="form.category" required class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm">
+                      <select v-model="form.category" required class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm">
                         <option v-for="c in BOOK_CATEGORIES" :key="c" :value="c">{{ c }}</option>
                       </select>
                     </div>
                     <div>
                       <label class="text-xs text-gray-500 dark:text-neutral-400">Tahun</label>
-                      <input v-model.number="form.year" type="number" min="0" max="9999" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
+                      <input v-model.number="form.year" type="number" min="0" max="9999" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
                     </div>
                     <div>
                       <label class="text-xs text-gray-500 dark:text-neutral-400">Halaman</label>
-                      <input v-model.number="form.pages" type="number" min="0" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
+                      <input v-model.number="form.pages" type="number" min="0" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
                     </div>
                     <div class="sm:col-span-2">
                       <label class="text-xs text-gray-500 dark:text-neutral-400">Tag (pisah dengan koma)</label>
                       <input v-model.trim="tagInput" @blur="applyTags" @keydown.enter.prevent="applyTags"
                              type="text" placeholder="contoh: fiqih, akhlak"
-                             class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
+                             class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
                       <div class="mt-2 flex flex-wrap gap-1">
                         <span v-for="t in form.tags" :key="t" class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 700 ring-1 ring-emerald-100 dark:bg-emerald-900/20 dark:300 dark:ring-emerald-900/30">
                           #{{ t }}
@@ -187,13 +187,13 @@
                     </div>
                     <div class="sm:col-span-2">
                       <label class="text-xs text-gray-500 dark:text-neutral-400">Deskripsi</label>
-                      <textarea v-model.trim="form.description" rows="3" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
+                      <textarea v-model.trim="form.description" rows="3" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
                     </div>
                     <div class="sm:col-span-2">
                       <label class="text-xs text-gray-500 dark:text-neutral-400">PDF</label>
                       <div class="mt-1 flex items-center gap-2">
-                        <input v-model="form.pdfName" type="text" class="w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm opacity-70" placeholder="Belum dipilih" readonly />
-                        <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-emerald-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700 cursor-pointer w-fit">
+                        <input v-model="form.pdfName" type="text" class="w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm opacity-70" placeholder="Belum dipilih" readonly />
+                        <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700 cursor-pointer w-fit">
                           <Icon icon="lucide:file-input" class="size-4" />
                           <span class="text-sm">Pilih PDF</span>
                           <input type="file" accept="application/pdf" class="hidden" @change="onPdfInput" />
@@ -210,7 +210,7 @@
                     </div>
                     <div class="sm:col-span-2">
                       <label class="inline-flex items-center gap-2">
-                        <input type="checkbox" v-model="form.aktif" class="rounded border-emerald-200 600 focus:ring-emerald-500" />
+                        <input type="checkbox" v-model="form.aktif" class="rounded border-gray-200 600 focus:ring-emerald-500" />
                         Aktif
                       </label>
                     </div>

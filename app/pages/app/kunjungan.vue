@@ -38,6 +38,7 @@
             title="Log Kunjungan (bulan berjalan)"
             :rows="filteredLogs"
             :columns="columns"
+            :show-actions="true"
             :rowKey="(r)=>r.id"
           >
             <template #cell-ts="{ row }">{{ formatDate(row.ts) }}</template>

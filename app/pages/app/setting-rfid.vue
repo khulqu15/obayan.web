@@ -60,7 +60,7 @@
 
       <!-- Tabel santri + aksi bind/replace/unbind -->
       <div class="lg:col-span-5 col-span-6">
-        <DataTable title="Daftar Santri & Kartu" :rows="tableRows" :columns="columns" :rowKey="(r) => r.id">
+        <DataTable title="Daftar Santri & Kartu" :rows="tableRows" :columns="columns" :rowKey="(r) => r.id" :show-actions="true">
           <template #cell-santri="{ row }">
             <div class="font-medium">{{ row.santri }}</div>
             <div class="text-[11px] text-gray-500">Maskan {{ row.maskan || '-' }} • Kamar {{ row.kamar || '-' }}</div>

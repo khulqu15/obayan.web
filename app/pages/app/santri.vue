@@ -48,6 +48,7 @@
       <DataTable
         title="Santri Lama"
         :rows="filteredLamaRows"
+        :show-actions="true"
         :columns="columns"
         :rowKey="(r) => r.id"
       >

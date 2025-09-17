@@ -28,14 +28,14 @@
             v-model="q"
             type="search"
             placeholder="Cari judul/penulis/tag…"
-            class="w-full pl-8 pr-3 py-2 text-sm rounded-xl border border-emerald-100 bg-white/90 backdrop-blur focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:bg-neutral-800 dark:border-neutral-700"
+            class="w-full pl-8 pr-3 py-2 text-sm rounded-xl border border-gray-100 bg-white/90 backdrop-blur focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:bg-neutral-800 dark:border-neutral-700"
           />
         </div>
 
         <div class="flex flex-wrap gap-1.5 items-center overflow-x-auto no-scrollbar">
           <button
             class="px-3 py-2 text-xs rounded-full border transition"
-            :class="fCategory==='all' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white dark:bg-neutral-800 dark:border-neutral-700 border-gray-200 dark:hover:bg-neutral-700'"
+            :class="fCategory==='all' ? 'bg-emerald-600 text-white border-gray-600' : 'bg-white dark:bg-neutral-800 dark:border-neutral-700 border-gray-200 dark:hover:bg-neutral-700'"
             @click="fCategory='all'"
           >
             Semua
@@ -43,7 +43,7 @@
           <button
             v-for="c in BOOK_CATEGORIES" :key="c"
             class="px-3 py-2 text-xs rounded-full border transition"
-            :class="fCategory===c ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white dark:bg-neutral-800 dark:border-neutral-700 border-gray-200 dark:hover:bg-neutral-700'"
+            :class="fCategory===c ? 'bg-emerald-600 text-white border-gray-600' : 'bg-white dark:bg-neutral-800 dark:border-neutral-700 border-gray-200 dark:hover:bg-neutral-700'"
             @click="fCategory=c"
           >
             {{ c }}
@@ -62,7 +62,7 @@
     <div class="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4">
       <!-- Loading skeletons -->
       <template v-if="loading">
-        <div v-for="i in 8" :key="i" class="rounded-2xl overflow-hidden border border-emerald-100/60 dark:border-emerald-900/30 bg-white/70 dark:bg-neutral-800/70">
+        <div v-for="i in 8" :key="i" class="rounded-2xl overflow-hidden border border-gray-100/60 dark:border-gray-900/30 bg-white/70 dark:bg-neutral-800/70">
           <div class="aspect-[3/4] animate-pulse bg-emerald-100/40 dark:bg-neutral-700/40"></div>
           <div class="p-3 space-y-2">
             <div class="h-3 rounded bg-emerald-100/60 dark:bg-neutral-700/60"></div>
@@ -76,7 +76,7 @@
         v-else
         v-for="b in publicList"
         :key="b.id"
-        class="group rounded-2xl overflow-hidden border border-emerald-100/60 dark:border-emerald-900/30 bg-white/90 dark:bg-neutral-800/90 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+        class="group rounded-2xl overflow-hidden border border-gray-100/60 dark:border-gray-900/30 bg-white/90 dark:bg-neutral-800/90 hover:shadow-lg hover:-translate-y-0.5 transition-all"
       >
         <div class="relative">
           <img v-if="b.coverUrl" :src="b.coverUrl" alt="" class="w-full h-full object-cover aspect-[3/4]" />
@@ -105,11 +105,11 @@
           <p class="text-xs text-gray-500 dark:text-neutral-400 line-clamp-1 mt-0.5">{{ b.author || '—' }}</p>
 
           <div class="mt-2 flex items-center gap-1.5">
-            <button class="px-2 py-1.5 text-xs rounded-lg border border-emerald-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            <button class="px-2 py-1.5 text-xs rounded-lg border border-gray-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
                     @click="openDetail(b)">
               Detail
             </button>
-            <button class="px-2 py-1.5 text-xs rounded-lg border border-blue-200/60 700 hover:bg-blue-50 dark:border-blue-900/30 dark:300 dark:hover:bg-blue-900/20"
+            <button class="px-2 py-1.5 text-xs rounded-lg border border-gray-200 700 hover:bg-blue-50 dark:border-gray-700 dark:300 dark:hover:bg-blue-900/20"
                     @click="openDownload(b)">
               Unduh
             </button>
@@ -118,7 +118,7 @@
       </div>
 
       <!-- Empty -->
-      <div v-if="!loading && !publicList.length" class="col-span-full p-6 text-sm text-gray-600 border border-dashed border-emerald-200 rounded-2xl bg-emerald-50/40 dark:bg-neutral-800 dark:text-neutral-400 dark:border-emerald-900/30">
+      <div v-if="!loading && !publicList.length" class="col-span-full p-6 text-sm text-gray-600 border border-dashed border-gray-200 rounded-2xl bg-emerald-50/40 dark:bg-neutral-800 dark:text-neutral-400 dark:border-gray-900/30">
         Belum ada koleksi aktif atau tidak ditemukan.
       </div>
     </div>
@@ -128,7 +128,7 @@
       <div v-if="detailModal.open" class="fixed inset-0 z-[95]">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeDetail()"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4">
-          <div class="w-full max-w-3xl rounded-3xl border border-emerald-100/70 bg-white/95 shadow-2xl ring-1 ring-black/5 dark:bg-neutral-800 dark:border-neutral-700 overflow-hidden">
+          <div class="w-full max-w-3xl rounded-3xl border border-gray-100/70 bg-white/95 shadow-2xl ring-1 ring-black/5 dark:bg-neutral-800 dark:border-neutral-700 overflow-hidden">
             <div class="flex flex-col md:flex-row">
               <!-- Cover -->
               <div class="md:w-48">
@@ -149,7 +149,7 @@
                       <template v-if="detailModal.item?.pages"> • {{ detailModal.item?.pages }} hlm</template>
                     </p>
                   </div>
-                  <button class="p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-neutral-700" @click="closeDetail()">
+                  <button class="p-2 rounded-lg bg-gray-200 dark:hover:bg-neutral-700" @click="closeDetail()">
                     <Icon icon="lucide:x" class="size-4" />
                   </button>
                 </div>
@@ -167,7 +167,7 @@
                           @click="openViewer(detailModal.item!)">
                     <Icon icon="lucide:book-open" class="size-4" /> Baca
                   </button>
-                  <button class="inline-flex items-center gap-x-2 rounded-xl border border-blue-200/60 700 bg-white px-3 py-2 text-sm font-medium hover:bg-blue-50 dark:border-blue-900/30 dark:300 dark:bg-neutral-800 dark:hover:bg-blue-900/20"
+                  <button class="inline-flex items-center gap-x-2 rounded-xl border border-gray-200 700 bg-white px-3 py-2 text-sm font-medium hover:bg-blue-50 dark:border-gray-700 dark:300 dark:bg-neutral-800 dark:hover:bg-blue-900/20"
                           @click="openDownload(detailModal.item!)">
                     <Icon icon="lucide:download" class="size-4" /> Unduh
                   </button>
@@ -175,7 +175,7 @@
               </div>
             </div>
 
-            <div class="p-3 border-t border-emerald-100/70 dark:border-neutral-700 text-[11px] text-gray-500 dark:text-neutral-400">
+            <div class="p-3 border-t border-gray-100/70 dark:border-neutral-700 text-[11px] text-gray-500 dark:text-neutral-400">
               Terakhir diperbarui: {{ timeAgo(detailModal.item?.updatedAt || Date.now()) }}
             </div>
           </div>
@@ -200,7 +200,7 @@
               <p><span class="font-medium">{{ downloadModal.item?.title }}</span></p>
               <p class="text-gray-600 dark:text-neutral-300">Berkas PDF akan dibuka atau diunduh di tab baru. Pastikan koneksi internet stabil.</p>
               <label class="inline-flex items-center gap-2 text-xs">
-                <input type="checkbox" v-model="downloadModal.agree" class="rounded border-emerald-200 600 focus:ring-emerald-500" />
+                <input type="checkbox" v-model="downloadModal.agree" class="rounded border-gray-200 600 focus:ring-emerald-500" />
                 Saya setuju untuk menggunakan berkas ini secara wajar.
               </label>
             </div>
@@ -221,7 +221,7 @@
     <!-- MODAL: PDF Viewer -->
     <teleport to="body">
       <div v-if="viewer.open" class="fixed inset-0 z-[97]">
-        <div class="absolute inset-0 bg-black/70"></div>
+        <div class="absolute inset-0 bg-black/70" @click="closeViewer()"></div>
         <div class="absolute inset-0 flex flex-col">
           <!-- Toolbar -->
           <div class="p-3 flex items-center justify-between bg-neutral-950/70 text-white backdrop-blur">
@@ -234,8 +234,7 @@
                  class="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-1.5 text-xs hover:bg-white/10">
                 <Icon icon="lucide:external-link" class="size-4" /> Buka Tab
               </a>
-              <button class="inline-flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 text-xs"
-                      @click="viewer.open=false">
+              <button class="inline-flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 text-xs" @click="closeViewer()">
                 <Icon icon="lucide:x" class="size-4" /> Tutup
               </button>
             </div>
@@ -273,11 +272,78 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useBook, BOOK_CATEGORIES, type BookItem } from '~/composables/data/useBook'
+import { useWeb } from '~/composables/data/useWeb'
+import { definePageMeta } from '#imports'
+import { useRuntimeConfig } from 'nuxt/app'
+
+const {
+  meta, sortedSections, subscribePage,
+} = useWeb()
+
+const router = useRouter()
+const route = useRoute()
 
 definePageMeta({ ssr: false }) // client-only, karena baca Firebase via plugin/composable
+const config = useRuntimeConfig()
+const fallbackTitle = 'Kitab Ponpes Alberr | Pesantren Inovatif & Informatif'
+const fallbackDescription = 'Selamat datang di Ponpes Alberr Pandaan: KMI/Diniyah, Tahfidz, MTs/MA, kegiatan santri, dan PPDB online.'
+const url = computed(() => new URL(route.fullPath || '/', config.public.siteUrl).toString())
+
+const seoTitle = computed(() => meta.value?.title || fallbackTitle)
+const seoDesc  = computed(() => meta.value?.description || fallbackDescription)
+const ogImage  = computed(() => meta.value?.ogImage || '/assets/logo.png')
+
+useSeoMeta({
+  title: seoTitle,
+  description: seoDesc,
+  ogTitle: seoTitle,
+  ogDescription: seoDesc,
+  ogType: 'website',
+  ogUrl: url,
+  ogImage: ogImage,
+  twitterCard: 'summary_large_image',
+  twitterSite: () => (config.public.twitterSite || undefined),
+  themeColor: '#0ea5e9',
+  robots: 'index, follow'
+})
+
+useHead({
+  link: [{ rel: 'canonical', href: url.value }],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: computed(() => JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: config.public.siteName,
+        url: config.public.siteUrl,
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${config.public.siteUrl}/search?q={query}`,
+          'query-input': 'required name=query'
+        }
+      }))
+    },
+    {
+      type: 'application/ld+json',
+      children: computed(() => JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'Pondok Pesantren Alberr',
+        url: config.public.siteUrl,
+        logo: `${config.public.siteUrl}/assets/logo.png`,
+        sameAs: [
+          'https://facebook.com/alberr',
+          'https://instagram.com/alberr'
+        ]
+      }))
+    }
+  ]
+})
 
 /** Data buku (Realtime) */
 const { filtered, q, fCategory, fAktif, subscribeAll, unbindList } = useBook()
@@ -327,7 +393,32 @@ const viewer = ref<{ open:boolean; item: BookItem|null }>({ open:false, item:nul
 function openViewer(b: BookItem){
   if(!b.pdfUrl){ toast('PDF tidak tersedia.', 'error'); return }
   viewer.value.open = true; viewer.value.item = b
+  const q = { ...route.query, viewer: String(b.id || b.slug || b.title) }
+  router.push({ query: q })
 }
+
+function closeViewer(){
+  // hapus ?viewer tanpa pindah halaman
+  const q: Record<string, any> = { ...route.query }
+  if ('viewer' in q) { delete q.viewer; router.replace({ query: q }) }
+  viewer.value.open = false; viewer.value.item = null
+}
+// sinkronkan modal dengan URL (menangkap tombol Back pada mobile)
+watch(() => route.query.viewer, (val) => {
+  if (!val) { viewer.value.open = false; viewer.value.item = null; return }
+  const id = String(val)
+  const item = publicList.value.find((b: any) => String(b.id||b.slug||b.title) === id)
+  if (item) { viewer.value.open = true; viewer.value.item = item }
+})
+
+onMounted(() => {
+  const v = route.query.viewer
+  if (v) {
+    const id = String(v)
+    const item = publicList.value.find((b: any) => String(b.id||b.slug||b.title) === id)
+    if (item) { viewer.value.open = true; viewer.value.item = item }
+  }
+})
 
 /** Utils */
 function timeAgo(ts: number){

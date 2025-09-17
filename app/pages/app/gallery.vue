@@ -15,7 +15,7 @@
         <p class="text-sm text-gray-500 dark:text-neutral-400">Kelola hero, teks, dan koleksi foto.</p>
       </div>
       <div class="flex items-center gap-2">
-        <NuxtLink to="/app" class="inline-flex items-center gap-2 rounded-xl border border-emerald-100 bg-white dark:bg-neutral-900 dark:border-neutral-700 px-3 py-2 text-sm hover:shadow">
+        <NuxtLink to="/app" class="inline-flex items-center gap-2 rounded-xl border border-gray-100 bg-white dark:bg-neutral-900 dark:border-neutral-700 px-3 py-2 text-sm hover:shadow">
           <Icon icon="lucide:arrow-left" class="size-4" /> Kembali
         </NuxtLink>
         <button class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 text-white px-3 py-2 text-sm hover:bg-emerald-700"
@@ -26,7 +26,7 @@
     </div>
 
     <!-- Tabs -->
-    <div class="mt-4 border-b border-emerald-100 dark:border-neutral-800 flex flex-wrap gap-1">
+    <div class="mt-4 border-b border-gray-100 dark:border-neutral-800 flex flex-wrap gap-1">
       <button v-for="t in tabs" :key="t"
               class="px-3 py-2 text-xs rounded-t-lg"
               :class="activeTab===t ? 'bg-emerald-600 text-white' : 'text-gray-600 dark:text-neutral-300 dark:hover:bg-neutral-800'"
@@ -35,7 +35,7 @@
       </button>
 
       <div class="ml-auto flex gap-2 mb-3">
-        <button class="px-3 py-2 text-xs rounded-xl border border-emerald-200 dark:border-neutral-700 hover:bg-emerald-50 dark:hover:bg-neutral-800"
+        <button class="px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-neutral-700 hover:bg-emerald-50 dark:hover:bg-neutral-800"
                 @click="resetDefaults">
           Isi Default
         </button>
@@ -49,7 +49,7 @@
 
     <!-- TAB: Hero & Teks -->
     <div v-show="activeTab==='Hero & Teks'" class="mt-4 grid lg:grid-cols-3 gap-4">
-      <div class="lg:col-span-2 rounded-2xl border border-emerald-100 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 p-4">
+      <div class="lg:col-span-2 rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 p-4">
         <h3 class="font-semibold mb-3 flex items-center gap-2">
           <Icon icon="lucide:images" class="size-4 text-emerald-600" /> Hero
         </h3>
@@ -60,8 +60,8 @@
             <div class="mt-1 flex items-center gap-2">
               <input v-model.trim="form.hero.cover"
                      placeholder="/assets/images/activity1.jpg"
-                     class="w-full rounded-lg border border-emerald-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
-              <label class="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-xl border border-emerald-100 dark:border-neutral-700 hover:bg-emerald-50 dark:hover:bg-neutral-800 cursor-pointer">
+                     class="w-full rounded-lg border border-gray-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
+              <label class="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-xl border border-gray-100 dark:border-neutral-700 hover:bg-emerald-50 dark:hover:bg-neutral-800 cursor-pointer">
                 <input type="file" accept="image/*" class="hidden" @change="onPickHero" />
                 Unggah
               </label>
@@ -74,7 +74,7 @@
 
             <div class="mt-3">
               <p class="text-xs text-gray-500 mb-1">Pratinjau</p>
-              <div class="h-40 rounded-xl overflow-hidden border border-emerald-100 dark:border-neutral-800 bg-emerald-50/60 dark:bg-neutral-800 grid place-items-center">
+              <div class="h-40 rounded-xl overflow-hidden border border-gray-100 dark:border-neutral-800 bg-emerald-50/60 dark:bg-neutral-800 grid place-items-center">
                 <img v-if="form.hero.cover" :src="form.hero.cover" alt=""
                      class="w-full h-full object-cover" @error="onImgError" />
                 <div v-else class="text-xs text-gray-400">Belum ada cover</div>
@@ -85,13 +85,13 @@
           <div class="grid gap-2">
             <div>
               <label class="text-xs text-gray-500">Badge</label>
-              <input v-model.trim="form.hero.badge" class="mt-1 w-full rounded-lg border border-emerald-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
+              <input v-model.trim="form.hero.badge" class="mt-1 w-full rounded-lg border border-gray-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
             </div>
             <div>
               <label class="text-xs text-gray-500">Tinggi (mobile/desktop)</label>
               <div class="mt-1 grid grid-cols-2 gap-2">
-                <input v-model.trim="form.hero.heightSm" placeholder="36vh" class="rounded-lg border border-emerald-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
-                <input v-model.trim="form.hero.heightLg" placeholder="44vh" class="rounded-lg border border-emerald-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
+                <input v-model.trim="form.hero.heightSm" placeholder="36vh" class="rounded-lg border border-gray-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
+                <input v-model.trim="form.hero.heightLg" placeholder="44vh" class="rounded-lg border border-gray-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
               </div>
             </div>
           </div>
@@ -100,31 +100,31 @@
         <div class="mt-3 grid gap-2">
           <div>
             <label class="text-xs text-gray-500">Judul Utama</label>
-            <input v-model.trim="form.hero.title" class="mt-1 w-full rounded-lg border border-emerald-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
+            <input v-model.trim="form.hero.title" class="mt-1 w-full rounded-lg border border-gray-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
           </div>
           <div>
             <label class="text-xs text-gray-500">Subjudul</label>
-            <textarea v-model.trim="form.hero.subtitle" rows="2" class="mt-1 w-full rounded-lg border border-emerald-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm"></textarea>
+            <textarea v-model.trim="form.hero.subtitle" rows="2" class="mt-1 w-full rounded-lg border border-gray-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm"></textarea>
           </div>
         </div>
       </div>
 
-      <div class="rounded-2xl border border-emerald-100 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 p-4">
+      <div class="rounded-2xl border border-gray-100 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 p-4">
         <h3 class="font-semibold mb-3 flex items-center gap-2">
           <Icon icon="lucide:text-cursor-input" class="size-4 text-sky-600" /> Teks
         </h3>
         <div class="grid gap-2">
           <div>
             <label class="text-xs text-gray-500">Placeholder Pencarian</label>
-            <input v-model.trim="form.texts.searchPlaceholder" class="mt-1 w-full rounded-lg border border-emerald-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
+            <input v-model.trim="form.texts.searchPlaceholder" class="mt-1 w-full rounded-lg border border-gray-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
           </div>
           <div>
             <label class="text-xs text-gray-500">Label Kategori “All”</label>
-            <input v-model.trim="form.texts.categoryAll" class="mt-1 w-full rounded-lg border border-emerald-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
+            <input v-model.trim="form.texts.categoryAll" class="mt-1 w-full rounded-lg border border-gray-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
           </div>
           <div>
             <label class="text-xs text-gray-500">Label “Load More”</label>
-            <input v-model.trim="form.texts.loadMore" class="mt-1 w-full rounded-lg border border-emerald-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
+            <input v-model.trim="form.texts.loadMore" class="mt-1 w-full rounded-lg border border-gray-100 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm" />
           </div>
         </div>
       </div>
@@ -137,14 +137,14 @@
         <div class="relative w-full sm:w-80">
           <Icon icon="lucide:search" class="size-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input v-model="q" type="search" placeholder="Cari judul/kategori/tag…"
-                 class="w-full pl-8 pr-3 py-2 text-sm rounded-xl border border-emerald-100 bg-white/90 dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                 class="w-full pl-8 pr-3 py-2 text-sm rounded-xl border border-gray-100 bg-white/90 dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
         </div>
         <div class="flex gap-1.5 items-center overflow-x-auto no-scrollbar">
           <button class="px-3 py-1.5 text-xs rounded-full border"
-                  :class="fCategory==='all'?'bg-emerald-600 text-white border-emerald-600':'border-emerald-100 dark:border-neutral-700 dark:hover:bg-neutral-700'"
+                  :class="fCategory==='all'?'bg-emerald-600 text-white border-gray-600':'border-gray-100 dark:border-neutral-700 dark:hover:bg-neutral-700'"
                   @click="fCategory='all'">Semua</button>
           <button v-for="c in categories" :key="c" class="px-3 py-1.5 text-xs rounded-full border"
-                  :class="fCategory===c?'bg-emerald-600 text-white border-emerald-600':'border-emerald-100 dark:border-neutral-700 dark:hover:bg-neutral-700'"
+                  :class="fCategory===c?'bg-emerald-600 text-white border-gray-600':'border-gray-100 dark:border-neutral-700 dark:hover:bg-neutral-700'"
                   @click="fCategory=c">{{ c }}</button>
         </div>
         <span class="text-xs text-gray-500 dark:text-neutral-400 ml-auto">({{ filtered.length }} item)</span>
@@ -152,7 +152,7 @@
 
       <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-3">
         <template v-if="loading">
-          <div v-for="i in 12" :key="i" class="rounded-xl overflow-hidden border border-emerald-100/60 dark:border-emerald-900/30 bg-white/70 dark:bg-neutral-800/70">
+          <div v-for="i in 12" :key="i" class="rounded-xl overflow-hidden border border-gray-100/60 dark:border-gray-900/30 bg-white/70 dark:bg-neutral-800/70">
             <div class="aspect-square animate-pulse bg-emerald-100/40 dark:bg-neutral-700/40"></div>
             <div class="p-3 space-y-2">
               <div class="h-3 rounded bg-emerald-100/60 dark:bg-neutral-700/60"></div>
@@ -162,7 +162,7 @@
         </template>
 
         <div v-else v-for="(g, idx) in filtered" :key="idx"
-             class="group rounded-2xl overflow-hidden border border-emerald-100/60 dark:border-emerald-900/30 bg-white/90 dark:bg-neutral-800/90 hover:shadow-md">
+             class="group rounded-2xl overflow-hidden border border-gray-100/60 dark:border-gray-900/30 bg-white/90 dark:bg-neutral-800/90 hover:shadow-md">
           <div class="relative">
             <img v-if="g.src" :src="g.src" class="w-full h-full object-cover aspect-square" alt="" @error="onImgError" />
             <div v-else class="w-full aspect-square grid place-items-center bg-gradient-to-br from-emerald-50 to-sky-50 dark:from-neutral-700 dark:to-neutral-700">
@@ -176,7 +176,7 @@
             <p class="font-medium truncate">{{ g.title || 'Tanpa judul' }}</p>
             <p class="text-[11px] text-gray-500 dark:text-neutral-400 truncate">{{ (g.tagsText||'').split(',').map(s=>s.trim()).filter(Boolean).slice(0,3).join(', ') }}</p>
             <div class="mt-2 flex items-center gap-1.5">
-              <button class="px-2 py-1.5 text-xs rounded-lg border border-emerald-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700" @click="openItemEdit(idx)">
+              <button class="px-2 py-1.5 text-xs rounded-lg border border-gray-100/70 hover:bg-emerald-50 dark:border-neutral-700 dark:hover:bg-neutral-700" @click="openItemEdit(idx)">
                 Edit
               </button>
               <button class="px-2 py-1.5 text-xs rounded-lg border border-rose-200/60 text-rose-600 hover:bg-rose-50 dark:border-rose-900/30 dark:hover:bg-rose-900/10" @click="openDelete(idx)">
@@ -186,7 +186,7 @@
           </div>
         </div>
 
-        <div v-if="!loading && !filtered.length" class="col-span-full p-6 text-sm text-gray-600 border border-dashed border-emerald-200 rounded-2xl bg-emerald-50/40 dark:bg-neutral-800 dark:text-neutral-400 dark:border-emerald-900/30">
+        <div v-if="!loading && !filtered.length" class="col-span-full p-6 text-sm text-gray-600 border border-dashed border-gray-200 rounded-2xl bg-emerald-50/40 dark:bg-neutral-800 dark:text-neutral-400 dark:border-gray-900/30">
           Tidak ada item.
         </div>
       </div>
@@ -197,8 +197,8 @@
       <div v-if="itemModal.open" class="fixed inset-0 z-[95]">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeItemModal"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4">
-          <div class="w-full max-w-2xl rounded-3xl border border-emerald-100/70 bg-white/95 shadow-2xl ring-1 ring-black/5 dark:bg-neutral-800 dark:border-neutral-700">
-            <div class="p-4 border-b border-emerald-100/70 dark:border-neutral-700 flex items-center justify-between rounded-t-3xl">
+          <div class="w-full max-w-2xl rounded-3xl border border-gray-100/70 bg-white/95 shadow-2xl ring-1 ring-black/5 dark:bg-neutral-800 dark:border-neutral-700">
+            <div class="p-4 border-b border-gray-100/70 dark:border-neutral-700 flex items-center justify-between rounded-t-3xl">
               <h3 class="font-semibold">{{ itemModal.mode==='create' ? 'Tambah Foto' : 'Edit Foto' }}</h3>
               <button class="p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-neutral-700" @click="closeItemModal">
                 <Icon icon="lucide:x" class="size-4" />
@@ -210,8 +210,8 @@
                 <div>
                   <label class="text-xs text-gray-500">Sumber Gambar (URL)</label>
                   <div class="mt-1 flex items-center gap-2">
-                    <input v-model.trim="itemForm.src" placeholder="https://…" class="w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
-                    <label class="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-xl border border-emerald-100/70 dark:border-neutral-700 hover:bg-emerald-50 dark:hover:bg-neutral-700 cursor-pointer">
+                    <input v-model.trim="itemForm.src" placeholder="https://…" class="w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
+                    <label class="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-xl border border-gray-100/70 dark:border-neutral-700 hover:bg-emerald-50 dark:hover:bg-neutral-700 cursor-pointer">
                       <input type="file" accept="image/*" class="hidden" @change="onPickItemImage" />
                       Unggah
                     </label>
@@ -219,7 +219,7 @@
                 </div>
                 <div class="w-36">
                   <div class="text-xs text-gray-500">Pratinjau</div>
-                  <div class="mt-1 aspect-square rounded-xl overflow-hidden border border-emerald-100/70 dark:border-neutral-700 dark:bg-neutral-800 grid place-items-center">
+                  <div class="mt-1 aspect-square rounded-xl overflow-hidden border border-gray-100/70 dark:border-neutral-700 dark:bg-neutral-800 grid place-items-center">
                     <img v-if="itemForm.src" :src="itemForm.src" alt="" class="w-full h-full object-cover" @error="onImgError" />
                     <div v-else class="text-[11px] text-gray-400">No image</div>
                   </div>
@@ -229,17 +229,17 @@
               <div class="grid sm:grid-cols-2 gap-3">
                 <div>
                   <label class="text-xs text-gray-500">Judul</label>
-                  <input v-model.trim="itemForm.title" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
+                  <input v-model.trim="itemForm.title" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
                 </div>
                 <div>
                   <label class="text-xs text-gray-500">Kategori</label>
-                  <input v-model.trim="itemForm.category" placeholder="Kegiatan / Fasilitas / ..." class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
+                  <input v-model.trim="itemForm.category" placeholder="Kegiatan / Fasilitas / ..." class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
                 </div>
               </div>
 
               <div>
                 <label class="text-xs text-gray-500">Tags (pisahkan dengan koma)</label>
-                <input v-model.trim="itemForm.tagsText" placeholder="santri, kajian" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-emerald-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
+                <input v-model.trim="itemForm.tagsText" placeholder="santri, kajian" class="mt-1 w-full rounded-xl border bg-white/90 dark:bg-neutral-900 border-gray-100/70 dark:border-neutral-700 px-3 py-2 text-sm" />
               </div>
 
               <div class="flex items-center justify-end gap-2">

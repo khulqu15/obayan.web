@@ -34,8 +34,9 @@ export const ALL_SIDEBAR_GROUPS: SidebarGroup[] = [
     { label: 'Pengumuman', href: '/app/announcement', icon: 'lucide:info' },
     { label: 'Agenda', href: '/app/agenda', icon: 'solar:calendar-line-duotone' },
   ]},
-  { title: 'Form', items: [
-    { label: 'Registrasi', href: '/app/registration', icon: 'fluent:form-24-regular' },
+    { title: 'Form', items: [
+    { label: 'Registrasi Putra', href: '/app/registration', icon: 'fluent:form-24-regular' },
+    { label: 'Registrasi Putri', href: '/app/registration-girl', icon: 'fluent:form-24-regular' },
   ]},
   { title: 'Kesantrian', items: [
     { label: 'Santri', href: '/app/santri', icon: 'lucide:users' },
@@ -44,6 +45,7 @@ export const ALL_SIDEBAR_GROUPS: SidebarGroup[] = [
     { label: 'Wali Santri', href: '/app/wali', icon: 'lucide:user-round' },
   ]},
   { title: 'Rutinitas', items: [
+    { label: 'Galeri', href: '/app/gallery', icon: 'streamline-flex:gallery' },
     { label: 'Absensi Harian', href: '/app/absen', icon: 'hugeicons:note-03' },
     { label: 'Kunjungan', href: '/app/kunjungan', icon: 'material-symbols:parent-child-dining-outline-rounded' },
     { label: 'Jadwal Piket', href: '/app/picket', icon: 'lucide:calendar-days' },
@@ -54,6 +56,7 @@ export const ALL_SIDEBAR_GROUPS: SidebarGroup[] = [
     { label: 'Perizinan', href: '/app/izin', icon: 'solar:letter-linear' },
   ]},
   { title: 'Akademik', items: [
+    { label: 'Buku / Kitab', href: '/app/book', icon: 'ion:book-outline' },
     { label: 'Nilai', href: '#', icon: 'solar:chart-linear' },
     { label: 'Hafalan', href: '#', icon: 'ooui:italic-arab-keheh-jeem' },
     { label: 'Guru', href: '/app/teacher', icon: 'tabler:chalkboard-teacher' },

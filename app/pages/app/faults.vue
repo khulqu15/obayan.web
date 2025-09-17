@@ -61,6 +61,7 @@
       title="Daftar Pelanggaran"
       :rows="tableRows"
       :columns="columns"
+      :show-actions="true"
       :rowKey="(r) => r.id"
     >
       <template #cell-tanggal="{ row }">

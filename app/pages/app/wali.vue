@@ -13,6 +13,7 @@
       :rows="waliRows"
       :columns="columns"
       :rowKey="(w) => w.id"
+      :show-actions="true"
     >
       <!-- Waliname -->
       <template #cell-waliname="{ row: w }">

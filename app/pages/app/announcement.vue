@@ -25,7 +25,7 @@
     </div>
     <div v-if="loading" class="text-sm text-gray-500">Memuat data…</div>
 
-    <DataTable  v-else  title="Daftar Pengumuman"  :rows="tableRows"  :columns="columns"  :rowKey="(r) => r.id">
+    <DataTable  v-else  title="Daftar Pengumuman"  :rows="tableRows"  :columns="columns"  :rowKey="(r) => r.id" :show-actions="true">
       <template #cell-level="{ row }">
         <span
           class="text-[11px] px-2 py-0.5 rounded"

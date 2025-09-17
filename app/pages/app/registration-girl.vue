@@ -595,7 +595,7 @@ const config = useRuntimeConfig()
 const formUrl = computed(() =>
   new URL('/registrationPPDB', config.public.siteUrl || window?.location?.origin || '').toString()
 )
-const ppdbMode = ref('putra')
+const ppdbMode = ref('putri')
 async function copy(t: string){ try { await navigator.clipboard.writeText(t) } catch {} }
 
 /** ===== Filters ===== */

@@ -52,6 +52,7 @@
             <DataTable
               title="Perizinan Aktif"
               :rows="filteredRows"
+              :show-actions="true"
               :columns="columns"
               :rowKey="(r) => r.id"
             >
