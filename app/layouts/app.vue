@@ -303,13 +303,14 @@ useHead({ link: [{ rel: 'canonical', href: url.value }] })
 let profileRef: ReturnType<typeof dbRef> | null = null
 
 function applyProfile(uid: string, v: any) {
-  // update sessionUser agar computed `user` langsung kebaca di header & sidebar
-  sessionUser.value = {
-    ...(sessionUser.value || {}),
-    uid,
-    name: v?.displayName || v?.name || sessionUser.value?.name || tokenUser.value?.name || 'Pengguna',
-    email: v?.email || sessionUser.value?.email || tokenUser.value?.email || '-',
-    avatar: v?.avatar || sessionUser.value?.avatar || '/assets/pp.jpg',
+  const nextName  = v?.displayName || v?.name  || sessionUser.value?.name  || tokenUser.value?.name  || 'Pengguna'
+  const nextEmail = v?.email       || sessionUser.value?.email || tokenUser.value?.email || '-'
+  const nextAvatar= v?.avatar      || sessionUser.value?.avatar || '/assets/pp.jpg'
+
+  sessionUser.value = { ...(sessionUser.value || {}), uid, name: nextName, email: nextEmail, avatar: nextAvatar }
+
+  if (tokenUser.value) {
+    tokenUser.value = { ...tokenUser.value, name: nextName, email: nextEmail }
   }
 }
 
@@ -547,8 +548,8 @@ async function decryptJSON(serialized: string) {
 
 const sessionUser = useState<any>('sessionUser', () => ({}))
 const user = computed(() => ({
-  name: tokenUser.value?.name || sessionUser.value?.name || 'Pengguna',
-  email: tokenUser.value?.email || sessionUser.value?.email || '-',
+  name:  sessionUser.value?.name  || tokenUser.value?.name  || 'Pengguna',
+  email: sessionUser.value?.email || tokenUser.value?.email || '-',
   avatar: sessionUser.value?.avatar || '/assets/pp.jpg'
 }))
 
