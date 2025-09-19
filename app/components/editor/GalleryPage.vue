@@ -169,6 +169,7 @@
   </div>
 </template>
 
+<!-- components/editor/GalleryPage.vue -->
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue'
 import { useWeb } from '~/composables/data/useWeb'
@@ -200,8 +201,8 @@ const props = defineProps<{
 const defaults: Shape = {
   hero: {
     cover: '/assets/images/activity1.jpg',
-    badge: 'Galeri Kegiatan Santri',
-    title: 'Gallery Pondok Pesantren Alberr',
+    badge: 'Galeri ALBERR',
+    title: 'Galeri ALBERR',
     subtitle: 'Dokumentasi kegiatan, fasilitas, dan momen terbaik di pesantren.',
     heightSm: '36vh',
     heightLg: '44vh'
@@ -250,9 +251,7 @@ const activeTab = ref<typeof tabs[number]>('Hero')
 watch(() => props.section?.props, (p) => { Object.assign(form, merge(defaults, p)) })
 
 const webApi = useWeb()
-watch(() => props.pagePath, (p) => {
-  (webApi as any)?.setActivePath?.(p)
-}, { immediate: true })
+watch(() => props.pagePath, (p) => { (webApi as any)?.setActivePath?.(p) }, { immediate: true })
 const { updateSection, uploadMedia } = webApi
 
 async function save() {
@@ -292,8 +291,8 @@ async function onPickItemImage(ev: Event, idx: number) {
 
 function onImgError(e: Event) {
   const el = e.target as HTMLImageElement
-  el.src =
-    'data:image/svg+xml;utf8,' +
-    encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="100%" height="100%" fill="#f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="12">No Image</text></svg>')
+  el.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="100%" height="100%" fill="#f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="12">No Image</text></svg>'
+  )
 }
 </script>

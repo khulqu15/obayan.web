@@ -18,12 +18,11 @@ import {
   deleteObject
 } from 'firebase/storage'
 
-export const BOOK_CATEGORIES = ['Buku', 'Kitab', 'Majalah', 'Modul', 'Lainnya'] as const
+export const BOOK_CATEGORIES = ['Buku', 'Kitab', 'Modul', 'Lainnya'] as const
 export type BookCategory = typeof BOOK_CATEGORIES[number]
 
 export type BookItem = {
   id: string
-  // meta
   title: string
   author?: string
   category: BookCategory
@@ -32,12 +31,10 @@ export type BookItem = {
   tags?: string[]
   description?: string
   aktif?: boolean
-  // files
   pdfUrl?: string | null
   pdfPath?: string | null
   coverUrl?: string | null
   coverPath?: string | null
-  // times
   createdAt: number
   updatedAt: number
 }

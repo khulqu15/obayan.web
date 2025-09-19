@@ -299,11 +299,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
-import { useNuxtApp } from 'nuxt/app'
-import { ref as dbRef, onValue, off, update, set } from 'firebase/database'
-import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { useWeb } from '~/composables/data/useWeb'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Galeri' }, ssr: false })
 
@@ -314,11 +312,14 @@ type Shape = {
   gallery: { items: GalleryItem[] }
 }
 
+const tabs = ['Hero & Teks', 'Galeri'] as const 
+const activeTab = ref<typeof tabs[number]>('Hero & Teks')
+
 const defaults: Shape = {
   hero: {
     cover: '/assets/images/activity1.jpg',
-    badge: 'Galeri Kegiatan Santri',
-    title: 'Gallery Pondok Pesantren Alberr',
+    badge: 'Galeri ALBERR',
+    title: 'Galeri ALBERR',
     subtitle: 'Dokumentasi kegiatan, fasilitas, dan momen terbaik di pesantren.',
     heightSm: '36vh',
     heightLg: '44vh'
@@ -335,29 +336,54 @@ const defaults: Shape = {
     ]
   }
 }
-function deepClone<T>(v: T): T { return JSON.parse(JSON.stringify(v)) }
+const clone = <T,>(v:T)=>JSON.parse(JSON.stringify(v))
 
-/** ====== FIREBASE (via plugin inject) ====== */
-const { $realtimeDb, $storage } = useNuxtApp()   // <<— gunakan instance dari firebase.client.ts
-const GALLERY_NODE = 'alber/web/gallery'                // ubah jika perlu
+/* ====== Sumber data tunggal: useWeb pada path /gallery ====== */
+const ACTIVE_PATH = '/gallery'
+const web = useWeb()
+const { subscribePage, sections, updateSection, uploadMedia, addSection, normalizePath } = web
 
-/** ====== STATE ====== */
-const tabs = ['Hero & Teks', 'Galeri'] as const
-const activeTab = ref<typeof tabs[number]>('Hero & Teks')
+onMounted(async () => {
+  // pastikan path aktif
+  (web as any)?.setActivePath?.(ACTIVE_PATH)
+  await subscribePage(ACTIVE_PATH)
+  ensureSectionExists()
+  hydrateForm()
+})
 
-const form = reactive<Shape>(deepClone(defaults))
+/* Temukan / buat section GalleryPage */
+const sectionId = computed(() => sections.value.find(s => s.key === 'GalleryPage')?.id || null)
+async function ensureSectionExists() {
+  if (!sectionId.value) {
+    await addSection({ key: 'GalleryPage', enabled: true, props: clone(defaults) }, normalizePath(ACTIVE_PATH))
+  }
+}
+
+/* ====== Form ====== */
+const form = reactive<Shape>(clone(defaults))
 const loading = ref(true)
 const savingConfig = ref(false)
 
+function hydrateForm(){
+  const sec = sections.value.find(s => s.key === 'GalleryPage')
+  const props = (sec?.props || {}) as Partial<Shape>
+  const merged: Shape = {
+    hero: { ...defaults.hero, ...(props.hero||{}) },
+    texts: { ...defaults.texts, ...(props.texts||{}) },
+    gallery: { items: Array.isArray(props.gallery?.items) ? props.gallery!.items : clone(defaults.gallery.items) }
+  }
+  Object.assign(form, clone(merged))
+  loading.value = false
+}
+
+/* ====== Filters & UI (sama seperti punyamu) ====== */
 const q = ref('')
 const fCategory = ref<'all'|string>('all')
-
-/** Items computed & filter */
 const items = computed(() => form.gallery.items || [])
 const categories = computed(() => {
-  const setCat = new Set<string>()
-  for (const it of items.value) if ((it.category||'').trim()) setCat.add(it.category.trim())
-  return Array.from(setCat).sort()
+  const set = new Set<string>()
+  for (const it of items.value) if ((it.category||'').trim()) set.add(it.category.trim())
+  return Array.from(set).sort()
 })
 const filtered = computed(() => {
   const qv = q.value.trim().toLowerCase()
@@ -369,37 +395,12 @@ const filtered = computed(() => {
   })
 })
 
-/** Subscription (Realtime DB) */
-let unSub: null | (()=>void) = null
-onMounted(() => {
-  const node = dbRef($realtimeDb, GALLERY_NODE)
-  const handler = onValue(node, (snap) => {
-    const v = snap.val()
-    if (!v) {
-      // init default on first run (optional)
-      set(node, deepClone(defaults)).catch(()=>{})
-      Object.assign(form, deepClone(defaults))
-    } else {
-      const merged: Shape = {
-        hero: { ...defaults.hero, ...(v.hero||{}) },
-        texts: { ...defaults.texts, ...(v.texts||{}) },
-        gallery: { items: Array.isArray(v.gallery?.items) ? v.gallery.items : deepClone(defaults.gallery.items) }
-      }
-      Object.assign(form, merged)
-    }
-    loading.value = false
-  }, (err) => {
-    console.error(err); toast('Gagal memuat data galeri.', 'error'); loading.value=false
-  })
-  unSub = () => off(node, 'value', handler as any)
-})
-onUnmounted(() => { if (unSub) try{ unSub() }catch{} })
-
-/** ====== SAVE CONFIG (hero + texts + items) ====== */
+/* ====== SAVE CONFIG (semua props → section GalleryPage) ====== */
 async function saveConfig() {
   try {
     savingConfig.value = true
-    await update(dbRef($realtimeDb, GALLERY_NODE), deepClone(form))
+    if (!sectionId.value) await ensureSectionExists()
+    await updateSection(sectionId.value as string, { props: clone(form) })
     toast('Konfigurasi tersimpan.')
   } catch (e) {
     console.error(e); toast('Gagal menyimpan konfigurasi.', 'error')
@@ -407,100 +408,65 @@ async function saveConfig() {
     savingConfig.value = false
   }
 }
-function resetDefaults() { Object.assign(form, deepClone(defaults)); toast('Diisi dengan nilai default.', 'info') }
+function resetDefaults() { Object.assign(form, clone(defaults)); toast('Diisi nilai default.', 'info') }
 
-/** ====== ITEM CRUD ====== */
+/* ====== CRUD Item ====== */
 const itemModal = reactive<{open:boolean; mode:'create'|'edit'; idx:number|null}>({ open:false, mode:'create', idx:null })
 const itemForm = reactive<GalleryItem>({ src:'', title:'', category:'', tagsText:'' })
 const itemSaving = ref(false)
 
-function openItemCreate(){
-  itemModal.open = true; itemModal.mode='create'; itemModal.idx=null
-  Object.assign(itemForm, { src:'', title:'', category:'', tagsText:'' })
-}
-function openItemEdit(idx: number){
-  itemModal.open = true; itemModal.mode='edit'; itemModal.idx=idx
-  const src = items.value[idx]
-  Object.assign(itemForm, deepClone(src||{ src:'', title:'', category:'', tagsText:'' }))
-}
+function openItemCreate(){ itemModal.open = true; itemModal.mode='create'; itemModal.idx=null; Object.assign(itemForm, { src:'', title:'', category:'', tagsText:'' }) }
+function openItemEdit(idx: number){ itemModal.open = true; itemModal.mode='edit'; itemModal.idx=idx; Object.assign(itemForm, clone(items.value[idx]||{ src:'', title:'', category:'', tagsText:'' })) }
 function closeItemModal(){ itemModal.open=false; itemModal.idx=null }
 
-/** Upload image -> Storage (via injected $storage) */
-function safeName(name: string){ return name.replace(/[^\w.\-]+/g, '_') }
-async function uploadImage(file: File){
-  const path = `alberr/media/gallery/${Date.now()}_${safeName(file.name)}`
-  const ref = sRef($storage, path)
-  await uploadBytes(ref, file)
-  return await getDownloadURL(ref)
-}
+/* Upload lewat useWeb */
 async function onPickHero(e: Event){
   const file = (e.target as HTMLInputElement).files?.[0]; (e.target as HTMLInputElement).value=''
   if (!file) return
-  try {
-    const url = await uploadImage(file)
-    form.hero.cover = url
-    toast('Cover diunggah.')
-  } catch { toast('Gagal unggah cover.', 'error') }
+  try { const up = await uploadMedia(file); if (up?.url) form.hero.cover = up.url; toast('Cover diunggah.') } catch { toast('Gagal unggah cover.', 'error') }
 }
 async function onPickItemImage(e: Event){
   const file = (e.target as HTMLInputElement).files?.[0]; (e.target as HTMLInputElement).value=''
   if (!file) return
-  try {
-    const url = await uploadImage(file)
-    itemForm.src = url
-    toast('Gambar diunggah.')
-  } catch { toast('Gagal unggah gambar.', 'error') }
+  try { const up = await uploadMedia(file); if (up?.url) itemForm.src = up.url; toast('Gambar diunggah.') } catch { toast('Gagal unggah gambar.', 'error') }
 }
 
-/** Save item */
 async function saveItem(){
   try {
     itemSaving.value = true
-    const arr = deepClone(items.value)
-    if (itemModal.mode==='create') {
-      arr.push(deepClone(itemForm))
-    } else if (itemModal.idx!=null) {
-      arr[itemModal.idx] = deepClone(itemForm)
-    }
-    await update(dbRef($realtimeDb, `${GALLERY_NODE}/gallery`), { items: arr })
+    const arr = clone(items.value)
+    if (itemModal.mode==='create') arr.push(clone(itemForm))
+    else if (itemModal.idx!=null) arr[itemModal.idx] = clone(itemForm)
+    await updateSection(sectionId.value as string, { props: clone({ ...form, gallery: { items: arr } }) })
+    Object.assign(form.gallery, { items: arr })
     toast(itemModal.mode==='create'?'Item ditambahkan.':'Item diperbarui.')
     closeItemModal()
   } catch (e) {
     console.error(e); toast('Gagal menyimpan item.', 'error')
-  } finally {
-    itemSaving.value = false
-  }
+  } finally { itemSaving.value = false }
 }
 
-/** Delete */
+/* Delete */
 const delModal = reactive<{open:boolean; idx:number|null; title?:string}>({ open:false, idx:null, title:'' })
-function openDelete(idx:number){
-  delModal.open=true; delModal.idx=idx; delModal.title = items.value[idx]?.title || '(tanpa judul)'
-}
+function openDelete(idx:number){ delModal.open=true; delModal.idx=idx; delModal.title = items.value[idx]?.title || '(tanpa judul)' }
 function closeDelete(){ delModal.open=false; delModal.idx=null }
 async function doDelete(){
   if (delModal.idx==null) return
   try {
-    const arr = deepClone(items.value)
-    arr.splice(delModal.idx, 1)
-    await update(dbRef($realtimeDb, `${GALLERY_NODE}/gallery`), { items: arr })
+    const arr = clone(items.value); arr.splice(delModal.idx, 1)
+    await updateSection(sectionId.value as string, { props: clone({ ...form, gallery: { items: arr } }) })
+    Object.assign(form.gallery, { items: arr })
     toast('Item dihapus.')
   } catch (e) {
     console.error(e); toast('Gagal menghapus item.', 'error')
-  } finally {
-    closeDelete()
-  }
+  } finally { closeDelete() }
 }
 
-/** ====== UTILS ====== */
+/* ====== Utils ====== */
 function onImgError(e: Event) {
   const el = e.target as HTMLImageElement
-  el.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="100%" height="100%" fill="#f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="12">No Image</text></svg>'
-  )
+  el.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="100%" height="100%" fill="#f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="12">No Image</text></svg>')
 }
-
-/** Toast */
 type Toast = { id:number; message:string; type?:'success'|'error'|'info' }
 const toasts = ref<Toast[]>([])
 function toast(message:string, type:Toast['type']='success'){
@@ -508,7 +474,6 @@ function toast(message:string, type:Toast['type']='success'){
   toasts.value.push({ id, message, type })
   setTimeout(()=>{ toasts.value = toasts.value.filter(t=>t.id!==id) }, 3000)
 }
-
 </script>
 
 <style scoped>

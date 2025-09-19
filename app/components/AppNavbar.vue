@@ -343,13 +343,13 @@ const megaMenu = ref<MegaGroup[]>([])
 const ppdbCta = ref({
   title: 'PPDB Online 2025/2026',
   desc: 'Penerimaan Peserta Didik Baru. Daftar mudah & cepat secara online.',
-  href: '/registrationPPDB',
+  href: '/registration',
   image: '/assets/images/activity.jpg',
 })
 
 const ctaButtons = ref([
   { label: 'Login Wali', href: '/waliLogin', style: 'primary' as const },
-  { label: 'Registrasi', href: '/registrationPPDB', style: 'primary' as const },
+  { label: 'Registrasi', href: '/registration', style: 'primary' as const },
 ])
 
 const isMobileOpen = ref(false)

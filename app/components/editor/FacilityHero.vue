@@ -212,7 +212,10 @@ type Shape = {
   brochures: string[]
 }
 
-const props = defineProps<{ section: { id: string; key: string; props?: Partial<Shape> } }>()
+const props = defineProps<{
+  section: { id: string; key: string; props?: Partial<Shape> }
+  pagePath?: string
+}>()
 
 const defaults: Shape = {
   badge: 'Fasilitas Pondok Alberr',
@@ -242,15 +245,7 @@ const defaults: Shape = {
 const tabs = ['Konten','Stats','Galeri','Brosur'] as const
 const activeTab = ref<typeof tabs[number]>('Konten')
 
-const form = reactive<Shape>(merge(defaults, props.section?.props || {}))
-const savedNote = ref(''); const errNote = ref('')
-const progress = reactive<Record<string, number>>({})
-
-watch(() => props.section?.props, (p) => {
-  Object.assign(form, merge(defaults, p || {}))
-})
-
-function merge(b: Shape, p: Partial<Shape>): Shape {
+function merge(b: Shape, p: Partial<Shape> = {}): Shape {
   return {
     badge: p.badge ?? b.badge,
     headingLead: p.headingLead ?? b.headingLead,
@@ -262,65 +257,67 @@ function merge(b: Shape, p: Partial<Shape>): Shape {
     brochures: Array.isArray(p.brochures) && p.brochures.length ? p.brochures : [...b.brochures],
   }
 }
+const clone = <T,>(v:T)=>JSON.parse(JSON.stringify(v))
 
-const { updateSection } = useWeb()
+const form = reactive<Shape>(merge(defaults, props.section?.props || {}))
+watch(() => props.section?.props, (p) => { Object.assign(form, merge(defaults, p || {})) })
+
+/* === useWeb sebagai single source of truth === */
+const web = useWeb()
+const { updateSection, uploadMedia } = web
+
+/* Set active path agar updateSection nulis ke halaman yang benar */
+watch(() => props.pagePath, (p) => { (web as any)?.setActivePath?.(p) }, { immediate: true })
+
+const savedNote = ref(''); const errNote = ref('')
 
 async function save() {
   try {
     errNote.value = ''
-    await updateSection(props.section.id, { props: JSON.parse(JSON.stringify(form)) })
+    await updateSection(props.section.id, { props: clone(form) })
     savedNote.value = 'Tersimpan.'; setTimeout(()=>savedNote.value='', 1500)
   } catch (e:any) {
     errNote.value = e?.message || 'Gagal menyimpan'
   }
 }
-
-function resetToDefault() {
-  Object.assign(form, JSON.parse(JSON.stringify(defaults)))
-  activeTab.value = 'Konten'
-}
+function resetToDefault() { Object.assign(form, clone(defaults)); activeTab.value = 'Konten' }
 function moveBrochure(i:number, dir:number) {
   const j = i + dir; if (j<0 || j>=form.brochures.length) return
-  const tmp = form.brochures[i]; form.brochures[i] = form.brochures[j]; form.brochures[j] = tmp
+  ;[form.brochures[i], form.brochures[j]] = [form.brochures[j], form.brochures[i]]
 }
 function removeBrochure(i:number) { form.brochures.splice(i,1) }
 
-/* Upload ke /alberr/web/facility */
+/* ===== Upload pakai uploadMedia dari useWeb (bukan storage manual) ===== */
+const progress = reactive<Record<string, number|undefined>>({})
+
 async function upload(e: Event, fieldKey: string) {
-  const file = (e.target as HTMLInputElement).files?.[0]; if (!file) return
-  progress[fieldKey] = 0
+  const file = (e.target as HTMLInputElement).files?.[0]; (e.target as HTMLInputElement).value=''
+  if (!file) return
   try {
-    const { getStorage, ref, uploadBytesResumable, getDownloadURL } = await import('firebase/storage')
-    const storage = getStorage()
-    const path = `alberr/web/facility/${Date.now()}_${file.name.replace(/\s+/g,'_')}`
-    const r = ref(storage, path)
-    const task = uploadBytesResumable(r, file, { contentType: file.type })
-    await new Promise<void>((res, rej) => {
-      task.on('state_changed',
-        s => progress[fieldKey] = Math.round(100 * s.bytesTransferred / s.totalBytes),
-        rej,
-        async () => {
-          const url = await getDownloadURL(task.snapshot.ref)
-          const gmatch = fieldKey.match(/^gallery\.(\d+)$/)
-          const bmatch = fieldKey.match(/^brosur\.(\d+)$/)
-          if (gmatch) {
-            const idx = Number(gmatch[1]); if (!form.gallery[idx]) form.gallery[idx] = { src:'', label:'', icon:'ph:info' }
-            form.gallery[idx].src = url
-          } else if (bmatch) {
-            const idx = Number(bmatch[1]); form.brochures[idx] = url
-          }
-          res()
-        })
-    })
+    progress[fieldKey] = 5
+    const up = await uploadMedia(file)
+    if (!up?.url) throw new Error('Upload gagal')
+
+    const gmatch = fieldKey.match(/^gallery\.(\d+)$/)
+    const bmatch = fieldKey.match(/^brosur\.(\d+)$/)
+
+    if (gmatch) {
+      const idx = Number(gmatch[1])
+      if (!form.gallery[idx]) form.gallery[idx] = { src:'', label:'', icon:'ph:info' }
+      form.gallery[idx].src = up.url
+    } else if (bmatch) {
+      const idx = Number(bmatch[1])
+      form.brochures[idx] = up.url
+    }
+    progress[fieldKey] = 100
+    setTimeout(()=>{ progress[fieldKey] = undefined }, 900)
   } catch (e:any) {
     errNote.value = e?.message || 'Upload gagal'
-  } finally {
-    setTimeout(()=>{ delete progress[fieldKey] }, 1200)
-    ;(e.target as HTMLInputElement).value = ''
+    progress[fieldKey] = undefined
   }
 }
 
-/* ========== Icon Picker (Local + Online) ========== */
+/* ========== Icon Picker (Local + Online) — tetap sama ========== */
 type Target = { kind: 'stat'|'gallery'; index: number }
 const iconModal = reactive({
   show:false,

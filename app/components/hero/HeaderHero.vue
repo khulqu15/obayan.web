@@ -169,7 +169,7 @@ const defaults: HeaderHeroComputed = {
   ctaPrimary: { label: 'Login Wali', href: '/waliLogin' },
   ctaSecondary: { label: 'Pelajari Program', href: '/program' },
   /** NEW */
-  ctaPPDB: { label: 'Daftar PPSB', href: '/registrationPPDB' },
+  ctaPPDB: { label: 'Daftar PSB', href: '/registration' },
   badges: [
     { label: 'SIAKAD',     icon: 'ph:chalkboard-teacher' },
     { label: 'App',        icon: 'ph:device-mobile' },

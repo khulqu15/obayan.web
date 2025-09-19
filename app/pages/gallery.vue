@@ -177,89 +177,61 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useRoute } from '#imports'
+import { useRuntimeConfig, useSeoMeta, useHead } from '#app'
 import { useWeb } from '~/composables/data/useWeb'
 
-/* ================= SEO ================= */
+definePageMeta({ ssr: false }) // opsional, agar meta reaktif dari client
+
+/* ======= Ambil meta + sections dari useWeb untuk path /gallery ======= */
 const route = useRoute()
 const config = useRuntimeConfig()
+const web = useWeb()
+const { subscribePage, sections, meta } = web
 
-const url = computed(() => new URL(route.fullPath || '/', config.public.siteUrl).toString())
-const title = 'Ponpes Alberr | Pesantren Inovatif & Informatif'
-const description = 'Selamat datang di Ponpes Alberr Pandaan: KMI/Diniyah, Tahfidz, MTs/MA, kegiatan santri, dan PPDB online.'
+const PATH = '/gallery'
+onMounted(async () => {
+  (web as any)?.setActivePath?.(PATH)
+  await subscribePage(PATH)
+})
+watch(() => route.path, async () => {
+  (web as any)?.setActivePath?.(PATH)
+  await subscribePage(PATH)
+})
+
+/* ======= SEO dari meta CMS (fallback ke defaults) ======= */
+const fallbackTitle = 'Galeri ALBERR'
+const fallbackDesc = 'Dokumentasi kegiatan, fasilitas, dan momen terbaik di pesantren.'
+const canonical = computed(() => new URL(PATH, config.public.siteUrl).toString())
+const seoTitle = computed(() => meta.value?.title || fallbackTitle)
+const seoDesc  = computed(() => meta.value?.description || fallbackDesc)
+const ogImage  = computed(() => meta.value?.ogImage || '/assets/logo.png')
 
 useSeoMeta({
-  title,
-  description,
-  ogTitle: title,
-  ogDescription: description,
+  title: seoTitle,
+  description: seoDesc,
+  ogTitle: seoTitle,
+  ogDescription: seoDesc,
   ogType: 'website',
-  ogUrl: url.value,
-  ogImage: '/assets/logo.png',
+  ogUrl: canonical,
+  ogImage,
   twitterCard: 'summary_large_image',
-  twitterSite: config.public.twitterSite || undefined,
   themeColor: '#0ea5e9',
   robots: 'index, follow'
 })
+useHead({ link: [{ rel: 'canonical', href: canonical.value }] })
 
-useHead({
-  link: [{ rel: 'canonical', href: url.value }],
-  script: [
-    {
-      type: 'application/ld+json',
-      children: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'WebSite',
-        name: config.public.siteName,
-        url: config.public.siteUrl,
-        potentialAction: {
-          '@type': 'SearchAction',
-          target: `${config.public.siteUrl}/search?q={query}`,
-          'query-input': 'required name=query'
-        }
-      })
-    },
-    {
-      type: 'application/ld+json',
-      children: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        name: 'Pondok Pesantren Alberr',
-        url: config.public.siteUrl,
-        logo: `${config.public.siteUrl}/assets/logo.png`,
-        sameAs: [
-          'https://facebook.com/alberr',
-          'https://instagram.com/alberr'
-        ]
-      })
-    }
-  ]
-})
-
-/* ============ Ambil props dari Editor: GalleryPage ============ */
+/* ======= Props Galeri dari section 'GalleryPage' ======= */
 type Shape = {
-  hero: {
-    cover: string
-    badge: string
-    title: string
-    subtitle: string
-    heightSm: string
-    heightLg: string
-  },
-  texts: {
-    searchPlaceholder: string
-    categoryAll: string
-    loadMore: string
-  },
-  gallery: {
-    items: Array<{ src: string; title: string; category: string; tagsText?: string; tags?: string[]; createdAt?: number }>
-  }
+  hero: { cover: string; badge: string; title: string; subtitle: string; heightSm: string; heightLg: string },
+  texts: { searchPlaceholder: string; categoryAll: string; loadMore: string },
+  gallery: { items: Array<{ src: string; title: string; category: string; tagsText?: string; tags?: string[]; createdAt?: number }> }
 }
-
 const defaults: Shape = {
   hero: {
     cover: '/assets/images/activity1.jpg',
-    badge: 'Galeri Kegiatan Santri',
-    title: 'Gallery Pondok Pesantren Alberr',
+    badge: 'Galeri ALBERR',
+    title: 'Galeri ALBERR',
     subtitle: 'Dokumentasi kegiatan, fasilitas, dan momen terbaik di pesantren.',
     heightSm: '36vh',
     heightLg: '44vh'
@@ -269,12 +241,7 @@ const defaults: Shape = {
     categoryAll: 'All',
     loadMore: 'Tampilkan Lebih Banyak'
   },
-  gallery: {
-    items: [
-      { src: '/assets/images/gallery/1.jpg', title: 'Dokumentasi #1', category: 'Kegiatan', tagsText: 'santri, kajian' },
-      { src: '/assets/images/gallery/2.jpg', title: 'Dokumentasi #2', category: 'Fasilitas', tagsText: 'kelas, perpustakaan' }
-    ]
-  }
+  gallery: { items: [] }
 }
 
 function merge(base: Shape, patch?: Partial<Shape>): Shape {
@@ -293,36 +260,24 @@ function merge(base: Shape, patch?: Partial<Shape>): Shape {
       loadMore: patch?.texts?.loadMore ?? base.texts.loadMore
     },
     gallery: {
-      items: Array.isArray(patch?.gallery?.items) && patch!.gallery!.items.length
-        ? patch!.gallery!.items
-        : [...base.gallery.items]
+      items: Array.isArray(patch?.gallery?.items) ? patch!.gallery!.items : []
     }
   }
 }
-
-const web = useWeb()
-const { sections, subscribePage } = web
-onMounted(() => { subscribePage(route.path || '/') })
-watch(() => route.path, (p) => { subscribePage(p || '/') })
 
 const galleryProps = computed<Partial<Shape> | undefined>(() =>
   sections.value.find(s => s.key === 'GalleryPage')?.props as any
 )
 const shape = computed<Shape>(() => merge(defaults, galleryProps.value))
 
-/* ================== Normalisasi data untuk UI ================== */
+/* ======= Derivasi untuk UI ======= */
 const hero = computed(() => shape.value.hero)
 const texts = computed(() => shape.value.texts)
-
 const items = computed(() =>
   (shape.value.gallery.items || []).map((it, idx) => {
     const tags = Array.isArray((it as any).tags)
       ? (it as any).tags
-      : (it.tagsText || '')
-          .split(',')
-          .map(t => t.trim())
-          .filter(Boolean)
-
+      : (it.tagsText || '').split(',').map(t => t.trim()).filter(Boolean)
     return {
       src: it.src,
       title: it.title || `Dokumentasi #${idx + 1}`,
@@ -333,56 +288,32 @@ const items = computed(() =>
   })
 )
 
-/* Responsive height hero (mengikuti data editor) */
+/* Responsive hero height */
 const isLg = ref(false)
 const heroHeight = computed(() => (isLg.value ? hero.value.heightLg : hero.value.heightSm))
 onMounted(() => {
   const mq = window.matchMedia('(min-width: 1024px)')
   const handler = () => (isLg.value = mq.matches)
-  handler()
-  mq.addEventListener('change', handler)
+  handler(); mq.addEventListener('change', handler)
   onBeforeUnmount(() => mq.removeEventListener('change', handler))
 })
 
-/* ================= Filter / Sort ================= */
+/* Filter / Sort / Pagination (tetap seperti punyamu) */
 const q = ref('')
 const selectedCategory = ref<string>('')
 const sortBy = ref<'newest' | 'oldest' | 'title'>('newest')
-
-const categories = computed(() => {
-  const set = new Set(items.value.map(i => i.category).filter(Boolean))
-  return Array.from(set)
-})
-
-const allTags = computed(() => {
-  const set = new Set(items.value.flatMap(i => i.tags))
-  return Array.from(set)
-})
+const categories = computed(() => Array.from(new Set(items.value.map(i => i.category).filter(Boolean))))
+const allTags = computed(() => Array.from(new Set(items.value.flatMap(i => i.tags))))
 const selectedTags = ref<Set<string>>(new Set())
 const tagsUi = computed(() => allTags.value)
-
-function setCategory(c: string) {
-  selectedCategory.value = c || ''
-}
-function toggleTag(t: string) {
-  const s = new Set(selectedTags.value)
-  s.has(t) ? s.delete(t) : s.add(t)
-  selectedTags.value = s
-}
-function resetFilters() {
-  q.value = ''
-  selectedCategory.value = ''
-  selectedTags.value = new Set()
-  sortBy.value = 'newest'
-}
+function setCategory(c: string){ selectedCategory.value = c || '' }
+function toggleTag(t: string){ const s=new Set(selectedTags.value); s.has(t)?s.delete(t):s.add(t); selectedTags.value=s }
+function resetFilters(){ q.value=''; selectedCategory.value=''; selectedTags.value=new Set(); sortBy.value='newest' }
 
 const filtered = computed(() => {
   let out = items.value.filter(i => {
     const mq = q.value.trim().toLowerCase()
-    const matchQ = !mq ||
-      i.title.toLowerCase().includes(mq) ||
-      i.tags.some(t => t.toLowerCase().includes(mq)) ||
-      i.category.toLowerCase().includes(mq)
+    const matchQ = !mq || i.title.toLowerCase().includes(mq) || i.tags.some(t => t.toLowerCase().includes(mq)) || i.category.toLowerCase().includes(mq)
     const matchC = !selectedCategory.value || i.category === selectedCategory.value
     const matchT = selectedTags.value.size === 0 || [...selectedTags.value].every(t => i.tags.includes(t))
     return matchQ && matchC && matchT
@@ -392,175 +323,44 @@ const filtered = computed(() => {
   if (sortBy.value === 'title') out.sort((a, b) => a.title.localeCompare(b.title))
   return out
 })
-
-/* ================= Pagination ================= */
 const page = ref(1)
 const pageSize = 12
 const startIndex = computed(() => 0)
 const paged = computed(() => filtered.value.slice(0, page.value * pageSize))
 const hasMore = computed(() => paged.value.length < filtered.value.length)
-function loadMore() { page.value++ }
+function loadMore(){ page.value++ }
 
-/* ================= Lightbox / Zoom ================= */
+/* Lightbox (tetap) */
 const index = ref(0)
 const current = computed(() => filtered.value[index.value])
+function openLightbox(i:number){ index.value=i; resetZoom(); const el=document.getElementById('hs-lightbox'); el?.classList.remove('hidden'); el?.classList.add('block'); document.addEventListener('keydown', onKey) }
+function closeLightbox(){ const el=document.getElementById('hs-lightbox'); el?.classList.add('hidden'); el?.classList.remove('block'); document.removeEventListener('keydown', onKey) }
+function prev(){ index.value = (index.value - 1 + filtered.value.length) % filtered.value.length; resetZoom(false) }
+function next(){ index.value = (index.value + 1) % filtered.value.length; resetZoom(false) }
+function onKey(e: KeyboardEvent){ if (e.key==='Escape') closeLightbox(); if (e.key==='ArrowLeft') prev(); if (e.key==='ArrowRight') next() }
 
-function openLightbox(i: number) {
-  index.value = i
-  resetZoom()
-  const el = document.getElementById('hs-lightbox')
-  el?.classList.add('open')
-  el?.classList.remove('hidden')
-  el?.classList.add('block')
-  document.documentElement.classList.add('hs-overlay-open:overflow-y-hidden')
-  document.addEventListener('keydown', onKey)
-}
-function closeLightbox() {
-  const el = document.getElementById('hs-lightbox')
-  el?.classList.add('hidden')
-  el?.classList.remove('block')
-  document.documentElement.classList.remove('hs-overlay-open:overflow-y-hidden')
-  document.removeEventListener('keydown', onKey)
-}
-function prev() { index.value = (index.value - 1 + filtered.value.length) % filtered.value.length; resetZoom(false) }
-function next() { index.value = (index.value + 1) % filtered.value.length; resetZoom(false) }
-function onKey(e: KeyboardEvent) {
-  if (e.key === 'Escape') closeLightbox()
-  if (e.key === 'ArrowLeft') prev()
-  if (e.key === 'ArrowRight') next()
-}
-
+/* Zoom/pan (tetap) */
 const stageRef = ref<HTMLElement | null>(null)
-const scale = ref(1)
-const minScale = 1
-const maxScale = 4
-const tx = ref(0)
-const ty = ref(0)
+const scale = ref(1), minScale=1, maxScale=4
+const tx = ref(0), ty = ref(0)
 const isDragging = ref(false)
-let startX = 0, startY = 0, startTx = 0, startTy = 0
-let pinchStartDist = 0, pinchStartScale = 1
-let pinchCenter = { x: 0, y: 0 }
+let startX=0, startY=0, startTx=0, startTy=0, pinchStartDist=0, pinchStartScale=1
+let pinchCenter = { x:0, y:0 }
+const imgStyle = computed(()=>({ transform:`translate(-50%,-50%) translate(${tx.value}px, ${ty.value}px) scale(${scale.value})`, transformOrigin:'center center', maxWidth:'none', maxHeight:'none'}))
+function resetZoom(center=true){ scale.value=0.6; tx.value=0; ty.value=0; if(center) clampPan() }
+function clampPan(){ if (scale.value<=1){ tx.value=0; ty.value=0; return } const el=stageRef.value; if(!el) return; const r=el.getBoundingClientRect(); const bx=(r.width*(scale.value-1))/2; const by=(r.height*(scale.value-1))/2; tx.value=Math.max(Math.min(tx.value,bx),-bx); ty.value=Math.max(Math.min(ty.value,by),-by) }
+function onWheel(e: WheelEvent){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); const cx=e.clientX-rect.left-rect.width/2; const cy=e.clientY-rect.top-rect.height/2; const isPinch=e.ctrlKey===true; if(isPinch){ e.preventDefault(); const prev=scale.value; let next=prev*(1 - e.deltaY*0.02); next=Math.min(Math.max(next,minScale),maxScale); if(next===prev) return; const k=next/prev; tx.value=cx - k*(cx - tx.value); ty.value=cy - k*(cy - ty.value); scale.value=next; clampPan(); return } if (scale.value>1){ e.preventDefault(); tx.value -= e.deltaX; ty.value -= e.deltaY; clampPan() } }
+function onPointerDown(e: MouseEvent){ if(e.button!==0) return; isDragging.value=true; startX=e.clientX; startY=e.clientY; startTx=tx.value; startTy=ty.value }
+function onPointerMove(e: MouseEvent){ if(!isDragging.value) return; tx.value=startTx+(e.clientX-startX); ty.value=startTy+(e.clientY-startY); clampPan() }
+function onPointerUp(){ isDragging.value=false }
+function onDblClick(e: MouseEvent){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); const cx=e.clientX-rect.left-rect.width/2; const cy=e.clientY-rect.top-rect-rect.height/2; const prev=scale.value; const next=prev<2?2:1; const k=next/prev; tx.value=cx - k*(cx - tx.value); ty.value=cy - k*(cy - ty.value); scale.value=next; if(next===1){ tx.value=0; ty.value=0 } clampPan() }
+function distance(t1: Touch, t2: Touch){ const dx=t2.clientX-t1.clientX, dy=t2.clientY-t1.clientY; return Math.hypot(dx,dy) }
+function midpoint(t1: Touch, t2: Touch, rect: DOMRect){ return { x:((t1.clientX+t2.clientX)/2)-rect.left-rect.width/2, y:((t1.clientY+t2.clientY)/2)-rect.top-rect.height/2 } }
+function onTouchStart(e: TouchEvent){ if(e.touches.length===1){ isDragging.value=true; startX=e.touches[0]!.clientX; startY=e.touches[0]!.clientY; startTx=tx.value; startTy=ty.value } else if(e.touches.length===2){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); pinchStartDist=distance(e.touches[0]!, e.touches[1]!); pinchStartScale=scale.value; pinchCenter=midpoint(e.touches[0]!, e.touches[1]!, rect) } }
+function onTouchMove(e: TouchEvent){ if(e.touches.length===1 && isDragging.value){ tx.value=startTx + (e.touches[0]!.clientX-startX); ty.value=startTy + (e.touches[0]!.clientY-startY); clampPan() } else if(e.touches.length===2 && pinchStartDist>0){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); const curr=distance(e.touches[0]!, e.touches[1]!); let next=pinchStartScale * (curr/pinchStartDist); next=Math.min(Math.max(next,minScale),maxScale); const prev=scale.value; const k=next/prev; tx.value=pinchCenter.x - k*(pinchCenter.x - tx.value); ty.value=pinchCenter.y - k*(pinchCenter.y - ty.value); scale.value=next; clampPan() } }
+function onTouchEnd(){ isDragging.value=false; if(pinchStartDist>0 && scale.value<1.02) resetZoom(); pinchStartDist=0 }
 
-const imgStyle = computed(() => ({
-  transform: `translate(-50%, -50%) translate(${tx.value}px, ${ty.value}px) scale(${scale.value})`,
-  transformOrigin: 'center center',
-  maxWidth: 'none',
-  maxHeight: 'none',
-}))
-
-function resetZoom(center = true) {
-  scale.value = 0.6
-  tx.value = 0
-  ty.value = 0
-  if (center) clampPan()
-}
-function clampPan() {
-  if (scale.value <= 1) { tx.value = 0; ty.value = 0; return }
-  const el = stageRef.value
-  if (!el) return
-  const rect = el.getBoundingClientRect()
-  const boundX = (rect.width  * (scale.value - 1)) / 2
-  const boundY = (rect.height * (scale.value - 1)) / 2
-  tx.value = Math.max(Math.min(tx.value,  boundX), -boundX)
-  ty.value = Math.max(Math.min(ty.value,  boundY), -boundY)
-}
-function onWheel(e: WheelEvent) {
-  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-  const cx = e.clientX - rect.left - rect.width / 2
-  const cy = e.clientY - rect.top - rect.height / 2
-  const isPinchZoom = e.ctrlKey === true
-  if (isPinchZoom) {
-    e.preventDefault()
-    const prevScale = scale.value
-    let nextScale = prevScale * (1 - e.deltaY * 0.02)
-    nextScale = Math.min(Math.max(nextScale, minScale), maxScale)
-    if (nextScale === prevScale) return
-    const k = nextScale / prevScale
-    tx.value = cx - k * (cx - tx.value)
-    ty.value = cy - k * (cy - ty.value)
-    scale.value = nextScale
-    clampPan()
-    return
-  }
-  if (scale.value > 1) {
-    e.preventDefault()
-    tx.value -= e.deltaX
-    ty.value -= e.deltaY
-    clampPan()
-  }
-}
-function onPointerDown(e: MouseEvent) {
-  if (e.button !== 0) return
-  isDragging.value = true
-  startX = e.clientX; startY = e.clientY
-  startTx = tx.value; startTy = ty.value
-}
-function onPointerMove(e: MouseEvent) {
-  if (!isDragging.value) return
-  tx.value = startTx + (e.clientX - startX)
-  ty.value = startTy + (e.clientY - startY)
-  clampPan()
-}
-function onPointerUp() { isDragging.value = false }
-function onDblClick(e: MouseEvent) {
-  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-  const cx = e.clientX - rect.left - rect.width / 2
-  const cy = e.clientY - rect.top - rect.height / 2
-  const prevScale = scale.value
-  const nextScale = prevScale < 2 ? 2 : 1
-  const k = nextScale / prevScale
-  tx.value = cx - k * (cx - tx.value)
-  ty.value = cy - k * (cy - ty.value)
-  scale.value = nextScale
-  if (nextScale === 1) { tx.value = 0; ty.value = 0 }
-  clampPan()
-}
-function distance(t1: Touch, t2: Touch) {
-  const dx = t2.clientX - t1.clientX, dy = t2.clientY - t1.clientY
-  return Math.hypot(dx, dy)
-}
-function midpoint(t1: Touch, t2: Touch, rect: DOMRect) {
-  return { x: ((t1.clientX + t2.clientX) / 2) - rect.left - rect.width / 2,
-           y: ((t1.clientY + t2.clientY) / 2) - rect.top  - rect.height / 2 }
-}
-function onTouchStart(e: TouchEvent) {
-  if (e.touches.length === 1) {
-    isDragging.value = true
-    startX = e.touches[0]!.clientX
-    startY = e.touches[0]!.clientY
-    startTx = tx.value; startTy = ty.value
-  } else if (e.touches.length === 2) {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    pinchStartDist = distance(e.touches[0]!, e.touches[1]!)
-    pinchStartScale = scale.value
-    pinchCenter = midpoint(e.touches[0]!, e.touches[1]!, rect)
-  }
-}
-function onTouchMove(e: TouchEvent) {
-  if (e.touches.length === 1 && isDragging.value) {
-    tx.value = startTx + (e.touches[0]!.clientX - startX)
-    ty.value = startTy + (e.touches[0]!.clientY - startY)
-    clampPan()
-  } else if (e.touches.length === 2 && pinchStartDist > 0) {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    const currDist = distance(e.touches[0]!, e.touches[1]!)
-    let nextScale = pinchStartScale * (currDist / pinchStartDist)
-    nextScale = Math.min(Math.max(nextScale, minScale), maxScale)
-    const prevScale = scale.value
-    const k = nextScale / prevScale
-    tx.value = pinchCenter.x - k * (pinchCenter.x - tx.value)
-    ty.value = pinchCenter.y - k * (pinchCenter.y - ty.value)
-    scale.value = nextScale
-    clampPan()
-  }
-}
-function onTouchEnd() {
-  isDragging.value = false
-  if (pinchStartDist > 0 && scale.value < 1.02) resetZoom()
-  pinchStartDist = 0
-}
-
-/* cleanup overlay (kalau user reload saat open) */
+/* cleanup overlay */
 onMounted(() => { document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox() }) })
 onBeforeUnmount(() => { document.removeEventListener('keydown', onKey) })
 </script>

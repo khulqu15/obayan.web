@@ -30,7 +30,8 @@
         icon="lucide:shield-alert"
         sub="Belum diselesaikan"
       />
-       <InfoStatCard
+
+      <InfoStatCard
         label="Uang Masuk (Bulan Ini)"
         :value="fmtMoney(uangMasukBulan)"
         :percent="trendIncomeMonth"
@@ -44,12 +45,13 @@
         icon="lucide:calendar-range"
         sub="Akumulasi tahun berjalan"
       />
+      <!-- DIGANTI: Uang Keluar -> Syahriyah Menunggak -->
       <InfoStatCard
-        label="Uang Keluar (Bulan Ini)"
-        :value="fmtMoney(uangKeluarBulan)"
-        :percent="trendExpenseMonth"
-        icon="lucide:arrow-down-circle"
-        sub="Pengeluaran bulan berjalan"
+        label="Syahriyah Menunggak"
+        :value="fmtMoney(totalTunggakan)"
+        :percent="0"
+        icon="lucide:alert-circle"
+        sub="Akumulasi tunggakan aktif"
       />
       <InfoStatCard
         label="Saldo Kas"
@@ -60,7 +62,7 @@
       />
     </div>
 
-    <!-- ===== Charts Row ===== -->
+    <!-- ===== Charts Row (Agenda Terdekat pindah ke sini) ===== -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
       <AreaLineChart
         class="lg:col-span-2"
@@ -76,17 +78,33 @@
         </template>
       </AreaLineChart>
 
+      <!-- Agenda Terdekat -->
+      <div class="p-4 rounded-xl border border-gray-200 bg-white shadow-xs dark:bg-neutral-800 dark:border-neutral-700">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-gray-800 dark:text-neutral-100">Agenda Terdekat (7 hari)</h3>
+          <NuxtLink to="/app/agenda" class="text-xs text-blue-600 hover:underline">Lihat semua</NuxtLink>
+        </div>
+
+        <ul v-if="agendaTerdekat.length" class="space-y-2 text-sm">
+          <li v-for="a in agendaTerdekat" :key="a.id" class="flex items-start gap-2" @click="openAgendaDetail(a.id)">
+            <span class="inline-block w-2.5 h-2.5 rounded-full mt-1" :style="{ background: a.color }"></span>
+            <div class="min-w-0">
+              <p class="text-gray-800 dark:text-neutral-100 truncate">{{ a.title }}</p>
+              <p class="text-[12px] text-gray-500 dark:text-neutral-400">
+                {{ a.when }} <span v-if="a.time">· {{ a.time }}</span><span v-if="a.where"> · {{ a.where }}</span>
+              </p>
+            </div>
+          </li>
+        </ul>
+        <p v-else class="text-sm text-gray-500 dark:text-neutral-400">Tidak ada agenda 7 hari ke depan.</p>
+      </div>
+    </div>
+
+    <!-- ===== Row berikut: Komposisi Jenjang pindah ke sini ===== -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
       <DonutChart
         title="Komposisi Jenjang"
         :data="jenjangChart"
-        :options="{ cutout: '60%' }"
-      />
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
-      <DonutChart
-        title="Absensi Pengurus (Hari Ini)"
-        :data="pengurusDonut"
         :options="{ cutout: '60%' }"
       />
       <BarChart
@@ -107,37 +125,52 @@
 
       <div class="p-4 rounded-xl border border-gray-200 bg-white shadow-xs dark:bg-neutral-800 dark:border-neutral-700">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold text-gray-800 dark:text-neutral-100">Agenda Terdekat</h3>
-          <NuxtLink to="/app/announcement" class="text-xs text-blue-600 hover:underline">Lihat semua</NuxtLink>
+          <h3 class="font-semibold text-gray-800 dark:text-neutral-100">Absensi Pengurus (Hari Ini)</h3>
         </div>
-
-        <ul v-if="agenda.length" class="space-y-2 text-sm">
-          <li v-for="a in agenda.slice(0,6)" :key="a.id" class="flex items-start gap-2">
-            <Icon icon="lucide:calendar" width="16" height="16" class="mt-0.5 text-gray-600 dark:text-neutral-300"/>
-            <div class="min-w-0">
-              <p class="text-gray-800 dark:text-neutral-100 truncate">{{ a.title }}</p>
-              <p class="text-[12px] text-gray-500 dark:text-neutral-400">
-                {{ a.when }} <span v-if="a.where">· {{ a.where }}</span>
-              </p>
-            </div>
-          </li>
-        </ul>
-        <p v-else class="text-sm text-gray-500 dark:text-neutral-400">Belum ada agenda terjadwal.</p>
+        <DonutChart
+          :data="pengurusDonut"
+          :options="{ cutout: '60%' }"
+        />
       </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <!-- Perizinan Terbaru -->
       <DataTable
         title="Perizinan Terbaru"
         :rows="izinRows"
         :columns="izinCols"
         :rowKey="r => r.id"
       >
+        <!-- badge status -->
         <template #cell-status="{ row }">
-          <span :class="badgeClass(row.status)">{{ row.status }}</span>
+          <span :class="badgeClass(row.status)">{{ row.statusLabel }}</span>
         </template>
+
+        <!-- badge urgensi -->
+        <template #cell-urgency="{ row }">
+          <span :class="urgencyClass(row.urgency)">{{ row.urgency }}</span>
+        </template>
+
+        <!-- jadwal rencana (keluar – kembali) -->
+        <template #cell-planned="{ row }">
+          <span class="text-xs text-gray-700 dark:text-neutral-200">{{ row.planned }}</span>
+        </template>
+
+        <!-- maskan / kamar -->
+        <template #cell-maskan="{ row }">
+          <span class="text-xs text-gray-700 dark:text-neutral-200">
+            {{ row.maskan || '—' }}<span v-if="row.kamar"> · Kamar {{ row.kamar }}</span>
+          </span>
+        </template>
+
+        <!-- waktu diminta -->
+        <template #cell-requestedAt="{ row }">
+          <span class="text-xs text-gray-700 dark:text-neutral-200">{{ row.requestedAtLabel }}</span>
+        </template>
+
         <template #cell-actions="{ row }">
-          <NuxtLink :to="'/app/izin?focus='+row.id" class="text-xs text-blue-600 hover:underline">Lihat</NuxtLink>
+          <NuxtLink :to="'/app/izin?focus='+row.id" class="text-xs 600 hover:underline">Lihat</NuxtLink>
         </template>
       </DataTable>
 
@@ -153,15 +186,88 @@
           </span>
         </template>
         <template #cell-actions="{ row }">
-          <NuxtLink :to="'/app/faults?focus='+row.id" class="text-xs text-blue-600 hover:underline">Lihat</NuxtLink>
+          <NuxtLink :to="'/app/faults?focus='+row.id" class="text-xs 600 hover:underline">Lihat</NuxtLink>
         </template>
       </DataTable>
     </div>
+    <teleport to="body">
+      <div v-if="agendaDetailId && selectedAgenda" class="fixed inset-0 z-[100]">
+        <div class="absolute inset-0 bg-black/40" @click="closeAgendaDetail"></div>
+
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+          <div class="w-full max-w-lg rounded-2xl border border-gray-100 bg-white shadow-xl dark:bg-neutral-800 dark:border-neutral-700">
+            <div class="p-4 border-b border-gray-200 dark:border-neutral-700 flex items-center justify-between">
+              <h3 class="font-semibold truncate">{{ selectedAgenda.title || 'Agenda' }}</h3>
+              <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700" @click="closeAgendaDetail">
+                <Icon icon="lucide:x" class="size-4" />
+              </button>
+            </div>
+
+            <div class="p-4 space-y-3 max-h-[75vh] overflow-y-auto">
+              <div v-if="selectedAgenda.thumbUrl" class="rounded-lg overflow-hidden border border-gray-200 dark:border-neutral-700">
+                <img :src="selectedAgenda.thumbUrl" alt="thumb" class="w-full h-48 object-cover" />
+              </div>
+
+              <div class="text-sm space-y-1">
+                <div class="flex items-start gap-2">
+                  <Icon icon="lucide:calendar" class="size-4 mt-0.5 text-gray-500 dark:text-neutral-400" />
+                  <div>
+                    <div class="font-medium">
+                      {{ fmtDateTimeRange(selectedAgenda.startAt, selectedAgenda.endAt, selectedAgenda.allDay) }}
+                    </div>
+                    <div v-if="selectedAgenda.location" class="text-gray-500 dark:text-neutral-400">
+                      <Icon icon="lucide:map-pin" class="inline size-4 -mt-0.5 mr-1" />
+                      {{ selectedAgenda.location }}
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="selectedAgenda.desc" class="pt-2 whitespace-pre-wrap text-gray-700 dark:text-neutral-200">
+                  {{ selectedAgenda.desc }}
+                </div>
+              </div>
+            </div>
+
+            <div class="p-4 border-t border-gray-200 dark:border-neutral-700 flex items-center justify-between">
+              <div class="inline-flex items-center gap-2">
+                <span class="inline-block w-3 h-3 rounded-full" :style="{ background: selectedAgenda.color || '#3b82f6' }"></span>
+                <span class="text-xs text-gray-500 dark:text-neutral-400">Label warna</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <NuxtLink
+                  :to="`/app/agenda`"
+                  class="px-3 py-1.5 rounded-lg border hover:bg-gray-50 border-gray-200 dark:border-neutral-700 dark:hover:bg-neutral-700 text-sm"
+                >
+                  Edit di Halaman Agenda
+                </NuxtLink>
+                <button
+                  type="button"
+                  class="px-3 py-1.5 rounded-lg border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700 text-sm text-rose-600"
+                  @click="deleteAgendaFromDetail"
+                  :disabled="agendaDeleting"
+                >
+                  <Icon v-if="agendaDeleting" icon="ph:spinner" class="size-4 animate-spin" />
+                  <span>{{ agendaDeleting ? 'Menghapus…' : 'Hapus' }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"
+                  @click="closeAgendaDetail"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { Icon } from '@iconify/vue'
 import InfoStatCard from '~/components/widget/InfoStatCard.vue'
 import AreaLineChart from '~/components/widget/AreaLineChart.vue'
@@ -176,6 +282,9 @@ import { useSantri } from '~/composables/data/useSantri'
 import { useIzin } from '~/composables/data/useIzin'
 import { useFaults } from '~/composables/data/useFaults'
 import { useAnnouncements } from '~/composables/data/useAnnouncements'
+import { useAgenda } from '~/composables/data/useAgenda'
+
+const agendaApi = useAgenda()
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Dashboard' } })
 
@@ -201,7 +310,69 @@ const ann     = useAnnouncements()
 const finance  = useFinance()
 const pengurus = usePengurus?.()
 
+const agendaDetailId = ref<string | null>(null)
+const agendaDeleting = ref(false)
+
+const selectedAgenda = computed(() =>
+  agendaDetailId.value
+    ? (agendaApi.rows.value || []).find(a => a.id === agendaDetailId.value) || null
+    : null
+)
+
+function fmtDateTimeRange(a?: number, b?: number, allDay?: boolean) {
+  if (!a && !b) return ''
+  if (allDay) {
+    const d = a ? new Date(a) : b ? new Date(b) : new Date()
+    return d.toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) + ' · Seharian'
+  }
+  const A = a ? new Date(a) : null
+  const B = b ? new Date(b) : null
+  const fmtD = (d: Date) => d.toLocaleDateString('id-ID', { weekday:'long', day:'2-digit', month:'long', year:'numeric' })
+  const fmtT = (d: Date) => d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' })
+  if (A && B) {
+    const sameDay = A.toDateString() === B.toDateString()
+    return sameDay
+      ? `${fmtD(A)} · ${fmtT(A)}–${fmtT(B)}`
+      : `${fmtD(A)} ${fmtT(A)} — ${fmtD(B)} ${fmtT(B)}`
+  }
+  if (A) return `${fmtD(A)} · ${fmtT(A)}`
+  return `${fmtD(B!)} · ${fmtT(B!)}`
+}
+
+function openAgendaDetail(id: string) {
+  agendaDetailId.value = id
+}
+function closeAgendaDetail() {
+  agendaDetailId.value = null
+}
+
+async function deleteAgendaFromDetail() {
+  if (!selectedAgenda.value) return
+  const ok = confirm('Apakah Anda yakin ingin menghapus agenda ini?')
+  if (!ok) return
+  try {
+    agendaDeleting.value = true
+    await agendaApi.deleteAgenda(selectedAgenda.value.id)
+    closeAgendaDetail()
+  } catch (e) {
+    console.error(e)
+    alert('Gagal menghapus agenda.')
+  } finally {
+    agendaDeleting.value = false
+  }
+}
+
 onMounted(async () => {
+  const d = new Date()
+  agendaApi.subscribeMonth(d.getFullYear(), d.getMonth())
+
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
+  const day     = d.getDate()
+  if (lastDay - day <= 7) {
+    const y = d.getFullYear(), m1 = d.getMonth() + 1
+    setTimeout(() => agendaApi.subscribeMonth(y + (m1>11?1:0), (m1%12)), 100)
+  }
+
   try { santri.subscribeSantri?.() } catch {}
   try { await santri.fetchSantri?.() } catch {}
 
@@ -291,25 +462,20 @@ const uangMasukTahun = computed(() => {
            .reduce((a: any, t: any) => a + amount(t), 0)
 })
 
-const uangKeluarBulan = computed(() => {
-  const s = finance.summary?.value
-  if (s?.expenseMonth != null) return Number(s.expenseMonth)
-  const tx = finance.transactions?.value || []
-  return tx.filter((t: any) => isExpense(t) && sameMonth(toDate(t?.date ?? t?.tanggal ?? t?.ts), now))
-           .reduce((a: any, t: any) => a + amount(t), 0)
-})
-
 const saldoKas = computed(() => {
   const s = finance.summary?.value
   if (s?.balance != null) return Number(s.balance)
-  // fallback: total income - total expense dari semua transaksi yang ada
   const tx = finance.transactions?.value || []
   const inc = tx.filter(isIncome).reduce((a: any, t: any) => a + amount(t), 0)
   const exp = tx.filter(isExpense).reduce((a: any, t: any) => a + amount(t), 0)
   return inc - exp
 })
 
-
+const totalTunggakan = computed(() => {
+  const s = finance.summary?.value
+  if (s?.arrears != null) return Number(s.arrears)
+  return 0
+})
 
 const izinPending = computed(() => {
   const rows = izin.rows?.value || []
@@ -378,7 +544,7 @@ const faultChart = computed(() => {
     const since = Date.now() - 30*86400000
     const map: Record<string, number> = {}
     for (const f of rows) {
-      const t = Number(f?.timestamp || f?.createdAt || Date.parse(f?.date||''))
+      const t = Number(f?.timestamp || f?.createdAt || Date.parse(f?.date||'')) || 0
       if (!t || t < since) continue
       const k = String(f?.kategori || 'Lainnya')
       map[k] = (map[k] || 0) + 1
@@ -392,50 +558,106 @@ const faultChart = computed(() => {
   }
 })
 
-const agenda = computed(() => {
-  const nexts = ann.getDueAnnouncements?.() || []
-  if (Array.isArray(nexts) && nexts.length) {
-    return nexts
-      .slice(0, 10)
-      .map((x:any, i:number) => ({
-        id: x?.id || ('a'+i),
-        title: x?.title || x?.text || 'Pengumuman',
-        when: ann.scheduleLabel?.(x) || x?.when || '',
-        where: x?.place || x?.location || ''
-      }))
-  }
-  const rows = (ann.rows?.value || [])
-    .filter((x:any) => Number(x?.timestamp || Date.parse(x?.date||'')) >= Date.now()-86400000)
-    .sort((a:any,b:any) => Number(a?.timestamp||0) - Number(b?.timestamp||0))
-  return rows.slice(0,10).map((x:any,i:number)=>({
-    id: x?.id || ('r'+i),
-    title: x?.title || 'Pengumuman',
-    when: ann.scheduleLabel?.(x) || '',
-    where: x?.place || ''
-  }))
-})
+const nowMs = () => Date.now()
+const in7DaysMs = () => nowMs() + 7 * 86400000
 
-const izinCols = [
-  { key: 'pemohon', label: 'Santri', sortable: true },
-  { key: 'alasan',  label: 'Alasan', sortable: true },
-  { key: 'waktu',   label: 'Waktu',  sortable: true },
-  { key: 'status',  label: 'Status', sortable: true },
-  { key: 'actions', label: '',       sortable: false },
-]
-const izinRows = computed(() => {
-  const rows = izin.rows?.value || []
-  return rows
-    .slice()
-    .sort((a:any,b:any)=> Number(b?.timestamp||0) - Number(a?.timestamp||0))
-    .slice(0,20)
-    .map((x:any) => ({
-      id: x?.id || x?._id,
-      pemohon: x?.santri || x?.pemohon || x?.nama || '-',
-      alasan: x?.alasan || x?.reason || '-',
-      waktu: new Date(Number(x?.timestamp || Date.parse(x?.tanggal||Date.now()))).toLocaleString(),
-      status: x?.status || '-'
+const fmtTimeRange = (a?: number, b?: number, allDay?: boolean) => {
+  if (!a && !b) return ''
+  if (allDay) return 'Seharian'
+  const A = a ? new Date(a) : null
+  const B = b ? new Date(b) : null
+  const time = (d: Date) => d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+  if (A && B) return `${time(A)}–${time(B)}`
+  if (A) return time(A)
+  return time(B!)
+}
+
+const agendaTerdekat = computed(() => {
+  const list = agendaApi.rows.value || []
+  const start = nowMs()
+  const end   = in7DaysMs()
+  return list
+    .filter(a => {
+      const s = Number(a.startAt || 0)
+      const e = Number(a.endAt || a.startAt || 0)
+      return (s >= start && s <= end) || (e >= start && e <= end) || (s <= start && e >= start) // overlap juga masuk
+    })
+    .sort((a,b) => (a.startAt - b.startAt) || (a.title||'').localeCompare(b.title||''))
+    .slice(0, 10)
+    .map((a, i) => ({
+      id: a.id || ('a'+i),
+      title: a.title || 'Agenda',
+      when: new Date(a.startAt).toLocaleDateString('id-ID', { weekday:'short', day:'2-digit', month:'short' }),
+      time: fmtTimeRange(a.startAt, a.endAt, a.allDay),
+      where: a.location || '',
+      color: a.color || '#3b82f6',
+      thumb: a.thumbUrl || null
     }))
 })
+
+
+const izinCols = [
+  { key: 'name',        label: 'Santri',            sortable: true },
+  { key: 'maskan',      label: 'Maskan / Kamar',    sortable: true },
+  { key: 'reason',      label: 'Alasan',            sortable: true },
+  { key: 'urgency',     label: 'Urgensi',           sortable: true },
+  { key: 'planned',     label: 'Rencana',           sortable: false },
+  { key: 'requestedAt', label: 'Diminta',           sortable: true },
+  { key: 'status',      label: 'Status',            sortable: true },
+  { key: 'actions',     label: '',                  sortable: false },
+]
+
+const fmtDateTime = (ms?: number) =>
+  ms ? new Date(ms).toLocaleString('id-ID', { dateStyle:'medium', timeStyle:'short' }) : '—'
+
+const fmtRange = (a?: number, b?: number) => {
+  const A = a ? new Date(a) : null
+  const B = b ? new Date(b) : null
+  if (!A && !B) return '—'
+  if (A && !B)  return `${A.toLocaleString('id-ID', { dateStyle:'medium', timeStyle:'short' })}`
+  if (!A && B)  return `s.d. ${B.toLocaleString('id-ID', { dateStyle:'medium', timeStyle:'short' })}`
+  return `${A!.toLocaleString('id-ID', { dateStyle:'medium', timeStyle:'short' })} – ${B!.toLocaleString('id-ID', { dateStyle:'medium', timeStyle:'short' })}`
+}
+
+const humanStatus = (s?: string) => {
+  const x = String(s||'').toLowerCase()
+  if (x === 'pending')  return 'Menunggu'
+  if (x === 'approved') return 'Disetujui'
+  if (x === 'rejected') return 'Ditolak'
+  if (x === 'out')      return 'Keluar'
+  if (x === 'returned') return 'Kembali'
+  return s || '-'
+}
+
+const urgencyClass = (u?: string) => {
+  const x = String(u||'Normal').toLowerCase()
+  if (x === 'darurat') return 'text-xs px-2 py-0.5 rounded bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
+  if (x === 'tinggi')  return 'text-xs px-2 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+  if (x === 'rendah')  return 'text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-700 dark:bg-neutral-700/40 dark:text-neutral-200'
+  return 'text-xs px-2 py-0.5 rounded bg-blue-100 700 dark:bg-blue-900/30 dark:300'
+}
+
+const izinRows = computed(() => {
+  const list = izin.rows?.value || []
+  return list
+    .slice()
+    .sort((a:any,b:any)=> Number(b?.requestedAt||0) - Number(a?.requestedAt||0))
+    .slice(0, 20)
+    .map((x:any) => ({
+      id: x.id,
+      name: x.name || 'Santri Fulan',
+      maskan: x.maskan || '',
+      kamar: x.kamar || '',
+      reason: x.reason || '-',
+      urgency: x.urgency || 'Normal',
+      planned: fmtRange(x.plannedOutAt, x.plannedReturnAt),
+      requestedAt: x.requestedAt || 0,
+      requestedAtLabel: fmtDateTime(x.requestedAt),
+      status: x.status || 'pending',
+      statusLabel: humanStatus(x.status),
+    }))
+})
+
 
 const trendIncomeMonth = computed(() => {
   const s = finance.summary?.value
@@ -453,18 +675,10 @@ const trendIncomeYear = computed(() => {
   return Number((((cur - prev) / prev) * 100).toFixed(1))
 })
 
-const trendExpenseMonth = computed(() => {
-  const s = finance.summary?.value
-  const cur = Number(s?.expenseMonth ?? uangKeluarBulan.value)
-  const prev = Number(s?.expensePrevMonth ?? 0)
-  if (prev <= 0) return 0
-  return Number((((cur - prev) / prev) * 100).toFixed(1))
-})
-
 const pengurusDonut = computed(() => {
   const t = pengurus?.today?.value || pengurus?.current?.value || {}
   const present = Number(t?.present ?? t?.hadir ?? 0)
-  const total   = Number(t?.total ?? t?.jumlah ?? 0)
+  const total   = Number(t?.total   ?? t?.jumlah ?? 0)
   const absent  = Math.max(total - present, 0)
   return {
     labels: ['Masuk', 'Tidak Masuk'],

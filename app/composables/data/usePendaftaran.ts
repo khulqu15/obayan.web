@@ -1,5 +1,6 @@
 import { ref as vRef } from 'vue'
-import { child, get, ref as dbRef, push, set, update, remove } from 'firebase/database'
+import { useNuxtApp } from '#app'
+import { get, ref as dbRef, update } from 'firebase/database'
 
 export type PendaftaranRow = {
   id: string; gen: string; santri: string; walisantri?: string; nohp?: string;
@@ -16,34 +17,10 @@ export type PendaftaranSettings = {
 }
 
 const SETTINGS_PATH = 'alberr/form/pendaftaran'
-
-function extractYear(r: any): number | null {
-  if (typeof r?.ppdbCode === 'string' && /^ALB-\d{8}-/i.test(r.ppdbCode)) {
-    return parseInt(r.ppdbCode.slice(4, 8))
-  }
-  const ca = (r as any)?.createdAt
-  if (typeof ca === 'number') return new Date(ca).getFullYear()
-  if (ca && typeof ca === 'object') {
-    const ms = ca._seconds ? ca._seconds * 1000 : ca?.toMillis?.()
-    if (ms) return new Date(ms).getFullYear()
-  }
-  const g = (r as any)?.gen
-  if (g && /^\d{4}$/.test(String(g))) return parseInt(g)
-  return null
-}
-
-function isCalonThisYear(r: PendaftaranRow, year: number): boolean {
-  const y = extractYear(r)
-  const looksNew = (r.status === 'nonaktif') && (!r.kamar || r.kamar === '-')
-  const hasPpdb = 'ppdbCode' in r || 'ppdb' in (r as any) || ('username' in (r as any) && 'publicToken' in (r as any))
-  return (y === year) && (looksNew || hasPpdb)
-}
-function isBaruThisYear(r: PendaftaranRow, year: number): boolean {
-  const y = extractYear(r)
-  // Diterima/aktif untuk tahun berjalan
-  return (y === year) && (r.status !== 'nonaktif')
-}
 const TZ_JKT = 'Asia/Jakarta'
+function tzYearFromMs(ms: number, tz = TZ_JKT) {
+  return Number(new Intl.DateTimeFormat('en-CA', { timeZone: tz, year:'numeric' }).format(new Date(ms)))
+}
 
 export const usePendaftaran = () => {
   const loading = vRef(false)
@@ -51,29 +28,9 @@ export const usePendaftaran = () => {
   const allRows = vRef<PendaftaranRow[]>([])
   const calonRows = vRef<PendaftaranRow[]>([])
   const baruRows  = vRef<PendaftaranRow[]>([])
-    const settings  = vRef<PendaftaranSettings>({
-        isClosed: false, autoCloseEnabled: false, autoCloseAt: null, year: tzYearFromMs(Date.now())
-    })
-
-  
-    function tzYearFromMs(ms: number, tz = TZ_JKT) {
-        return Number(new Intl.DateTimeFormat('en-CA', { timeZone: tz, year:'numeric' }).format(new Date(ms)))
-    }
-
-    function extractYear(r: any): number | null {
-        if (typeof r?.ppdbCode === 'string' && /^ALB-\d{8}-/i.test(r.ppdbCode)) {
-            return parseInt(r.ppdbCode.slice(4, 8))
-        }
-        const ca = (r as any)?.createdAt
-        if (typeof ca === 'number') return tzYearFromMs(ca)
-        if (ca && typeof ca === 'object') {
-            const ms = ca._seconds ? ca._seconds * 1000 : ca?.toMillis?.()
-            if (ms) return tzYearFromMs(ms)
-        }
-        const g = (r as any)?.gen
-        if (g && /^\d{4}$/.test(String(g))) return parseInt(g)
-        return null
-    }
+  const settings  = vRef<PendaftaranSettings>({
+    isClosed: false, autoCloseEnabled: false, autoCloseAt: null, year: tzYearFromMs(Date.now())
+  })
 
   async function fetchAll() {
     loading.value = true; error.value = null
@@ -88,96 +45,50 @@ export const usePendaftaran = () => {
         rfid: v.rfid || '', fingerprint: v.fingerprint || '', ppdbCode: v.ppdbCode, createdAt: v.createdAt
       }))
       allRows.value = rows
-      const y = settings.value.year || new Date().getFullYear()
-      calonRows.value = rows.filter(r => isCalonThisYear(r, y))
-      baruRows.value  = rows.filter(r => isBaruThisYear(r, y))
+      const y = settings.value.year || tzYearFromMs(Date.now())
+      const isCalonThisYear = (r:PendaftaranRow) => String(r.gen) === String(y) && String(r.status).toLowerCase()==='nonaktif'
+      const isBaruThisYear  = (r:PendaftaranRow) => String(r.gen) === String(y) && String(r.status).toLowerCase()!=='nonaktif'
+      calonRows.value = rows.filter(isCalonThisYear)
+      baruRows.value  = rows.filter(isBaruThisYear)
     } catch (e:any) {
       console.error(e); error.value = e?.message ?? 'Gagal memuat data'
     } finally { loading.value = false }
   }
 
-  async function approveCalon(id: string) {
-    const { $realtimeDb } = useNuxtApp()
-    const nodeRef = dbRef($realtimeDb, `alberr/santri/${id}`)
-    await remove(child(nodeRef, 'status'))
-    await fetchAll()
-  }
-
-  async function revertToCalon(id: string) {
-    await updateRow(id, { status: 'nonaktif', kamar: '-', maskan: '' })
-    await fetchAll()
-  }
-
-  async function createRow(payload: Omit<PendaftaranRow, 'id'>, opts: { refresh?: boolean } = {}) {
-    const { refresh = true } = opts
-    const { $realtimeDb } = useNuxtApp()
-    const listRef = dbRef($realtimeDb, 'alberr/santri'); const newRef = push(listRef)
-    const data = {
-      gen: payload.gen ?? '', santri: payload.santri ?? '', walisantri: payload.walisantri ?? '', nohp: payload.nohp ?? '',
-      kamar: payload.kamar ?? '', maskan: payload.maskan ?? '', alamat: payload.alamat ?? '',
-      status: payload.status ?? 'nonaktif', jenjang: payload.jenjang ?? '', rfid: payload.rfid || '', fingerprint: payload.fingerprint || '',
-    }
-    await set(newRef, data)
-    if (refresh) await fetchAll()
-    return newRef.key
-  }
-
-  async function updateRow(id: string, payload: Partial<Omit<PendaftaranRow, 'id'>>, opts: { refresh?: boolean } = {}) {
-    const { refresh = true } = opts; const { $realtimeDb } = useNuxtApp()
-    const nodeRef = dbRef($realtimeDb, `alberr/santri/${id}`)
-    const data:any = {}
-    if (payload.gen !== undefined) data.gen = payload.gen
-    if (payload.santri !== undefined) data.santri = payload.santri
-    if (payload.walisantri !== undefined) data.walisantri = payload.walisantri
-    if (payload.nohp !== undefined) data.nohp = payload.nohp
-    if (payload.kamar !== undefined) data.kamar = payload.kamar
-    if (payload.maskan !== undefined) data.maskan = payload.maskan
-    if (payload.status !== undefined) data.status = payload.status
-    if (payload.alamat !== undefined) data.alamat = payload.alamat
-    if (payload.jenjang !== undefined) data.jenjang = payload.jenjang
-    if (payload.rfid !== undefined) data.rfid = payload.rfid
-    if (payload.fingerprint !== undefined) data.fingerprint = payload.fingerprint
-    await update(nodeRef, data)
-    if (refresh) await fetchAll()
-  }
-
-  async function deleteRow(id: string) {
-    const { $realtimeDb } = useNuxtApp()
-    await remove(dbRef($realtimeDb, `alberr/santri/${id}`))
-    await fetchAll()
-  }
-
-  /** ===== Settings (alberr/form/pendaftaran) ===== */
   async function fetchSettings() {
     try {
-      const { $realtimeDb } = useNuxtApp()
+      const { $realtimeDb } = useNuxtApp() as any
       const snap = await get(dbRef($realtimeDb, SETTINGS_PATH))
-      const val = snap.val() || {}
+      const v = snap.val()
+      if (v && typeof v === 'object') {
         settings.value = {
-            isClosed: !!val.isClosed,
-            autoCloseEnabled: !!val.autoCloseEnabled,
-            autoCloseAt: val.autoCloseAt ?? null,
-            year: Number(val.year ?? tzYearFromMs(Date.now())),
-            updatedAt: val.updatedAt ?? Date.now()
+          isClosed: !!v.isClosed,
+          autoCloseEnabled: !!v.autoCloseEnabled,
+          autoCloseAt: v.autoCloseAt || null,
+          year: Number(v.year || settings.value.year),
+          updatedAt: Number(v.updatedAt || Date.now()),
         }
-    } catch (e:any) { console.warn('settings error', e) }
+      }
+    } catch (e) {
+      console.error('[fetchSettings] failed', e)
+    }
   }
 
-  async function saveSettings(patch: Partial<PendaftaranSettings>) {
-    const { $realtimeDb } = useNuxtApp()
-    const merged: PendaftaranSettings = { ...settings.value, ...patch, updatedAt: Date.now() }
-    await update(dbRef($realtimeDb, SETTINGS_PATH), merged as any)
-    settings.value = merged
-    // refresh filter berdasarkan tahun jika berubah
-    if (patch.year !== undefined) await fetchAll()
+  async function saveSettings(partial: Partial<PendaftaranSettings>) {
+    const next: PendaftaranSettings = { ...settings.value, ...partial, updatedAt: Date.now() }
+    if (next.autoCloseAt && typeof next.autoCloseAt === 'string') {
+      const ms = Date.parse(next.autoCloseAt)
+      if (Number.isNaN(ms)) next.autoCloseAt = null
+    }
+    try {
+      const { $realtimeDb } = useNuxtApp() as any
+      await update(dbRef($realtimeDb, SETTINGS_PATH), next as any)
+      settings.value = next
+    } catch (e) {
+      console.error('[saveSettings] failed', e)
+      throw e
+    }
   }
 
-  return {
-    // state
-    loading, error, allRows, calonRows, baruRows, settings,
-    // data ops
-    fetchAll, createRow, updateRow, deleteRow, approveCalon, revertToCalon,
-    // settings ops
-    fetchSettings, saveSettings
-  }
+  return { loading, error, allRows, calonRows, baruRows, settings, fetchAll, fetchSettings, saveSettings }
 }

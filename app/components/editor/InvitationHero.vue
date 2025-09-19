@@ -266,8 +266,7 @@
 import { reactive, ref, watch, computed } from 'vue'
 import InvitationHeroView from '~/components/hero/InvitationHero.vue'
 import { Icon } from '@iconify/vue'
-import { useNuxtApp } from '#app'
-import { ref as dbRef, update } from 'firebase/database'
+import { useWeb } from '~/composables/data/useWeb'
 
 type CTA = { label: string; href: string; icon?: string }
 type EditorShape = {
@@ -279,6 +278,7 @@ type EditorShape = {
 
 const props = defineProps<{ section: { id: string; key: string; props?: Partial<EditorShape> } }>()
 
+/* ===== DEFAULTS (dipakai hanya untuk nilai yang belum ada) ===== */
 const defaults: EditorShape = {
   eyebrow: 'Ajakan Kebaikan',
   titlePrefix: 'Ayo',
@@ -298,32 +298,35 @@ const defaults: EditorShape = {
 const tabs = ['Konten','CTA','Hadist','Media','Preview'] as const
 const activeTab = ref<typeof tabs[number]>('Konten')
 
-const form = reactive<EditorShape>(merge(defaults, props.section?.props || {}))
-const savedNote = ref(''); const errNote = ref(''); const progress = reactive<Record<string,number>>({})
-
-watch(() => props.section?.props, (p) => {
-  Object.assign(form, merge(defaults, p || {}))
-})
-
-function merge(b: EditorShape, p: Partial<EditorShape>): EditorShape {
+/* ===== MERGE helper ===== */
+function merge(b: EditorShape, p?: Partial<EditorShape>): EditorShape {
+  const x = p || {}
   return {
-    eyebrow: p.eyebrow ?? b.eyebrow,
-    titlePrefix: p.titlePrefix ?? b.titlePrefix,
-    titleUnderline: p.titleUnderline ?? b.titleUnderline,
-    titleSuffix: p.titleSuffix ?? b.titleSuffix,
-    brand: p.brand ?? b.brand,
-    subtitle: p.subtitle ?? b.subtitle,
-    primaryCTA: { ...b.primaryCTA, ...(p.primaryCTA||{}) },
-    secondaryCTA: { ...b.secondaryCTA, ...(p.secondaryCTA||{}) },
-    bg: p.bg ?? b.bg,
-    pattern: p.pattern ?? b.pattern,
-    hadithArabic: p.hadithArabic ?? b.hadithArabic,
-    hadithTranslation: p.hadithTranslation ?? b.hadithTranslation,
-    hadithSource: p.hadithSource ?? b.hadithSource
+    eyebrow: x.eyebrow ?? b.eyebrow,
+    titlePrefix: x.titlePrefix ?? b.titlePrefix,
+    titleUnderline: x.titleUnderline ?? b.titleUnderline,
+    titleSuffix: x.titleSuffix ?? b.titleSuffix,
+    brand: x.brand ?? b.brand,
+    subtitle: x.subtitle ?? b.subtitle,
+    primaryCTA: { ...b.primaryCTA, ...(x.primaryCTA||{}) },
+    secondaryCTA: { ...b.secondaryCTA, ...(x.secondaryCTA||{}) },
+    bg: x.bg ?? b.bg,
+    pattern: x.pattern ?? b.pattern,
+    hadithArabic: x.hadithArabic ?? b.hadithArabic,
+    hadithTranslation: x.hadithTranslation ?? b.hadithTranslation,
+    hadithSource: x.hadithSource ?? b.hadithSource
   }
 }
+const clone = <T,>(v:T)=>JSON.parse(JSON.stringify(v))
 
-/** editor -> hero props */
+/* ===== STATE editor (selalu di-hydrate dari props.section.props) ===== */
+const form = reactive<EditorShape>(merge(defaults, props.section?.props))
+watch(() => props.section?.props, (p) => { Object.assign(form, merge(defaults, p)) })
+
+/* ====== useWeb API (single source of truth) ====== */
+const { updateSection, uploadMedia } = useWeb()
+
+/* ====== Preview props (read-only) ====== */
 const heroProps = computed(() => ({
   bg: form.bg,
   pattern: form.pattern,
@@ -340,52 +343,41 @@ const heroProps = computed(() => ({
   hadithSource: form.hadithSource
 }))
 
+/* ====== Save (langsung ke section props) ====== */
+const savedNote = ref(''); const errNote = ref('')
 async function save() {
   try {
     errNote.value = ''
-    const { $realtimeDb } = useNuxtApp()
-
-    const cleanId = (props.section?.id || '').replace(/^\/+|\/+$/g, '')
-    const nodePath = cleanId.startsWith('home/sections/')
-      ? `alberr/web/pages/${cleanId}/props`
-      : `alberr/web/pages/home/sections/${cleanId}/props`
-
-    const payload = JSON.parse(JSON.stringify(heroProps.value))
-    await update(dbRef($realtimeDb), { [nodePath]: payload })
-
-    savedNote.value = 'Tersimpan.'; setTimeout(()=>savedNote.value='', 1500)
-  } catch (e: any) {
+    await updateSection(props.section.id, { props: clone(form) })
+    savedNote.value = 'Tersimpan.'; setTimeout(()=>savedNote.value='', 1400)
+  } catch (e:any) {
     errNote.value = e?.message || 'Gagal menyimpan'
   }
 }
-/** Upload media (Firebase Storage) */
+
+/* ====== Reset ke default (opsional) ====== */
+function resetToDefault() { Object.assign(form, clone(defaults)); activeTab.value='Konten' }
+
+/* ====== Upload media (via useWeb.uploadMedia) ====== */
+const progress = reactive<Record<'bg'|'pattern', number|undefined>>({ bg: undefined, pattern: undefined })
 async function upload(e: Event, key: 'bg'|'pattern') {
-  const file = (e.target as HTMLInputElement).files?.[0]; if (!file) return
-  progress[key] = 0
+  const file = (e.target as HTMLInputElement).files?.[0]; (e.target as HTMLInputElement).value=''
+  if (!file) return
   try {
-    const { getStorage, ref, uploadBytesResumable, getDownloadURL } = await import('firebase/storage')
-    const storage = getStorage()
-    const path = `alberr/web/invitationhero/${Date.now()}_${file.name.replace(/\s+/g,'_')}`
-    const r = ref(storage, path)
-    const task = uploadBytesResumable(r, file, { contentType: file.type })
-    await new Promise<void>((res, rej) => {
-      task.on('state_changed',
-        s => progress[key] = Math.round(100 * s.bytesTransferred / s.totalBytes),
-        rej,
-        async () => { (form as any)[key] = await getDownloadURL(task.snapshot.ref); res() })
-    })
-  } catch (e:any) {
-    errNote.value = e?.message || 'Upload gagal'
-  } finally {
-    setTimeout(()=>{ delete progress[key] }, 1200)
-    ;(e.target as HTMLInputElement).value = ''
+    progress[key] = 5
+    const up = await uploadMedia(file)
+    if (up?.url) (form as any)[key] = up.url
+    progress[key] = 100
+    setTimeout(()=>progress[key]=undefined, 900)
+  } catch (err:any) {
+    errNote.value = err?.message || 'Upload gagal'
+    progress[key] = undefined
   }
 }
 
-/* ===== ICON PICKER ===== */
+/* ===== ICON PICKER (lokal + online) — tetap sama ===== */
 type IconTab = 'All' | 'Phosphor' | 'Lucide' | 'Material' | 'Logos'
 type IconTarget = 'primary' | 'secondary'
-
 const iconModal = reactive({
   show: false,
   target: 'primary' as IconTarget,
@@ -399,84 +391,39 @@ const iconModal = reactive({
   start: 0,
   limit: 48,
 })
-
 const localIcons = ref<string[]>([
   'ph:student','ph:book-open-text','ph:house','ph:gear','ph:arrow-right','ph:printer','ph:bell','ph:calendar','ph:check-circle',
   'lucide:home','lucide:settings','lucide:school','lucide:bell','lucide:calendar','lucide:arrow-right','lucide:printer',
   'mdi:home','mdi:cog','mdi:school','mdi:bell','mdi:calendar','mdi:arrow-right','mdi:printer',
   'logos:nuxt-icon','logos:vue','logos:firebase','logos:tailwindcss'
 ])
-
-function openIconPicker(target: IconTarget) {
-  iconModal.target = target
-  iconModal.show = true
-  iconModal.query = ''
-  iconModal.start = 0
-  setTab(iconModal.activeTab)
-  iconModal.visible = filterLocal(iconModal.activeTab, '')
-  iconModal.total = iconModal.visible.length
-}
-function closeIconPicker() { iconModal.show = false }
-function setTab(tab: IconTab) {
-  iconModal.activeTab = tab
-  iconModal.start = 0
-  iconModal.visible = filterLocal(tab, iconModal.query)
-  iconModal.total = iconModal.visible.length
-}
-function filterLocal(tab: IconTab, q: string) {
-  const prefix = tab === 'Phosphor' ? 'ph:' : tab === 'Lucide' ? 'lucide:' : tab === 'Material' ? 'mdi:' : tab === 'Logos' ? 'logos:' : ''
-  return localIcons.value.filter(n => (!prefix || n.startsWith(prefix)) && (!q || n.toLowerCase().includes(q.toLowerCase())))
-}
-let si: any
-function onSearchInput() {
-  clearTimeout(si)
-  si = setTimeout(() => {
-    iconModal.visible = filterLocal(iconModal.activeTab, iconModal.query)
-    iconModal.total = iconModal.visible.length
-  }, 200)
-}
-async function searchOnline(force = false) {
+function openIconPicker(target: IconTarget) { iconModal.target=target; iconModal.show=true; iconModal.query=''; iconModal.start=0; setTab(iconModal.activeTab); iconModal.visible=filterLocal(iconModal.activeTab,''); iconModal.total=iconModal.visible.length }
+function closeIconPicker() { iconModal.show=false }
+function setTab(tab: IconTab){ iconModal.activeTab=tab; iconModal.start=0; iconModal.visible=filterLocal(tab, iconModal.query); iconModal.total=iconModal.visible.length }
+function filterLocal(tab: IconTab, q: string){ const prefix = tab==='Phosphor'?'ph:':tab==='Lucide'?'lucide:':tab==='Material'?'mdi:':tab==='Logos'?'logos:':''; return localIcons.value.filter(n => (!prefix||n.startsWith(prefix)) && (!q || n.toLowerCase().includes(q.toLowerCase()))) }
+let si:any
+function onSearchInput(){ clearTimeout(si); si=setTimeout(()=>{ iconModal.visible=filterLocal(iconModal.activeTab, iconModal.query); iconModal.total=iconModal.visible.length }, 200) }
+async function searchOnline(force=false){
   try {
     iconModal.loading = true
     const q = iconModal.query.trim()
-    if (!q && !force) {
-      iconModal.visible = filterLocal(iconModal.activeTab, '')
-      iconModal.total = iconModal.visible.length
-      return
-    }
-    const prefixes = iconModal.activeTab === 'Phosphor' ? 'ph' :
-                     iconModal.activeTab === 'Lucide' ? 'lucide' :
-                     iconModal.activeTab === 'Material' ? 'mdi' :
-                     iconModal.activeTab === 'Logos' ? 'logos' : undefined
-    const params = new URLSearchParams({
-      query: q || '', limit: String(iconModal.limit), start: String(iconModal.start)
-    })
+    if (!q && !force) { iconModal.visible=filterLocal(iconModal.activeTab,''); iconModal.total=iconModal.visible.length; return }
+    const prefixes = iconModal.activeTab==='Phosphor'?'ph':iconModal.activeTab==='Lucide'?'lucide':iconModal.activeTab==='Material'?'mdi':iconModal.activeTab==='Logos'?'logos':undefined
+    const params = new URLSearchParams({ query: q||'', limit: String(iconModal.limit), start: String(iconModal.start) })
     if (prefixes) params.set('prefixes', prefixes)
     const res = await fetch(`https://api.iconify.design/search?${params.toString()}`)
     if (!res.ok) throw new Error('Iconify API error')
     const data = await res.json() as { total?: number; start?: number; limit?: number; icons?: string[] }
     iconModal.visible = Array.isArray(data.icons) ? data.icons : []
-    iconModal.total = typeof data.total === 'number' ? data.total : iconModal.visible.length
-    iconModal.start = typeof data.start === 'number' ? data.start : 0
-    iconModal.limit = typeof data.limit === 'number' ? data.limit : 48
-    if (!iconModal.visible.length) {
-      iconModal.visible = filterLocal(iconModal.activeTab, q)
-      iconModal.total = iconModal.visible.length
-      iconModal.start = 0
-    }
+    iconModal.total = typeof data.total==='number' ? data.total : iconModal.visible.length
+    iconModal.start = typeof data.start==='number' ? data.start : 0
+    iconModal.limit = typeof data.limit==='number' ? data.limit : 48
+    if (!iconModal.visible.length) { iconModal.visible=filterLocal(iconModal.activeTab, q); iconModal.total=iconModal.visible.length; iconModal.start=0 }
   } catch {
-    iconModal.visible = filterLocal(iconModal.activeTab, iconModal.query)
-    iconModal.total = iconModal.visible.length
-    iconModal.start = 0
-  } finally {
-    iconModal.loading = false
-  }
+    iconModal.visible=filterLocal(iconModal.activeTab, iconModal.query); iconModal.total=iconModal.visible.length; iconModal.start=0
+  } finally { iconModal.loading=false }
 }
-function nextPage() { iconModal.start = Math.min(iconModal.start + iconModal.limit, Math.max(0, iconModal.total - iconModal.limit)); searchOnline(true) }
-function prevPage() { iconModal.start = Math.max(0, iconModal.start - iconModal.limit); searchOnline(true) }
-function chooseIcon(name: string) {
-  if (iconModal.target === 'primary') form.primaryCTA.icon = name
-  else form.secondaryCTA.icon = name
-  closeIconPicker()
-}
+function nextPage(){ iconModal.start = Math.min(iconModal.start + iconModal.limit, Math.max(0, iconModal.total - iconModal.limit)); searchOnline(true) }
+function prevPage(){ iconModal.start = Math.max(0, iconModal.start - iconModal.limit); searchOnline(true) }
+function chooseIcon(name: string){ if (iconModal.target==='primary') form.primaryCTA.icon = name; else form.secondaryCTA.icon = name; closeIconPicker() }
 </script>
