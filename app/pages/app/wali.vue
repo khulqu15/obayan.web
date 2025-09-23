@@ -12,6 +12,7 @@
       title="Wali & Santri (Grouped)"
       :rows="waliRows"
       :columns="columns"
+      :show-page-size="true"
       :rowKey="(w) => w.id"
       :show-actions="true"
     >

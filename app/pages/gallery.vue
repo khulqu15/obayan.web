@@ -117,34 +117,37 @@
       </div>
     </div>
 
-    <!-- LIGHTBOX -->
-    <div id="hs-lightbox" class="hs-overlay hidden size-full fixed top-0 start-0 z-[90] overflow-x-hidden overflow-y-auto" role="dialog" tabindex="-1" aria-labelledby="hs-lightbox-label">
-      <div class="hs-overlay-open:opacity-100 hs-overlay-open:duration-300 opacity-0 ease-out transition-all max-w-[96rem] w-full mx-auto p-3">
-        <div class="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800 bg-neutral-950/90">
-          <!-- Toolbar -->
-          <div class="absolute z-20 top-2 right-2 flex items-center gap-2">
-            <button @click="prev" class="size-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center">
-              <ClientOnly><Icon icon="ph:caret-left-bold" class="size-5" /></ClientOnly>
-            </button>
-            <button @click="next" class="size-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center">
-              <ClientOnly><Icon icon="ph:caret-right-bold" class="size-5" /></ClientOnly>
-            </button>
-            <button @click="resetZoom" class="size-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center">
-              <ClientOnly><Icon icon="ph:magnifying-glass" class="size-5" /></ClientOnly>
-            </button>
-            <button type="button" class="size-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center"
-                    data-hs-overlay="#hs-lightbox" aria-label="Close">
-              <ClientOnly><Icon icon="ph:x-bold" class="size-5" /></ClientOnly>
-            </button>
-          </div>
+    <!-- LIGHTBOX (Vue controlled) -->
+    <teleport to="body">
+      <div v-if="lightboxOpen" class="fixed inset-0 z-[90]">
+        <!-- backdrop -->
+        <div class="absolute inset-0 bg-black/70" @click="closeLightbox" />
 
-          <!-- Canvas -->
-          <div class="relative h-[80vh] bg-white select-none">
+        <div class="absolute inset-0 flex items-center justify-center p-3">
+          <div class="relative w-full max-w-[96rem] rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800 bg-neutral-950">
+
+            <!-- Toolbar -->
+            <div class="absolute z-20 top-2 right-2 flex items-center gap-2">
+              <button @click="prev" class="size-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center">
+                <ClientOnly><Icon icon="ph:caret-left-bold" class="size-5" /></ClientOnly>
+              </button>
+              <button @click="next" class="size-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center">
+                <ClientOnly><Icon icon="ph:caret-right-bold" class="size-5" /></ClientOnly>
+              </button>
+              <button @click="resetZoom()" class="size-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center" title="Reset zoom">
+                <ClientOnly><Icon icon="ph:magnifying-glass" class="size-5" /></ClientOnly>
+              </button>
+              <button @click="closeLightbox" class="size-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center" aria-label="Close">
+                <ClientOnly><Icon icon="ph:x-bold" class="size-5" /></ClientOnly>
+              </button>
+            </div>
+
+            <!-- Canvas -->
             <div
               ref="stageRef"
+              class="relative h-[80vh] bg-black select-none touch-none"
               :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
-              class="absolute inset-0"
-              @wheel="onWheel"
+              @wheel.passive="onWheel"
               @mousedown="onPointerDown"
               @mousemove="onPointerMove"
               @mouseup="onPointerUp"
@@ -160,28 +163,37 @@
                 class="absolute top-1/2 left-1/2 will-change-transform"
                 :style="imgStyle"
                 draggable="false"
+                @load="onImageLoaded"
               />
             </div>
 
-            <div class="absolute bottom-2 left-2 right-2 text-white/90 text-sm flex items-center justify-between">
+            <div class="absolute bottom-2 left-2 right-2 text-white/90 text-sm flex items-center justify-between px-2">
               <div class="truncate">{{ current?.title }}</div>
-              <div class="text-xs">{{ (scale * 100).toFixed(0) }}% • {{ index + 1 }} / {{ filtered.length }}</div>
+              <div class="text-xs">
+                {{ Math.round(scale * 100) }}% • {{ index + 1 }} / {{ filtered.length }}
+              </div>
             </div>
+
           </div>
         </div>
       </div>
-    </div>
+    </teleport>
+
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useRoute } from '#imports'
 import { useRuntimeConfig, useSeoMeta, useHead } from '#app'
 import { useWeb } from '~/composables/data/useWeb'
 
 definePageMeta({ ssr: false }) // opsional, agar meta reaktif dari client
+const lightboxOpen = ref(false)
+const naturalW = ref(0)
+const naturalH = ref(0)
+const fitScale = ref(1)                 // skala agar gambar pas di panggung
 
 /* ======= Ambil meta + sections dari useWeb untuk path /gallery ======= */
 const route = useRoute()
@@ -333,34 +345,189 @@ function loadMore(){ page.value++ }
 /* Lightbox (tetap) */
 const index = ref(0)
 const current = computed(() => filtered.value[index.value])
-function openLightbox(i:number){ index.value=i; resetZoom(); const el=document.getElementById('hs-lightbox'); el?.classList.remove('hidden'); el?.classList.add('block'); document.addEventListener('keydown', onKey) }
-function closeLightbox(){ const el=document.getElementById('hs-lightbox'); el?.classList.add('hidden'); el?.classList.remove('block'); document.removeEventListener('keydown', onKey) }
 function prev(){ index.value = (index.value - 1 + filtered.value.length) % filtered.value.length; resetZoom(false) }
 function next(){ index.value = (index.value + 1) % filtered.value.length; resetZoom(false) }
-function onKey(e: KeyboardEvent){ if (e.key==='Escape') closeLightbox(); if (e.key==='ArrowLeft') prev(); if (e.key==='ArrowRight') next() }
 
 /* Zoom/pan (tetap) */
 const stageRef = ref<HTMLElement | null>(null)
-const scale = ref(1), minScale=1, maxScale=4
+const scale = ref(1) 
+const maxScale = 4
+const minScale = computed(() => Math.max(0.1, fitScale.value))
 const tx = ref(0), ty = ref(0)
 const isDragging = ref(false)
 let startX=0, startY=0, startTx=0, startTy=0, pinchStartDist=0, pinchStartScale=1
 let pinchCenter = { x:0, y:0 }
-const imgStyle = computed(()=>({ transform:`translate(-50%,-50%) translate(${tx.value}px, ${ty.value}px) scale(${scale.value})`, transformOrigin:'center center', maxWidth:'none', maxHeight:'none'}))
+const imgStyle = computed(() => ({
+  transform: `translate(-50%, -50%) translate(${tx.value}px, ${ty.value}px) scale(${scale.value})`,
+  transformOrigin: 'center center',
+  maxWidth: 'none',
+  maxHeight: 'none'
+}))
+function lockScroll(on: boolean) {
+  const html = document.documentElement
+  html.style.overflow = on ? 'hidden' : ''
+}
+function addKb() { document.addEventListener('keydown', onKey) }
+function removeKb() { document.removeEventListener('keydown', onKey) }
+function openLightbox(i: number) {
+  index.value = i
+  lightboxOpen.value = true
+  nextTick(() => {
+    computeFitScale()
+    resetZoom()
+    addKb()
+    lockScroll(true)
+  })
+}
+function closeLightbox() {
+  lightboxOpen.value = false
+  removeKb()
+  lockScroll(false)
+}
+function onImageLoaded(e: Event) {
+  const img = e.target as HTMLImageElement
+  naturalW.value = img.naturalWidth || img.width
+  naturalH.value = img.naturalHeight || img.height
+  computeFitScale()
+  resetZoom()
+}
+function computeFitScale() {
+  const el = stageRef.value
+  if (!el || !naturalW.value || !naturalH.value) { fitScale.value = 1; return }
+  const r = el.getBoundingClientRect()
+  const sx = r.width / naturalW.value
+  const sy = r.height / naturalH.value
+  const s = Math.min(sx, sy)
+  fitScale.value = isFinite(s) && s > 0 ? s : 1
+}
 function resetZoom(center=true){ scale.value=0.6; tx.value=0; ty.value=0; if(center) clampPan() }
-function clampPan(){ if (scale.value<=1){ tx.value=0; ty.value=0; return } const el=stageRef.value; if(!el) return; const r=el.getBoundingClientRect(); const bx=(r.width*(scale.value-1))/2; const by=(r.height*(scale.value-1))/2; tx.value=Math.max(Math.min(tx.value,bx),-bx); ty.value=Math.max(Math.min(ty.value,by),-by) }
-function onWheel(e: WheelEvent){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); const cx=e.clientX-rect.left-rect.width/2; const cy=e.clientY-rect.top-rect.height/2; const isPinch=e.ctrlKey===true; if(isPinch){ e.preventDefault(); const prev=scale.value; let next=prev*(1 - e.deltaY*0.02); next=Math.min(Math.max(next,minScale),maxScale); if(next===prev) return; const k=next/prev; tx.value=cx - k*(cx - tx.value); ty.value=cy - k*(cy - ty.value); scale.value=next; clampPan(); return } if (scale.value>1){ e.preventDefault(); tx.value -= e.deltaX; ty.value -= e.deltaY; clampPan() } }
-function onPointerDown(e: MouseEvent){ if(e.button!==0) return; isDragging.value=true; startX=e.clientX; startY=e.clientY; startTx=tx.value; startTy=ty.value }
-function onPointerMove(e: MouseEvent){ if(!isDragging.value) return; tx.value=startTx+(e.clientX-startX); ty.value=startTy+(e.clientY-startY); clampPan() }
-function onPointerUp(){ isDragging.value=false }
-function onDblClick(e: MouseEvent){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); const cx=e.clientX-rect.left-rect.width/2; const cy=e.clientY-rect.top-rect-rect.height/2; const prev=scale.value; const next=prev<2?2:1; const k=next/prev; tx.value=cx - k*(cx - tx.value); ty.value=cy - k*(cy - ty.value); scale.value=next; if(next===1){ tx.value=0; ty.value=0 } clampPan() }
-function distance(t1: Touch, t2: Touch){ const dx=t2.clientX-t1.clientX, dy=t2.clientY-t1.clientY; return Math.hypot(dx,dy) }
-function midpoint(t1: Touch, t2: Touch, rect: DOMRect){ return { x:((t1.clientX+t2.clientX)/2)-rect.left-rect.width/2, y:((t1.clientY+t2.clientY)/2)-rect.top-rect.height/2 } }
-function onTouchStart(e: TouchEvent){ if(e.touches.length===1){ isDragging.value=true; startX=e.touches[0]!.clientX; startY=e.touches[0]!.clientY; startTx=tx.value; startTy=ty.value } else if(e.touches.length===2){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); pinchStartDist=distance(e.touches[0]!, e.touches[1]!); pinchStartScale=scale.value; pinchCenter=midpoint(e.touches[0]!, e.touches[1]!, rect) } }
-function onTouchMove(e: TouchEvent){ if(e.touches.length===1 && isDragging.value){ tx.value=startTx + (e.touches[0]!.clientX-startX); ty.value=startTy + (e.touches[0]!.clientY-startY); clampPan() } else if(e.touches.length===2 && pinchStartDist>0){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); const curr=distance(e.touches[0]!, e.touches[1]!); let next=pinchStartScale * (curr/pinchStartDist); next=Math.min(Math.max(next,minScale),maxScale); const prev=scale.value; const k=next/prev; tx.value=pinchCenter.x - k*(pinchCenter.x - tx.value); ty.value=pinchCenter.y - k*(pinchCenter.y - ty.value); scale.value=next; clampPan() } }
-function onTouchEnd(){ isDragging.value=false; if(pinchStartDist>0 && scale.value<1.02) resetZoom(); pinchStartDist=0 }
+function clampPan() {
+  const el = stageRef.value
+  if (!el) return
+  const r = el.getBoundingClientRect()
+  const imgW = naturalW.value * scale.value
+  const imgH = naturalH.value * scale.value
+  const boundX = Math.max(0, (imgW - r.width) / 2)
+  const boundY = Math.max(0, (imgH - r.height) / 2)
+  tx.value = Math.max(Math.min(tx.value,  boundX), -boundX)
+  ty.value = Math.max(Math.min(ty.value,  boundY), -boundY)
+}
+function onKey(e: KeyboardEvent) {
+  if (!lightboxOpen.value) return
+  if (e.key === 'Escape') closeLightbox()
+  if (e.key === 'ArrowLeft') prev()
+  if (e.key === 'ArrowRight') next()
+}
 
-/* cleanup overlay */
-onMounted(() => { document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox() }) })
+function onWheel(e: WheelEvent) {
+  const el = stageRef.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  const cx = e.clientX - rect.left - rect.width / 2
+  const cy = e.clientY - rect.top - rect.height / 2
+
+  const prev = scale.value
+  let next = prev * (1 - e.deltaY * (e.ctrlKey ? 0.002 : 0.001))
+  next = Math.min(Math.max(next, minScale.value), maxScale)
+
+  if (next !== prev) {
+    const k = next / prev
+    tx.value = cx - k * (cx - tx.value)
+    ty.value = cy - k * (cy - ty.value)
+    scale.value = next
+    clampPan()
+    e.preventDefault()
+  }
+}
+
+function onPointerDown(e: MouseEvent) {
+  if (e.button !== 0) return
+  isDragging.value = true
+  startX = e.clientX; startY = e.clientY
+  startTx = tx.value; startTy = ty.value
+}
+function onPointerMove(e: MouseEvent) {
+  if (!isDragging.value) return
+  tx.value = startTx + (e.clientX - startX)
+  ty.value = startTy + (e.clientY - startY)
+  clampPan()
+}
+function onPointerUp() { isDragging.value = false }
+
+/* Double click: zoom in/out */
+function onDblClick(e: MouseEvent) {
+  const el = stageRef.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  const cx = e.clientX - rect.left - rect.width / 2
+  const cy = e.clientY - rect.top - rect.height / 2
+
+  const prev = scale.value
+  const target = prev < 2 * minScale.value ? prev * 2 : minScale.value
+  const next = Math.min(Math.max(target, minScale.value), maxScale)
+  const k = next / prev
+
+  tx.value = cx - k * (cx - tx.value)
+  ty.value = cy - k * (cy - ty.value)
+  scale.value = next
+
+  if (next === minScale.value) centerImage()
+  clampPan()
+}
+
+/* Touch: drag + pinch */
+function distance(t1: Touch, t2: Touch) {
+  const dx = t2.clientX - t1.clientX
+  const dy = t2.clientY - t1.clientY
+  return Math.hypot(dx, dy)
+}
+function midpoint(t1: Touch, t2: Touch, rect: DOMRect) {
+  return { x: ((t1.clientX + t2.clientX) / 2) - rect.left - rect.width / 2,
+           y: ((t1.clientY + t2.clientY) / 2) - rect.top  - rect.height / 2 }
+}
+function onTouchStart(e: TouchEvent) {
+  if (e.touches.length === 1) {
+    isDragging.value = true
+    startX = e.touches[0]!.clientX
+    startY = e.touches[0]!.clientY
+    startTx = tx.value
+    startTy = ty.value
+  } else if (e.touches.length === 2) {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    pinchStartDist = distance(e.touches[0]!, e.touches[1]!)
+    pinchStartScale = scale.value
+    pinchCenter = midpoint(e.touches[0]!, e.touches[1]!, rect)
+  }
+}
+function onTouchMove(e: TouchEvent) {
+  if (e.touches.length === 1 && isDragging.value) {
+    tx.value = startTx + (e.touches[0]!.clientX - startX)
+    ty.value = startTy + (e.touches[0]!.clientY - startY)
+    clampPan()
+  } else if (e.touches.length === 2 && pinchStartDist > 0) {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const curr = distance(e.touches[0]!, e.touches[1]!)
+    let next = pinchStartScale * (curr / pinchStartDist)
+    next = Math.min(Math.max(next, minScale.value), maxScale)
+
+    const prev = scale.value
+    const k = next / prev
+    tx.value = pinchCenter.x - k * (pinchCenter.x - tx.value)
+    ty.value = pinchCenter.y - k * (pinchCenter.y - ty.value)
+    scale.value = next
+    clampPan()
+  }
+}
+function onTouchEnd() {
+  isDragging.value = false
+  if (pinchStartDist > 0 && scale.value < minScale.value * 1.02) resetZoom()
+  pinchStartDist = 0
+}
+
+onMounted(() => {
+  const onResize = () => { if (lightboxOpen.value) { computeFitScale(); resetZoom(false) } }
+  window.addEventListener('resize', onResize)
+  onBeforeUnmount(() => window.removeEventListener('resize', onResize))
+})
 onBeforeUnmount(() => { document.removeEventListener('keydown', onKey) })
 </script>

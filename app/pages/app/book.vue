@@ -94,7 +94,6 @@
       </div>
     </div>
 
-    <!-- MODAL CREATE/EDIT -->
     <teleport to="body">
       <div v-if="modal.open" class="fixed inset-0 z-[90]">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" @click="closeModal"></div>
@@ -108,7 +107,6 @@
             </div>
 
             <form class="p-4 space-y-5 max-h-[80vh] overflow-y-auto" @submit.prevent="save">
-              <!-- File & Cover -->
               <div class="grid gap-3 sm:grid-cols-[auto,1fr]">
                 <div>
                   <label class="text-xs text-gray-500 dark:text-neutral-400">Cover</label>

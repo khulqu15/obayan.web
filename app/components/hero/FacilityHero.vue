@@ -34,11 +34,7 @@
           </p>
 
           <div class="mt-7 grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div
-              v-for="s in stats"
-              :key="s.label + s.value"
-              class="rounded-xl border border-gray-200 bg-white/70 backdrop-blur p-4 dark:bg-neutral-800/60 dark:border-neutral-700"
-            >
+            <div v-for="s in stats" :key="(s.label||'') + (s.value||'')" class="rounded-xl border border-gray-200 bg-white/70 backdrop-blur p-4 dark:bg-neutral-800/60 dark:border-neutral-700">
               <div class="flex-col items-center gap-3 flex-wrap">
                 <ClientOnly>
                   <Icon :icon="s.icon" class="size-5 text-blue-600 dark:text-blue-400" />
@@ -51,21 +47,12 @@
           </div>
 
           <div class="mt-7 flex flex-wrap gap-3">
-            <a :href="galleryHref"
-               class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-blue-700 focus:outline-hidden">
+            <a :href="galleryHref" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-blue-700 focus:outline-hidden">
               <ClientOnly><Icon icon="lucide:image" class="size-4" /></ClientOnly>
               Lihat Galeri
             </a>
 
-            <button
-              v-if="brochureImages.length"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-              aria-controls="hs-brochures-view"
-              data-hs-overlay="#hs-brochures-view"
-              type="button"
-              class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white/80 backdrop-blur px-4 py-2.5 text-sm font-medium text-gray-800 shadow-2xs dark:bg-neutral-800/70 dark:border-neutral-700 dark:text-neutral-100"
-            >
+            <button v-if="brochureImages.length" aria-haspopup="dialog" aria-expanded="false" aria-controls="hs-brochures-view" data-hs-overlay="#hs-brochures-view" type="button" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white/80 backdrop-blur px-4 py-2.5 text-sm font-medium text-gray-800 shadow-2xs dark:bg-neutral-800/70 dark:border-neutral-700 dark:text-neutral-100">
               <ClientOnly><Icon icon="lucide:download" class="size-4" /></ClientOnly>
               Unduh Brosur
             </button>
@@ -73,14 +60,9 @@
         </div>
 
         <!-- Overlay (Brosur Viewer) -->
-        <div
-          id="hs-brochures-view"
-          class="hs-overlay hidden size-full fixed top-0 start-0 z-80 overflow-x-hidden overflow-y-auto"
-          role="dialog" tabindex="-1" aria-labelledby="hs-brochures-view-label"
-        >
+        <div id="hs-brochures-view" class="hs-overlay hidden size-full fixed top-0 start-0 z-80 overflow-x-hidden overflow-y-auto" role="dialog" tabindex="-1" aria-labelledby="hs-brochures-view-label">
           <div class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-500 mt-0 opacity-0 ease-out transition-all md:max-w-5xl md:w-full m-3 md:mx-auto">
             <div class="relative flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl overflow-hidden dark:bg-neutral-900 dark:border-neutral-800">
-              <!-- Close -->
               <div class="absolute top-2 end-2">
                 <button type="button" class="size-8 inline-flex justify-center items-center gap-x-2 rounded-full border border-transparent bg-gray-100 text-gray-800 hover:bg-gray-200 focus:outline-hidden dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-300" aria-label="Close" data-hs-overlay="#hs-brochures-view">
                   <span class="sr-only">Close</span>
@@ -88,39 +70,16 @@
                 </button>
               </div>
 
-              <!-- Header -->
               <div class="px-5 sm:px-8 pt-6 pb-3 border-b border-gray-200 dark:border-neutral-800">
                 <h3 id="hs-brochures-view-label" class="text-lg font-semibold text-gray-800 dark:text-neutral-200">Brochure Gallery</h3>
                 <p class="text-xs text-gray-500 dark:text-neutral-400">Gunakan <code>CTRL</code> untuk zoom</p>
               </div>
 
-              <!-- Stage -->
-              <div
-                v-if="brochureImages.length"
-                class="relative w-full aspect-video rounded-xl border border-gray-200 overflow-hidden bg-gray-100 dark:border-neutral-800 dark:bg-neutral-800 select-none"
-              >
-                <div
-                  ref="stageRef"
-                  :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
-                  class="absolute inset-0 touch-pan-y touch-pan-x"
-                  @wheel="onWheel"
-                  @mousedown="onPointerDown"
-                  @mousemove="onPointerMove"
-                  @mouseup="onPointerUp"
-                  @mouseleave="onPointerUp"
-                  @touchstart.passive="onTouchStart"
-                  @touchmove.prevent="onTouchMove"
-                  @touchend="onTouchEnd"
-                  @dblclick="onDblClick"
-                >
-                  <img
-                    :src="brochureImages[selectedBrochure]"
-                    :alt="`Brochure ${selectedBrochure + 1}`"
-                    class="absolute top-1/2 left-1/2 will-change-transform"
-                    :style="imgStyle"
-                    draggable="false"
-                    loading="eager"
-                  />
+              <div v-if="brochureImages.length" class="relative w-full aspect-video rounded-xl border border-gray-200 overflow-hidden bg-gray-100 dark:border-neutral-800 dark:bg-neutral-800 select-none">
+                <div ref="stageRef" :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'" class="absolute inset-0 touch-pan-y touch-pan-x"
+                  @wheel="onWheel" @mousedown="onPointerDown" @mousemove="onPointerMove" @mouseup="onPointerUp" @mouseleave="onPointerUp"
+                  @touchstart.passive="onTouchStart" @touchmove.prevent="onTouchMove" @touchend="onTouchEnd" @dblclick="onDblClick">
+                  <img :src="brochureImages[selectedBrochure]" :alt="`Brochure ${selectedBrochure + 1}`" class="absolute top-1/2 left-1/2 will-change-transform" :style="imgStyle" draggable="false" loading="eager" />
                 </div>
 
                 <div class="absolute bottom-2 left-2 px-2 py-1 rounded-md bg-black/50 text-white text-xs">
@@ -139,23 +98,14 @@
                 </button>
               </div>
 
-              <!-- Footer -->
               <div class="flex flex-wrap justify-between items-center gap-2 py-3 px-4 bg-gray-50 border-t border-gray-200 dark:bg-neutral-950 dark:border-neutral-800">
-                <div class="text-xs text-gray-500 dark:text-neutral-400">
-                  Total: {{ brochureImages.length }} file
-                </div>
+                <div class="text-xs text-gray-500 dark:text-neutral-400">Total: {{ brochureImages.length }} file</div>
                 <div class="flex gap-2">
-                  <a
-                    :href="brochureImages[selectedBrochure]"
-                    download
-                    class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700"
-                  >
+                  <a :href="brochureImages[selectedBrochure]" download class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700">
                     <ClientOnly><Icon icon="lucide:download" class="size-4" /></ClientOnly>
                     Unduh
                   </a>
-                  <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700" data-hs-overlay="#hs-brochures-view">
-                    Tutup
-                  </button>
+                  <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700" data-hs-overlay="#hs-brochures-view">Tutup</button>
                 </div>
               </div>
 
@@ -166,7 +116,6 @@
         <!-- Gallery grid -->
         <div class="lg:col-span-6">
           <div class="grid grid-cols-12 gap-3 sm:gap-4">
-            <!-- Tile 0 (besar) -->
             <div v-if="tiles[0]" class="col-span-7">
               <div class="relative h-64 sm:h-80 rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-neutral-800">
                 <img :src="tiles[0].src" :alt="tiles[0].label" class="absolute inset-0 w-full h-full object-cover">
@@ -178,7 +127,6 @@
               </div>
             </div>
 
-            <!-- Tile 1–2 (stack kanan) -->
             <div class="col-span-5 space-y-3 sm:space-y-4">
               <div v-if="tiles[1]" class="relative h-32 sm:h-40 rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-neutral-800">
                 <img :src="tiles[1].src" :alt="tiles[1].label" class="absolute inset-0 w-full h-full object-cover">
@@ -196,7 +144,6 @@
               </div>
             </div>
 
-            <!-- Tile 3–4 (baris bawah 2 kolom) -->
             <div v-if="tiles[3]" class="col-span-6">
               <div class="relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-neutral-800">
                 <img :src="tiles[3].src" :alt="tiles[3].label" class="absolute inset-0 w-full h-full object-cover">
@@ -227,7 +174,7 @@
 import { computed, ref } from 'vue'
 import { Icon } from '@iconify/vue'
 
-type Stat = { label: string; value: string; icon: string }
+type Stat = { label?: string; value?: string | number; icon?: string }
 type Tile = { src: string; label: string; icon: string }
 type Shape = {
   eyebrow: string
@@ -241,13 +188,13 @@ type Shape = {
   galleryHref: string
 }
 
+/* Default values */
 const defaults: Shape = {
   eyebrow: 'Fasilitas Pondok Alberr',
   headingMain: 'Nyaman, Tertib,',
   headingHi1: 'Inklusif',
   headingHi2: 'dirancang untuk bertumbuh',
-  description:
-    'Dari asrama yang rapi, masjid yang lapang, ruang kelas interaktif, hingga perpustakaan. Semua disiapkan untuk mendukung adab, akademik, dan kemandirian santri.',
+  description: 'Dari asrama yang rapi, masjid yang lapang, ruang kelas interaktif, hingga perpustakaan. Semua disiapkan untuk mendukung adab, akademik, dan kemandirian santri.',
   stats: [
     { label: 'Asrama', value: '8', icon: 'ph:house' },
     { label: 'Ruang Kelas', value: '24', icon: 'ph:chalkboard-teacher' },
@@ -261,197 +208,79 @@ const defaults: Shape = {
     { src: '/assets/images/lapangan.jpg', label: 'Lapangan Olahraga',  icon: 'ph:soccer-ball' },
     { src: '/assets/images/asrama.jpg',   label: 'Asrama & Kafetaria', icon: 'ph:house' }
   ],
-  brochures: [
-    '/assets/images/brochures/1.jpg',
-    '/assets/images/brochures/2.jpg'
-  ],
+  brochures: ['/assets/images/brochures/1.jpg','/assets/images/brochures/2.jpg'],
   galleryHref: '/gallery'
 }
 
-const props = defineProps<{ props?: Partial<Shape> }>()
-const merged = computed<Shape>(() => merge(defaults, props.props || {}))
+/* Menerima flattened props ATAU props.props dari CMS */
+type EditorFields = {
+  badge?: string; headingLead?: string; highlight1?: string; highlight2?: string;
+  description?: string; stats?: Stat[]; gallery?: Tile[]; brochures?: string[]; galleryHref?: string;
+}
+const raw = defineProps<Partial<Shape> & EditorFields & { props?: Partial<Shape> & EditorFields }>()
 
-const eyebrow = computed(() => merged.value.eyebrow)
-const headingMain = computed(() => merged.value.headingMain)
-const headingHi1 = computed(() => merged.value.headingHi1)
-const headingHi2 = computed(() => merged.value.headingHi2)
-const description = computed(() => merged.value.description)
-const stats = computed(() => merged.value.stats)
-const tiles = computed(() => merged.value.gallery)
-const brochureImages = computed(() => merged.value.brochures)
-const galleryHref = computed(() => merged.value.galleryHref)
+/* Normalisasi: gabungkan inner props + flattened (prioritas flattened), lalu map nama field editor -> hero */
+function normalize(input: any): Shape {
+  const p = input || {}
 
-/* --------- Zoom/Pan Viewer --------- */
+  const eyebrow     = p.eyebrow     ?? p.badge       ?? defaults.eyebrow
+  const headingMain = p.headingMain ?? p.headingLead ?? defaults.headingMain
+  const headingHi1  = p.headingHi1  ?? p.highlight1  ?? defaults.headingHi1
+  const headingHi2  = p.headingHi2  ?? p.highlight2  ?? defaults.headingHi2
+  const description = p.description ?? defaults.description
+
+  const stats: Stat[] = Array.isArray(p.stats) && p.stats.length
+    ? p.stats.map((s:any)=>({ label:String(s?.label??''), value:s?.value??'', icon:String(s?.icon??'ph:info') }))
+    : defaults.stats
+
+  const gallery: Tile[] = (Array.isArray(p.gallery) && p.gallery.length ? p.gallery : defaults.gallery)
+    .map((g:any)=>({ src:String(g?.src??''), label:String(g?.label??''), icon:String(g?.icon??'ph:image') }))
+    .filter((t:Tile)=>!!t.src)
+
+  const brochures: string[] = Array.isArray(p.brochures) ? p.brochures.filter(Boolean).map(String) : defaults.brochures
+  const galleryHref = p.galleryHref ?? defaults.galleryHref
+
+  return { eyebrow, headingMain, headingHi1, headingHi2, description, stats, gallery, brochures, galleryHref }
+}
+
+/* Merge order: props.props -> flattened -> defaults (flattened override inner) */
+const merged = computed<Shape>(() => {
+  const { props: inner, ...outer } = raw as any
+  const flat = { ...(inner || {}), ...(outer || {}) }
+  return normalize(flat)
+})
+
+/* Expose ke template */
+const eyebrow        = computed(()=>merged.value.eyebrow)
+const headingMain    = computed(()=>merged.value.headingMain)
+const headingHi1     = computed(()=>merged.value.headingHi1)
+const headingHi2     = computed(()=>merged.value.headingHi2)
+const description    = computed(()=>merged.value.description)
+const stats          = computed(()=>merged.value.stats)
+const tiles          = computed(()=>merged.value.gallery)
+const brochureImages = computed(()=>merged.value.brochures)
+const galleryHref    = computed(()=>merged.value.galleryHref)
+
+/* Viewer zoom/pan */
 const selectedBrochure = ref(0)
-function prevBrochure() {
-  const n = brochureImages.value.length
-  if (!n) return
-  selectedBrochure.value = (selectedBrochure.value - 1 + n) % n
-}
-function nextBrochure() {
-  const n = brochureImages.value.length
-  if (!n) return
-  selectedBrochure.value = (selectedBrochure.value + 1) % n
-}
+function prevBrochure(){ const n=brochureImages.value.length; if(!n) return; selectedBrochure.value=(selectedBrochure.value-1+n)%n }
+function nextBrochure(){ const n=brochureImages.value.length; if(!n) return; selectedBrochure.value=(selectedBrochure.value+1)%n }
 
-const scale = ref(0.1)
-const minScale = 0.1
-const maxScale = 4
-const tx = ref(0)
-const ty = ref(0)
-const isDragging = ref(false)
-let startX = 0, startY = 0, startTx = 0, startTy = 0
-
-let pinchStartDist = 0
-let pinchStartScale = 1
-let pinchCenter = { x: 0, y: 0 }
-
-const stageRef = ref<HTMLElement | null>(null)
-const imgStyle = computed(() => ({
-  transform: `translate(${tx.value}px, ${ty.value}px) scale(${scale.value}) translate(-50%, -50%)`,
-  transformOrigin: '0 0',
-  maxWidth: 'none',
-  maxHeight: 'none'
-}))
-
-function resetZoom() {
-  scale.value = 0.1
-  tx.value = 0
-  ty.value = 0
-}
-
-function clampPan() {
-  if (scale.value <= 0.1) {
-    tx.value = 0
-    ty.value = 0
-    return
-  }
-  const el = stageRef.value
-  if (!el) return
-  const rect = el.getBoundingClientRect()
-  const boundX = (rect.width  * (scale.value - 0.1)) / 2
-  const boundY = (rect.height * (scale.value - 0.1)) / 2
-  tx.value = Math.max(Math.min(tx.value,  boundX), -boundX)
-  ty.value = Math.max(Math.min(ty.value,  boundY), -boundY)
-}
-
-function onWheel(e: WheelEvent) {
-  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-  const cx = e.clientX - rect.left - rect.width / 2
-  const cy = e.clientY - rect.top - rect.height / 2
-
-  if (e.ctrlKey === true) {
-    e.preventDefault()
-    const prevScale = scale.value
-    const zoomIntensity = 0.0005
-    let nextScale = prevScale * (1 - e.deltaY * zoomIntensity)
-    nextScale = Math.min(Math.max(nextScale, minScale), maxScale)
-    if (nextScale === prevScale) return
-    const k = nextScale / prevScale
-    tx.value = cx - k * (cx - tx.value)
-    ty.value = cy - k * (cy - ty.value)
-    scale.value = nextScale
-    clampPan()
-    return
-  }
-
-  if (scale.value > 1) {
-    e.preventDefault()
-    const panFactor = 1
-    tx.value -= e.deltaX * panFactor
-    ty.value -= e.deltaY * panFactor
-    clampPan()
-  }
-}
-
-function onPointerDown(e: MouseEvent) {
-  if (e.button !== 0) return
-  isDragging.value = true
-  startX = e.clientX
-  startY = e.clientY
-  startTx = tx.value
-  startTy = ty.value
-}
-function onPointerMove(e: MouseEvent) {
-  if (!isDragging.value) return
-  tx.value = startTx + (e.clientX - startX)
-  ty.value = startTy + (e.clientY - startY)
-  clampPan()
-}
-function onPointerUp() { isDragging.value = false }
-
-function onDblClick(e: MouseEvent) {
-  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-  const cx = e.clientX - rect.left - rect.width / 2
-  const cy = e.clientY - rect.top - rect.height / 2
-  const prevScale = scale.value
-  const nextScale = prevScale < 2 ? 2 : 1
-  const k = nextScale / prevScale
-  tx.value = cx - k * (cx - tx.value)
-  ty.value = cy - k * (cy - ty.value)
-  scale.value = nextScale
-  if (nextScale === 1) { tx.value = 0; ty.value = 0 }
-  clampPan()
-}
-
-function distance(t1: Touch, t2: Touch) {
-  const dx = t2.clientX - t1.clientX
-  const dy = t2.clientY - t1.clientY
-  return Math.hypot(dx, dy)
-}
-function midpoint(t1: Touch, t2: Touch, rect: DOMRect) {
-  return { x: ((t1.clientX + t2.clientX) / 2) - rect.left - rect.width / 2,
-           y: ((t1.clientY + t2.clientY) / 2) - rect.top  - rect.height / 2 }
-}
-
-function onTouchStart(e: TouchEvent) {
-  if (e.touches.length === 1) {
-    isDragging.value = true
-    startX = e.touches[0]!.clientX
-    startY = e.touches[0]!.clientY
-    startTx = tx.value
-    startTy = ty.value
-  } else if (e.touches.length === 2) {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    pinchStartDist = distance(e.touches[0]!, e.touches[1]!)
-    pinchStartScale = scale.value
-    pinchCenter = midpoint(e.touches[0]!, e.touches[1]!, rect)
-  }
-}
-function onTouchMove(e: TouchEvent) {
-  if (e.touches.length === 1 && isDragging.value) {
-    tx.value = startTx + (e.touches[0]!.clientX - startX)
-    ty.value = startTy + (e.touches[0]!.clientY - startY)
-    clampPan()
-  } else if (e.touches.length === 2 && pinchStartDist > 0) {
-    const currDist = distance(e.touches[0]!, e.touches[1]!)
-    let nextScale = pinchStartScale * (currDist / pinchStartDist)
-    nextScale = Math.min(Math.max(nextScale, minScale), maxScale)
-    const prevScale = scale.value
-    const k = nextScale / prevScale
-    tx.value = pinchCenter.x - k * (pinchCenter.x - tx.value)
-    ty.value = pinchCenter.y - k * (pinchCenter.y - ty.value)
-    scale.value = nextScale
-    clampPan()
-  }
-}
-function onTouchEnd() {
-  isDragging.value = false
-  if (pinchStartDist > 0 && scale.value < 1.02) resetZoom()
-  pinchStartDist = 0
-}
-
-function merge(base: Shape, patch: Partial<Shape>): Shape {
-  return {
-    eyebrow: patch.eyebrow ?? base.eyebrow,
-    headingMain: patch.headingMain ?? base.headingMain,
-    headingHi1: patch.headingHi1 ?? base.headingHi1,
-    headingHi2: patch.headingHi2 ?? base.headingHi2,
-    description: patch.description ?? base.description,
-    stats: Array.isArray(patch.stats) && patch.stats.length ? patch.stats : [...base.stats],
-    gallery: Array.isArray(patch.gallery) && patch.gallery.length ? patch.gallery : [...base.gallery],
-    brochures: Array.isArray(patch.brochures) && patch.brochures.length ? patch.brochures : [...base.brochures],
-    galleryHref: patch.galleryHref ?? base.galleryHref
-  }
-}
+const scale=ref(0.1), minScale=0.1, maxScale=4
+const tx=ref(0), ty=ref(0), isDragging=ref(false)
+let startX=0,startY=0,startTx=0,startTy=0, pinchStartDist=0, pinchStartScale=1, pinchCenter={x:0,y:0}
+const stageRef = ref<HTMLElement|null>(null)
+const imgStyle = computed(()=>({ transform:`translate(${tx.value}px, ${ty.value}px) scale(${scale.value}) translate(-50%, -50%)`, transformOrigin:'0 0', maxWidth:'none', maxHeight:'none' }))
+function resetZoom(){ scale.value=0.1; tx.value=0; ty.value=0 }
+function clampPan(){ if(scale.value<=0.1){ tx.value=0; ty.value=0; return } const el=stageRef.value; if(!el) return; const r=el.getBoundingClientRect(); const bx=(r.width*(scale.value-0.1))/2; const by=(r.height*(scale.value-0.1))/2; tx.value=Math.max(Math.min(tx.value,bx),-bx); ty.value=Math.max(Math.min(ty.value,by),-by) }
+function onWheel(e:WheelEvent){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); const cx=e.clientX-rect.left-rect.width/2; const cy=e.clientY-rect.top-rect.height/2; if(e.ctrlKey){ e.preventDefault(); const prev=scale.value; let next=prev*(1-e.deltaY*0.0005); next=Math.min(Math.max(next,minScale),maxScale); if(next===prev) return; const k=next/prev; tx.value=cx-k*(cx-tx.value); ty.value=cy-k*(cy-ty.value); scale.value=next; clampPan(); return } if(scale.value>1){ e.preventDefault(); tx.value-=e.deltaX; ty.value-=e.deltaY; clampPan() } }
+function onPointerDown(e:MouseEvent){ if(e.button!==0) return; isDragging.value=true; startX=e.clientX; startY=e.clientY; startTx=tx.value; startTy=ty.value }
+function onPointerMove(e:MouseEvent){ if(!isDragging.value) return; tx.value=startTx+(e.clientX-startX); ty.value=startTy+(e.clientY-startY); clampPan() }
+function onPointerUp(){ isDragging.value=false }
+function onDblClick(e:MouseEvent){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); const cx=e.clientX-rect.left-rect.width/2; const cy=e.clientY-rect.top-rect.height/2; const prev=scale.value; const next=prev<2?2:1; const k=next/prev; tx.value=cx-k*(cx-tx.value); ty.value=cy-k*(cy-ty.value); scale.value=next; if(next===1){ tx.value=0; ty.value=0 } clampPan() }
+function distance(t1:Touch,t2:Touch){ const dx=t2.clientX-t1.clientX, dy=t2.clientY-t1.clientY; return Math.hypot(dx,dy) }
+function midpoint(t1:Touch,t2:Touch,rect:DOMRect){ return { x:((t1.clientX+t2.clientX)/2)-rect.left-rect.width/2, y:((t1.clientY+t2.clientY)/2)-rect.top-rect.height/2 } }
+function onTouchStart(e:TouchEvent){ if(e.touches.length===1){ isDragging.value=true; startX=e.touches[0]!.clientX; startY=e.touches[0]!.clientY; startTx=tx.value; startTy=ty.value } else if(e.touches.length===2){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); pinchStartDist=distance(e.touches[0]!,e.touches[1]!); pinchStartScale=scale.value; pinchCenter=midpoint(e.touches[0]!,e.touches[1]!,rect) } }
+function onTouchMove(e:TouchEvent){ if(e.touches.length===1&&isDragging.value){ tx.value=startTx+(e.touches[0]!.clientX-startX); ty.value=startTy+(e.touches[0]!.clientY-startY); clampPan() } else if(e.touches.length===2&&pinchStartDist>0){ const curr=distance(e.touches[0]!,e.touches[1]!); let next=pinchStartScale*(curr/pinchStartDist); next=Math.min(Math.max(next,minScale),maxScale); const prev=scale.value; const k=next/prev; tx.value=pinchCenter.x-k*(pinchCenter.x-tx.value); ty.value=pinchCenter.y-k*(pinchCenter.y-ty.value); scale.value=next; clampPan() } }
+function onTouchEnd(){ isDragging.value=false; if(pinchStartDist>0&&scale.value<1.02) resetZoom(); pinchStartDist=0 }
 </script>

@@ -168,7 +168,6 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { computed, ref, watch } from 'vue'
-
 type Column = { key: string; label: string; sortable?: boolean }
 
 const props = defineProps<{
@@ -176,21 +175,13 @@ const props = defineProps<{
   rows: any[]
   columns: Column[]
   rowKey?: (row: any) => string|number
-
-  /* opsi UI */
   selectable?: boolean
   showActions?: boolean
   showSearch?: boolean
   showPageSize?: boolean
   pageSizeOptions?: number[]
-
-  /* integrasi selection (opsional) */
   selection?: Array<string|number>
-
-  /* custom filter client-side (opsional) */
   clientFilter?: (row: any, q: string) => boolean
-
-  /* kolom yang ditampilkan di HP (label–value) */
   mobileKeys?: string[]
 }>()
 
@@ -198,14 +189,12 @@ const emit = defineEmits<{
   (e: 'update:selection', v: Array<string|number>): void
 }>()
 
-/* defaults */
 const selectable = computed(() => props.selectable ?? true)
 const showActions = computed(() => props.showActions ?? true)
 const showSearch  = computed(() => props.showSearch  ?? true)
 const showPageSize= computed(() => props.showPageSize?? true)
-const pageSizeOptionsSafe = computed(() => (props.pageSizeOptions?.length ? props.pageSizeOptions : [5,10,20,50]))
+const pageSizeOptionsSafe = computed(() => (props.pageSizeOptions?.length ? props.pageSizeOptions : [5,10,20,50,100]))
 
-/* state */
 const q = ref('')
 const page = ref(1)
 const pageSize = ref(pageSizeOptionsSafe.value[1] || 10)
@@ -215,18 +204,15 @@ const selectedIds = ref<Array<string|number>>((props.selection ?? []).slice())
 
 const rowKeySafe = (row: any) => props.rowKey?.(row) ?? row.id ?? JSON.stringify(row)
 
-/* sync selection (v-model:selection) */
 watch(() => props.selection, v => { if (v) selectedIds.value = v.slice() }, { immediate: true })
 watch(selectedIds, v => emit('update:selection', v))
 
-/* reset halaman saat data / filter berubah */
 watch([() => props.rows, q, pageSize], () => {
   page.value = 1
   const keys = new Set(props.rows.map(rowKeySafe))
   selectedIds.value = selectedIds.value.filter(id => keys.has(id))
 })
 
-/* filter */
 const filtered = computed(() => {
   const s = q.value.trim().toLowerCase()
   if (!s) return props.rows
@@ -234,7 +220,6 @@ const filtered = computed(() => {
   return props.rows.filter(r => JSON.stringify(r).toLowerCase().includes(s))
 })
 
-/* sort */
 const sorted = computed(() => {
   if (!sortKey.value) return filtered.value
   const arr = [...filtered.value]
@@ -247,13 +232,11 @@ const sorted = computed(() => {
   return arr
 })
 
-/* paging */
 const totalPages = computed(() => Math.ceil(sorted.value.length / pageSize.value))
 const start = computed(() => (page.value - 1) * pageSize.value)
 const end = computed(() => start.value + pageSize.value)
 const paged = computed(() => sorted.value.slice(start.value, end.value))
 
-/* header select all */
 const allChecked = computed(() => {
   if (!selectable.value || !paged.value.length) return false
   const keys = paged.value.map(rowKeySafe)
@@ -279,7 +262,6 @@ function toggleAll(e: Event) {
   }
 }
 
-/* mobile visible cols */
 const mobileCols = computed<Column[]>(() => {
   const want = props.mobileKeys && props.mobileKeys.length
     ? props.columns.filter(c => props.mobileKeys!.includes(c.key))

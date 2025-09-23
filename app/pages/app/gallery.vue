@@ -35,10 +35,6 @@
       </button>
 
       <div class="ml-auto flex gap-2 mb-3">
-        <button class="px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-neutral-700 hover:bg-emerald-50 dark:hover:bg-neutral-800"
-                @click="resetDefaults">
-          Isi Default
-        </button>
         <button class="px-3 py-2 text-xs flex rounded-xl bg-blue-600 text-white hover:bg-blue-700"
                 :disabled="savingConfig" @click="saveConfig">
           <Icon :icon="savingConfig?'svg-spinners:3-dots-fade':'lucide:save'" class="size-4" />
@@ -74,7 +70,7 @@
 
             <div class="mt-3">
               <p class="text-xs text-gray-500 mb-1">Pratinjau</p>
-              <div class="h-40 rounded-xl overflow-hidden border border-gray-100 dark:border-neutral-800 bg-emerald-50/60 dark:bg-neutral-800 grid place-items-center">
+              <div class="rounded-xl overflow-hidden border border-gray-100 dark:border-neutral-800 bg-emerald-50/60 dark:bg-neutral-800 grid place-items-center">
                 <img v-if="form.hero.cover" :src="form.hero.cover" alt=""
                      class="w-full h-full object-cover" @error="onImgError" />
                 <div v-else class="text-xs text-gray-400">Belum ada cover</div>
@@ -313,7 +309,7 @@ type Shape = {
 }
 
 const tabs = ['Hero & Teks', 'Galeri'] as const 
-const activeTab = ref<typeof tabs[number]>('Hero & Teks')
+const activeTab = ref<typeof tabs[number]>('Galeri')
 
 const defaults: Shape = {
   hero: {

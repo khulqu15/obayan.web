@@ -99,9 +99,8 @@
     </DataTable>
 
     <!-- Modal Form -->
-    <ModalShell v-model="showForm" :title="formMode==='create' ? 'Tambah Pelanggaran' : 'Ubah Pelanggaran'">
+    <ModalShell size="4xl" v-model="showForm" :title="formMode==='create' ? 'Tambah Pelanggaran' : 'Ubah Pelanggaran'">
       <form class="space-y-4 max-h-[60vh] overflow-y-auto scrollbar-none" @submit.prevent="submitForm">
-        <!-- Autocomplete Santri -->
         <div>
           <label class="text-xs text-gray-600 dark:text-neutral-300">Santri</label>
           <div class="relative">

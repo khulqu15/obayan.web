@@ -3,6 +3,7 @@
     <!-- Header -->
     <div class="flex items-center flex-wrap gap-3 justify-between">
       <h1 class="text-xl font-semibold">Santri Lama</h1>
+
       <div class="flex items-center flex-wrap gap-3">
         <button @click="openCreate()" class="text-xs px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">
           + Tambah Santri
@@ -10,6 +11,61 @@
         <button @click="reload" class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
           Muat Ulang
         </button>
+
+        <!-- Dropdown Menu (actions ringkas) -->
+        <div class="relative" ref="menuRoot" @keydown.escape="menuOpen=false">
+          <button
+            @click="menuOpen = !menuOpen"
+            class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800"
+          >
+            Menu ▾
+          </button>
+          <div
+            v-if="menuOpen"
+            class="absolute right-0 mt-2 w-44 rounded-md border border-gray-200 bg-white shadow-lg z-20
+                   dark:bg-neutral-900 dark:border-neutral-700"
+          >
+            <button
+              @click="fileInputLama?.click(); menuOpen=false"
+              class="w-full text-left text-xs px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
+            >
+              Import CSV/Excel
+            </button>
+            <button
+              @click="downloadTemplate('lama'); menuOpen=false"
+              class="w-full text-left text-xs px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
+            >
+              Template CSV
+            </button>
+            <button
+              @click="exportCSV(filteredLamaRows, 'santri_lama.csv'); menuOpen=false"
+              class="w-full text-left text-xs px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
+            >
+              Export CSV
+            </button>
+            <button
+              @click="exportExcel(filteredLamaRows, 'santri_lama.xlsx'); menuOpen=false"
+              class="w-full text-left text-xs px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
+            >
+              Export Excel
+            </button>
+            <button
+              @click="showFieldSettings = true; menuOpen=false"
+              class="w-full text-left text-xs px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-800"
+            >
+              Tampilan Kolom
+            </button>
+          </div>
+        </div>
+
+        <!-- hidden input untuk import -->
+        <input
+          type="file"
+          ref="fileInputLama"
+          class="hidden"
+          accept=".xlsx,.xls,.csv"
+          @change="handleImportLama"
+        />
       </div>
     </div>
 
@@ -20,11 +76,15 @@
 
     <!-- ===================== TABEL: SANTRI LAMA ===================== -->
     <section v-if="!loading" class="space-y-3">
-      <div class="flex items-center flex-wrap gap-3 justify-between">
-        <h2 class="text-base font-semibold">Santri Lama</h2>
+      <!-- Bar Filter -->
+      <div class="flex items-center flex-wrap gap-2 justify-between">
+        <h2 class="text-base font-semibold">Daftar</h2>
         <div class="flex flex-wrap items-center gap-2">
-          <!-- Filters -->
-          <input v-model="filtersLama.q" placeholder="Cari nama / wali / alamat…" class="w-52 text-xs px-3 py-1.5 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
+          <input
+            v-model="filtersLama.q"
+            placeholder="Cari nama / wali / alamat…"
+            class="w-52 text-xs px-3 py-1.5 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700"
+          />
           <select v-model="filtersLama.status" class="text-xs px-2 py-1.5 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700">
             <option value="semua">Semua Status</option>
             <option v-for="s in statusOptionsLama" :key="s" :value="s">{{ s }}</option>
@@ -33,15 +93,6 @@
             <option value="semua">Semua Jenjang</option>
             <option v-for="j in jenjangOptionsLama" :key="j" :value="j">{{ j }}</option>
           </select>
-
-          <!-- Import / Export -->
-          <input type="file" ref="fileInputLama" class="hidden" accept=".xlsx,.xls,.csv" @change="handleImportLama" />
-          <button @click="fileInputLama?.click()" class="text-xs px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700">Import</button>
-          <button @click="downloadTemplate('lama')" class="text-xs px-3 py-1.5 rounded border border-dashed border-gray-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
-            Template CSV
-          </button>
-          <button @click="exportCSV(filteredLamaRows, 'santri_lama.csv')" class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Export CSV</button>
-          <button @click="exportExcel(filteredLamaRows, 'santri_lama.xlsx')" class="text-xs px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Export Excel</button>
         </div>
       </div>
 
@@ -50,6 +101,7 @@
         :rows="filteredLamaRows"
         :show-actions="true"
         :columns="columns"
+        :show-page-size="true"
         :rowKey="(r) => r.id"
       >
         <template #cell-nohp="{ row }">
@@ -57,25 +109,22 @@
           <span v-else class="text-gray-400">-</span>
         </template>
 
-        <template #cell-kuotaKunjunganBulanIni="{ row }">
-          <span
-            :class="[
-              'text-xs px-2 py-0.5 rounded',
-              (row.kuotaKunjunganBulanIni ?? 0) > 0
-                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-            ]"
-          >
-            {{ row.kuotaKunjunganBulanIni ?? 0 }}x / bulan ini
-          </span>
+        <template #cell-noInduk="{ row }">
+          <span class="font-medium">{{ row.noInduk || '—' }}</span>
         </template>
 
-        <template #cell-kamar="{row}">
-          {{ row.kamar }} - {{ (row as any).maskan }}
+        <template #cell-santri="{ row }">
+          <div class="font-medium">{{ row.santri }}</div>
+          <div class="text-xs text-gray-500">{{ row.noInduk || '' }}</div>
+        </template>
+
+        <template #cell-kamar="{ row }">
+          {{ row.kamar }} <span v-if="(row as any).maskan">- {{ (row as any).maskan }}</span>
         </template>
 
         <template #cell-action="{ row }">
           <div class="flex items-center flex-wrap gap-2">
+            <button @click="openDetail(row)" class="text-xs px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Detail</button>
             <button @click="openEdit(row)" class="text-xs px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Edit</button>
             <button @click="openConfirm(row)" class="text-xs px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
           </div>
@@ -83,8 +132,71 @@
       </DataTable>
     </section>
 
+    <!-- Modal Detail (besar) -->
+    <ModalShell v-model="showDetail" title="Detail Santri" size="5xl">
+      <div v-if="detailRow" class="grid md:grid-cols-3 gap-3">
+        <div class="md:col-span-1 space-y-2">
+          <div class="text-sm">
+            <div class="text-xs text-gray-500">No. Induk</div>
+            <div class="font-medium">{{ detailRow.noInduk || '—' }}</div>
+          </div>
+          <div class="text-sm">
+            <div class="text-xs text-gray-500">Gen</div>
+            <div class="font-medium">{{ detailRow.gen || '—' }}</div>
+          </div>
+          <div class="text-sm">
+            <div class="text-xs text-gray-500">Nama</div>
+            <div class="font-medium">{{ detailRow.santri || '—' }}</div>
+          </div>
+          <div class="text-sm">
+            <div class="text-xs text-gray-500">Kamar</div>
+            <div class="font-medium">{{ detailRow.kamar || '—' }}</div>
+          </div>
+        </div>
+
+        <div class="md:col-span-1 space-y-2">
+          <div class="text-sm">
+            <div class="text-xs text-gray-500">Ayah</div>
+            <div class="font-medium">{{ (detailRow as any).ayahNama || '—' }}</div>
+          </div>
+          <div class="text-sm">
+            <div class="text-xs text-gray-500">Ibu</div>
+            <div class="font-medium">{{ (detailRow as any).ibuNama || '—' }}</div>
+          </div>
+          <div class="text-sm">
+            <div class="text-xs text-gray-500">Nomor</div>
+            <div class="font-medium">
+              <a v-if="detailRow.nohp" :href="`tel:${detailRow.nohp}`" class="text-blue-600 hover:underline">{{ detailRow.nohp }}</a>
+              <span v-else>—</span>
+            </div>
+          </div>
+          <div class="text-sm">
+            <div class="text-xs text-gray-500">Status</div>
+            <div class="font-medium">{{ detailRow.status || '—' }}</div>
+          </div>
+        </div>
+
+        <div class="md:col-span-1 space-y-2">
+          <div class="text-sm">
+            <div class="text-xs text-gray-500">Kelas Formal</div>
+            <div class="font-medium">{{ (detailRow as any).kelasFormal || detailRow.jenjang || '—' }}</div>
+          </div>
+          <div class="text-sm">
+            <div class="text-xs text-gray-500">Alamat</div>
+            <div class="font-medium break-words">{{ detailRow.alamat || '—' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <button @click="showDetail=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
+          Tutup
+        </button>
+      </template>
+    </ModalShell>
+
     <!-- ========== MODALS ========== -->
-    <ModalShell v-model="showForm" :title="formMode === 'create' ? 'Tambah Santri' : 'Ubah Santri'">
+    <ModalShell size="4xl" v-model="showForm" :title="formMode === 'create' ? 'Tambah Santri' : 'Ubah Santri'">
       <form class="space-y-3" @submit.prevent="submitForm">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -154,8 +266,31 @@
       </template>
     </ModalShell>
 
+    <ModalShell v-model="showFieldSettings" title="Pilih Kolom yang Ditampilkan" size="xl">
+      <div class="grid sm:grid-cols-2 gap-2">
+        <label
+          v-for="c in allColumnDefs"
+          :key="c.key"
+          class="flex items-center gap-2 p-2 rounded border border-gray-200 dark:border-neutral-700"
+        >
+          <input
+            type="checkbox"
+            :value="c.key"
+            v-model="selectedFieldKeys"
+          />
+          <span class="text-sm">{{ c.label }}</span>
+        </label>
+      </div>
+
+      <template #footer>
+        <button @click="showFieldSettings=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
+          Tutup
+        </button>
+      </template>
+    </ModalShell>
+
     <!-- Modal Progress Import -->
-    <ModalShell v-model="showProgress" title="Import Data (Santri Lama)">
+    <ModalShell size="4xl" v-model="showProgress" title="Import Data (Santri Lama)">
       <div class="space-y-3">
         <div class="w-full bg-gray-200 dark:bg-neutral-800 rounded h-3 overflow-hidden">
           <div class="bg-blue-600 h-3 transition-all duration-300" :style="{ width: progress+'%' }"></div>
@@ -167,10 +302,11 @@
       </template>
     </ModalShell>
   </div>
-</template>
+</template>``
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, computed } from 'vue'
+import { definePageMeta } from '#imports'
+import { onMounted, onBeforeUnmount, reactive, ref, computed } from 'vue'
 import DataTable from '~/components/widget/DataTable.vue'
 import ModalShell from '~/components/widget/ModalShell.vue'
 import { useSantri, type SantriRow } from '~/composables/data/useSantri'
@@ -181,18 +317,40 @@ const { rows, loading, error, fetchSantri, createSantri, updateSantri, deleteSan
 onMounted(fetchSantri)
 const reload = () => fetchSantri()
 
-/** Columns */
-const columns = [
-  { key: 'gen', label: 'Gen', sortable: true },
-  { key: 'santri', label: 'Santri', sortable: true },
-  { key: 'walisantri', label: 'Wali Santri', sortable: true },
-  { key: 'nohp', label: 'No. HP Wali', sortable: true },
-  { key: 'kuotaKunjunganBulanIni', label: 'Kuota Kunjungan (bln ini)', sortable: true },
-  { key: 'kamar', label: 'Kamar', sortable: true },
-  { key: 'alamat', label: 'Alamat', sortable: true },
-  { key: 'status', label: 'Status', sortable: true },
-  { key: 'jenjang', label: 'Jenjang', sortable: true },
-]
+/** Dropdown menu (SSR-safe click outside) */
+const menuOpen = ref(false)
+const menuRoot = ref<HTMLElement | null>(null)
+function onDocClick(e: MouseEvent) {
+  const t = e.target as HTMLElement
+  if (!menuRoot.value?.contains(t)) menuOpen.value = false
+}
+onMounted(() => document.addEventListener('click', onDocClick))
+onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
+
+/** Modal Detail */
+const showDetail = ref(false)
+const detailRow = ref<SantriRow | null>(null)
+function openDetail(row: SantriRow) { detailRow.value = row; showDetail.value = true }
+
+/** Kolom Master + Setting Kolom */
+const allColumnDefs = [
+  { key: 'noInduk',     label: 'No. Induk', sortable: true },
+  { key: 'gen',         label: 'Gen', sortable: true },
+  { key: 'santri',      label: 'Nama', sortable: true },
+  { key: 'kamar',       label: 'Kamar', sortable: true },
+  { key: 'ayahNama',    label: 'Ayah', sortable: true },
+  { key: 'ibuNama',     label: 'Ibu', sortable: true },
+  { key: 'nohp',        label: 'Nomor', sortable: true },
+  { key: 'alamat',      label: 'Alamat', sortable: true },
+  { key: 'status',      label: 'Status', sortable: true },
+  { key: 'kelasFormal', label: 'Kelas Formal', sortable: true },
+] as const
+
+const selectedFieldKeys = ref<string[]>([
+  'noInduk', 'gen', 'santri', 'kamar', 'ayahNama', 'ibuNama', 'nohp', 'alamat', 'status', 'kelasFormal'
+])
+const columns = computed(() => allColumnDefs.filter(c => selectedFieldKeys.value.includes(c.key)))
+const showFieldSettings = ref(false)
 
 /** Filter Santri Lama (exclude calon tahun ini) */
 const currentYear = new Date().getFullYear()
@@ -218,8 +376,8 @@ function isCalonThisYear(r: any): boolean {
 const rowsLama  = computed(() => (rows.value || []).filter(r => !isCalonThisYear(r)))
 
 /** Filters */
-type Filters = { q: string, status: string, jenjang: string }
-const filtersLama  = reactive<Filters>({ q: '', status: 'semua', jenjang: 'semua' })
+type Filters = { q: string; status: string; jenjang: string }
+const filtersLama = ref<Filters>({ q: '', status: 'semua', jenjang: 'semua' })
 function matchSearch(r: SantriRow, q: string) {
   if (!q) return true
   const s = q.toLowerCase()
@@ -227,16 +385,19 @@ function matchSearch(r: SantriRow, q: string) {
     .map(v => String(v || '').toLowerCase()).join(' | ')
   return hay.includes(s)
 }
-function matchStatus(r: SantriRow, st: string) { return st === 'semua' ? true : String(r.status || '').toLowerCase() === st.toLowerCase() }
-function matchJenjang(r: SantriRow, jj: string) { return jj === 'semua' ? true : String(r.jenjang || '').toLowerCase() === jj.toLowerCase() }
+function matchStatus(r: SantriRow, st: string) {
+  return st === 'semua' ? true : String(r.status || '').toLowerCase() === st.toLowerCase()
+}
+function matchJenjang(r: SantriRow, jj: string) {
+  return jj === 'semua' ? true : String(r.jenjang || '').toLowerCase() === jj.toLowerCase()
+}
 
 const filteredLamaRows = computed(() =>
   rowsLama.value
-    .filter(r => matchSearch(r, filtersLama.q))
-    .filter(r => matchStatus(r, filtersLama.status))
-    .filter(r => matchJenjang(r, filtersLama.jenjang))
+    .filter(r => matchSearch(r, filtersLama.value.q))
+    .filter(r => matchStatus(r, filtersLama.value.status))
+    .filter(r => matchJenjang(r, filtersLama.value.jenjang))
 )
-
 const statusOptionsLama  = computed(() => uniqueNonEmpty(rowsLama.value.map(r => r.status)))
 const jenjangOptionsLama = computed(() => uniqueNonEmpty(rowsLama.value.map(r => r.jenjang)))
 function uniqueNonEmpty(arr: (string|number|undefined|null)[]) {
@@ -262,72 +423,7 @@ async function handleImportLama(e: Event) {
   await fetchSantri()
 }
 
-/** Export & Template (Lama) */
-const csvHeaders = ['gen','santri','walisantri','nohp','kuotaKunjunganBulanIni','kamar','alamat','status','jenjang'] as const
-type CsvRow = Record<(typeof csvHeaders)[number], string|number|null|undefined>
-function mapRowToCsv(r: SantriRow): CsvRow {
-  return {
-    gen: r.gen ?? '',
-    santri: r.santri ?? '',
-    walisantri: r.walisantri ?? '',
-    nohp: r.nohp ?? '',
-    kuotaKunjunganBulanIni: r.kuotaKunjunganBulanIni ?? 0,
-    kamar: r.kamar ?? '',
-    alamat: r.alamat ?? '',
-    status: (r.status as any) ?? '',
-    jenjang: r.jenjang ?? ''
-  }
-}
-function toCSV(rows: SantriRow[]) {
-  const esc = (v: any) => { const s = String(v ?? ''); const needs = /[",\n]/.test(s); const x = s.replace(/"/g, '""'); return needs ? `"${x}"` : s }
-  const head = csvHeaders.join(',')
-  const body = rows.map(r => csvHeaders.map(h => esc((mapRowToCsv(r) as any)[h])).join(',')).join('\n')
-  return head + '\n' + body
-}
-function downloadBlob(filename: string, blob: Blob) {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url)
-}
-function exportCSV(source: SantriRow[], filename: string) {
-  const csv = toCSV(source)
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
-  downloadBlob(filename, blob)
-}
-async function exportExcel(source: SantriRow[], filename: string) {
-  try {
-    // @ts-ignore
-    const XLSX = (await import('xlsx')).default || (await import('xlsx'))
-    const data = source.map(r => mapRowToCsv(r))
-    const ws = XLSX.utils.json_to_sheet(data, { header: csvHeaders as any })
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Data')
-    XLSX.writeFile(wb, filename)
-  } catch (e) {
-    console.warn('xlsx tidak tersedia, fallback ke CSV', e)
-    exportCSV(source, filename.replace(/\.xlsx$/i, '.csv'))
-  }
-}
-function downloadTemplate(which: 'lama') {
-  const example: CsvRow = {
-    gen: String(currentYear),
-    santri: 'Budi Contoh',
-    walisantri: 'Sdr. Wali',
-    nohp: '081234567890',
-    kuotaKunjunganBulanIni: 2,
-    kamar: 'B2',
-    alamat: 'Jl. Mawar No. 5, Desa Sejuk',
-    status: 'aktif',
-    jenjang: 'KMI • MA 2'
-  }
-  const head = csvHeaders.join(',')
-  const esc = (v: any) => { const s = String(v ?? ''); const needs = /[",\n]/.test(s); const x = s.replace(/"/g, '""'); return needs ? `"${x}"` : x }
-  const row = csvHeaders.map(h => esc((example as any)[h])).join(',')
-  const csv = head + '\n' + row
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
-  downloadBlob('template_santri_lama.csv', blob)
-}
-
-/** CRUD form (sama persis) */
+/** CRUD form */
 const showForm = ref(false)
 const formMode = ref<'create' | 'edit'>('create')
 const saving = ref(false)

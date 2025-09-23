@@ -60,6 +60,7 @@ const registry: Record<string, any> = {
   HeroBlogHero: BlogHero,
   InvitationHero,
   HeroInvitationHero: InvitationHero,
+  FacilityHero: HeroFacilityHero,
   HeroFacilityHero,
   HeroProgramHero,
 }

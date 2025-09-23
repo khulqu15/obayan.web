@@ -4,386 +4,380 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-xl font-semibold">Pembayaran</h1>
-        <p class="text-sm text-gray-500 dark:text-neutral-400">Kelola tagihan dan pilih metode pembayaran.</p>
-      </div>
-      <div class="flex gap-2">
-        <span class="inline-flex items-center text-xs px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30">
-          Tagihan Aktif: {{ unpaidCount }}
-        </span>
-        <span class="inline-flex items-center text-xs px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-          Total Terhutang: {{ fmtMoney(totalDue) }}
-        </span>
+        <p class="text-sm text-gray-500 dark:text-neutral-400">
+          Tabel santri per kamar per maskan. Kelola beban tagihan & diskon per santri dan lihat total tagihan belum terbayar.
+        </p>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <div class="lg:col-span-2 space-y-4">
-        <div class="rounded-xl border border-gray-200 bg-white shadow-xs dark:bg-neutral-800 dark:border-neutral-700">
-          <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-neutral-700">
-            <h2 class="font-semibold">Tagihan Aktif</h2>
-            <button class="text-xs px-2 py-1 rounded border border-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-700/50" @click="regenerateDummy()">
-              Refresh
-            </button>
-          </div>
-          <div class="divide-y divide-gray-100 dark:divide-neutral-700">
-            <div
-              v-for="b in bills"
-              :key="b.id"
-              class="p-4 flex items-start justify-between gap-3 hover:bg-gray-50/60 dark:hover:bg-neutral-700/40 transition-colors"
-            >
-              <div class="min-w-0">
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex items-center text-[11px] px-2 py-0.5 rounded-full"
-                        :class="badgeClass(b.type)">
-                    {{ b.type }}
-                  </span>
-                  <span class="text-xs text-gray-500 dark:text-neutral-400">Periode: {{ b.period }}</span>
-                </div>
-                <div class="mt-1 font-medium truncate">{{ b.title }}</div>
-                <div class="mt-0.5 text-xs text-gray-500 dark:text-neutral-400">
-                  Jatuh tempo: {{ new Date(b.dueAt).toLocaleDateString('id-ID') }} • Kode: {{ b.code }}
-                </div>
-              </div>
-              <div class="text-right shrink-0">
-                <div class="font-semibold">{{ fmtMoney(b.amount) }}</div>
-                <div class="mt-2 flex items-center gap-2">
-                  <button
-                    class="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
-                    @click="selectBill(b)"
-                  >
-                    Bayar
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div v-if="!bills.length" class="p-6 text-sm text-gray-500 dark:text-neutral-400">
-              Tidak ada tagihan saat ini.
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-xl border border-gray-200 bg-white shadow-xs dark:bg-neutral-800 dark:border-neutral-700">
-          <div class="p-4 border-b border-gray-200 dark:border-neutral-700">
-            <h2 class="font-semibold">Pilih Metode Pembayaran</h2>
-            <p class="text-xs text-gray-500 dark:text-neutral-400">Metode akan menampilkan instruksi dan nomor VA/QR.</p>
-          </div>
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-3 p-4">
-            <button
-              class="relative p-3 rounded-lg border text-center bg-white dark:bg-neutral-800 border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700/40 transition-colors"
-              :class="{ 'ring-2 ring-blue-500/50 border-blue-500/60': selectedMethod?.key==='bca-va' }"
-              @click="selectMethod(methods.find(m=>m.key==='bca-va'))"
-            >
-              <img src="/assets/images/mitra/bca.png" alt="BCA" class="h-5 mx-auto mb-2 opacity-90">
-              <div class="text-xs font-medium">BCA VA</div>
-            </button>
-
-            <button
-              class="relative p-3 rounded-lg border text-center bg-white dark:bg-neutral-800 border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700/40 transition-colors"
-              :class="{ 'ring-2 ring-blue-500/50 border-blue-500/60': selectedMethod?.key==='dana' }"
-              @click="selectMethod(methods.find(m=>m.key==='dana'))"
-            >
-              <img src="/assets/images/mitra/dana.png" alt="DANA" class="h-5 mx-auto mb-2 opacity-90">
-              <div class="text-xs font-medium">DANA</div>
-            </button>
-
-            <button
-              class="relative p-3 rounded-lg border text-center bg-white dark:bg-neutral-800 border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700/40 transition-colors"
-              :class="{ 'ring-2 ring-blue-500/50 border-blue-500/60': selectedMethod?.key==='gopay' }"
-              @click="selectMethod(methods.find(m=>m.key==='gopay'))"
-            >
-              <img src="/assets/images/mitra/gopay.png" alt="GoPay" class="h-5 mx-auto mb-2 opacity-90">
-              <div class="text-xs font-medium">GoPay</div>
-            </button>
-
-            <button
-              class="relative p-3 rounded-lg border text-center bg-white dark:bg-neutral-800 border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700/40 transition-colors"
-              :class="{ 'ring-2 ring-blue-500/50 border-blue-500/60': selectedMethod?.key==='qris' }"
-              @click="selectMethod(methods.find(m=>m.key==='qris'))"
-            >
-              <img src="/assets/qris.png" alt="QRIS" class="h-5 mx-auto mb-2 opacity-90">
-              <div class="text-xs font-medium">QRIS</div>
-            </button>
-          </div>
-        </div>
+    <!-- Filter Bulan / Maskan / Kamar -->
+    <div class="grid md:grid-cols-3 gap-3">
+      <div>
+        <label class="text-xs text-gray-500 dark:text-neutral-400">Bulan</label>
+        <input type="month" v-model="monthInput"
+               class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 dark:bg-neutral-800"/>
       </div>
-
-      <!-- RIGHT: Instructions -->
-      <div class="space-y-4">
-        <div class="rounded-xl border border-gray-200 bg-white shadow-xs dark:bg-neutral-800 dark:border-neutral-700">
-          <div class="p-4 border-b border-gray-200 dark:border-neutral-700">
-            <h2 class="font-semibold">Instruksi Pembayaran</h2>
-            <p class="text-xs text-gray-500 dark:text-neutral-400">
-              Pilih tagihan & metode untuk melihat detail.
-            </p>
-          </div>
-
-          <div class="p-4 space-y-3" v-if="selectedBill && selectedMethod">
-            <div class="text-sm">
-              <div class="font-medium">{{ selectedBill.title }}</div>
-              <div class="text-gray-500 dark:text-neutral-400">Nominal: <span class="font-medium text-gray-800 dark:text-neutral-200">{{ fmtMoney(selectedBill.amount) }}</span></div>
-            </div>
-
-            <!-- VA / QR -->
-            <div v-if="selectedMethod.key !== 'qris'" class="space-y-2">
-              <div class="text-xs text-gray-500 dark:text-neutral-400">Nomor Virtual Account :</div>
-              <div class="flex items-center gap-2">
-                <code class="px-2 py-1 rounded bg-gray-100 text-gray-800 dark:bg-neutral-700 dark:text-neutral-100 select-all">
-                  {{ currentVA }}
-                </code>
-                <button class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-700/50" @click="copy(currentVA)">
-                  Salin
-                </button>
-              </div>
-            </div>
-
-            <div v-else class="space-y-2">
-              <div class="text-xs text-gray-500 dark:text-neutral-400">Pindai QRIS :</div>
-              <div class="rounded-lg border border-gray-200 bg-white p-3 dark:bg-neutral-900 dark:border-neutral-700">
-                <img :src="qrisImage" alt="QRIS" class="w-full rounded">
-              </div>
-            </div>
-
-            <!-- Steps -->
-            <div class="pt-2">
-              <div class="text-sm font-medium mb-1">Tata Cara {{ selectedMethod.title }}</div>
-              <ol class="list-decimal ms-4 text-sm space-y-1">
-                <li v-for="(s,i) in steps" :key="i">{{ s }}</li>
-              </ol>
-              <p class="mt-2 text-[12px] text-amber-600 dark:text-amber-400">* Ini hanya simulasi. Nomor VA/QR tidak dapat digunakan untuk transaksi nyata.</p>
-            </div>
-
-            <div class="flex items-center gap-2 pt-1">
-              <button
-                class="text-sm px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700"
-                @click="markAsPaid()"
-              >
-                Tandai Sudah Bayar
-              </button>
-              <button
-                class="text-sm px-3 py-1.5 rounded border hover:bg-gray-50 dark:hover:bg-neutral-700/50"
-                @click="resetSelection()"
-              >
-                Batalkan
-              </button>
-            </div>
-          </div>
-
-          <div v-else class="p-4 text-sm text-gray-500 dark:text-neutral-400">
-            Pilih tagihan dan metode pembayaran di panel kiri.
-          </div>
-        </div>
-
-        <div class="rounded-xl border border-gray-200 bg-white shadow-xs dark:bg-neutral-800 dark:border-neutral-700 p-4">
-          <div class="flex items-center justify-between">
-            <div class="text-sm">
-              <div class="text-gray-500 dark:text-neutral-400">Total Terhutang</div>
-              <div class="text-lg font-semibold">{{ fmtMoney(totalDue) }}</div>
-            </div>
-            <div class="text-sm">
-              <div class="text-gray-500 dark:text-neutral-400">Tagihan Aktif</div>
-              <div class="text-lg font-semibold text-right">{{ unpaidCount }}</div>
-            </div>
-          </div>
-        </div>
+      <div>
+        <label class="text-xs text-gray-500 dark:text-neutral-400">Maskan</label>
+        <select v-model="maskan" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 dark:bg-neutral-800">
+          <option value="">— Pilih —</option>
+          <option v-for="m in uniqueMaskan" :key="m" :value="m">{{ m || '—' }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 dark:text-neutral-400">Kamar</label>
+        <select v-model="kamar" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 dark:bg-neutral-800">
+          <option value="">— Pilih —</option>
+          <option v-for="r in roomsFilteredByMaskan" :key="`${r.maskan}|||${r.kamar}`" :value="r.kamar">{{ r.kamar }}</option>
+        </select>
       </div>
     </div>
 
+    <!-- Satu Tabel: Santri di kamar terpilih -->
     <div class="rounded-xl border border-gray-200 bg-white shadow-xs dark:bg-neutral-800 dark:border-neutral-700">
-      <div class="p-4 border-b border-gray-200 dark:border-neutral-700">
-        <h2 class="font-semibold">Riwayat Pembayaran </h2>
+      <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-neutral-700">
+        <h2 class="font-semibold">Santri — {{ maskan || '—' }} / {{ kamar || '—' }} ({{ month }})</h2>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center text-[11px] px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30">
+            {{ santriList.length }} santri
+          </span>
+        </div>
       </div>
+
       <div class="p-4 overflow-x-auto">
         <table class="min-w-full text-sm">
           <thead class="text-left text-gray-500 dark:text-neutral-400">
             <tr>
-              <th class="py-2">Tanggal</th>
-              <th class="py-2">Jenis</th>
-              <th class="py-2">Metode</th>
-              <th class="py-2">Nominal</th>
-              <th class="py-2">Status</th>
+              <th class="py-2">Santri</th>
+              <th class="py-2">Maskan</th>
+              <th class="py-2">Kamar</th>
+              <th class="py-2">Tagihan (bulan ini)</th>
+              <th class="py-2">Total Belum Terbayar</th>
+              <th class="py-2">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-neutral-700">
-            <tr v-for="h in history" :key="h.id">
-              <td class="py-2">{{ new Date(h.paidAt).toLocaleString('id-ID') }}</td>
-              <td class="py-2">{{ h.type }}</td>
-              <td class="py-2">{{ h.method }}</td>
-              <td class="py-2">{{ fmtMoney(h.amount) }}</td>
+            <tr v-for="s in santriList" :key="s.id">
               <td class="py-2">
-                <span class="inline-flex text-xs px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30">Berhasil</span>
+                <div class="font-medium">{{ s.santri }}</div>
+                <div class="text-[11px] text-gray-500">{{ s.jenjang || '-' }}</div>
+              </td>
+              <td class="py-2">{{ s.maskan || '—' }}</td>
+              <td class="py-2">{{ s.kamar || '—' }}</td>
+              <td class="py-2">
+                <!-- ringkas tagihan aktif (dari charges) + indikator diskon -->
+                <div class="flex flex-wrap gap-x-2 gap-y-1">
+                  <template v-for="c in charges" :key="c.key">
+                    <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded border border-gray-200 dark:border-neutral-600">
+                      {{ c.title }}: {{ fmtMoney(c.amount) }}
+                      <span v-if="getDiscount(s.id, c.key)" class="text-amber-600">−{{ discountLabel(getDiscount(s.id, c.key)) }}</span>
+                    </span>
+                  </template>
+                  <span v-if="!charges.length" class="text-xs text-gray-500">Belum ada beban (akan otomatis dibuat default)</span>
+                </div>
+              </td>
+              <td class="py-2 font-semibold">
+                {{ fmtMoney(unpaidTotalFor(s.id)) }}
+              </td>
+              <td class="py-2">
+                <button class="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+                        @click="openManage(s)">
+                  Kelola
+                </button>
               </td>
             </tr>
-            <tr v-if="!history.length">
-              <td class="py-6 text-gray-500 dark:text-neutral-400" colspan="5">Belum ada riwayat pembayaran.</td>
+            <tr v-if="!santriList.length">
+              <td colspan="99" class="py-6 text-gray-500 dark:text-neutral-400">Pilih maskan & kamar untuk melihat santri.</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
+    <!-- Modal Kelola Tagihan & Diskon -->
+    <div v-if="showManage" class="fixed inset-0 z-[70] flex items-center justify-center">
+      <div class="fixed inset-0 bg-black/40"></div>
+      <div class="relative w-full max-w-3xl mx-4 rounded-2xl border border-gray-200 bg-white shadow-xl dark:bg-neutral-900 dark:border-neutral-800">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-neutral-800">
+          <h3 class="text-sm font-semibold">
+            Kelola Tagihan — {{ currentSantri?.santri }} ({{ maskan }}/{{ kamar }}) — {{ month }}
+          </h3>
+          <button @click="closeManage" class="inline-flex size-8 items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="px-4 py-4 space-y-6">
+          <!-- BEBAN (CRUD) -->
+          <section>
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <div class="font-medium">Beban Anggaran Kamar (bulan ini)</div>
+                <p class="text-xs text-gray-500 dark:text-neutral-400">Mengatur daftar beban untuk semua santri kamar ini.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="addChargeRow">
+                  + Beban
+                </button>
+                <button class="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700" @click="saveCharges">
+                  Simpan Beban
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-neutral-800">
+              <table class="min-w-full text-sm">
+                <thead class="text-left text-gray-500 dark:text-neutral-400">
+                  <tr>
+                    <th class="py-2 px-2">Key</th>
+                    <th class="py-2 px-2">Nama</th>
+                    <th class="py-2 px-2">Nominal</th>
+                    <th class="py-2 px-2">Aktif</th>
+                    <th class="py-2 px-2"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-neutral-800">
+                  <tr v-for="(c, i) in editCharges" :key="c._uid">
+                    <td class="py-2 px-2"><input v-model="c.key" class="w-40 px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900" placeholder="syahriyah"></td>
+                    <td class="py-2 px-2"><input v-model="c.title" class="w-56 px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900" placeholder="Syahriyah"></td>
+                    <td class="py-2 px-2"><input v-model.number="c.amount" type="number" min="0" class="w-40 text-right px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900"></td>
+                    <td class="py-2 px-2"><input type="checkbox" v-model="c.active"></td>
+                    <td class="py-2 px-2 text-right">
+                      <button class="text-xs px-2 py-1 rounded border text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" @click="removeChargeRow(i)">Hapus</button>
+                    </td>
+                  </tr>
+                  <tr v-if="!editCharges.length">
+                    <td colspan="99" class="py-4 px-2 text-gray-500 dark:text-neutral-400">Belum ada beban.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- DISKON per SANTRI -->
+          <section>
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <div class="font-medium">Diskon untuk {{ currentSantri?.santri }}</div>
+                <p class="text-xs text-gray-500 dark:text-neutral-400">Diskon terapkan ke salah satu beban.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <label class="text-xs text-gray-500 dark:text-neutral-400">Jatuh Tempo:
+                  <input type="date" v-model="dueDateInput" class="ms-2 px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900"/>
+                </label>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <select v-model="draft(currentSantri!.id).chargeKey" class="px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900">
+                <option disabled value="">Pilih Beban</option>
+                <option v-for="c in charges" :key="c.key" :value="c.key">{{ c.title }}</option>
+              </select>
+
+              <select v-model="draft(currentSantri!.id).type" class="px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900">
+                <option value="amount">Rp</option>
+                <option value="percent">%</option>
+              </select>
+
+              <input v-model.number="draft(currentSantri!.id).value" type="number" min="0"
+                     class="w-24 text-right px-2 py-1 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900"/>
+
+              <button class="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700" @click="applyDiscount(currentSantri!.id)">Set</button>
+              <button v-if="draft(currentSantri!.id).chargeKey" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                      @click="removeDiscount(currentSantri!.id, draft(currentSantri!.id).chargeKey)">
+                Hapus Diskon
+              </button>
+            </div>
+
+            <div class="mt-2 flex flex-wrap gap-1">
+              <button v-for="d in (discounts[currentSantri!.id] || [])"
+                      :key="d.chargeKey"
+                      @click="removeDiscount(currentSantri!.id, d.chargeKey)"
+                      class="text-[11px] px-1.5 py-0.5 rounded border border-amber-300 text-amber-700 dark:border-amber-900/40 dark:text-amber-300">
+                {{ findCharge(d.chargeKey)?.title || d.chargeKey }}: −{{ discountLabel(d) }} ✕
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <div class="flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-200 dark:border-neutral-800">
+          <div class="text-xs text-gray-500 dark:text-neutral-400">
+            Estimasi total: <span class="font-semibold text-gray-800 dark:text-neutral-200">{{ fmtMoney(currentEstimateTotal) }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button @click="closeManage" class="px-3 py-1.5 rounded-lg border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">Tutup</button>
+            <button @click="saveAndGenerate" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Simpan & Generate Tagihan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /Modal -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed } from 'vue'
+import { computed, onMounted, onBeforeUnmount, reactive, ref, watch, watchEffect } from 'vue'
+import { usePayment } from '~/composables/data/usePayment'
+import { useSantri } from '~/composables/data/useSantri'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Pembayaran' } })
 
-const user = reactive({
-  id: 'S-2025-001',
-  name: 'Admin',
-  email: 'admin@alberr.sch.id',
+/** ===== Composables ===== */
+const { rows: santriRows, fetchSantri } = useSantri()
+const {
+  rooms, santriByRoom, charges, discounts, bills,
+  subscribeRooms, unsubscribeRooms,
+  subscribeCharges, unsubscribeCharges,
+  subscribeBills, unsubscribeBills,
+  ensureDefaultCharges, upsertCharge, deleteCharge,
+  loadDiscounts, setDiscount, deleteDiscount,
+  buildItemsForSantri, deleteBill, markPaid, generateBillsForRoom,
+} = usePayment()
+
+/** ===== Bulan YYYY-MM <-> yyyymm ===== */
+const toYYYYMM = (d = new Date()) => `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`
+const toYearMonth = (yyyymm: string) => `${yyyymm.slice(0,4)}-${yyyymm.slice(4,6)}`
+const monthInput = ref<string>(toYearMonth(toYYYYMM()))
+const month = computed<string>({
+  get(){ return /^\d{4}-\d{2}$/.test(monthInput.value) ? monthInput.value.replace('-', '') : toYYYYMM() },
+  set(yyyymm: string){ if (/^\d{6}$/.test(yyyymm)) monthInput.value = toYearMonth(yyyymm) }
 })
 
-type Bill = {
-  id: string
-  type: 'Bulanan' | 'Makanan' | 'Transportasi' | 'SPP'
-  title: string
-  period: string
-  amount: number
-  dueAt: number
-  code: string
-}
-const now = new Date()
-const pad = (n:number)=> String(n).padStart(2,'0')
-const monthLbl = (d:Date)=> `${pad(d.getMonth()+1)}/${d.getFullYear()}`
-const bills = ref<Bill[]>([
-  { id: 'b1', type: 'SPP',         title: 'SPP Sekolah',     period: monthLbl(now), amount: 250_000, dueAt: +new Date(now.getFullYear(), now.getMonth(), 15), code: 'INV-SPP-001' },
-  { id: 'b2', type: 'Bulanan',     title: 'Asrama Bulanan',  period: monthLbl(now), amount: 200_000, dueAt: +new Date(now.getFullYear(), now.getMonth(), 10), code: 'INV-ASR-001' },
-  { id: 'b3', type: 'Makanan',     title: 'Uang Makan',      period: monthLbl(now), amount: 300_000, dueAt: +new Date(now.getFullYear(), now.getMonth(), 20), code: 'INV-MKN-001' },
-  { id: 'b4', type: 'Transportasi',title: 'Transport Bulan', period: monthLbl(now), amount: 150_000, dueAt: +new Date(now.getFullYear(), now.getMonth(), 25), code: 'INV-TRP-001' },
-])
+/** ===== Filter kamar ===== */
+const maskan = ref<string>(''); const kamar = ref<string>('')
+const uniqueMaskan = computed(() => Array.from(new Set(rooms.value.map(r => r.maskan || ''))).sort((a,b)=>a.localeCompare(b,'id')))
+const roomsFilteredByMaskan = computed(() => rooms.value.filter(r => !maskan.value || r.maskan === maskan.value))
+const roomKey = computed(()=> `${maskan.value}|||${kamar.value}`)
+const santriList = computed(()=> santriByRoom.value[roomKey.value] || [])
 
-type Method = { key: 'bca-va'|'dana'|'gopay'|'qris'; title: string }
-const methods: Method[] = [
-  { key: 'bca-va', title: 'BCA Virtual Account' },
-  { key: 'dana',   title: 'DANA via VA' },
-  { key: 'gopay',  title: 'GoPay via VA' },
-  { key: 'qris',   title: 'QRIS' },
-]
-
-const selectedBill   = ref<Bill|null>(null)
-const selectedMethod = ref<Method|null>(null)
-const qrisImage      = '/assets/qris.png'
-
-function selectBill(b: Bill) {
-  selectedBill.value = b
-  if (!selectedMethod.value) selectedMethod.value = methods[0]
-}
-function selectMethod(m?: Method) {
-  if (!m) return
-  selectedMethod.value = m
-}
-
-const unpaidCount = computed(()=> bills.value.length)
-const totalDue = computed(()=> bills.value.reduce((a,b)=>a+b.amount,0))
-
-function genVA(m: Method, bill: Bill) {
-  const digits = (user.id.match(/\d+/g)?.join('') || '0000')
-  const last4  = digits.slice(-4).padStart(4,'0')
-  const mm     = pad(new Date(bill.dueAt).getMonth()+1)
-  const suf    = bill.id.replace(/\D/g,'').padStart(2,'0').slice(-2)
-
-  if (m.key === 'bca-va') return `8800${last4}${mm}${suf}`
-  if (m.key === 'dana')   return `3901${last4}${mm}${suf}`        // 3901 = dummy pattern
-  if (m.key === 'gopay')  return `70001${last4}${mm}${suf}`       // 70001 = dummy pattern
-  return ''
-}
-const currentVA = computed(()=>{
-  if (!selectedBill.value || !selectedMethod.value) return ''
-  return genVA(selectedMethod.value, selectedBill.value)
+/** ===== Subs data kamar & bulan ===== */
+watch([month, maskan, kamar], async ([m, mk, km]) => {
+  unsubscribeCharges()
+  unsubscribeBills()
+  if (m && mk && km) {
+    await ensureDefaultCharges(m, mk, km)
+    subscribeCharges(m, mk, km)
+    await loadDiscounts(m, santriList.value.map(s => s.id))
+    subscribeBills(m, santriList.value.map(s => s.id))
+    seedEditCharges()
+  }
+})
+watchEffect(async () => {
+  if (!month.value || !maskan.value || !kamar.value) return
+  await loadDiscounts(month.value, santriList.value.map(s => s.id))
+  subscribeBills(month.value, santriList.value.map(s => s.id))
 })
 
-const steps = computed(()=>{
-  const b = selectedBill.value, m = selectedMethod.value
-  if (!b || !m) return []
-  const nominal = `Nominal: ${fmtMoney(b.amount)}`
-  if (m.key === 'bca-va') return [
-    'Buka BCA mobile / myBCA atau ATM BCA',
-    'Pilih menu “m-Transfer” → “BCA Virtual Account”',
-    `Masukkan No. VA: ${currentVA.value}`,
-    nominal,
-    'Konfirmasi dan selesaikan pembayaran',
-  ]
-  if (m.key === 'dana') return [
-    'Buka aplikasi DANA',
-    'Pilih “Kirim ke Bank / Virtual Account”',
-    `Masukkan No. VA (DANA via VA): ${currentVA.value}`,
-    nominal,
-    'Konfirmasi dan bayar',
-  ]
-  if (m.key === 'gopay') return [
-    'Buka Gojek → GoPay',
-    'Pilih “Bayar Tagihan” / “Virtual Account”',
-    `Masukkan No. VA (GoPay via VA): ${currentVA.value}`,
-    nominal,
-    'Konfirmasi dan bayar',
-  ]
-  return [
-    'Buka aplikasi pembayaran yang mendukung QRIS',
-    'Pindai kode QR di atas',
-    nominal,
-    'Konfirmasi dan selesaikan pembayaran',
-  ]
-})
-
-async function copy(text: string) {
-  try {
-    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text)
-    else {
-      const ta = document.createElement('textarea')
-      ta.value = text; document.body.appendChild(ta); ta.select()
-      document.execCommand('copy'); document.body.removeChild(ta)
-    }
-  } catch {}
+/** ===== Edit charges buffer (untuk modal) ===== */
+type EditCharge = { _uid: string; key: string; title: string; amount: number; active: boolean }
+const editCharges = ref<EditCharge[]>([])
+function seedEditCharges() {
+  editCharges.value = charges.value.map(c => ({ _uid: `${c.key}-${Math.random().toString(36).slice(2,8)}`, key: c.key, title: c.title, amount: c.amount, active: c.active !== false }))
+}
+function addChargeRow(){ editCharges.value.push({ _uid: 'tmp-'+Math.random().toString(36).slice(2,8), key:'', title:'', amount:0, active:true }) }
+function removeChargeRow(i:number){ editCharges.value.splice(i,1) }
+async function saveCharges(){
+  if (!month.value || !maskan.value || !kamar.value) return
+  const m = month.value, mk = maskan.value, km = kamar.value
+  const keep = new Set(editCharges.value.filter(e=>e.key.trim()).map(e=>e.key.trim()))
+  for (const c of charges.value) if (!keep.has(c.key)) await deleteCharge(m, mk, km, c.key)
+  for (const e of editCharges.value) {
+    if (!e.key.trim() || !e.title.trim()) continue
+    await upsertCharge(m, mk, km, { key: e.key.trim(), title: e.title.trim(), amount: Number(e.amount||0), active: e.active })
+  }
 }
 
-const history = ref<{id:string; type:string; method:string; amount:number; paidAt:number}[]>([])
-function markAsPaid() {
-  if (!selectedBill.value || !selectedMethod.value) return
-  const b = selectedBill.value, m = selectedMethod.value
-  history.value.unshift({
-    id: `H-${Date.now()}`,
-    type: b.type,
-    method: m.title,
-    amount: b.amount,
-    paidAt: Date.now(),
+/** ===== Draft diskon per santri (modal) ===== */
+const discountDraft = reactive<Record<string, { chargeKey: string; type: 'amount'|'percent'; value: number }>>({})
+function draft(sid: string){
+  // @ts-ignore dynamic index
+  return (discountDraft[sid] ??= { chargeKey:'', type:'amount', value:0 })
+}
+function getDiscount(sid: string, ck: string){ return (discounts.value[sid]||[]).find(d=>d.chargeKey===ck) }
+function findCharge(key: string){ return charges.value.find(c=>c.key===key) }
+function discountLabel(d?: {type:'amount'|'percent'; value:number}){ return !d ? '' : d.type==='percent' ? `${d.value}%` : fmtMoney(d.value) }
+
+/** ===== Unpaid total per santri (baca bills) ===== */
+const roomBillMap = computed(() => {
+  const map = new Map<string, any>()
+  for (const b of bills.value) map.set(`${b.santriId}|||${b.id}`, b)
+  return map
+})
+function unpaidTotalFor(sid: string){
+  const key = `${sid}|||${month.value}`
+  const b = roomBillMap.value.get(key)
+  if (b && b.status === 'unpaid') return Number(b.total || 0)
+  return 0
+}
+
+/** ===== Modal state ===== */
+const showManage = ref(false)
+const currentSantri = ref<any|null>(null)
+const dueDateInput = ref<string>('') // YYYY-MM-DD
+
+const currentEstimateTotal = computed(() => {
+  if (!currentSantri.value) return 0
+  const base = editCharges.value.map(c => ({ key: c.key, title: c.title, amount: c.amount, active: c.active }))
+  const dmap = new Map<string, {type:'amount'|'percent'; value:number}>()
+  for (const d of (discounts.value[currentSantri.value.id] || [])) dmap.set(d.chargeKey, d)
+  // gabungkan draft diskon yang lagi diedit juga (override)
+  const dr = draft(currentSantri.value.id)
+  if (dr.chargeKey) dmap.set(dr.chargeKey, { type: dr.type, value: Number(dr.value||0) })
+
+  // hitung manual (mirroring buildItemsForSantri):
+  const items = base.filter(c => c.active !== false).map(c => {
+    const original = Number(c.amount || 0)
+    const dd = dmap.get(c.key)
+    let disc = 0
+    if (dd) disc = dd.type === 'percent' ? Math.round(original * (dd.value/100)) : Math.min(original, Math.round(dd.value))
+    return Math.max(0, original - disc)
   })
-  bills.value = bills.value.filter(x=>x.id !== b.id)
-  resetSelection()
+  return items.reduce((a,b)=>a+b,0)
+})
+
+function openManage(s: any){
+  currentSantri.value = s
+  // seed edit charges dari charges aktif sekarang
+  seedEditCharges()
+  // seed draft diskon agar selalu ada object saat v-model
+  draft(s.id)
+  showManage.value = true
+}
+function closeManage(){ showManage.value = false; currentSantri.value = null }
+
+/** ===== Apply diskon + Simpan & Generate ===== */
+async function applyDiscount(sid: string){
+  const d = draft(sid)
+  if (!d.chargeKey) return
+  await setDiscount(month.value, sid, { chargeKey: d.chargeKey, type: d.type, value: Number(d.value||0) })
+  await loadDiscounts(month.value, santriList.value.map(ss => ss.id))
+}
+async function removeDiscount(sid: string, ck: string){
+  await deleteDiscount(month.value, sid, ck)
+  await loadDiscounts(month.value, santriList.value.map(ss => ss.id))
+}
+async function saveAndGenerate(){
+  if (!currentSantri.value) return
+  await saveCharges()
+  const dueAt = dueDateInput.value ? Date.parse(dueDateInput.value) : undefined
+  await generateBillsForRoom(month.value, maskan.value, kamar.value, dueAt)
+  closeManage()
 }
 
-function resetSelection() {
-  selectedBill.value = null
-  selectedMethod.value = null
-}
-
-function regenerateDummy() {
-  const base = [
-    { id: 'b1', type: 'SPP',         title: 'SPP Sekolah',     amount: 200_000 },
-    { id: 'b2', type: 'Bulanan',     title: 'Asrama Bulanan',  amount: 180_000 },
-    { id: 'b3', type: 'Makanan',     title: 'Uang Makan',      amount: 320_000 },
-    { id: 'b4', type: 'Transportasi',title: 'Transport Bulan', amount: 140_000 },
-  ] as const
-  const d = new Date()
-  bills.value = base.map((x, i)=>({
-    id: `b${i+1}`,
-    type: x.type as Bill['type'],
-    title: x.title,
-    period: monthLbl(d),
-    amount: x.amount + Math.round(Math.random()*50_000),
-    dueAt: +new Date(d.getFullYear(), d.getMonth(), 10 + i*5),
-    code: `INV-${x.type.substring(0,3).toUpperCase()}-${String(i+1).padStart(3,'0')}`
-  }))
-}
-
+/** ===== Money util ===== */
 const fmtMoney = (n?: number | null) =>
   (Number(n ?? 0)).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })
 
-const badgeClass = (type: Bill['type']) => {
-  if (type === 'SPP') return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-  if (type === 'Bulanan') return 'bg-emerald-100 dark:bg-emerald-900/30'
-  if (type === 'Makanan') return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-  return 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
-}
+/** ===== Lifecycle ===== */
+onMounted(async () => {
+  await fetchSantri()
+  subscribeRooms()
+})
+onBeforeUnmount(() => {
+  unsubscribeRooms()
+  unsubscribeCharges()
+  unsubscribeBills()
+})
 </script>

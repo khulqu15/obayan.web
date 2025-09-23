@@ -91,9 +91,9 @@
               <template #cell-action="{ row }">
                 <div class="flex flex-wrap gap-1">
                   <button v-if="row.status!=='returned' && row.status!=='done'" @click="markReturned(row.id)" class="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">Return</button>
-                  <button @click="openEdit(row)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800">Edit</button>
+                  <button @click="openEdit(row)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 border-gray-200 dark:hover:bg-neutral-800">Edit</button>
                   <button @click="openDelete(row)" class="text-xs px-2 py-1 rounded border text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">Hapus</button>
-                  <button @click="printIzin(row)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800">Print (Dot Matrix)</button>
+                  <button @click="printIzin(row)" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 border-gray-200 dark:hover:bg-neutral-800">Print (Dot Matrix)</button>
                 </div>
               </template>
             </DataTable>
@@ -182,10 +182,8 @@
         </template>
       </ModalShell>
 
-      <!-- MODAL Create/Edit -->
-      <ModalShell v-model="showForm" :title="formMode==='create' ? 'Tambah Izin' : 'Ubah Izin'">
+      <ModalShell size="4xl" v-model="showForm" :title="formMode==='create' ? 'Tambah Izin' : 'Ubah Izin'">
         <form class="space-y-4 max-h-[50vh] overflow-y-auto scrollbar-none" @submit.prevent="submitForm">
-          <!-- SANTRI -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="sm:col-span-2">
               <label class="text-xs text-gray-600 dark:text-neutral-300">Nama Santri</label>
@@ -286,7 +284,7 @@
       </ModalShell>
 
       <!-- MODAL History Detail -->
-      <ModalShell v-model="showHistDetail" :title="`Detail Sesi ${histDetailId||''} — ${activeTipe}`">
+      <ModalShell size="4xl" v-model="showHistDetail" :title="`Detail Sesi ${histDetailId||''} — ${activeTipe}`">
         <div class="max-h-[70vh] overflow-auto">
           <table class="min-w-full text-xs">
             <thead><tr class="text-left">
@@ -312,6 +310,73 @@
           <button @click="showHistDetail=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">Tutup</button>
         </template>
       </ModalShell>
+
+      <!-- MODAL: Hapus 1 Data -->
+      <div
+        v-if="showDeleteOneModal"
+        class="hs-overlay fixed inset-0 z-[70] flex items-center justify-center"
+        role="dialog"
+        aria-modal="true"
+      >
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/40"></div>
+
+        <!-- Panel -->
+        <div
+          class="relative w-full max-w-md mx-4 rounded-2xl border border-gray-200 bg-white shadow-xl
+                dark:bg-neutral-900 dark:border-neutral-800"
+        >
+          <!-- Header -->
+          <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-neutral-800">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-neutral-100">Hapus Data</h3>
+            <button
+              type="button"
+              @click="cancelDeleteOne"
+              class="inline-flex size-8 items-center justify-center rounded-lg hover:bg-gray-100
+                    dark:hover:bg-neutral-800"
+              aria-label="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="px-4 py-4 text-sm">
+            <div class="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800
+                        dark:bg-amber-900/20 dark:border-amber-900/30 dark:text-amber-300">
+              Tindakan ini permanen dan tidak dapat dibatalkan.
+            </div>
+            <p class="text-gray-700 dark:text-neutral-300">
+              Anda yakin ingin menghapus data perizinan
+              <span class="font-semibold">{{ deleteTarget?.name || '-' }}</span>?
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div class="flex items-center justify-end gap-2 px-4 py-3 border-t border-gray-200 dark:border-neutral-800">
+            <button
+              type="button"
+              @click="cancelDeleteOne"
+              class="px-3 py-1.5 rounded-lg border border-gray-200 text-sm hover:bg-gray-50
+                    dark:border-neutral-700 dark:hover:bg-neutral-800"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              :disabled="deletingOne"
+              @click="confirmDeleteOne"
+              class="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-sm hover:bg-rose-700
+                    disabled:opacity-60"
+            >
+              {{ deletingOne ? 'Menghapus…' : 'Hapus' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 </template>
@@ -733,8 +798,34 @@ async function submitForm() {
   } finally { saving.value = false }
 }
 
+const showDeleteOneModal = ref(false)
+const deletingOne = ref(false)
+const deleteTarget = ref<IzinRow | null>(null)
+
 function openDelete(r: IzinRow) {
-  if (confirm(`Hapus izin ${r.name}?`)) deleteIzin(r.id)
+  deleteTarget.value = r
+  showDeleteOneModal.value = true
+}
+
+function cancelDeleteOne() {
+  if (deletingOne.value) return
+  showDeleteOneModal.value = false
+  deleteTarget.value = null
+}
+
+async function confirmDeleteOne() {
+  if (!deleteTarget.value) return
+  deletingOne.value = true
+  try {
+    await deleteIzin(deleteTarget.value.id)
+    showDeleteOneModal.value = false
+    deleteTarget.value = null
+  } catch (e) {
+    console.error(e)
+    alert('Gagal menghapus data.')
+  } finally {
+    deletingOne.value = false
+  }
 }
 
 // ============ AUTOCOMPLETE (SANTRI) ============

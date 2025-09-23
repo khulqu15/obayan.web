@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div class="relative overflow-hidden">
     <!-- Background pattern -->
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
       <div class="absolute inset-0 bg-white dark:bg-neutral-950
@@ -366,6 +366,7 @@
               <DataTable
                 :show-actions="true"
                 title="Santri Baru Putri"
+                :show-page-size="true"
                 :rows="baruPutriFiltered"
                 :columns="columnsAdmin"
                 :rowKey="(r) => r.id"
@@ -393,8 +394,7 @@
         </section>
       </div>
 
-      <!-- Modal: Edit ringkas (tetap) -->
-      <ModalShell v-model="showForm" :title="formMode === 'edit' ? 'Ubah Data (Ringkas)' : 'Tambah Pendaftar'">
+      <ModalShell size="3xl" v-model="showForm" :title="formMode === 'edit' ? 'Ubah Data (Ringkas)' : 'Tambah Pendaftar'">
         <form class="space-y-3 max-h-[60vh] overflow-y-auto scrollbar-none" @submit.prevent="saveRow">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -443,9 +443,8 @@
         </template>
       </ModalShell>
 
-      <!-- Modal: Dokumen -->
-      <ModalShell v-model="showDocs" title="Dokumen Pendaftar">
-        <div class="space-y-3">
+      <ModalShell size="3xl" v-model="showDocs" title="Dokumen Pendaftar">
+        <div class="space-y-3 max-h-[70vh] overflow-y-auto">
           <div v-if="docState.loading" class="text-sm text-slate-500">Memuat dokumen…</div>
           <div v-else-if="!docTabs.length" class="text-sm text-slate-500">Tidak ada dokumen.</div>
           <div v-else>
@@ -465,7 +464,7 @@
             </div>
             <div class="mt-3 rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
               <div class="p-2">
-                <div v-if="currentTab.isImage" class="w-full h-[60vh] grid place-items-center">
+                <div v-if="currentTab.isImage" class="w-full grid place-items-center">
                   <img :src="currentTab.url" alt="" class="max-h-full max-w-full object-contain rounded-md" @error="() => {}" />
                 </div>
                 <div v-else-if="currentTab.isPdf" class="w-full h-[60vh]">
@@ -490,8 +489,7 @@
         </template>
       </ModalShell>
 
-      <!-- Modal: Detail Lengkap -->
-      <ModalShell v-model="showDetail" title="Detail Pendaftaran">
+      <ModalShell size="3xl" v-model="showDetail" title="Detail Pendaftaran">
         <div v-if="detailState.loading" class="text-sm text-slate-500">Memuat detail…</div>
         <div v-else-if="!fullRecord" class="text-sm text-slate-500">Data tidak tersedia.</div>
         <div v-else class="max-h-[65vh] overflow-y-auto space-y-4 pr-1">
@@ -527,7 +525,6 @@
         </template>
       </ModalShell>
 
-      <!-- Modal: Konfirmasi Hapus -->
       <ModalShell v-model="showConfirm" title="Hapus Data">
         <p class="text-sm text-slate-700 dark:text-neutral-200">
           Hapus data <strong>{{ current?.santri }}</strong>? Tindakan ini tidak dapat dibatalkan.

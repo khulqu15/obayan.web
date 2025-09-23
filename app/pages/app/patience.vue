@@ -104,7 +104,7 @@
     <!-- ====== PER KAMAR (LIST KOLLAPS) ====== -->
     <details v-if="mode==='kamar'" class="group mt-4 rounded-2xl border border-gray-200 bg-white dark:bg-neutral-800 overflow-hidden" open>
       <summary class="flex items-center justify-between p-4 cursor-pointer select-none">
-        <div class="font-semibold">Input Cepat Per Kamar</div>
+        <div class="font-semibold">Buku Sabar Santri</div>
         <Icon icon="lucide:chevron-down" class="size-5 text-gray-500 transition group-open:rotate-180"/>
       </summary>
 
@@ -114,7 +114,7 @@
         </div>
 
         <div class="rounded-xl border border-gray-200 dark:border-neutral-700 divide-y dark:divide-neutral-700">
-          <div v-for="mg in maskanKamarTree" :key="mg.maskan" class="p-0">
+          <div v-for="mg in maskanKamarTree" :key="mg.maskan" class="p-0 border-b border-gray-200">
             <details class="group" open>
               <summary class="flex items-center justify-between px-4 py-3 cursor-pointer">
                 <div class="font-semibold">{{ mg.maskan || '(Tanpa Maskan)' }}</div>

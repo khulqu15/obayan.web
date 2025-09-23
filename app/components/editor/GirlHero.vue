@@ -35,7 +35,6 @@
 
     <!-- CTA -->
     <div v-show="activeTab==='CTA'" class="mt-3 grid sm:grid-cols-2 gap-4">
-      <!-- Lokasi -->
       <div class="space-y-2">
         <p class="text-xs font-semibold text-gray-700 dark:text-neutral-300">Button Lokasi</p>
         <div>
@@ -61,7 +60,6 @@
         </div>
       </div>
 
-      <!-- Kontak -->
       <div class="space-y-2">
         <p class="text-xs font-semibold text-gray-700 dark:text-neutral-300">Button Kontak</p>
         <div>
@@ -84,6 +82,48 @@
                   @click="openIconPicker('contact')">Pilih Ikon</button>
           <button type="button" class="px-3 py-2 rounded-lg border bg-white hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 text-sm"
                   @click="form.ctaContact.icon=''">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating cards -->
+    <div v-show="activeTab==='Floating'" class="mt-3 grid sm:grid-cols-2 gap-4">
+      <!-- ATAS (kanan) -->
+      <div class="space-y-2">
+        <p class="text-xs font-semibold text-gray-700 dark:text-neutral-300">Kartu Atas (kanan)</p>
+        <div>
+          <label class="text-xs text-gray-500">Judul (atas)</label>
+          <input v-model.trim="form.floatingTopTitle" placeholder="Ustadzah" class="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
+        </div>
+        <div>
+          <label class="text-xs text-gray-500">Subjudul (atas)</label>
+          <input v-model.trim="form.floatingTopSubtitle" placeholder="Kompeten" class="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
+        </div>
+        <div class="grid sm:grid-cols-[1fr_auto_auto] gap-2 items-end">
+          <div>
+            <label class="text-xs text-gray-500">Ikon (opsional)</label>
+            <div class="mt-1 flex items-center gap-2">
+              <input v-model.trim="form.floatingTopIcon" placeholder="ph:chalkboard-teacher" class="w-full rounded-md border border-gray-200 px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
+              <ClientOnly><Icon v-if="form.floatingTopIcon" :icon="form.floatingTopIcon" class="size-5 text-gray-600 dark:text-neutral-300" /></ClientOnly>
+            </div>
+          </div>
+          <button type="button" class="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 text-sm"
+                  @click="openIconPicker('top')">Pilih Ikon</button>
+          <button type="button" class="px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 text-sm"
+                  @click="form.floatingTopIcon=''">Clear</button>
+        </div>
+      </div>
+
+      <!-- BAWAH (kiri) -->
+      <div class="space-y-2">
+        <p class="text-xs font-semibold text-gray-700 dark:text-neutral-300">Kartu Bawah (kiri)</p>
+        <div>
+          <label class="text-xs text-gray-500">Judul (bawah)</label>
+          <input v-model.trim="form.floatingBottomTitle" placeholder="Santri awal" class="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
+        </div>
+        <div>
+          <label class="text-xs text-gray-500">Subjudul (bawah)</label>
+          <input v-model.trim="form.floatingBottomSubtitle" placeholder="70+" class="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
         </div>
       </div>
     </div>
@@ -111,13 +151,12 @@
       <p class="mt-2 text-[11px] text-gray-500">Preview menampilkan hasil sesuai data saat ini (belum tentu tersimpan).</p>
     </div>
 
-    <!-- Notes -->
     <div class="mt-4 flex flex-wrap gap-2">
       <p v-if="savedNote" class="text-[11px] text-emerald-600">{{ savedNote }}</p>
       <p v-if="errNote" class="text-[11px] text-rose-600">{{ errNote }}</p>
     </div>
 
-    <!-- ICON PICKER MODAL -->
+    <!-- Icon picker modal (reuse) -->
     <div v-if="iconModal.show" class="fixed left-0 top-0 w-full z-[1002] h-screen flex items-start py-24 overflow-y-auto justify-center bg-black/30 px-4" @click.self="closeIconPicker">
       <div class="w-full max-w-3xl rounded-2xl bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700">
         <div class="p-4 border-b border-gray-200 dark:border-neutral-800 flex items-center justify-between">
@@ -173,7 +212,6 @@
         </div>
       </div>
     </div>
-    <!-- /ICON PICKER MODAL -->
   </div>
 </template>
 
@@ -192,6 +230,11 @@ type Shape = {
   image: string
   ctaLocation: CTA
   ctaContact: CTA
+  floatingTopTitle: string
+  floatingTopSubtitle: string
+  floatingTopIcon?: string
+  floatingBottomTitle: string
+  floatingBottomSubtitle: string
 }
 
 const props = defineProps<{ section: { id: string; key: string; props?: Partial<Shape> } }>()
@@ -203,10 +246,15 @@ const defaults: Shape = {
     'Pondok Pesantren Al-Berr membuka unit pendidikan putri dengan sekitar 70 santri awal dan dibina ustadzah berkompeten. Mengusung kemandirian, disiplin, serta program pendidikan setara santri putra, unit ini menegaskan Al-Berr sebagai pesantren komprehensif bagi putra-putri. Kehadiran pondok putri menegaskan Al-Berr sebagai pesantren komprehensif yang melayani santri putra dan putri serta siap menghadapi tantangan zaman.',
   image: '/assets/images/gallery/5.jpg',
   ctaLocation: { label: 'Lihat Lokasi', href: 'https://maps.app.goo.gl/BTtkMt27swwav4TA8', icon: 'ph:map-pin-area' },
-  ctaContact:  { label: 'Kontak Pengurus', href: 'tel:+6281234567890', icon: 'ph:phone-call' }
+  ctaContact:  { label: 'Kontak Pengurus', href: 'tel:+6281234567890', icon: 'ph:phone-call' },
+  floatingTopTitle: 'Ustadzah',
+  floatingTopSubtitle: 'Kompeten',
+  floatingTopIcon: 'ph:chalkboard-teacher',
+  floatingBottomTitle: 'Santri awal',
+  floatingBottomSubtitle: '70+'
 }
 
-const tabs = ['Konten','CTA','Media','Preview'] as const
+const tabs = ['Konten','CTA','Floating','Media','Preview'] as const
 const activeTab = ref<typeof tabs[number]>('Konten')
 const form = reactive<Shape>(merge(defaults, props.section?.props || {}))
 const savedNote = ref(''); const errNote = ref(''); const progress = reactive<Record<string,number>>({})
@@ -223,22 +271,24 @@ function merge(b: Shape, p: Partial<Shape>): Shape {
     image: p.image ?? b.image,
     ctaLocation: { ...b.ctaLocation, ...(p.ctaLocation||{}) },
     ctaContact: { ...b.ctaContact, ...(p.ctaContact||{}) },
+    floatingTopTitle: p.floatingTopTitle ?? b.floatingTopTitle,
+    floatingTopSubtitle: p.floatingTopSubtitle ?? b.floatingTopSubtitle,
+    floatingTopIcon: p.floatingTopIcon ?? b.floatingTopIcon,
+    floatingBottomTitle: p.floatingBottomTitle ?? b.floatingBottomTitle,
+    floatingBottomSubtitle: p.floatingBottomSubtitle ?? b.floatingBottomSubtitle,
   }
 }
 
 const heroProps = computed(() => JSON.parse(JSON.stringify(form)))
 
-/** SAVE -> /alberr/web/pages/home/sections/<uuid>/props */
 async function save() {
   try {
     errNote.value = ''
     const { $realtimeDb } = useNuxtApp()
-
     const cleanId = (props.section?.id || '').replace(/^\/+|\/+$/g, '')
     const nodePath = cleanId.startsWith('home/sections/')
       ? `alberr/web/pages/${cleanId}/props`
       : `alberr/web/pages/home/sections/${cleanId}/props`
-
     await update(dbRef($realtimeDb), { [nodePath]: heroProps.value })
     savedNote.value = 'Tersimpan.'; setTimeout(()=>savedNote.value='', 1500)
   } catch (e:any) {
@@ -246,7 +296,6 @@ async function save() {
   }
 }
 
-/** Upload image ke Firebase Storage */
 async function upload(e: Event, key: 'image') {
   const file = (e.target as HTMLInputElement).files?.[0]; if (!file) return
   progress[key] = 0
@@ -270,9 +319,9 @@ async function upload(e: Event, key: 'image') {
   }
 }
 
-/* ===== Icon Picker (ringkas, dengan dukungan online Iconify) ===== */
+/* Icon picker */
 type IconTab = 'All' | 'Phosphor' | 'Lucide' | 'Material'
-type Target = 'loc' | 'contact'
+type Target = 'loc' | 'contact' | 'top'
 const iconModal = reactive({
   show:false, target:'loc' as Target,
   tabs:['All','Phosphor','Lucide','Material'] as IconTab[],
@@ -283,7 +332,8 @@ const iconModal = reactive({
 const localIcons = ref<string[]>([
   'ph:map-pin-area','ph:map-trifold','ph:map-pin','ph:phone-call','ph:phone','ph:whatsapp-logo',
   'lucide:map-pin','lucide:phone','lucide:navigation-2',
-  'mdi:map-marker','mdi:phone','mdi:whatsapp'
+  'mdi:map-marker','mdi:phone','mdi:whatsapp',
+  'ph:chalkboard-teacher','ph:users-three','ph:book-open-text'
 ])
 function openIconPicker(t:Target){ iconModal.target=t; iconModal.show=true; iconModal.query=''; setTab(iconModal.activeTab); iconModal.visible=filterLocal(iconModal.activeTab,''); iconModal.total=iconModal.visible.length }
 function closeIconPicker(){ iconModal.show=false }
@@ -317,7 +367,11 @@ function nextPage(){ iconModal.start=Math.min(iconModal.start+iconModal.limit, M
 function prevPage(){ iconModal.start=Math.max(0, iconModal.start-iconModal.limit); searchOnline(true) }
 function chooseIcon(name:string){
   if(iconModal.target==='loc') form.ctaLocation.icon = name
-  else form.ctaContact.icon = name
+  else if(iconModal.target==='contact') form.ctaContact.icon = name
+  else form.floatingTopIcon = name
   closeIconPicker()
 }
+
+/* Helpers */
+function resetToDefault(){ Object.assign(form, JSON.parse(JSON.stringify(defaults))); activeTab.value='Konten' }
 </script>

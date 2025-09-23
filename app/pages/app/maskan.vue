@@ -84,13 +84,13 @@
             <!-- Ketua -->
             <td class="px-3 py-3 align-middle">
               <div class="flex items-center gap-2">
-                <span class="truncate max-w-[14rem]">{{ displayPjName(r.pj) || '—' }}</span>
                 <button
                   class="inline-flex items-center justify-center rounded-md border border-gray-200 dark:border-neutral-700 p-1 hover:bg-gray-50 dark:hover:bg-neutral-800"
                   @click="openSetKetua(r)"
                   title="Ubah ketua">
                   <svg class="size-4" viewBox="0 0 24 24" fill="none"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" stroke="currentColor" stroke-width="1.5"/></svg>
                 </button>
+                <span class="truncate max-w-[14rem]">{{ displayPjName(r.pj) || '—' }}</span>
               </div>
             </td>
 
@@ -199,11 +199,11 @@
       </template>
     </ModalShell>
 
-    <ModalShell size="2xl" v-model="showResidents" :title="roomForResidents ? `Penghuni Kamar ${roomForResidents.number} • Maskan ${roomForResidents.maskanName}` : 'Penghuni Kamar'">
+    <ModalShell size="5xl" v-model="showResidents" :title="roomForResidents ? `Penghuni Kamar ${roomForResidents.number} • Maskan ${roomForResidents.maskanName}` : 'Penghuni Kamar'">
       <div v-if="roomForResidents" class="grid sm:grid-cols-2 gap-4">
         <div class="space-y-2">
           <div class="text-xs font-semibold">Penghuni saat ini</div>
-          <div class="max-h-72 overflow-auto rounded border border-gray-200 dark:border-neutral-700 divide-y dark:divide-neutral-800">
+          <div class="max-h-[22.7rem] overflow-auto rounded border border-gray-200 dark:border-neutral-700 divide-y dark:divide-neutral-800">
             <div v-for="s in roomForResidents.santri" :key="s.id" class="flex items-center justify-between px-3 py-2 border-b border-gray-200">
               <div>
                 <div class="text-sm font-medium">{{ s.santri }}</div>
@@ -224,7 +224,7 @@
           <input v-model.trim="addQuery" placeholder="Cari nama santri…" class="w-full px-3 py-2 rounded border border-gray-200 dark:bg-neutral-900 dark:border-neutral-700" />
           <div class="text-[11px] text-gray-500">Hanya menampilkan santri yang belum di kamar ini & cocok tipe.</div>
           <div class="max-h-72 overflow-auto rounded border border-gray-200 dark:border-neutral-700 divide-y dark:divide-neutral-800">
-            <div v-for="s in addCandidates" :key="s.id" class="flex border-b border-gray-200 items-center justify-between px-3 py-2">
+            <div v-for="s in addCandidates" :key="s.id" class="flex-col border-b border-gray-200 items-center justify-between px-3 py-2">
               <div>
                 <div class="text-sm font-medium">{{ s.santri }}</div>
                 <div class="text-[11px] text-gray-500">Gen {{ s.gen || '-' }} <span v-if="s.kamar || s.maskan">• sekarang: {{ s.maskan || '-' }} {{ s.kamar || '' }}</span></div>
@@ -232,7 +232,7 @@
               <button
                 :disabled="residentsSaving"
                 @click="addResident(s)"
-                class="text-[11px] px-2 py-1 rounded border border-emerald-300 w-full px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900700 hover:bg-emerald-50 dark:border-emerald-900/40 dark:w-full px-3 py-2 rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900300 dark:hover:bg-emerald-900/20 disabled:opacity-60">
+                class="text-[11px] px-2 py-1 w-full inline-block rounded border border-gray-200 dark:border-neutral-700 dark:bg-neutral-900700 hover:bg-emerald-50 dark:w-full dark:bg-neutral-900300 dark:hover:bg-emerald-900/20 disabled:opacity-60">
                 Tambahkan
               </button>
             </div>
@@ -245,7 +245,7 @@
       </template>
     </ModalShell>
 
-    <ModalShell v-model="showMaskanForm" :title="maskanFormMode==='create' ? 'Tambah Maskan' : 'Ubah Maskan'">
+    <ModalShell size="3xl" v-model="showMaskanForm" :title="maskanFormMode==='create' ? 'Tambah Maskan' : 'Ubah Maskan'">
       <form class="space-y-3" @submit.prevent="submitMaskanForm">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -286,10 +286,8 @@
       </template>
     </ModalShell>
 
-    <!-- Modal: Maskan Manager -->
-    <ModalShell size="3xl" v-model="showMaskanManager" title="Kelola Struktur Maskan">
-      <div class="space-y-4">
-        <!-- Tabs + Actions -->
+    <ModalShell size="4xl" v-model="showMaskanManager" title="Kelola Struktur Maskan">
+      <div class="space-y-4 max-h-[50vh] overflow-y-auto scrollbar-none">
         <div class="flex items-center justify-between flex-wrap gap-2">
           <div class="inline-flex p-1 rounded-2xl bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700">
             <button
@@ -312,17 +310,9 @@
           </div>
         </div>
 
-        <!-- Grid Cards -->
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <div
-            v-for="m in maskanRowsMgr"
-            :key="m.id"
-            class="group rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-900/50 shadow-sm hover:shadow-md transition-all">
-
-            <!-- Header ala Duolingo (gradient biru/emerald) -->
-            <div
-              class="rounded-t-2xl px-4 py-3 text-white"
-              :class="m.tipe==='Putra'
+          <div v-for="m in maskanRowsMgr" :key="m.id" class="group rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-900/50 shadow-sm hover:shadow-md transition-all">
+            <div class="rounded-t-2xl px-4 py-3 text-white" :class="m.tipe==='Putra'
                       ? 'bg-gradient-to-r from-blue-600 to-emerald-500'
                       : 'bg-gradient-to-r from-emerald-600 to-blue-500'">
               <div class="flex items-center justify-between">
@@ -330,16 +320,13 @@
                   <div class="text-sm/5 font-semibold">Maskan {{ m.name }}</div>
                   <div class="text-[11px]/4 opacity-90">{{ m.tipe }}</div>
                 </div>
-                <!-- Icon -->
                 <svg class="size-5 opacity-90" viewBox="0 0 24 24" fill="none">
                   <path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zm2-4h12l2 4H4l2-4z" stroke="currentColor" stroke-width="1.5"/>
                 </svg>
               </div>
             </div>
 
-            <!-- Body: stats + actions -->
             <div class="p-4 space-y-3">
-              <!-- Stats -->
               <div class="grid grid-cols-3 gap-2 text-center">
                 <div class="rounded-lg bg-gray-50 dark:bg-neutral-800 p-2">
                   <div class="text-[11px] text-gray-500 dark:text-neutral-400">Kamar</div>
@@ -418,7 +405,7 @@
     </ModalShell>
 
     <!-- Modal: Hapus Maskan -->
-    <ModalShell v-model="showMaskanDelete" title="Hapus Maskan">
+    <ModalShell size="3xl" v-model="showMaskanDelete" title="Hapus Maskan">
       <div class="rounded-xl border border-rose-300 dark:border-rose-900/40 bg-rose-50/70 dark:bg-rose-900/10 p-3 text-rose-800 dark:text-rose-200">
         <div class="font-semibold">Tindakan ini permanen.</div>
         <ul class="list-disc pl-5 text-sm mt-1 space-y-1">
@@ -445,7 +432,7 @@
 
 
     <!-- Modal: Tambah/Ubah Kamar -->
-    <ModalShell v-model="showRoomForm" :title="roomFormMode==='create' ? `Tambah Kamar • Maskan ${maskanForRoom?.name || '-'}` : `Ubah Kamar • Maskan ${maskanForRoom?.name || '-'}`">
+    <ModalShell size="3xl" v-model="showRoomForm" :title="roomFormMode==='create' ? `Tambah Kamar • Maskan ${maskanForRoom?.name || '-'}` : `Ubah Kamar • Maskan ${maskanForRoom?.name || '-'}`">
       <form class="space-y-3" @submit.prevent="submitRoomForm">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
