@@ -3,7 +3,8 @@
     <NuxtLoadingIndicator :color="settings.primaryColor || '#2563eb'" :height="3" :throttle="0" :duration="2000" />
     <AppLoading :force="forced" label="Memuat..." sublabel="Menyiapkan halaman" />
     <NuxtLayout v-bind="page?.meta?.layoutProps">
-      <NuxtPage />
+      <Maintenance v-if="maintenance"></Maintenance>
+      <NuxtPage/>
     </NuxtLayout>
   </div>
 </template>
@@ -12,7 +13,9 @@
 import { onMounted, ref, nextTick, watch, onBeforeUnmount } from 'vue'
 import { useSettings } from '~/composables/data/useSettings'
 import { ref as dbRef, onValue, off } from 'firebase/database'
+import Maintenance from './components/Maintenance.vue'
 
+const maintenance = ref(false)
 const page = useRoute()
 const forced = ref(false)
 
@@ -38,14 +41,16 @@ function applyPrimary(hex?: string) {
   root.style.setProperty('--app-primary-rgb', hexToRgbStr(h))
   root.style.setProperty('--auto-text-on-primary', getContrastYIQ(h))
 }
+
 function applySecondary(hex?: string) {
   if (typeof document === 'undefined') return
   const root = document.documentElement
-  const h = hex || '#10b981' /* emerald-500 default */
+  const h = hex || '#10b981'
   root.style.setProperty('--app-secondary', h)
   root.style.setProperty('--app-secondary-rgb', hexToRgbStr(h))
   root.style.setProperty('--auto-text-on-secondary', getContrastYIQ(h))
 }
+
 function applyTheme(theme?: 'light'|'dark'|'system') {
   if (typeof document === 'undefined') return
   const root = document.documentElement
@@ -57,12 +62,14 @@ function applyTheme(theme?: 'light'|'dark'|'system') {
     setDark(!!mq && mq.matches)
   }
 }
+
 function applyFontScale(scale?: number) {
   if (typeof document === 'undefined') return
   const s = Number(scale || 1)
   document.documentElement.style.setProperty('--app-font-scale', String(s))
   document.documentElement.style.setProperty('font-size', `${(16 * s).toFixed(2)}px`)
 }
+
 function applyDensity(density?: 'comfortable'|'compact') {
   if (typeof document === 'undefined') return
   document.documentElement.setAttribute('data-density', density === 'comfortable' ? 'comfortable' : 'compact')
@@ -70,8 +77,13 @@ function applyDensity(density?: 'comfortable'|'compact') {
 
 let rtdbRef: ReturnType<typeof dbRef> | null = null
 const cb = (snap: any) => {
-  const v = snap?.val?.() ?? snap?.val?.call?.(snap) ?? snap?.val?.() // guard
+  const v = snap?.val?.() ?? snap?.val?.call?.(snap) ?? snap?.val?.()
   const s = v || {}
+  if(s.maintenance != null || s.maintenance != undefined) {
+    maintenance.value = s.maintenance
+    if(s.maintenance) document.querySelector('html')?.classList.add('overflow-hidden')
+    else document.querySelector('html')?.classList.remove('overflow-hidden')
+  }
   applyPrimary(s.primaryColor)
   applySecondary(s.secondaryColor)
   applyTheme(s.theme)
@@ -85,7 +97,6 @@ onMounted(() => {
   applyTheme('system')
   applyFontScale(1)
   applyDensity('comfortable')
-
   const { $realtimeDb } = useNuxtApp() as any
   rtdbRef = dbRef($realtimeDb, '/alberr/settings')
   onValue(rtdbRef, cb, (err) => console.error('RTDB settings error:', err))

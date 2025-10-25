@@ -301,18 +301,133 @@
         <button @click="showProgress=false" class="px-3 py-1.5 rounded border border-gray-200 dark:border-neutral-600 hover:bg-gray-50 dark:hover:bg-neutral-800" :disabled="progress < 100">Tutup</button>
       </template>
     </ModalShell>
+
+    <!-- ===================== GRUP: Wali/Ayah + No HP Sama ===================== -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold">Potensi Duplikat Keluarga (Nama Wali/Ayah & No HP Sama)</h2>
+
+        <!-- Kontrol Nilai -->
+        <div class="flex items-center gap-2 text-xs">
+          <select v-model="selectedMapelId" class="px-2 py-1.5 rounded border border-gray-200 dark:border-neutral-700">
+            <option value="">(Pilih Mapel untuk tampilkan nilai)</option>
+            <option v-for="m in subjects" :key="m.id" :value="m.id">{{ m.name }}</option>
+          </select>
+          <input v-model.number="tahunAwalNilai" type="number" class="w-20 px-2 py-1.5 rounded border border-gray-200 dark:border-neutral-700" :title="'Tahun Awal – term aktif: ' + termKeyNilai"/>
+          <select v-model="semesterNilai" class="px-2 py-1.5 rounded border border-gray-200 dark:border-neutral-700">
+            <option>Ganjil</option><option>Genap</option>
+          </select>
+        </div>
+      </div>
+
+      <div v-if="!groupsWali.length" class="text-sm text-gray-500">
+        Tidak ditemukan grup dengan nama wali/ayah dan nomor HP yang sama.
+      </div>
+
+      <div v-for="g in groupsWali" :key="g.key" class="rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
+        <!-- Header grup -->
+        <div class="p-3 bg-gray-50 dark:bg-neutral-900/40 flex items-center justify-between">
+          <div>
+            <div class="font-medium">
+              {{ g.waliName || '(tanpa nama wali)' }}
+              <span class="text-gray-400">•</span>
+              <a :href="`tel:${g.phone}`" class="text-blue-600 hover:underline">+{{ g.phone }}</a>
+            </div>
+            <div class="text-xs text-gray-500">
+              {{ statsForGroup(g).total }} santri
+              <span class="mx-2 text-gray-300">|</span>
+              Status:
+              <span v-for="(s,i) in statsForGroup(g).byStatus" :key="s.k">
+                <b>{{ s.k }}</b> {{ s.v }}<span v-if="i < statsForGroup(g).byStatus.length-1">, </span>
+              </span>
+              <span class="mx-2 text-gray-300">|</span>
+              Jenjang:
+              <span v-for="(j,i) in statsForGroup(g).byJenjang" :key="j.k">
+                <b>{{ j.k }}</b> {{ j.v }}<span v-if="i < statsForGroup(g).byJenjang.length-1">, </span>
+              </span>
+            </div>
+          </div>
+          <div class="text-xs text-gray-500">
+            Term nilai aktif: <b>{{ termKeyNilai }}</b>
+          </div>
+        </div>
+
+        <!-- Body daftar santri -->
+        <div class="p-3 overflow-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-white dark:bg-neutral-800 sticky top-0">
+              <tr>
+                <th class="px-3 py-2 text-left w-40">No. Induk</th>
+                <th class="px-3 py-2 text-left w-56">Santri</th>
+                <th class="px-3 py-2 text-left w-40">Kamar</th>
+                <th class="px-3 py-2 text-left w-32">Jenjang</th>
+                <th class="px-3 py-2 text-left w-28">Status</th>
+                <th class="px-3 py-2 text-left min-w-60">
+                  Nilai <span v-if="selectedMapelId">({{ subjects.find(m=>m.id===selectedMapelId)?.name || '' }})</span>
+                </th>
+                <th class="px-3 py-2 text-left">Alamat</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-neutral-700">
+              <tr v-for="s in g.items" :key="s.id">
+                <td class="px-3 py-2">{{ s.noInduk || '—' }}</td>
+                <td class="px-3 py-2">
+                  <div class="font-medium">{{ s.santri }}</div>
+                  <div class="text-[11px] text-gray-500">Wali: {{ (s as any).walisantri || (s as any).ayahNama || '—' }}</div>
+                  <div class="text-[11px] text-gray-500" v-if="s.nohp">
+                    <a :href="`tel:${s.nohp}`" class="text-blue-600 hover:underline">{{ s.nohp }}</a>
+                  </div>
+                </td>
+                <td class="px-3 py-2">{{ s.kamar || '—' }}</td>
+                <td class="px-3 py-2">{{ s.jenjang || '—' }}</td>
+                <td class="px-3 py-2">{{ s.status || '—' }}</td>
+
+                <!-- Nilai -->
+                <td class="px-3 py-2">
+                  <div v-if="selectedMapelId">
+                    <template v-if="nilaiRingkas(s.id).akhir != null || nilaiRingkas(s.id).predikat">
+                      <div class="font-semibold">
+                        Akhir: {{ nilaiRingkas(s.id).akhir ?? '—' }}
+                        <span v-if="nilaiRingkas(s.id).predikat">({{ nilaiRingkas(s.id).predikat }})</span>
+                      </div>
+                      <div class="text-[11px] text-gray-500">
+                        T{{ nilaiRingkas(s.id).tugas ?? '–' }} / H{{ nilaiRingkas(s.id).harian ?? '–' }} / PTS {{ nilaiRingkas(s.id).pts ?? '–' }} / PAS {{ nilaiRingkas(s.id).pas ?? '–' }}
+                        <span v-if="nilaiRingkas(s.id).proyek != null"> / Proyek {{ nilaiRingkas(s.id).proyek }}</span>
+                        <span v-if="nilaiRingkas(s.id).lainnya != null"> / Lainnya {{ nilaiRingkas(s.id).lainnya }}</span>
+                      </div>
+                      <div v-if="nilaiRingkas(s.id).catatan" class="text-[11px] italic text-gray-500">“{{ nilaiRingkas(s.id).catatan }}”</div>
+                    </template>
+                    <template v-else>
+                      <span class="text-gray-400">Belum ada nilai pada term/mapel ini.</span>
+                    </template>
+                  </div>
+                  <div v-else class="text-gray-400">Pilih mapel untuk melihat nilai.</div>
+                </td>
+
+                <td class="px-3 py-2">{{ s.alamat || '—' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
   </div>
-</template>``
+</template>
 
 <script setup lang="ts">
 import { definePageMeta } from '#imports'
-import { onMounted, onBeforeUnmount, reactive, ref, computed } from 'vue'
+import { onMounted, onBeforeUnmount, reactive, ref, computed, watch } from 'vue'
 import DataTable from '~/components/widget/DataTable.vue'
 import ModalShell from '~/components/widget/ModalShell.vue'
 import { useSantri, type SantriRow } from '~/composables/data/useSantri'
 
+/* ==== Tambahan untuk nilai & term ==== */
+import { usePelajaran, makeTermKey } from '~/composables/data/usePelajaran'
+
 definePageMeta({ layout: 'app', layoutProps: { title: 'Santri Lama' } })
 
+/* ===================== DATA SANTRI ===================== */
 const { rows, loading, error, fetchSantri, createSantri, updateSantri, deleteSantri, importFromExcelWithProgress } = useSantri()
 onMounted(fetchSantri)
 const reload = () => fetchSantri()
@@ -391,7 +506,6 @@ function matchStatus(r: SantriRow, st: string) {
 function matchJenjang(r: SantriRow, jj: string) {
   return jj === 'semua' ? true : String(r.jenjang || '').toLowerCase() === jj.toLowerCase()
 }
-
 const filteredLamaRows = computed(() =>
   rowsLama.value
     .filter(r => matchSearch(r, filtersLama.value.q))
@@ -492,5 +606,185 @@ async function confirmDelete() {
     showConfirm.value = false
     await fetchSantri()
   } finally { deleting.value = false }
+}
+
+/* ================== OPSIONAL NILAI (untuk tampilkan nilai per grup) ================== */
+const {
+  subjects, subscribeSubjects, unbindSubjects,
+  nilaiMap, subscribeNilai, unsubscribeNilai,
+} = usePelajaran()
+
+const selectedMapelId = ref('')                                          // mapel terpilih
+const tahunAwalNilai = ref<number>(new Date().getMonth() >= 6 ? new Date().getFullYear() : new Date().getFullYear()-1)
+const semesterNilai = ref<'Ganjil'|'Genap'>(new Date().getMonth() >= 6 ? 'Ganjil' : 'Genap')
+const termKeyNilai = computed(() => makeTermKey(tahunAwalNilai.value, semesterNilai.value))
+
+onMounted(() => { subscribeSubjects() })
+onBeforeUnmount(() => { unbindSubjects(); unsubscribeNilai() })
+watch([selectedMapelId, termKeyNilai], ([mid]) => { unsubscribeNilai(); if (mid) subscribeNilai(termKeyNilai.value, mid) })
+
+/* ================== GROUPING: (wali OR ayah) + nohp (AND sama) ================== */
+function normPhone(raw?: string) {
+  const d = String(raw || '').replace(/\D+/g, '')
+  if (!d) return ''
+  if (d.startsWith('0')) return '62' + d.slice(1)
+  if (d.startsWith('620')) return '62' + d.slice(3)
+  return d
+}
+function normName(raw?: string) {
+  return String(raw || '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+function primaryGuardianName(r: SantriRow) {
+  return String((r as any).walisantri || (r as any).ayahNama || '')
+}
+
+type GrupWali = { key: string; waliName: string; phone: string; items: SantriRow[] }
+const groupsWali = computed<GrupWali[]>(() => {
+  const byKey = new Map<string, GrupWali>()
+  for (const r of rowsLama.value) {
+    const nmRaw = primaryGuardianName(r)
+    const ph = normPhone(r.nohp)
+    const nm = normName(nmRaw)
+    if (!nm || !ph) continue
+    const key = nm + '|' + ph
+    if (!byKey.has(key)) byKey.set(key, { key, waliName: nmRaw || '-', phone: ph, items: [] })
+    byKey.get(key)!.items.push(r)
+  }
+  return Array.from(byKey.values()).filter(g => g.items.length >= 2)
+})
+
+/* ================== STATS per grup ================== */
+function statsForGroup(g: GrupWali) {
+  const total = g.items.length
+  const byStatus = new Map<string, number>()
+  const byJenjang = new Map<string, number>()
+  for (const s of g.items) {
+    const st = String(s.status || '-')
+    const jj = String(s.jenjang || '-')
+    byStatus.set(st, (byStatus.get(st) || 0) + 1)
+    byJenjang.set(jj, (byJenjang.get(jj) || 0) + 1)
+  }
+  return {
+    total,
+    byStatus: Array.from(byStatus.entries()).map(([k,v]) => ({ k, v })),
+    byJenjang: Array.from(byJenjang.entries()).map(([k,v]) => ({ k, v })),
+  }
+}
+
+/* ================== NILAI ringkas per santri (term/mapel aktif) ================== */
+function nilaiRingkas(santriId: string) {
+  const n: any = nilaiMap.value?.[santriId] || {}
+  const tugas = Number(n.tugas ?? '')
+  const harian= Number(n.harian ?? '')
+  const pts   = Number(n.pts ?? '')
+  const pas   = Number(n.pas ?? '')
+  const proyek= n.proyek != null ? Number(n.proyek) : undefined
+  const lainnya= n.lainnya != null ? Number(n.lainnya) : undefined
+  const comps = [tugas, harian, pts, pas, proyek, lainnya].filter(x => typeof x === 'number' && !Number.isNaN(x)) as number[]
+  const akhir = comps.length ? Math.round(comps.reduce((a,b)=>a+b,0)/comps.length) : (Number(n.akhir) || undefined)
+  return {
+    tugas: Number.isFinite(tugas) ? tugas : undefined,
+    harian: Number.isFinite(harian) ? harian : undefined,
+    pts: Number.isFinite(pts) ? pts : undefined,
+    pas: Number.isFinite(pas) ? pas : undefined,
+    proyek: typeof proyek === 'number' ? proyek : undefined,
+    lainnya: typeof lainnya === 'number' ? lainnya : undefined,
+    akhir,
+    predikat: n.predikat || undefined,
+    catatan: n.catatan || ''
+  }
+}
+
+/* ================== UTIL: Export/Template ================== */
+function saveBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+function withExt(name: string, ext: string) { return name?.toLowerCase().endsWith(`.${ext}`) ? name : `${name}.${ext}` }
+function buildTemplateCsv(): string {
+  const headers = ['No Induk','Gen','Nama','Kamar','Ayah','Ibu','No HP','Alamat','Status','Kelas Formal']
+  const rows = [
+    ['2024-001','2024','Muhammad Alif','B2','Budi','Siti','081234567890','Ds. Sukamaju RT 01 RW 02','aktif','7 MTs A'],
+    ['2023-015','2023','Aisyah Zahra','A1','Andi','Rina','081298765432','Jl. Melati No. 5','aktif','8 MTs B'],
+  ]
+  const bom = '\uFEFF'
+  const csv = [headers.join(','), ...rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(','))].join('\r\n')
+  return bom + csv
+}
+function downloadTemplate(kind: 'lama'|'master' = 'lama') {
+  const csv = buildTemplateCsv()
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+  const fname = kind === 'master' ? 'template_master_santri.csv' : 'template_santri_lama.csv'
+  saveBlob(blob, fname)
+}
+type RowDict = Record<string, any>
+function pickExportRows(input: SantriRow[], fieldKeys: string[]): RowDict[] {
+  const labelMap: Record<string,string> = {
+    noInduk: 'No Induk', gen: 'Gen', santri: 'Nama', kamar: 'Kamar',
+    ayahNama: 'Ayah', ibuNama: 'Ibu', nohp: 'No HP', alamat: 'Alamat',
+    status: 'Status', kelasFormal: 'Kelas Formal',
+  }
+  return input.map(r => {
+    const out: RowDict = {}
+    for (const key of fieldKeys) {
+      const label = labelMap[key] ?? key
+      const val = (r as any)[key]
+      out[label] = (val ?? '') as any
+    }
+    return out
+  })
+}
+function toCsv(rowsDict: RowDict[]): string {
+  if (!rowsDict.length) return '\uFEFF'
+  const headers = Object.keys(rowsDict[0]!)
+  const lines = rowsDict.map(obj =>
+    headers.map(h => {
+      const cell = obj[h] ?? ''
+      const txt = String(cell)
+      if (/[",\r\n]/.test(txt)) return `"${txt.replace(/"/g, '""')}"`
+      return txt
+    }).join(',')
+  )
+  const bom = '\uFEFF'
+  return bom + [headers.join(','), ...lines].join('\r\n')
+}
+function exportCSV(data: SantriRow[], filename = 'export.csv') {
+  const rowsDict = pickExportRows(data, selectedFieldKeys.value)
+  const csv = toCsv(rowsDict)
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+  saveBlob(blob, withExt(filename, 'csv'))
+}
+async function exportExcel(data: SantriRow[], filename = 'export.xlsx') {
+  const rowsDict = pickExportRows(data, selectedFieldKeys.value)
+  // @ts-ignore
+  const XLSX = (await import('xlsx')).default || (await import('xlsx'))
+  const ws = XLSX.utils.json_to_sheet(rowsDict, { skipHeader: false })
+  const headers = Object.keys(rowsDict[0] || {})
+  const colWidths = headers.map((h) => {
+    let maxLen = String(h).length
+    rowsDict.forEach(r => {
+      const len = String(r[h] ?? '').length
+      if (len > maxLen) maxLen = len
+    })
+    return { wch: Math.min(Math.max(maxLen + 2, 10), 60) }
+  })
+  // @ts-ignore
+  ws['!cols'] = colWidths
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Santri')
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+  const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  saveBlob(blob, withExt(filename, 'xlsx'))
 }
 </script>

@@ -301,6 +301,21 @@ useSeoMeta({ title: titlePage, description, ogTitle: titlePage, ogDescription: d
 useHead({ link: [{ rel: 'canonical', href: url.value }] })
 
 let profileRef: ReturnType<typeof dbRef> | null = null
+type PlainSession = {
+  sub?: string
+  uid?: string
+  role?: string
+  name?: string
+  email?: string
+  phone?: string
+  waliPhone?: string
+  waliName?: string
+  santriId?: string
+  santriName?: string
+  allowedRoutes?: string[]
+  iat?: number
+  exp?: number
+}
 
 function applyProfile(uid: string, v: any) {
   const nextName  = v?.displayName || v?.name  || sessionUser.value?.name  || tokenUser.value?.name  || 'Pengguna'
@@ -438,6 +453,37 @@ const firstAllowedPath = computed<string | null>(() => {
   for (const p of allMenuPaths.value) if (isAllowed(p, allowed)) return p
   return null
 })
+
+function isLikelyEncryptedToken(raw: string): boolean {
+  try {
+    const o = JSON.parse(raw)
+    return !!(o && typeof o === 'object' && o.iv && o.ct)
+  } catch { return false }
+}
+
+async function readAuthToken(): Promise<PlainSession | null> {
+  const raw = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
+  if (!raw) return null
+  try {
+    if (isLikelyEncryptedToken(raw)) {
+      const data = await decryptJSON(raw)
+      return data as PlainSession
+    }
+    return JSON.parse(raw) as PlainSession
+  } catch {
+    return null
+  }
+}
+
+function looksLikeEmail(v?: string): boolean {
+  return !!(v && v.includes('@') && !/^\s*-\s*$/.test(v))
+}
+
+function primaryContactFromSession(sess?: PlainSession | null): string {
+  if (!sess) return '-'
+  if (looksLikeEmail(sess.email)) return String(sess.email)
+  return (sess.phone || sess.waliPhone || '-').toString()
+}
 
 function enforceRouteAccess(p: string) {
   if (!(p.startsWith('/app') || p.startsWith('/wali'))) return
@@ -629,32 +675,39 @@ onMounted(async () => {
   window?.HSDropdown?.autoInit?.()
   // @ts-ignore
   window?.HSOverlay?.autoInit?.()
+
   try {
-    const raw = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
-    if (!raw) throw new Error('no token')
-    const data = await decryptJSON(raw)
+    const sess = await readAuthToken()
+    if (!sess) throw new Error('no token')
     const now = Math.floor(Date.now() / 1000)
-    if (!data?.exp || now >= data.exp) throw new Error('expired')
+    if (!sess.exp || now >= sess.exp) throw new Error('expired')
+    const uid   = sess.uid || sess.sub || 'wali'
+    const role  = sess.role || (route.path.startsWith('/wali') ? 'wali' : 'admin')
+    const name  = sess.name || sess.waliName || sess.santriName || 'Wali'
+    const contact = primaryContactFromSession(sess)
 
     tokenUser.value = {
-      uid: data.uid,
-      email: data.email,
-      role: data.role,
-      name: data.name || 'Pengguna',
-      allowedRoutes: Array.isArray(data.allowedRoutes) ? data.allowedRoutes : []
+      uid,
+      email: contact,
+      role,
+      name,
+      allowedRoutes: Array.isArray(sess.allowedRoutes) ? sess.allowedRoutes : []
     }
+
     if (route.path === '/' || route.path === '/login' || route.path === '/cakAdmin') {
-      router.replace(tokenUser.value?.role === 'wali' ? '/wali' : '/app')
+      router.replace(role === 'wali' ? '/wali' : '/app')
     }
 
     await nextTick()
-    await startAclWatcher(tokenUser.value?.uid)
-    await startProfileWatcher(tokenUser.value?.uid)
+    if (uid && uid !== 'wali') {
+      await startAclWatcher(uid)
+      await startProfileWatcher(uid)
+    } else {
+      applyAllowedRoutes(uid, tokenUser.value?.allowedRoutes || [])
+    }
   } catch {
     localStorage.removeItem(AUTH_KEY)
-    if (!route.path.startsWith('/auth') && route.path !== '/' && route.path !== '/cakAdmin') {
-      // router.replace('/cakAdmin')
-    }
+    sessionStorage.removeItem(AUTH_KEY)
     aclReady.value = true
   } finally {
     authLoading.value = false

@@ -1,377 +1,309 @@
 <template>
   <div class="space-y-6 p-6">
-    <!-- Top: Profil santri + Pengumuman -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-      <!-- Card Santri -->
-      <section class="xl:col-span-1 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
+    <!-- Jika belum login -->
+    <div v-if="!session" class="p-6 rounded-2xl border border-amber-300 bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-200 dark:border-amber-900/40">
+      Anda belum masuk sebagai wali. <NuxtLink to="/waliLogin" class="underline">Masuk sekarang</NuxtLink>.
+    </div>
+
+    <template v-else>
+      <!-- Top: Profil santri + identitas wali -->
+      <section class="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
         <div class="p-5 flex items-start gap-4">
-          <img :src="santri.avatar" alt="Foto Santri" class="size-16 rounded-2xl object-cover ring-2 ring-blue-100 dark:ring-blue-900/40" />
+          <img :src="avatarUrl" alt="Foto Santri" class="size-16 rounded-2xl object-cover ring-2 ring-blue-100 dark:ring-blue-900/40" />
           <div class="min-w-0">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white truncate">{{ santri.name }}</h2>
-            <p class="text-sm text-gray-500 dark:text-neutral-400">{{ santri.nis }} • {{ santri.jenjang }}</p>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white truncate">
+              {{ santri?.santri || session?.santriName }}
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-neutral-400">
+              {{ santri?.noInduk ? `NIS: ${santri.noInduk}` : 'NIS: -' }} • {{ santri?.kelasFormal || santri?.jenjang || '-' }}
+            </p>
             <div class="mt-2 flex flex-wrap gap-2">
               <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30">
-                <Icon icon="lucide:venetian-mask" class="size-3.5" /> {{ santri.gen }}
+                <Icon icon="lucide:venetian-mask" class="size-3.5" /> {{ santri?.gender==='P'?'Perempuan':'Laki-laki' }}
               </span>
-              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-emerald-50 -700 dark:bg-emerald-900/30 dark:-300">
-                <Icon icon="lucide:home" class="size-3.5" /> {{ santri.maskan }}
+              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30">
+                <Icon icon="lucide:home" class="size-3.5" /> {{ santri?.maskan || '-' }}
               </span>
-              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                <Icon icon="lucide:bed" class="size-3.5" /> Kamar {{ santri.kamar }}
+              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-amber-50 dark:bg-amber-900/30">
+                <Icon icon="lucide:bed" class="size-3.5" /> Kamar {{ santri?.kamar || '-' }}
               </span>
-              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
-                <Icon icon="ri:rfid-fill" class="size-3.5" /> RFID {{ santri.rfid }}
+              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-violet-50 dark:bg-violet-900/30">
+                <Icon icon="ri:rfid-fill" class="size-3.5" /> RFID {{ santri?.rfid || '-' }}
               </span>
+            </div>
+          </div>
+
+          <!-- Term selector -->
+          <div class="ms-auto text-right">
+            <div class="text-xs text-gray-500 dark:text-neutral-400">Term Akademik</div>
+            <div class="mt-1">
+              <select v-model="termKey" @change="loadGrades" class="select select-sm rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-900/70">
+                <option v-for="t in termKeys" :key="t" :value="t">{{ t }}</option>
+              </select>
             </div>
           </div>
         </div>
 
+        <!-- Identitas Akun Wali -->
         <div class="px-5 pb-5">
-          <dl class="grid grid-cols-2 gap-3 text-sm">
+          <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <div class="p-3 rounded-xl bg-gray-50 dark:bg-neutral-800/70">
-              <dt class="text-gray-500 dark:text-neutral-400">Wali</dt>
-              <dd class="font-medium text-gray-800 dark:text-neutral-100 truncate">{{ santri.wali }}</dd>
+              <dt class="text-gray-500 dark:text-neutral-400">Wali (Akun Anda)</dt>
+              <dd class="font-medium text-gray-800 dark:text-neutral-100 truncate">
+                {{ waliNameDisplay }}
+              </dd>
             </div>
             <div class="p-3 rounded-xl bg-gray-50 dark:bg-neutral-800/70">
-              <dt class="text-gray-500 dark:text-neutral-400">Kontak Wali</dt>
-              <dd class="font-medium text-gray-800 dark:text-neutral-100">{{ santri.waliPhone }}</dd>
+              <dt class="text-gray-500 dark:text-neutral-400">Kontak Akun</dt>
+              <dd class="font-medium text-gray-800 dark:text-neutral-100 truncate">
+                {{ waliContactDisplay }}
+              </dd>
             </div>
           </dl>
         </div>
       </section>
 
-      <!-- Card Pengumuman -->
-      <section class="xl:col-span-2 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
-        <header class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-neutral-800">
-          <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <Icon icon="lucide:megaphone" class="size-5" /> Pengumuman Terbaru
-          </h3>
-          <NuxtLink to="/wali/pengumuman" class="text-sm">Lihat semua</NuxtLink>
-        </header>
-
-        <ul class="divide-y divide-gray-200 dark:divide-neutral-800">
-          <li v-for="p in pengumuman" :key="p.id" class="px-5 py-4 hover:bg-gray-50/70 dark:hover:bg-neutral-800/60 transition">
-            <div class="flex items-start gap-3">
-              <span
-                class="mt-0.5 inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full"
-                :class="p.badgeClass"
-              >
-                <Icon :icon="p.icon" class="size-3.5" /> {{ p.kategori }}
-              </span>
-              <div class="min-w-0">
-                <p class="font-medium text-gray-900 dark:text-white line-clamp-1">{{ p.judul }}</p>
-                <p class="text-sm text-gray-600 dark:text-neutral-300 line-clamp-2">{{ p.ringkas }}</p>
-                <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">{{ p.tanggal }}</p>
-              </div>
-            </div>
-          </li>
-        </ul>
-      </section>
-    </div>
-
-    <!-- Middle: Pembayaran SPP + Transport -->
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-      <!-- SPP -->
+      <!-- Nilai per Mapel -->
       <section class="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
         <header class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-neutral-800">
           <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <Icon icon="hugeicons:invoice-01" class="size-5" /> Pembayaran SPP
+            <Icon icon="lucide:book-open" class="size-5" /> Rekap Nilai • {{ termKey || '-' }}
           </h3>
-          <span class="text-xs px-2 py-1 rounded-full"
-                :class="spp.statusPaidThisMonth ? 'bg-emerald-50 -700 dark:bg-emerald-900/30 dark:-300' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'">
-            {{ spp.statusPaidThisMonth ? 'Lunas bulan ini' : 'Belum lunas' }}
-          </span>
+          <div class="text-sm">
+            <span class="text-gray-500 dark:text-neutral-400">Rata-rata Akhir: </span>
+            <span class="font-semibold text-gray-900 dark:text-white">{{ avgFinal || 0 }}</span>
+          </div>
         </header>
 
-        <div class="px-5 py-4 grid md:grid-cols-3 gap-4">
-          <div class="p-4 rounded-xl bg-gray-50 dark:bg-neutral-800/70">
-            <p class="text-xs text-gray-500 dark:text-neutral-400">Tarif / bulan</p>
-            <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ toIDR(spp.tarif) }}</p>
-          </div>
-          <div class="p-4 rounded-xl bg-gray-50 dark:bg-neutral-800/70">
-            <p class="text-xs text-gray-500 dark:text-neutral-400">Jatuh tempo</p>
-            <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ spp.jatuhTempo }}</p>
-          </div>
-          <div class="p-4 rounded-xl bg-gray-50 dark:bg-neutral-800/70">
-            <p class="text-xs text-gray-500 dark:text-neutral-400">Tunggakan</p>
-            <p class="text-lg font-semibold"
-               :class="spp.tunggakan > 0 ? 'text-rose-600 dark:text-rose-400' : '-600 dark:-400'">
-              {{ spp.tunggakan }} bln
-            </p>
-          </div>
-        </div>
-
-        <div class="px-5 pb-5">
-          <div class="text-xs text-gray-500 dark:text-neutral-400 mb-2">Status 6 bulan terakhir</div>
-          <div class="flex flex-wrap gap-2">
-            <div v-for="m in spp.riwayat6Bulan" :key="m.bulan"
-                 class="flex items-center gap-2 px-3 py-2 rounded-xl border"
-                 :class="m.lunas ? 'bg-emerald-50 border-emerald-200 -700 dark:bg-emerald-900/20 dark:border-emerald-900/40 dark:-300'
-                                : 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-900/20 dark:border-rose-900/40 dark:text-rose-300'">
-              <span class="font-medium">{{ m.bulan }}</span>
-              <Icon :icon="m.lunas ? 'lucide:check' : 'lucide:x'" class="size-4" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Transport -->
-      <section class="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
-        <header class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-neutral-800">
-          <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <Icon icon="lets-icons:money-light" class="size-5 text-amber-600 dark:text-amber-400" /> Pembayaran Syahriyah
-          </h3>
-          <span class="text-xs px-2 py-1 rounded-full"
-                :class="transport.statusPaidThisMonth ? 'bg-emerald-50 -700 dark:bg-emerald-900/30 dark:-300' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'">
-            {{ transport.statusPaidThisMonth ? 'Lunas bulan ini' : 'Belum lunas' }}
-          </span>
-        </header>
-
-        <div class="px-5 py-4 grid md:grid-cols-3 gap-4">
-          <div class="p-4 rounded-xl bg-gray-50 dark:bg-neutral-800/70">
-            <p class="text-xs text-gray-500 dark:text-neutral-400">Tarif / bulan</p>
-            <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ toIDR(transport.tarif) }}</p>
-          </div>
-          <div class="p-4 rounded-xl bg-gray-50 dark:bg-neutral-800/70">
-            <p class="text-xs text-gray-500 dark:text-neutral-400">Jatuh tempo</p>
-            <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ transport.jatuhTempo }}</p>
-          </div>
-          <div class="p-4 rounded-xl bg-gray-50 dark:bg-neutral-800/70">
-            <p class="text-xs text-gray-500 dark:text-neutral-400">Tunggakan</p>
-            <p class="text-lg font-semibold"
-               :class="transport.tunggakan > 0 ? 'text-rose-600 dark:text-rose-400' : ''">
-              {{ transport.tunggakan }} bln
-            </p>
-          </div>
-        </div>
-
-        <div class="px-5 pb-5">
-          <div class="text-xs text-gray-500 dark:text-neutral-400 mb-2">Status 6 bulan terakhir</div>
-          <div class="flex flex-wrap gap-2">
-            <div v-for="m in transport.riwayat6Bulan" :key="m.bulan"
-                 class="flex items-center gap-2 px-3 py-2 rounded-xl border"
-                 :class="m.lunas ? 'bg-emerald-50 border-emerald-200 -700 dark:bg-emerald-900/20 dark:border-emerald-900/40 dark:-300'
-                                : 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-900/20 dark:border-rose-900/40 dark:text-rose-300'">
-              <span class="font-medium">{{ m.bulan }}</span>
-              <Icon :icon="m.lunas ? 'lucide:check' : 'lucide:x'" class="size-4" />
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- Bottom: Statistik Riwayat Pembayaran -->
-    <section class="rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
-      <header class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-neutral-800">
-        <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <Icon icon="solar:chart-linear" class="size-5 text-indigo-600 dark:text-indigo-400" /> Statistik Pembayaran (12 bulan)
-        </h3>
-        <div class="flex items-center gap-3 text-sm">
-          <span class="text-gray-500 dark:text-neutral-400">Total Bayar</span>
-          <span class="font-semibold text-gray-900 dark:text-white">{{ toIDR(total12Bulan) }}</span>
-        </div>
-      </header>
-
-      <div class="grid lg:grid-cols-3 gap-6 p-5">
-        <!-- Chart -->
-        <div class="lg:col-span-2">
-          <div class="rounded-xl border border-gray-200 dark:border-neutral-800 p-4">
-            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-neutral-400 px-1">
-              <span>0</span>
-              <span>Rata-rata {{ toIDR(rerataBulanan) }}</span>
-              <span>{{ toIDR(maxY) }}</span>
-            </div>
-            <div class="mt-2">
-              <!-- Simple SVG line chart -->
-              <svg :viewBox="`0 0 ${chartW} ${chartH}`" class="w-full h-44">
-                <!-- grid -->
-                <g stroke="currentColor" class="text-gray-200 dark:text-neutral-800">
-                  <line v-for="(y, i) in 4" :key="'g'+i" :x1="0" :y1="(i+1)*(chartH/5)" :x2="chartW" :y2="(i+1)*(chartH/5)" stroke-width="1" />
-                </g>
-                <!-- area -->
-                <path
-                  :d="areaPath"
-                  fill="currentColor"
-                  class="text-indigo-200 dark:text-indigo-900/50"
-                />
-                <!-- line -->
-                <path
-                  :d="linePath"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  class="text-indigo-500 dark:text-indigo-400"
-                />
-                <!-- points -->
-                <g>
-                  <circle v-for="(pt,i) in points" :key="'p'+i" :cx="pt.x" :cy="pt.y" r="3" class="fill-indigo-500 dark:fill-indigo-400" />
-                </g>
-              </svg>
-              <div class="mt-2 grid grid-cols-12 gap-1 text-[11px] text-gray-500 dark:text-neutral-400">
-                <span v-for="m in labels" :key="m" class="text-center truncate">{{ m }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tabel transaksi -->
-        <div>
-          <div class="rounded-xl border border-gray-200 dark:border-neutral-800 overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-200 dark:border-neutral-800 font-medium">Transaksi Terakhir</div>
-            <ul class="divide-y divide-gray-200 dark:divide-neutral-800">
-              <li v-for="t in transaksiTerakhir" :key="t.id" class="px-4 py-3 flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t.jenis }}</p>
-                  <p class="text-xs text-gray-500 dark:text-neutral-400">{{ t.tanggal }}</p>
-                </div>
-                <div class="text-right">
-                  <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ toIDR(t.nominal) }}</p>
-                  <span class="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full"
-                        :class="t.status==='Lunas' ? 'bg-emerald-50 -700 dark:bg-emerald-900/30 dark:-300' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'">
-                    {{ t.status }}
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-50 dark:bg-neutral-800/70">
+              <tr>
+                <th class="px-4 py-3 text-left font-semibold">Mata Pelajaran</th>
+                <th class="px-4 py-3 text-center">Tugas</th>
+                <th class="px-4 py-3 text-center">Harian</th>
+                <th class="px-4 py-3 text-center">PTS</th>
+                <th class="px-4 py-3 text-center">PAS</th>
+                <th class="px-4 py-3 text-center">Proyek</th>
+                <th class="px-4 py-3 text-center">Lainnya</th>
+                <th class="px-4 py-3 text-center">Akhir</th>
+                <th class="px-4 py-3 text-center">Predikat</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-neutral-800">
+              <tr v-for="row in tableRows" :key="row.mapelId" class="hover:bg-gray-50/70 dark:hover:bg-neutral-800/60">
+                <td class="px-4 py-3">
+                  <div class="font-medium text-gray-900 dark:text-white">{{ row.mapelName }}</div>
+                  <div class="text-xs text-gray-500 dark:text-neutral-400">KKM: {{ row.kkm || 0 }}</div>
+                </td>
+                <td class="px-4 py-3 text-center">{{ row.tugas ?? '-' }}</td>
+                <td class="px-4 py-3 text-center">{{ row.harian ?? '-' }}</td>
+                <td class="px-4 py-3 text-center">{{ row.pts ?? '-' }}</td>
+                <td class="px-4 py-3 text-center">{{ row.pas ?? '-' }}</td>
+                <td class="px-4 py-3 text-center">{{ row.proyek ?? '-' }}</td>
+                <td class="px-4 py-3 text-center">{{ row.lainnya ?? '-' }}</td>
+                <td class="px-4 py-3 text-center font-semibold">{{ row.akhir ?? '-' }}</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs"
+                        :class="predBadgeClass(row.predikat)">
+                    {{ row.predikat || '-' }}
                   </span>
-                </div>
-              </li>
-            </ul>
-            <div class="px-4 py-3 text-right">
-              <NuxtLink to="/wali/pembayaran" class="text-sm">Lihat semua pembayaran</NuxtLink>
-            </div>
-          </div>
+                </td>
+              </tr>
+
+              <tr v-if="!loading && !tableRows.length">
+                <td colspan="9" class="px-4 py-8 text-center text-gray-500 dark:text-neutral-400">
+                  Belum ada nilai untuk term ini.
+                </td>
+              </tr>
+
+              <tr v-if="loading">
+                <td colspan="9" class="px-4 py-8 text-center text-gray-500 dark:text-neutral-400">
+                  Memuat nilai…
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-    </section>
+      </section>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
+import { usePelajaran } from '@/composables/data/usePelajaran'
+import { useNuxtApp } from '#app'
+import { get, ref as dref, onValue, off } from 'firebase/database'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Beranda Wali' } })
 
-/* ================== DUMMY DATA ================== */
-const santri = {
-  avatar: '/assets/pp.jpg',
-  name: 'Muhammad Rizky Alfarizi',
-  nis: 'NIS: 2023.045',
-  gen: 'Laki-laki',
-  maskan: 'Baitus Salam',
-  kamar: 'A3',
-  rfid: 'RF12345678',
-  jenjang: 'KMI • MTs Kelas 2',
-  wali: 'Ahmad Fauzi',
-  waliPhone: '0812-3456-7890'
-}
+/* ===== Session & profile ===== */
+const AUTH_KEY = 'alberr:auth'
+const session = ref<any | null>(null)
 
-const pengumuman = [
-  {
-    id: 'p1',
-    kategori: 'Akademik',
-    icon: 'lucide:book-open',
-    judul: 'Ujian Tengah Semester dimulai 16–20 Sep 2025',
-    ringkas: 'Pastikan santri mempersiapkan materi dan hadir tepat waktu.',
-    tanggal: '1 Sep 2025, 13:30',
-    badgeClass: 'bg-blue-50 dark:bg-blue-900/30'
-  },
-  {
-    id: 'p2',
-    kategori: 'Kesantrian',
-    icon: 'lucide:users',
-    judul: 'Kegiatan Muharram: Doa bersama & santunan',
-    ringkas: 'Kegiatan bersama di masjid utama pada Jumat malam.',
-    tanggal: '29 Agu 2025, 19:00',
-    badgeClass: 'bg-emerald-50 dark:bg-emerald-900/30'
-  }
-]
+const { $realtimeDb } = useNuxtApp() as any
+const santri = ref<any | null>(null)
+const avatarUrl = '/assets/pp.jpg'
 
-const spp = {
-  tarif: 100_000,
-  jatuhTempo: 'Setiap tanggal 10',
-  statusPaidThisMonth: true,
-  tunggakan: 0,
-  riwayat6Bulan: [
-    { bulan: 'Apr', lunas: true },
-    { bulan: 'Mei', lunas: true },
-    { bulan: 'Jun', lunas: true },
-    { bulan: 'Jul', lunas: true },
-    { bulan: 'Agu', lunas: true },
-    { bulan: 'Sep', lunas: true },
-  ]
-}
+/* ===== Pelajaran & Nilai helpers ===== */
+const {
+  subjects, subscribeSubjects, unbindSubjects,
+  readWeights, computeFinal
+} = usePelajaran()
 
-const transport = {
-  tarif: 390_000,
-  jatuhTempo: 'Setiap tanggal 10',
-  statusPaidThisMonth: false,
-  tunggakan: 1,
-  riwayat6Bulan: [
-    { bulan: 'Apr', lunas: true },
-    { bulan: 'Mei', lunas: false },
-    { bulan: 'Jun', lunas: true },
-    { bulan: 'Jul', lunas: true },
-    { bulan: 'Agu', lunas: false },
-    { bulan: 'Sep', lunas: false },
-  ]
-}
+/* ===== Term & nilai state ===== */
+const termKeys = ref<string[]>([])
+const termKey = ref<string | ''>('')
+const nilaiByMapel = ref<Record<string, any>>({})
+const loading = ref(false)
 
-// 12 bulan data gabungan (SPP + Transport) — nominal per bulan
-const series12 = [
-  500_000, 350_000, 350_000, 350_000, 500_000, 350_000,
-  500_000, 0,       350_000, 350_000, 500_000, 350_000
-]
-// label bulan (kiri ke kanan)
-const labels = ['Okt', 'Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep']
-
-/* ================== HELPERS ================== */
-const toIDR = (n: number) =>
-  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n)
-
-/* ================== CHART (SVG sederhana) ================== */
-const chartW = 600
-const chartH = 160
-const padX = 24
-const padY = 14
-
-const maxY = computed(() => Math.max(...series12, 1))
-const minY = 0
-const stepX = computed(() => (chartW - padX * 2) / (series12.length - 1))
-const scaleY = (v: number) => {
-  const h = chartH - padY * 2
-  const ratio = (v - minY) / (maxY.value - minY || 1)
-  return chartH - padY - ratio * h
-}
-
-const points = computed(() =>
-  series12.map((v, i) => ({
-    x: padX + i * stepX.value,
-    y: scaleY(v)
-  }))
-)
-const linePath = computed(() =>
-  points.value.reduce((d, p, i) => d + (i ? ` L ${p.x} ${p.y}` : `M ${p.x} ${p.y}`), '')
-)
-const areaPath = computed(() => {
-  if (!points.value.length) return ''
-  const first = points.value[0]
-  const last = points.value[points.value.length - 1]
-  return `M ${first.x} ${chartH - padY} L ${first.x} ${first.y}` +
-         points.value.slice(1).map(p => ` L ${p.x} ${p.y}`).join('') +
-         ` L ${last.x} ${chartH - padY} Z`
+/* ===== Computed tabel ===== */
+const tableRows = computed(() => {
+  return Object.entries(nilaiByMapel.value).map(([mapelId, rec]: any) => {
+    const subj = subjects.value.find(s => s.id === mapelId)
+    return {
+      mapelId,
+      mapelName: subj?.name || mapelId,
+      kkm: subj?.kkm ?? 0,
+      tugas: rec.tugas ?? null,
+      harian: rec.harian ?? null,
+      pts:    rec.pts ?? null,
+      pas:    rec.pas ?? null,
+      proyek: rec.proyek ?? null,
+      lainnya: rec.lainnya ?? null,
+      akhir: rec.akhir ?? null,
+      predikat: rec.predikat ?? null
+    }
+  })
+})
+const avgFinal = computed(() => {
+  const vals = tableRows.value.map(r => Number(r.akhir)).filter(n => Number.isFinite(n))
+  if (!vals.length) return 0
+  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)
 })
 
-/* ================== AGGREGATES ================== */
-const total12Bulan = computed(() => series12.reduce((a, b) => a + b, 0))
-const rerataBulanan = computed(() => Math.round(total12Bulan.value / series12.length))
+/* ===== Badge class predikat ===== */
+function predBadgeClass(pred?: string){
+  if (pred === 'A') return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+  if (pred === 'B') return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+  if (pred === 'C') return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+  if (pred === 'D' || pred === 'E') return 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
+  return 'bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-neutral-300'
+}
 
-/* ================== TRANSAKSI TERAKHIR (dummy) ================== */
-const transaksiTerakhir = [
-  { id: 't4', jenis: 'SPP Syahriyah - Sep 2025',          tanggal: '02 Sep 2025', nominal: 490_000, status: 'Lunas' },
-  { id: 't2', jenis: 'SPP Syahriyah - Agu 2025',          tanggal: '02 Agu 2025', nominal: 490_000, status: 'Lunas' },
-  { id: 't1', jenis: 'SPP Syahriyah - Jul 2025',          tanggal: '03 Jul 2025', nominal: 490_000, status: 'Lunas' },
-]
+/* ===== Wali (akun) display ===== */
+const waliNameDisplay = computed(() => {
+  // Prioritas: sesi → data santri → 'Wali'
+  const sName = (session.value?.waliName || '').toString().trim()
+  if (sName) return sName
+  const alt = (santri.value?.walisantri || '').toString().trim()
+  return alt || 'Wali'
+})
+const waliContactDisplay = computed(() => {
+  // Jika ada email valid pada sesi → gunakan email; else phone
+  const email = (session.value as any)?.email
+  const isValidEmail = typeof email === 'string' && email.includes('@') && !/^\s*-\s*$/.test(email)
+  if (isValidEmail) return email
+
+  const p1 = (session.value?.waliPhone || '').toString().trim()
+  if (p1) return p1
+  const p2 = (santri.value?.nohp || '').toString().trim()
+  return p2 || '-'
+})
+
+/* ===== Utils ===== */
+function numOrNull(v:any){ return Number.isFinite(Number(v)) ? Number(v) : null }
+function hasNum(v:any){ return v!==undefined && v!==null && v!=='' && Number.isFinite(Number(v)) }
+
+/* ===== Load session ===== */
+function readSession(){
+  const raw = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
+  try { session.value = raw ? JSON.parse(raw) : null } catch { session.value = null }
+}
+
+/* ===== Load santri profile ===== */
+async function loadSantriProfile(){
+  if (!session.value?.santriId) return
+  const snap = await get(dref($realtimeDb, `alberr/santri/${session.value.santriId}`))
+  santri.value = snap.exists() ? snap.val() : null
+}
+
+/* ===== Bind term keys ===== */
+let unsubNilaiRoot: null | (()=>void) = null
+function bindTermKeys(){
+  if (unsubNilaiRoot) unsubNilaiRoot()
+  const node = dref($realtimeDb, 'alberr/nilai')
+  const h = onValue(node, snap=>{
+    const keys:string[] = []
+    snap.forEach(ch=>keys.push(ch.key!))
+    keys.sort() // contoh: "2024-2025_Ganjil" ... urut naik
+    termKeys.value = keys
+    if (!termKey.value && keys.length) {
+      termKey.value = keys[keys.length-1] // term terbaru
+      loadGrades()
+    }
+  })
+  unsubNilaiRoot = () => off(node, 'value', h as any)
+}
+
+/* ===== Muat nilai utk term terpilih (satu santri) ===== */
+async function loadGrades(){
+  if (!session.value?.santriId || !termKey.value) return
+  loading.value = true
+  try {
+    const termRef = dref($realtimeDb, `alberr/nilai/${termKey.value}`)
+    const termSnap = await get(termRef)
+    const data = termSnap.exists() ? (termSnap.val() || {}) : {}
+
+    const merged: Record<string, any> = {}
+    const entries = Object.entries<any>(data) // [mapelId, { santriId: GradeRecord, ... }]
+    for (const [mapelId, val] of entries) {
+      const rec = (val && val[session.value.santriId]) || null
+      if (!rec) continue
+
+      // Baca weight dan KKM lalu hitung akhir+predikat
+      const weights = await readWeights(termKey.value, mapelId)
+      const subj = subjects.value.find(s => s.id === mapelId)
+      const { akhir, predikat } = computeFinal(rec, weights, subj?.kkm)
+
+      merged[mapelId] = {
+        tugas: numOrNull(rec.tugas),
+        harian: numOrNull(rec.harian),
+        pts:    numOrNull(rec.pts),
+        pas:    numOrNull(rec.pas),
+        proyek: hasNum(rec.proyek) ? Number(rec.proyek) : null,
+        lainnya: hasNum(rec.lainnya) ? Number(rec.lainnya) : null,
+        akhir: Math.round(akhir),
+        predikat
+      }
+    }
+
+    nilaiByMapel.value = merged
+  } catch (e:any){
+    console.error(e)
+    nilaiByMapel.value = {}
+  } finally {
+    loading.value = false
+  }
+}
+
+/* ===== Lifecycle ===== */
+onMounted(async ()=>{
+  readSession()
+  if (!session.value) return
+  subscribeSubjects() // metadata mapel (nama, KKM)
+  await loadSantriProfile()
+  bindTermKeys()
+})
+watch(termKey, ()=> loadGrades())
+onUnmounted(()=>{
+  unbindSubjects()
+  if (unsubNilaiRoot) { unsubNilaiRoot(); unsubNilaiRoot=null }
+})
 </script>
 
 <style scoped>
-/* optional: smooth line edges */
 svg path { shape-rendering: geometricPrecision; }
 </style>

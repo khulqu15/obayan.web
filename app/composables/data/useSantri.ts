@@ -30,16 +30,16 @@ export type SantriRow = {
   tipe?: 'Putra' | 'Putri' | ''
   ppdbCode?: string
   dokumen?: DokumenBox | null
-
-  // derived for admin table
+  birthday?: string
   nik?: string
   ayahNama?: string
   ibuNama?: string
   dokumenCount?: number
 
-  // master-friendly fields
-  noInduk?: string        // NIS/NISN/No. Induk
-  kelasFormal?: string    // contoh: "7 MTs A"
+  noInduk?: string
+  kelasFormal?: string
+  kelasDiniyah?: string
+  pekerjaan?: string
 }
 
 function deriveGenderAndTipe(v: any): { gender: 'L'|'P'|''; tipe: 'Putra'|'Putri'|'' } {
@@ -144,12 +144,13 @@ export const useSantri = () => {
       tipe: payload.tipe ?? '',
       ppdbCode: payload.ppdbCode ?? '',
       dokumen: payload.dokumen ?? null,
-
-      // NEW
       noInduk: payload.noInduk ?? '',
       kelasFormal: payload.kelasFormal ?? '',
       ayahNama: payload.ayahNama ?? '',
       ibuNama: payload.ibuNama ?? '',
+      pekerjaan: payload.pekerjaan ?? '',
+      kelasDiniyah: payload.kelasDiniyah ?? '',
+      birthday: payload.birthday ?? '',
     }
     await set(newRef, data)
     if (refresh) await fetchSantri()
@@ -162,11 +163,9 @@ export const useSantri = () => {
     const nodeRef = dbRef($realtimeDb, `alberr/santri/${id}`)
     const data: any = {}
     const keys = [
-      'gen','santri','walisantri','nohp','kuotaKunjunganBulanIni','kamar','maskan','status','alamat','jenjang',
-      'rfid','fingerprint','gender','tipe','ppdbCode','dokumen',
-      'nik','ayahNama','ibuNama',
-      // NEW:
-      'noInduk','kelasFormal'
+      'gen', 'santri', 'walisantri', 'nohp', 'kuotaKunjunganBulanIni', 'kamar', 'maskan', 'status','alamat','jenjang',
+      'rfid', 'fingerprint', 'gender', 'tipe', 'ppdbCode', 'dokumen',
+      'nik','ayahNama','ibuNama', 'noInduk','kelasFormal', 'kelasDiniyah', 'pekerjaan'
     ] as const
     for (const k of keys) {
       if ((payload as any)[k] !== undefined) data[k] = (payload as any)[k]
@@ -175,7 +174,6 @@ export const useSantri = () => {
     if (refresh) await fetchSantri()
   }
 
-  // --- Import CSV Full (tetap disediakan)
   async function importFromCsvFull(file: File, onProgress: (percent: number, status: string) => void) {
     return new Promise<void>((resolve) => {
       let total = 0, done = 0
@@ -200,9 +198,6 @@ export const useSantri = () => {
     })
   }
 
-  /** =========================
-   *  Import Excel/CSV (Data Master)
-   *  ========================= */
   function norm(s: any) {
     return String(s || '')
       .toLowerCase()
@@ -223,14 +218,17 @@ export const useSantri = () => {
     const noInduk = pick('no induk','noinduk','nis','nisn','no santri','no siswa','nomor induk')
     const gen = String(pick('gen','angkatan','tahun masuk','tahun')).trim()
     const santri = pick('nama','nama santri','nama lengkap','siswa','santri')
-    const kamar = pick('kamar','asrama','maskan')
+    const kamar = pick('kamar','asrama')
+    const maskan = pick('maskan')
     const ayahNama = pick('ayah','nama ayah','wali ayah','nama ayah kandung')
     const ibuNama  = pick('ibu','nama ibu','wali ibu','nama ibu kandung')
     const nohp = String(pick('nomor','no hp','hp','no wa','whatsapp','telepon','telp','no telepon')).replace(/[^\d+]/g,'')
     const alamat = pick('alamat','alamat domisili','alamat wali','alamat lengkap')
     const statusRaw = String(pick('status','keterangan','aktif')).toLowerCase()
     const kelasFormal = pick('kelas formal','kelas','level','jenjang','jenjang pendidikan')
-
+    const kelasDiniyah = pick('kelas diniyah')
+    const birthday = pick('tempat tanggal lahir')
+    const pekerjaan = pick('pekerjaan')
     const status =
       /lulus/.test(statusRaw) ? 'lulus' :
       /cuti/.test(statusRaw) ? 'cuti' :
@@ -249,12 +247,14 @@ export const useSantri = () => {
       alamat: alamat || '',
       status,
       jenjang,
-
-      // tambahan
       ayahNama: ayahNama || '',
       ibuNama: ibuNama || '',
       noInduk: String(noInduk || '').trim(),
       kelasFormal: String(kelasFormal || '').trim(),
+      maskan: maskan || '',
+      kelasDiniyah: kelasDiniyah || '',
+      pekerjaan: pekerjaan || '',
+      birthday: birthday || ''
     }
   }
 
