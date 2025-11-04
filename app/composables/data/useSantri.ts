@@ -1,6 +1,5 @@
 import { ref as vRef, computed } from 'vue'
 import { child, get, ref as dbRef, push, set, update, remove, onValue, off } from 'firebase/database'
-import Papa from "papaparse"
 
 export type SantriRow = {
   id: string
@@ -103,6 +102,27 @@ export const useSantri = () => {
     file: File,
     onProgress: (percent: number, status: string) => void
   ) {
+    if (import.meta.server) {
+      throw new Error("Import data hanya bisa dijalankan di browser.")
+    }
+
+    const XLSX = (await import('xlsx')).default
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || ''
+    let rowsRaw: any[] = []
+
+    if (ext === 'csv') {
+      const text = await file.text()
+      const wb = XLSX.read(text, { type: 'string' }) // CSV mode
+      const sheet = wb.Sheets[wb.SheetNames[0]!]
+      rowsRaw = XLSX.utils.sheet_to_json(sheet!, { defval: '' })
+    } else {
+      const buf = await file.arrayBuffer()
+      const wb = XLSX.read(buf, { type: 'array' })
+      const sheet = wb.Sheets[wb.SheetNames[0]!]
+      rowsRaw = XLSX.utils.sheet_to_json(sheet!, { defval: '' })
+    }
+
     const pick = (row: any, keys: string[], fallback = "") => {
       for (const k of keys) {
         if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== "") return row[k]
@@ -110,51 +130,39 @@ export const useSantri = () => {
       return fallback
     }
 
-    return new Promise<void>((resolve) => {
-      let total = 0
-      let done = 0
+    const total = rowsRaw.length
+    const BATCH = 200
+    let done = 0
 
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: 'greedy',
-        dynamicTyping: true,
-        encoding: "utf-8",
-        chunk: async (results: any) => {
-          const data = results.data as any[]
-          total += data.length
+    for (let i = 0; i < total; i += BATCH) {
+      const batch = rowsRaw.slice(i, i + BATCH)
 
-          for (const row of data) {
-            await createSantri({
-              gen:      String(pick(row, ["Gen", "gen"], "")),
-              santri:   String(pick(row, ["Nama","santri","nama"], "")),
-              walisantri: String(pick(row, ["Wali","Wali Santri"," Nama Ayah","wali","ortu"], "")),
-              nohp:     String(pick(row, ["No HP","No. HP","Nomor Telp","nohp","whatsapp"], "")),
-              kuotaKunjunganBulanIni: Number(pick(row, ["Kuota","Kuota Kunjungan","Kuota Kunjungan (bulan ini)","kuota"], '2')) || 2,
-              kamar:    String(pick(row, ["Kamar","Asrama","kamar"], "")),
-              maskan:   String(pick(row, ["Maskan"], "")),
-              alamat:   String(pick(row, ["Alamat ", "Alamat", " Alamat"], "")),
-              status:   String(pick(row, ["Status"], "")),
-              jenjang:  String(pick(row, ["Jenjang","Kelas","Kelas Formal","jenjang"], "")),
-              rfid:  String(pick(row, ["RFID","Rfid","rfid"], "")),
-              fingerprint:  String(pick(row, ["Fingerprint","fingerprint","FINGERPRINT"], "")),
-            }, { refresh: false })
-            done++
-            onProgress(Math.min(99, Math.round((done / Math.max(1, total)) * 100)), `Upload ${done} dari ${total} santri…`)
-          }
-        },
-        complete: async () => {
-          await fetchSantri()
-          onProgress(100, "✅ Selesai import data santri")
-          resolve()
-        },
-        error: (err: any) => {
-          console.error(err)
-          onProgress(0, "Gagal membaca CSV: " + err.message)
-          resolve()
-        }
-      })
-    })
+      for (const row of batch) {
+        await createSantri({
+          gen:      String(pick(row, ["Gen", "gen"], "")),
+          santri:   String(pick(row, ["Nama","santri","nama"], "")),
+          walisantri: String(pick(row, ["Wali","Wali Santri"," Nama Ayah","wali","ortu"], "")),
+          nohp:     String(pick(row, ["No HP","No. HP","Nomor Telp","nohp","whatsapp"], "")),
+          kuotaKunjunganBulanIni: Number(pick(row, ["Kuota","Kuota Kunjungan","Kuota Kunjungan (bulan ini)","kuota"], '2')) || 2,
+          kamar:    String(pick(row, ["Kamar","Asrama","kamar"], "")),
+          maskan:   String(pick(row, ["Maskan"], "")),
+          alamat:   String(pick(row, ["Alamat ", "Alamat", " Alamat"], "")),
+          status:   String(pick(row, ["Status"], "")),
+          jenjang:  String(pick(row, ["Jenjang","Kelas","Kelas Formal","jenjang"], "")),
+          rfid:     String(pick(row, ["RFID","Rfid","rfid"], "")),
+          fingerprint: String(pick(row, ["Fingerprint","fingerprint","FINGERPRINT"], "")),
+        }, { refresh: false })
+        done++
+      }
+
+      onProgress(Math.min(99, Math.round((done / Math.max(1, total)) * 100)), `Upload ${done} dari ${total} santri…`)
+      await Promise.resolve()
+    }
+
+    await fetchSantri()
+    onProgress(100, "✅ Selesai import data santri")
   }
+
 
   async function deleteSantri(id: string) {
     const { $realtimeDb } = useNuxtApp()

@@ -29,7 +29,6 @@
     "marked": "^16.2.0",
     "nuxt": "^4.0.3",
     "nuxt-tiptap-editor": "^2.3.1",
-    "papaparse": "^5.5.3",
     "preline": "^3.2.3",
     "tailwindcss": "^4.1.12",
     "vue": "^3.5.18",
