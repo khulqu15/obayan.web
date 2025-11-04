@@ -80,8 +80,8 @@ const cb = (snap: any) => {
   const v = snap?.val?.() ?? snap?.val?.call?.(snap) ?? snap?.val?.()
   const s = v || {}
   if(s.maintenance != null || s.maintenance != undefined) {
-    maintenance.value = s.maintenance
-    if(s.maintenance) document.querySelector('html')?.classList.add('overflow-hidden')
+    maintenance.value = !s.maintenance
+    if(!s.maintenance) document.querySelector('html')?.classList.add('overflow-hidden')
     else document.querySelector('html')?.classList.remove('overflow-hidden')
   }
   applyPrimary(s.primaryColor)

@@ -53,31 +53,31 @@
                         shadow-lg shadow-emerald-500/20"
                 >
                     <Icon icon="mdi:whatsapp" class="size-5" />
-                    Hubungi WhatsApp
+                    WhatsApp
                 </a>
 
                 <!-- Sencra.io -->
                 <a
                     href="https://sencra.io"
                     class="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 font-semibold
-                        bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 transition
-                        shadow-lg shadow-blue-600/20"
+                        bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-300 transition
+                        shadow-lg"
                     target="_blank" rel="noopener"
                 >
                     <Icon icon="ph:arrow-up-right-bold" class="size-5" />
-                    Kunjungi Sencra.io
+                    Sencra.io
                 </a>
 
                 <!-- Obayan.id -->
                 <a
                     href="https://obayan.id"
                     class="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 font-semibold
-                        bg-white 700 ring-1 ring-inset ring-blue-200 hover:bg-blue-50 transition
-                        dark:bg-neutral-900 dark:200 dark:ring-neutral-700 dark:hover:bg-neutral-800"
+                        bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-300 transition
+                        shadow-lg"
                     target="_blank" rel="noopener"
                 >
                     <Icon icon="ph:student-duotone" class="size-5" />
-                    Kunjungi Obayan.id
+                    Obayan.id
                 </a>
                 </div>
 
