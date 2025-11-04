@@ -157,38 +157,48 @@
         </div>
 
         <!-- Settings Modal -->
-        <dialog ref="settingsDlg" :open="openSettings" class="modal">
-          <div class="modal-box max-w-xl rounded-2xl">
-            <h3 class="font-semibold text-lg mb-3">Attendance Settings</h3>
-            <div class="space-y-4">
-              <div>
-                <label class="text-sm font-medium">Auto Reset Times (HH:MM, 24h)</label>
-                <div class="mt-1 flex items-center gap-2">
-                  <input v-model="timesInput" type="text" placeholder="e.g. 06:30, 12:00, 20:45" class="input input-sm w-full rounded-lg border border-gray-200"/>
-                  <button class="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg" @click="saveTimes">Simpan</button>
-                </div>
-                <p class="text-xs text-gray-500 mt-1">Pisahkan dengan koma. Nilai tidak valid akan diabaikan otomatis.</p>
-              </div>
+        <teleport to="body">
+            <div v-if="openSettings" class="fixed inset-0 z-[100]">
+                <div class="absolute inset-0 bg-black/40" @click="openSettings=false" />
+                <div class="absolute inset-0 grid place-items-center p-4">
+                    <div class="w-full max-w-xl rounded-2xl bg-white border border-gray-200 shadow-xl">
+                        <div class="p-5">
+                            <h3 class="font-semibold text-lg mb-3">Attendance Settings</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-sm font-medium">Auto Reset Times (HH:MM, 24h)</label>
+                                    <div class="mt-1 flex items-center gap-2">
+                                        <input ref="timesInputEl" v-model="timesInput" type="text" placeholder="e.g. 06:30, 12:00, 20:45" class="input input-sm w-full rounded-lg border border-gray-200"/>
+                                        <button class="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg" @click="saveTimes">Simpan</button>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Pisahkan dengan koma. Nilai tidak valid akan diabaikan otomatis.</p>
+                                </div>
 
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <div class="text-xs text-gray-500">Last Reset At</div>
-                  <div class="font-medium">{{ lastResetFull }}</div>
-                </div>
-                <div>
-                  <div class="text-xs text-gray-500">Last Reset Key</div>
-                  <div class="font-mono text-sm">{{ settings.lastResetKey || '—' }}</div>
-                </div>
-              </div>
 
-              <div class="flex items-center justify-between pt-3">
-                <button class="btn btn-sm bg-rose-600 hover:bg-rose-700 text-white rounded-lg" @click="confirmReset">Reset Sekarang</button>
-                <button class="btn btn-sm bg-white border border-gray-200 rounded-lg" @click="openSettings=false">Tutup</button>
-              </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <div class="text-xs text-gray-500">Last Reset At</div>
+                                        <div class="font-medium">{{ lastResetFull }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-500">Last Reset Key</div>
+                                        <div class="font-mono text-sm">{{ settings.lastResetKey || '—' }}</div>
+                                    </div>
+                                </div>
+
+
+                                <div class="flex items-center justify-between pt-3">
+                                    <button class="btn btn-sm px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg" @click="confirmReset">Reset Sekarang</button>
+                                    <div class="flex items-center gap-2">
+                                        <button class="btn btn-sm px-3 py-2 bg-white border border-gray-200 rounded-lg" @click="openSettings=false">Tutup</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <form method="dialog" class="modal-backdrop" @click="openSettings=false"><button>close</button></form>
-        </dialog>
+        </teleport>
       </div>
     </div>
   </div>
