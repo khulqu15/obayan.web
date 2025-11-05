@@ -1,7 +1,6 @@
 // composables/data/useAnnouncements.ts
 import { ref as vRef, computed } from 'vue'
 import { get, ref as dbRef, push, set, update, remove, onValue, off } from 'firebase/database'
-import Papa from 'papaparse'
 
 export type AnnouncementLevel = 'info' | 'warning' | 'urgent'
 
@@ -51,8 +50,8 @@ function clampTimeStr(s: string): string | null {
   // Normalisasi "7:0" -> "07:00", validasi "HH:mm"
   const m = String(s || '').trim().match(/^(\d{1,2}):(\d{1,2})$/)
   if (!m) return null
-  let hh = parseInt(m[1], 10)
-  let mm = parseInt(m[2], 10)
+  let hh = parseInt(m[1]!, 10)
+  let mm = parseInt(m[2]!, 10)
   if (isNaN(hh) || isNaN(mm) || hh < 0 || hh > 23 || mm < 0 || mm > 59) return null
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${pad(hh)}:${pad(mm)}`
@@ -73,7 +72,7 @@ function parseDays(input: any): number[] {
       const k = String(x || '').trim().toLowerCase()
       if (k in INDO_DOW) return INDO_DOW[k]
       return NaN
-    }).filter(n => !isNaN(n) && n >= 0 && n <= 6)
+    }).filter(n => !isNaN(n!) && n! >= 0 && n! <= 6)
     return Array.from(new Set(xs))
   }
   const raw = String(input || '').trim().toLowerCase()
@@ -227,11 +226,35 @@ export const useAnnouncements = () => {
     await updateAnnouncement(id, { lastAnnouncedAt: ts }, { refresh: false })
   }
 
-  // --- Import CSV (header fleksibel): Title, Message, Days, Times, Level, Category, Active, StartDate, EndDate, TTS* ---
   async function importFromExcelWithProgress(
     file: File,
     onProgress: (percent: number, status: string) => void
   ) {
+    if (import.meta.server) {
+      throw new Error('Import data hanya bisa dijalankan di browser.')
+    }
+    const XLSX = (await import('xlsx')).default
+    const ext = file.name.split('.').pop()?.toLowerCase() || ''
+    let rowsRaw: any[] = []
+
+    try {
+      if (ext === 'csv') {
+        const text = await file.text()
+        const wb = XLSX.read(text, { type: 'string' })
+        const sheet = wb.Sheets[wb.SheetNames[0]!]
+        rowsRaw = XLSX.utils.sheet_to_json(sheet!, { defval: '' })
+      } else {
+        const buf = await file.arrayBuffer()
+        const wb = XLSX.read(buf, { type: 'array' })
+        const sheet = wb.Sheets[wb.SheetNames[0]!]
+        rowsRaw = XLSX.utils.sheet_to_json(sheet!, { defval: '' })
+      }
+    } catch (err: any) {
+      console.error(err)
+      onProgress(0, '❌ Gagal membaca file: ' + (err?.message || err))
+      return
+    }
+
     const pick = (row: any, keys: string[], fallback: any = '') => {
       for (const k of keys) {
         if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return row[k]
@@ -239,64 +262,59 @@ export const useAnnouncements = () => {
       return fallback
     }
 
-    return new Promise<void>((resolve) => {
-      let total = 0
-      let done = 0
+    const total = rowsRaw.length
+    const BATCH = 200
+    let done = 0
 
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: 'greedy',
-        dynamicTyping: true,
-        encoding: 'utf-8',
-        chunk: async (results: any) => {
-          const data = results.data as any[]
-          total += data.length
+    for (let i = 0; i < total; i += BATCH) {
+      const batch = rowsRaw.slice(i, i + BATCH)
 
-          for (const row of data) {
-            const daysRaw = pick(row, ['Days', 'Hari', 'days', 'hari', 'HariList'], '')
-            const timesRaw = pick(row, ['Times', 'Jam', 'times', 'jam', 'JamList'], '')
-            const startRaw = pick(row, ['StartDate','Mulai'], '')
-            const endRaw = pick(row, ['EndDate','Selesai'], '')
+      for (const row of batch) {
+        const daysRaw = pick(row, ['Days', 'Hari', 'days', 'hari', 'HariList'], '')
+        const timesRaw = pick(row, ['Times', 'Jam', 'times', 'jam', 'JamList'], '')
+        const startRaw = pick(row, ['StartDate','Mulai'], '')
+        const endRaw   = pick(row, ['EndDate','Selesai'], '')
 
-            const days = parseDays(daysRaw)
-            const times = parseTimes(timesRaw)
-            const startDate = startRaw ? Number(new Date(startRaw).getTime() || 0) : null
-            const endDate   = endRaw   ? Number(new Date(endRaw).getTime() || 0)   : null
+        const days = parseDays(daysRaw)
+        const times = parseTimes(timesRaw)
 
-            await createAnnouncement({
-              title:   String(pick(row, ['Title','Judul'], '')),
-              message: String(pick(row, ['Message','Pesan','Text'], '')),
-              days, times,
-              startDate: startDate || null,
-              endDate: endDate || null,
-              active: String(pick(row, ['Active','Aktif'], 'true')).toLowerCase() !== 'false',
-              category: String(pick(row, ['Category','Kategori'], '')),
-              level: (String(pick(row, ['Level'], 'info')).toLowerCase() as AnnouncementLevel),
-              ttsEnabled: String(pick(row, ['TTSEnabled','TTS'], 'true')).toLowerCase() !== 'false',
-              ttsLang: String(pick(row, ['TTSLang'], 'id-ID')),
-              ttsVoice: String(pick(row, ['TTSVoice'], '')),
-              ttsRate: Number(pick(row, ['TTSRate'], 1)) || 1,
-              ttsPitch: Number(pick(row, ['TTSPitch'], 1)) || 1,
-              speakerChannel: String(pick(row, ['Channel','Speaker','SpeakerChannel'], 'main'))
-            }, { refresh: false })
-
-            done++
-            onProgress(Math.min(99, Math.round((done / Math.max(1, total)) * 100)), `Upload ${done} dari ${total} pengumuman…`)
-          }
-        },
-        complete: async () => {
-          await fetchAnnouncements()
-          onProgress(100, '✅ Selesai import pengumuman')
-          resolve()
-        },
-        error: (err: any) => {
-          console.error(err)
-          onProgress(0, '❌ Gagal membaca CSV: ' + err.message)
-          resolve()
+        const toTs = (v: any) => {
+          if (!v && v !== 0) return null
+          if (typeof v === 'number') return v || null
+          const t = new Date(String(v)).getTime()
+          return isNaN(t) ? null : t
         }
-      })
-    })
+        const startDate = toTs(startRaw)
+        const endDate   = toTs(endRaw)
+
+        await createAnnouncement({
+          title:   String(pick(row, ['Title','Judul'], '')),
+          message: String(pick(row, ['Message','Pesan','Text'], '')),
+          days, times,
+          startDate,
+          endDate,
+          active: String(pick(row, ['Active','Aktif'], 'true')).toLowerCase() !== 'false',
+          category: String(pick(row, ['Category','Kategori'], '')),
+          level: (String(pick(row, ['Level'], 'info')).toLowerCase() as AnnouncementLevel),
+          ttsEnabled: String(pick(row, ['TTSEnabled','TTS'], 'true')).toLowerCase() !== 'false',
+          ttsLang: String(pick(row, ['TTSLang'], 'id-ID')),
+          ttsVoice: String(pick(row, ['TTSVoice'], '')),
+          ttsRate: Number(pick(row, ['TTSRate'], 1)) || 1,
+          ttsPitch: Number(pick(row, ['TTSPitch'], 1)) || 1,
+          speakerChannel: String(pick(row, ['Channel','Speaker','SpeakerChannel'], 'main'))
+        }, { refresh: false })
+
+        done++
+      }
+
+      onProgress(Math.min(99, Math.round((done / Math.max(1, total)) * 100)), `Upload ${done} dari ${total} pengumuman…`)
+      await Promise.resolve() // beri jeda event loop agar UI tidak freeze
+    }
+
+    await fetchAnnouncements()
+    onProgress(100, '✅ Selesai import pengumuman')
   }
+
 
   // --- Realtime subscription ---
   function subscribeAnnouncements() {
@@ -371,7 +389,7 @@ export const useAnnouncements = () => {
         if (!t) continue
         const [H, M] = t.split(':').map(n => parseInt(n, 10))
         const scheduled = new Date(now)
-        scheduled.setHours(H, M, 0, 0)
+        scheduled.setHours(H!, M, 0, 0)
         const diff = Math.abs(nowMs - scheduled.getTime())
         if (diff <= windowSec * 1000) {
           // hindari double-trigger jika barusan diumumkan
@@ -399,7 +417,7 @@ export const useAnnouncements = () => {
       for (const t of r.times) {
         const [H, M] = t.split(':').map(n => parseInt(n, 10))
         const dt = new Date(cur)
-        dt.setHours(H, M, 0, 0)
+        dt.setHours(H!, M, 0, 0)
         const ms = dt.getTime()
         if (r.startDate && ms < r.startDate) continue
         if (r.endDate && ms > r.endDate) continue

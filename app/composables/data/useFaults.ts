@@ -1,7 +1,6 @@
 // composables/useFaults.ts
 import { ref as vRef, computed } from 'vue'
 import { child, get, ref as dbRef, push, set, update, remove, onValue, off } from 'firebase/database'
-import Papa from 'papaparse'
 
 export type FaultStatus = 'baru' | 'diproses' | 'selesai'
 
@@ -156,11 +155,31 @@ export const useFaults = () => {
     await fetchFaults()
   }
 
-  // Impor CSV (kolom fleksibel), progress per-chunk
   async function importFromExcelWithProgress(
     file: File,
     onProgress: (percent: number, status: string) => void
   ) {
+    if (import.meta.server) {
+      throw new Error('Import data hanya bisa dijalankan di browser.')
+    }
+
+    const XLSX = (await import('xlsx')).default
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || ''
+    let rowsRaw: any[] = []
+
+    if (ext === 'csv') {
+      const text = await file.text()
+      const wb = XLSX.read(text, { type: 'string' }) // mode CSV
+      const sheet = wb.Sheets[wb.SheetNames[0]]
+      rowsRaw = XLSX.utils.sheet_to_json(sheet, { defval: '' })
+    } else {
+      const buf = await file.arrayBuffer()
+      const wb = XLSX.read(buf, { type: 'array' })
+      const sheet = wb.Sheets[wb.SheetNames[0]]
+      rowsRaw = XLSX.utils.sheet_to_json(sheet, { defval: '' })
+    }
+
     const pick = (row: any, keys: string[], fallback = '') => {
       for (const k of keys) {
         if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return row[k]
@@ -168,57 +187,58 @@ export const useFaults = () => {
       return fallback
     }
 
-    return new Promise<void>((resolve) => {
-      let total = 0
-      let done = 0
+    const parseDate = (v: any): number => {
+      if (v == null || v === '') return Date.now()
+      if (typeof v === 'number') {
+        const excelEpoch = Date.UTC(1899, 11, 30)
+        const ms = excelEpoch + Math.round(v * 86400000)
+        return isNaN(ms) ? Date.now() : ms
+      }
+      const t = new Date(v as string).getTime()
+      return isNaN(t) ? Date.now() : t
+    }
 
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: 'greedy',
-        dynamicTyping: true,
-        encoding: 'utf-8',
-        chunk: async (results: any) => {
-          const data = results.data as any[]
-          total += data.length
+    const total = rowsRaw.length
+    const BATCH = 200
+    let done = 0
 
-          for (const row of data) {
-            const tglRaw = pick(row, ['Tanggal', 'tanggal', 'Date', 'date'], '')
-            const tgl = tglRaw ? Number(new Date(tglRaw).getTime() || Date.now()) : Date.now()
+    for (let i = 0; i < total; i += BATCH) {
+      const batch = rowsRaw.slice(i, i + BATCH)
 
-            await createFault({
-              santriId: String(pick(row, ['SantriID', 'santriId', 'ID Santri', 'ID'], '')),
-              santri:   String(pick(row, ['Santri', 'Nama', 'nama'], '')),
-              tanggal:  tgl,
-              jenis:    String(pick(row, ['Jenis', 'Pelanggaran', 'jenis'], 'Umum')),
-              kategori: String(pick(row, ['Kategori', 'Level'], '')),
-              poin:     Number(pick(row, ['Poin', 'Point', 'Skor'], '0')) || 0,
-              deskripsi:String(pick(row, ['Deskripsi', 'Keterangan'], '')),
-              pelapor:  String(pick(row, ['Pelapor', 'Petugas'], '')),
-              status:   (String(pick(row, ['Status'], 'baru')) as FaultStatus),
-              tindakan: String(pick(row, ['Tindakan'], '')),
-              lampiranUrl: String(pick(row, ['Lampiran', 'LampiranUrl', 'Bukti'], '')),
-              maskan:   String(pick(row, ['Maskan'], '')),
-              kamar:    String(pick(row, ['Kamar', 'Asrama'], '')),
-              jenjang:  String(pick(row, ['Jenjang', 'Kelas'], ''))
-            }, { refresh: false })
+      for (const row of batch) {
+        const tglRaw = pick(row, ['Tanggal', 'tanggal', 'Date', 'date'], '')
+        const tgl = parseDate(tglRaw)
 
-            done++
-            onProgress(Math.min(99, Math.round((done / Math.max(1, total)) * 100)), `Upload ${done} dari ${total} pelanggaran…`)
-          }
-        },
-        complete: async () => {
-          await fetchFaults()
-          onProgress(100, '✅ Selesai import data pelanggaran')
-          resolve()
-        },
-        error: (err: any) => {
-          console.error(err)
-          onProgress(0, '❌ Gagal membaca CSV: ' + err.message)
-          resolve()
-        }
-      })
-    })
+        await createFault({
+          santriId: String(pick(row, ['SantriID', 'santriId', 'ID Santri', 'ID'], '')),
+          santri:   String(pick(row, ['Santri', 'Nama', 'nama'], '')),
+          tanggal:  tgl,
+          jenis:    String(pick(row, ['Jenis', 'Pelanggaran', 'jenis'], 'Umum')),
+          kategori: String(pick(row, ['Kategori', 'Level'], '')),
+          poin:     Number(pick(row, ['Poin', 'Point', 'Skor'], '0')) || 0,
+          deskripsi:String(pick(row, ['Deskripsi', 'Keterangan'], '')),
+          pelapor:  String(pick(row, ['Pelapor', 'Petugas'], '')),
+          status:   (String(pick(row, ['Status'], 'baru')) as FaultStatus),
+          tindakan: String(pick(row, ['Tindakan'], '')),
+          lampiranUrl: String(pick(row, ['Lampiran', 'LampiranUrl', 'Bukti'], '')),
+          maskan:   String(pick(row, ['Maskan'], '')),
+          kamar:    String(pick(row, ['Kamar', 'Asrama'], '')),
+          jenjang:  String(pick(row, ['Jenjang', 'Kelas'], ''))
+        }, { refresh: false })
+
+        done++
+      }
+      onProgress(
+        Math.min(99, Math.round((done / Math.max(1, total)) * 100)),
+        `Upload ${done} dari ${total} pelanggaran…`
+      )
+      await Promise.resolve()
+    }
+
+    await fetchFaults()
+    onProgress(100, '✅ Selesai import data pelanggaran')
   }
+
 
   // Realtime subscription
   function subscribeFaults() {

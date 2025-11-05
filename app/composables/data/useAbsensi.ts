@@ -160,7 +160,7 @@ export const useAbsensi = () => {
 
   async function fetchHistory(options?: { limit?: number; date?: string }) {
     const { $realtimeDb } = useNuxtApp()
-    const base = dbRef($realtimeDb, 'alberr/absensi/history'); const lim = options?.limit ?? 30
+    const base = dbRef($realtimeDb, 'alberr/abs ensi/history'); const lim = options?.limit ?? 30
     const q = query(base, limitToLast(lim)); const snap = await get(q); const val = snap.val() || {}
     let arr = Object.entries<any>(val).map(([id, v]) => ({ id, meta: { startedAt:+(v?.meta?.startedAt||0), endedAt:+(v?.meta?.endedAt||0), resetBy:String(v?.meta?.resetBy||''), total:+(v?.meta?.total||0) }}))
     arr.sort((a,b)=> (a.id > b.id ? -1 : 1))
