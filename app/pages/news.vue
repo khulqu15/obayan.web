@@ -122,8 +122,7 @@
               </label>
 
               <div>
-                <select v-model="selectedCategory"
-                        class="block w-52 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm text-gray-700 dark:text-neutral-200 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select v-model="selectedCategory" class="block w-52 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm text-gray-700 dark:text-neutral-200 focus:ring-blue-500">
                   <option value="">Semua Kategori</option>
                   <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
                 </select>

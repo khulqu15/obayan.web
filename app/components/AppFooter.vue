@@ -82,7 +82,6 @@
               </div>
             </div>
 
-            <!-- Legal -->
             <div class="space-x-4 text-sm">
               <a
                 v-for="l in footerBottomLinks"
@@ -95,7 +94,6 @@
             </div>
           </div>
 
-          <!-- Right: brand (sm only) + socials -->
           <div class="flex flex-wrap justify-between items-center gap-3">
             <div class="mt-3 sm:hidden">
               <a class="flex-none font-semibold text-xl text-black dark:text-white" href="#" aria-label="Brand">
@@ -106,16 +104,8 @@
               </p>
             </div>
 
-            <!-- Socials -->
             <div class="space-x-4">
-              <a
-                v-for="s in socialLinks"
-                :key="s.label"
-                :href="s.href"
-                class="inline-block text-gray-500 hover:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200"
-                :aria-label="s.label"
-                rel="noopener"
-              >
+              <a v-for="s in socialLinks" :key="s.label" :href="s.href" class="inline-block text-gray-500 hover:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-200" :aria-label="s.label" rel="noopener">
                 <ClientOnly>
                   <Icon :icon="s.icon" class="shrink-0 size-4" />
                   <template #fallback><span class="w-4 h-4 inline-block" /></template>
@@ -126,7 +116,15 @@
         </div>
       </div>
     </footer>
-    <BannerSencraBanner/>
+    <div class="px-6 pb-3">
+      <div class="text-sm flex items-center gap-3 bg-gray-200 rounded-xl">
+        <div class="p-2 rounded-xl bg-blue-500">
+          <Icon icon="solar:code-bold" width="24" height="24" /> 
+        </div>
+        <span>Developed by Sencra Obayan</span>
+      </div>
+    </div>
+    <!-- <BannerSencraBanner/> -->
   </div>
 </template>
 

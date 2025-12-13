@@ -25,7 +25,7 @@
               <span class="text-blue-200">{{ c.titleHighlight }}</span>
             </h1>
 
-            <p class="mt-4 text-base sm:text-lg text-white/80 max-w-xl">
+            <p class="mt-4 text-base text-white/80 max-w-xl">
               {{ c.subtitle }}
             </p>
 

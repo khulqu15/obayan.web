@@ -32,7 +32,7 @@
     "nuxt-tiptap-editor": "^2.3.1",
     "papaparse": "^5.5.3",
     "preline": "^3.2.3",
-    "tailwindcss": "^4.1.12",
+    "tailwindcss": "^4.1.16",
     "vue": "^3.5.18",
     "vue-chartjs": "^5.3.2",
     "vue-router": "^4.5.1",

@@ -24,7 +24,6 @@
       </div>
     </div>
 
-    <!-- Arena -->
     <div
       ref="arenaRef"
       class="relative w-full h-[360px] sm:h-[420px] rounded-2xl ring-1 ring-inset ring-emerald-200/70
@@ -32,7 +31,6 @@
              overflow-hidden select-none"
       @click="spawnTap($event)"
     >
-      <!-- Falling items -->
       <transition-group name="pop" tag="div">
         <button
           v-for="item in items"
@@ -53,7 +51,6 @@
         </button>
       </transition-group>
 
-      <!-- Floating hint -->
       <div v-if="state==='idle'" class="absolute inset-0 grid place-items-center">
         <div class="text-center">
           <p class="text-sm 900/70 dark:text-neutral-300">Klik/tap permata & bintang. Hindari bom!</p>
@@ -69,7 +66,6 @@
         </div>
       </div>
 
-      <!-- Time up -->
       <div v-if="state==='done'" class="absolute inset-0 grid place-items-center">
         <div class="text-center rounded-2xl px-5 py-4 bg-white/80 dark:bg-neutral-800/80 backdrop-blur-md ring-1 ring-neutral-200/60 dark:ring-neutral-700">
           <h3 class="text-lg font-bold text-green-900 dark:100">Waktu Habis!</h3>
@@ -87,7 +83,6 @@
       </div>
     </div>
 
-    <!-- Tips -->
     <p class="mt-3 text-xs text-center 900/60 dark:text-neutral-400">
       Tip: klik cepat beberapa item berurutan untuk menaikkan <span class="font-semibold">combo</span> dan bonus skor 💎
     </p>

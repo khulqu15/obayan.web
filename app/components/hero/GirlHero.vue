@@ -1,29 +1,21 @@
 <template>
-  <section class="relative overflow-hidden bg-gradient-to-b from-emerald-50 via-blue-50 to-white dark:from-emerald-900/20 dark:via-blue-900/10 dark:to-neutral-900">
-    <div class="max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-18">
-      <div class="relative grid grid-cols-12 gap-8 items-center rounded-[2rem]
+  <section class="relative overflow-hidden bg-linear-to-b from-gray-100 via-blue-50 to-gray-100 dark:from-emerald-900/20 dark:via-blue-900/10 dark:to-neutral-900">
+    <div class="max-w-352 mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-18">
+      <div class="relative grid grid-cols-12 gap-8 items-center rounded-4xl
                   bg-white/75 dark:bg-neutral-900/60 backdrop-blur-xl shadow-[0_20px_60px_-20px_rgba(16,185,129,0.25)]
                   p-6 sm:p-10">
 
-        <!-- Left: content -->
         <div class="col-span-12 md:col-span-6 lg:col-span-7">
-          <!-- Eyebrow -->
           <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider 700 dark:300">
             <span class="inline-block size-1.5 rounded-full bg-emerald-500/90 animate-pulse" />
             {{ eyebrow }}
           </p>
-
-          <!-- Title -->
           <h1 class="mt-2 text-xl sm:text-2xl lg:text-3xl font-bold leading-tight text-neutral-900 dark:text-white">
             {{ title }}
           </h1>
-
-          <!-- Description -->
-          <p class="mt-2 text-neutral-700/90 dark:text-neutral-300 max-w-2xl leading-relaxed">
+          <p class="mt-2 text-sm text-neutral-700/90 dark:text-neutral-300 max-w-2xl leading-relaxed">
             {{ description }}
           </p>
-
-          <!-- Feature pills -->
           <div class="mt-5 flex flex-wrap gap-2.5">
             <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold bg-emerald-100 800 dark:bg-emerald-900/40 dark:200">
               <ClientOnly><Icon icon="ph:sparkle" class="size-3.5" /></ClientOnly> Kemandirian
@@ -55,7 +47,6 @@
             </a>
           </div>
 
-          <!-- Trust mini -->
           <div class="mt-5 flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
             <div class="flex items-center gap-1">
               <ClientOnly>
@@ -70,11 +61,9 @@
           </div>
         </div>
 
-        <!-- Right: image -->
         <div class="col-span-12 md:col-span-6 lg:col-span-5">
-          <div class="relative aspect-[4/3] rounded-[1.75rem] ring-1 ring-emerald-200/70 dark:ring-neutral-800 bg-white/60 dark:bg-neutral-800/40">
+          <div class="relative aspect-[4/3] rounded-[1.75rem] dark:ring-neutral-800 bg-white/60 dark:bg-neutral-800/40">
             <img v-if="image" :src="image" alt="Pondok Putri" class="size-full rounded-[1.75rem] object-cover">
-
             <div class="absolute left-4 top-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold
                         bg-white/85 dark:bg-neutral-900/70 backdrop-blur border border-neutral-200 dark:border-neutral-700
                         text-neutral-700 dark:text-neutral-300 shadow-sm">
@@ -82,7 +71,6 @@
               Putri Area
             </div>
 
-            <!-- Floating bottom (kiri) -->
             <div class="absolute -left-3 bottom-6">
               <div class="rounded-2xl bg-white/95 dark:bg-neutral-900/80 backdrop-blur border border-neutral-200 dark:border-neutral-700 shadow-md px-3.5 py-2.5 translate-y-2 animate-[float_6s_ease-in-out_infinite]">
                 <div class="text-xs text-neutral-500">{{ floatingBottomTitle }}</div>
@@ -90,7 +78,6 @@
               </div>
             </div>
 
-            <!-- Floating top (kanan) -->
             <div class="absolute -right-3 top-10">
               <div class="rounded-2xl bg-white/95 dark:bg-neutral-900/80 backdrop-blur border border-neutral-200 dark:border-neutral-700 shadow-md px-3.5 py-2.5 animate-[float_7s_ease-in-out_infinite]">
                 <div class="flex items-center gap-1.5 text-xs text-neutral-500">
@@ -102,7 +89,6 @@
             </div>
           </div>
         </div>
-        <!-- /Right -->
       </div>
     </div>
   </section>

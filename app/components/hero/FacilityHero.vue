@@ -164,7 +164,6 @@
             </div>
           </div>
         </div>
-        <!-- /grid -->
       </div>
     </div>
   </section>
