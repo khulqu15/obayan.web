@@ -13,7 +13,7 @@
     </div>
 
     <div class="relative p-6 grid grid-cols-7 gap-3">
-      <div class="col-span-6">
+      <div class="col-span-7">
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-lg font-semibold">Registrasi / Penggantian Kartu RFID</h1>
           <div class="flex items-center gap-2">
@@ -26,7 +26,7 @@
       </div>
 
       <!-- Panel waiting live scan singleton (/alberr/rfid/live) -->
-      <div class="lg:col-span-2 col-span-6">
+      <div class="lg:col-span-2 col-span-7">
         <div class="sticky top-10">
           <div class="rounded-xl border border-gray-200 dark:border-neutral-700 p-4 relative overflow-hidden">
             <div class="relative inset-0 flex items-center justify-center pointer-events-none">
@@ -59,7 +59,7 @@
       </div>
 
       <!-- Tabel santri + aksi bind/replace/unbind -->
-      <div class="lg:col-span-5 col-span-6">
+      <div class="lg:col-span-5 col-span-7">
         <DataTable title="Daftar Santri & Kartu" :rows="tableRows" :columns="columns" :rowKey="(r) => r.id" :show-actions="true">
           <template #cell-santri="{ row }">
             <div class="font-medium">{{ row.santri }}</div>
