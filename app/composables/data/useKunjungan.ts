@@ -13,7 +13,7 @@ function playToneOnce() { if (typeof Audio === 'undefined') return; try { if (!_
 async function resolveByUID(uid?: string) {
   if (!uid) return null
   const { $realtimeDb } = useNuxtApp()
-  try { const s = await get(child(dbRef($realtimeDb), `alberr/rfid/bindings/${uid}`))
+  try { const s = await get(child(dbRef($realtimeDb), `alinayah/rfid/bindings/${uid}`))
     const v = s.val(); if (!v) return null
     return { santriId: String(v.santriId || ''), name: String(v.name || 'Santri Fulan'), maskan: String(v.maskan || ''), kamar: String(v.kamar || '') }
   } catch { return null }
@@ -31,7 +31,7 @@ export const useKunjungan = () => {
     const { $realtimeDb } = useNuxtApp()
     const key = mKey || monthKey.value
     if (unsubMonth) unsubMonth()
-    const node = dbRef($realtimeDb, `alberr/kunjungan/logs/${key}`)
+    const node = dbRef($realtimeDb, `alinayah/kunjungan/logs/${key}`)
     const off = onValue(node, (snap) => {
       const val = snap.val() || {}
       const arr: VisitRow[] = Object.entries<any>(val).map(([id, v]) => ({
@@ -48,7 +48,7 @@ export const useKunjungan = () => {
   function subscribeLive(limit=40) {
     const { $realtimeDb } = useNuxtApp()
     if (unsubLive) unsubLive(); live.value = []
-    const q = query(dbRef($realtimeDb, 'alberr/kunjungan/live'), limitToLast(limit))
+    const q = query(dbRef($realtimeDb, 'alinayah/kunjungan/live'), limitToLast(limit))
     const off = onChildAdded(q, async (snap) => {
       const v = snap.val() || {}
       const uid = String(v.uid || '')
@@ -84,11 +84,11 @@ export const useKunjungan = () => {
     }
     if (linkId) { const cnt = visitsThisMonth(linkId); if (cnt >= 2) throw new Error('Kuota kunjungan bulan ini sudah 2x untuk santri ini.') } else { unlinked = true }
 
-    const node = push(dbRef($realtimeDb, `alberr/kunjungan/logs/${mKey}`))
+    const node = push(dbRef($realtimeDb, `alinayah/kunjungan/logs/${mKey}`))
     const row = { santriId: linkId || '', name: String(p.name || 'Santri Fulan'), maskan: String(p.maskan || ''), kamar: String(p.kamar || ''), visitor: String(p.visitor || ''), relation: String(p.relation || ''), by: (p.by || 'manual'), deviceId: String(p.deviceId || ''), unlinked, ts: serverTimestamp() }
-    await set(node, row); await set(push(dbRef($realtimeDb, 'alberr/kunjungan/live')), row)
+    await set(node, row); await set(push(dbRef($realtimeDb, 'alinayah/kunjungan/live')), row)
   }
-  async function deleteVisit(id: string) { const { $realtimeDb } = useNuxtApp(); await remove(dbRef($realtimeDb, `alberr/kunjungan/logs/${monthKey.value}/${id}`)) }
+  async function deleteVisit(id: string) { const { $realtimeDb } = useNuxtApp(); await remove(dbRef($realtimeDb, `alinayah/kunjungan/logs/${monthKey.value}/${id}`)) }
   async function setMonth(mKey: string) { monthKey.value = mKey; await subscribeMonth(mKey) }
   async function handleRFIDVisit(santriId: string, name: string, extra?: { maskan?: string; kamar?: string; visitor?: string; relation?: string; deviceId?: string }) {
     await createVisit({ santriId, name: name || 'Santri Fulan', maskan: extra?.maskan, kamar: extra?.kamar, visitor: extra?.visitor, relation: extra?.relation, by: 'rfid', deviceId: extra?.deviceId })

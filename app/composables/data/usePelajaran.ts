@@ -42,7 +42,7 @@ export function usePelajaran() {
 
   function subscribeSubjects() {
     if (unsubSub) unsubSub()
-    const base = dref($realtimeDb, 'alberr/pelajaran')
+    const base = dref($realtimeDb, 'alinayah/pelajaran')
     const q = dquery(base, orderByChild('name'))
     const h = onValue(q, snap => {
       const arr:MapelItem[]=[]
@@ -57,12 +57,12 @@ export function usePelajaran() {
   function unbindSubjects(){ if (unsubSub) { unsubSub(); unsubSub=null } }
 
   async function createSubject(p: Omit<MapelItem,'id'|'createdAt'|'updatedAt'>){
-    const node = push(dref($realtimeDb, 'alberr/pelajaran'))
+    const node = push(dref($realtimeDb, 'alinayah/pelajaran'))
     await set(node, { name:p.name?.trim(), code:p.code||'', jenjang:p.jenjang||'', group:p.group||'', kkm:Number(p.kkm??0), active:p.active!==false, createdAt: serverTimestamp(), updatedAt: serverTimestamp() })
     return node.key!
   }
   async function updateSubject(id:string, patch: Partial<Omit<MapelItem,'id'>>){
-    const node = dref($realtimeDb, `alberr/pelajaran/${id}`)
+    const node = dref($realtimeDb, `alinayah/pelajaran/${id}`)
     const data:any = { updatedAt: serverTimestamp() }
     if (patch.name !== undefined) data.name = patch.name?.trim()
     if (patch.code !== undefined) data.code = patch.code || ''
@@ -72,7 +72,7 @@ export function usePelajaran() {
     if (patch.active !== undefined) data.active = !!patch.active
     await update(node, data)
   }
-  async function deleteSubject(id:string){ await remove(dref($realtimeDb, `alberr/pelajaran/${id}`)) }
+  async function deleteSubject(id:string){ await remove(dref($realtimeDb, `alinayah/pelajaran/${id}`)) }
   const getSubject = (id?:string)=> subjects.value.find(x=>x.id===id)
 
   // ===== Nilai =====
@@ -80,7 +80,7 @@ export function usePelajaran() {
   let unsubNilai: null | (()=>void) = null
   function subscribeNilai(termKey:string, mapelId:string){
     if (unsubNilai) unsubNilai()
-    const node = dref($realtimeDb, `alberr/nilai/${termKey}/${mapelId}`)
+    const node = dref($realtimeDb, `alinayah/nilai/${termKey}/${mapelId}`)
     const h = onValue(node, snap=>{
       const val = snap.val()||{}
       const o:Record<string,GradeRecord> = {}
@@ -95,11 +95,11 @@ export function usePelajaran() {
   function unsubscribeNilai(){ if (unsubNilai) { unsubNilai(); unsubNilai=null } nilaiMap.value = {} }
 
   async function readWeights(termKey:string, mapelId:string):Promise<GradeWeights>{
-    try{ const s=await get(dref($realtimeDb, `alberr/nilai_weights/${termKey}/${mapelId}`)); const v=s.val()||{}; return { tugas:Number(v.tugas??DEFAULT_WEIGHTS.tugas), harian:Number(v.harian??DEFAULT_WEIGHTS.harian), pts:Number(v.pts??DEFAULT_WEIGHTS.pts), pas:Number(v.pas??DEFAULT_WEIGHTS.pas), proyek: v.proyek!==undefined?Number(v.proyek):undefined, lainnya: v.lainnya!==undefined?Number(v.lainnya):undefined } }
+    try{ const s=await get(dref($realtimeDb, `alinayah/nilai_weights/${termKey}/${mapelId}`)); const v=s.val()||{}; return { tugas:Number(v.tugas??DEFAULT_WEIGHTS.tugas), harian:Number(v.harian??DEFAULT_WEIGHTS.harian), pts:Number(v.pts??DEFAULT_WEIGHTS.pts), pas:Number(v.pas??DEFAULT_WEIGHTS.pas), proyek: v.proyek!==undefined?Number(v.proyek):undefined, lainnya: v.lainnya!==undefined?Number(v.lainnya):undefined } }
     catch { return DEFAULT_WEIGHTS }
   }
   async function saveWeights(termKey:string, mapelId:string, w:GradeWeights){
-    await update(dref($realtimeDb, `alberr/nilai_weights/${termKey}/${mapelId}`), { tugas:Number(w.tugas||0), harian:Number(w.harian||0), pts:Number(w.pts||0), pas:Number(w.pas||0), proyek:w.proyek!==undefined?Number(w.proyek):null, lainnya:w.lainnya!==undefined?Number(w.lainnya):null, updatedAt:serverTimestamp() })
+    await update(dref($realtimeDb, `alinayah/nilai_weights/${termKey}/${mapelId}`), { tugas:Number(w.tugas||0), harian:Number(w.harian||0), pts:Number(w.pts||0), pas:Number(w.pas||0), proyek:w.proyek!==undefined?Number(w.proyek):null, lainnya:w.lainnya!==undefined?Number(w.lainnya):null, updatedAt:serverTimestamp() })
   }
 
   async function saveNilai(termKey:string, mapelId:string, santriId:string, patch:Partial<GradeRecord>){
@@ -108,7 +108,7 @@ export function usePelajaran() {
     const current = nilaiMap.value[santriId] || {}
     const next:GradeRecord = { ...current, ...patch }
     const { akhir, predikat } = computeFinal(next, w, sub?.kkm)
-    await update(dref($realtimeDb, `alberr/nilai/${termKey}/${mapelId}/${santriId}`), {
+    await update(dref($realtimeDb, `alinayah/nilai/${termKey}/${mapelId}/${santriId}`), {
       ...(patch.tugas!==undefined?{tugas:clamp01(Number(patch.tugas))}:{})
       ,...(patch.harian!==undefined?{harian:clamp01(Number(patch.harian))}:{})
       ,...(patch.pts!==undefined?{pts:clamp01(Number(patch.pts))}:{})
@@ -122,7 +122,7 @@ export function usePelajaran() {
   async function bulkSaveNilai(termKey:string, mapelId:string, payload:Record<string,GradeRecord>){
     const sub = getSubject(mapelId)
     const w = await readWeights(termKey, mapelId)
-    const base = dref($realtimeDb, `alberr/nilai/${termKey}/${mapelId}`)
+    const base = dref($realtimeDb, `alinayah/nilai/${termKey}/${mapelId}`)
     const updates:Record<string,any>={}
     for (const [sid,r] of Object.entries(payload)){
       const { akhir, predikat } = computeFinal(r, w, sub?.kkm)

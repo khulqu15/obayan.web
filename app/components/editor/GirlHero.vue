@@ -241,7 +241,7 @@ const props = defineProps<{ section: { id: string; key: string; props?: Partial<
 
 const defaults: Shape = {
   eyebrow: 'Informasi Pondok Putri',
-  title: 'Pondok Pesantren ALBERR Putri',
+  title: 'Pondok Pesantren alinayah Putri',
   description:
     'Pondok Pesantren Al-Berr membuka unit pendidikan putri dengan sekitar 70 santri awal dan dibina ustadzah berkompeten. Mengusung kemandirian, disiplin, serta program pendidikan setara santri putra, unit ini menegaskan Al-Berr sebagai pesantren komprehensif bagi putra-putri. Kehadiran pondok putri menegaskan Al-Berr sebagai pesantren komprehensif yang melayani santri putra dan putri serta siap menghadapi tantangan zaman.',
   image: '/assets/images/gallery/5.jpg',
@@ -287,8 +287,8 @@ async function save() {
     const { $realtimeDb } = useNuxtApp()
     const cleanId = (props.section?.id || '').replace(/^\/+|\/+$/g, '')
     const nodePath = cleanId.startsWith('home/sections/')
-      ? `alberr/web/pages/${cleanId}/props`
-      : `alberr/web/pages/home/sections/${cleanId}/props`
+      ? `alinayah/web/pages/${cleanId}/props`
+      : `alinayah/web/pages/home/sections/${cleanId}/props`
     await update(dbRef($realtimeDb), { [nodePath]: heroProps.value })
     savedNote.value = 'Tersimpan.'; setTimeout(()=>savedNote.value='', 1500)
   } catch (e:any) {
@@ -302,7 +302,7 @@ async function upload(e: Event, key: 'image') {
   try {
     const { getStorage, ref, uploadBytesResumable, getDownloadURL } = await import('firebase/storage')
     const storage = getStorage()
-    const path = `alberr/web/pondokputrihero/${Date.now()}_${file.name.replace(/\s+/g,'_')}`
+    const path = `alinayah/web/pondokputrihero/${Date.now()}_${file.name.replace(/\s+/g,'_')}`
     const r = ref(storage, path)
     const task = uploadBytesResumable(r, file, { contentType: file.type })
     await new Promise<void>((res, rej) => {

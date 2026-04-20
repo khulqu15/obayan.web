@@ -19,7 +19,7 @@ const maintenance = ref(false)
 const page = useRoute()
 const forced = ref(false)
 
-const { settings, load } = useSettings('/alberr/settings')
+const { settings, load } = useSettings('/alinayah/settings')
 function hexToRgbStr(hex: string) {
   let c = (hex || '').replace('#',''); if (!c) return '37,99,235'
   if (c.length === 3) c = c.split('').map(h => h+h).join('')
@@ -98,7 +98,7 @@ onMounted(() => {
   applyFontScale(1)
   applyDensity('comfortable')
   const { $realtimeDb } = useNuxtApp() as any
-  rtdbRef = dbRef($realtimeDb, '/alberr/settings')
+  rtdbRef = dbRef($realtimeDb, '/alinayah/settings')
   onValue(rtdbRef, cb, (err) => console.error('RTDB settings error:', err))
 })
 

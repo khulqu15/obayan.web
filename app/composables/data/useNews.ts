@@ -4,6 +4,14 @@ export type NewsContentTiptap = { kind: 'tiptap'; json?: any; html?: string }
 export type NewsContentHtml   = { kind: 'html'; html: string }
 export type NewsContent       = NewsContentTiptap | NewsContentHtml | string | null
 
+export type NewsAuthor = {
+  uid?: string
+  name?: string
+  email?: string
+  role?: string
+  avatar?: string
+}
+
 export type NewsItem = {
   id: string
   slug: string
@@ -15,6 +23,10 @@ export type NewsItem = {
   publishedAt: number
   readTime?: number
   content?: NewsContent
+  author?: NewsAuthor
+  updatedBy?: NewsAuthor
+  createdAt?: number
+  updatedAt?: number
 }
 
 function slugify(s: string) {
@@ -140,9 +152,9 @@ export const useNews = () => {
     try {
       const { $realtimeDb } = useNuxtApp()
       const { get, ref: dbRef } = await import('firebase/database')
-      const snap = await get(dbRef($realtimeDb, 'alberr/news'))
+      const snap = await get(dbRef($realtimeDb, 'alinayah/news'))
       const val = snap.val() || {}
-
+        
       const arr: NewsItem[] = Object.entries(val).map(([key, v]: any) => {
         let content: NewsContent | undefined
         if (v?.content?.kind === 'tiptap') {
@@ -166,10 +178,13 @@ export const useNews = () => {
           tags: Array.isArray(v.tags) ? v.tags : String(v.tags || '').split(',').map((s:string)=>s.trim()).filter(Boolean),
           publishedAt: Number(v.publishedAt || Date.now()),
           readTime: read || 3,
-          content
+          content,
+          author: v.author || undefined,
+          updatedBy: v.updatedBy || undefined,
+          createdAt: Number(v.createdAt || 0) || undefined,
+          updatedAt: Number(v.updatedAt || 0) || undefined,
         }
       })
-
       items.value = arr.sort((a,b) => (b.publishedAt||0) - (a.publishedAt||0))
     } catch (e:any) {
       console.error(e)
@@ -180,8 +195,11 @@ export const useNews = () => {
   }
   onMounted(loadNews)
 
-  async function createNews(payload: Omit<NewsItem, 'id'|'slug'|'readTime'|'publishedAt'> & {
-    slug?: string; publishedAt?: number; readTime?: number; content?: NewsContent
+  async function createNews(payload: Omit<NewsItem, 'id'|'slug'|'readTime'> & {
+    slug?: string
+    publishedAt?: number
+    readTime?: number
+    content?: NewsContent
   }) {
     const { $realtimeDb } = useNuxtApp()
     const { push, set, ref: dbRef } = await import('firebase/database')
@@ -193,7 +211,9 @@ export const useNews = () => {
     while (taken.has(candidate)) candidate = `${base}-${i++}`
 
     let content: NewsContent = payload.content || null
-    let json: any = undefined, html: string | undefined
+    let json: any = undefined
+    let html: string | undefined
+
     if (content && typeof content === 'object' && (content as any).kind === 'tiptap') {
       json = (content as any).json
       html = (content as any).html
@@ -210,8 +230,9 @@ export const useNews = () => {
     const now = Date.now()
     const read = payload.readTime ?? estimateReadTimeFromTiptap(json, html)
 
-    const listRef = dbRef($realtimeDb, 'alberr/news')
+    const listRef = dbRef($realtimeDb, 'alinayah/news')
     const nodeRef = push(listRef)
+
     await set(nodeRef, {
       slug: candidate,
       title: payload.title || '',
@@ -221,16 +242,20 @@ export const useNews = () => {
       tags: payload.tags || [],
       publishedAt: payload.publishedAt ?? now,
       readTime: read || 3,
-      content
+      content,
+      author: payload.author || null,
+      createdAt: now,
+      updatedAt: now,
     })
+
     await loadNews()
     return nodeRef.key
   }
-
+  
   async function updateNews(id: string, patch: Partial<NewsItem> & { slug?: string; content?: NewsContent }) {
     const { $realtimeDb } = useNuxtApp()
     const { update, ref: dbRef } = await import('firebase/database')
-    const nodeRef = dbRef($realtimeDb, `alberr/news/${id}`)
+    const nodeRef = dbRef($realtimeDb, `alinayah/news/${id}`)
 
     const data: any = {}
     if (patch.title !== undefined) data.title = patch.title
@@ -241,6 +266,8 @@ export const useNews = () => {
     if (patch.publishedAt !== undefined) data.publishedAt = Number(patch.publishedAt)
     if (patch.readTime !== undefined) data.readTime = Number(patch.readTime)
     if (patch.slug) data.slug = slugify(patch.slug)
+    if (patch.updatedBy !== undefined) data.updatedBy = patch.updatedBy
+    data.updatedAt = Date.now()
 
     if (patch.content !== undefined) {
       let content: NewsContent = patch.content
@@ -267,7 +294,7 @@ export const useNews = () => {
   async function deleteNews(id: string) {
     const { $realtimeDb } = useNuxtApp()
     const { remove, ref: dbRef } = await import('firebase/database')
-    await remove(dbRef($realtimeDb, `alberr/news/${id}`))
+    await remove(dbRef($realtimeDb, `alinayah/news/${id}`))
     await loadNews()
   }
 

@@ -47,9 +47,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
   authLoading.value = true
 
   // ===== Crypto utils =====
-  const AUTH_KEY   = 'alberr:auth'
-  const PASSPHRASE = 'alberr-admin-secret'
-  const SALT       = 'alberr-static-salt'
+  const AUTH_KEY   = 'alinayah:auth'
+  const PASSPHRASE = 'alinayah-admin-secret'
+  const SALT       = 'alinayah-static-salt'
   const ITER       = 120_000
 
   function fromB64(b64: string) {

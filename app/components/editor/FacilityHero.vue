@@ -295,7 +295,7 @@ watch(() => props.pagePath, (p) => {
 }, { immediate: true })
 
 const defaults: Shape = {
-  badge: 'Fasilitas Pondok Alberr',
+  badge: 'Fasilitas Pondok alinayah',
   headingLead: 'Nyaman, Tertib,',
   highlight1: 'Inklusif',
   highlight2: 'dirancang untuk bertumbuh',

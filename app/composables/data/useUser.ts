@@ -104,7 +104,7 @@ function generatePassword(len = 12) {
 }
 function phoneToEmail(phone: string) {
   const digits = phone.replace(/[^0-9]/g, '').replace(/^0/, '62')
-  return `${digits}-user@alberr.sch.id`
+  return `${digits}-user@alinayah.sch.id`
 }
 function now() { return Date.now() }
 
@@ -131,7 +131,7 @@ export const useUser = () => {
     loading.value = true
     error.value = null
     try {
-      const snap = await get(child(dbRef($realtimeDb), 'alberr/users'))
+      const snap = await get(child(dbRef($realtimeDb), 'alinayah/users'))
       const val = snap.val() || {}
       const list: UserRow[] = Object.entries<any>(val).map(([uid, u]) => ({
         uid,
@@ -196,7 +196,7 @@ export const useUser = () => {
         createdAt: now(),
         updatedAt: now(),
       }
-      await set(dbRef($realtimeDb, `alberr/users/${uid}`), profile)
+      await set(dbRef($realtimeDb, `alinayah/users/${uid}`), profile)
       return profile
     } catch (e: any) {
       console.error(e)
@@ -213,7 +213,7 @@ export const useUser = () => {
     error.value = null
     try {
       const payload = { ...patch, updatedAt: now() }
-      await update(dbRef($realtimeDb, `alberr/users/${uid}`), payload as any)
+      await update(dbRef($realtimeDb, `alinayah/users/${uid}`), payload as any)
     } catch (e: any) {
       console.error(e)
       error.value = e?.message ?? 'Gagal memperbarui user'
@@ -226,18 +226,18 @@ export const useUser = () => {
   async function setRole(uid: string, role: AppRole, resetToRoleDefaults = true) {
     const patch: any = { role, updatedAt: now() }
     if (resetToRoleDefaults) patch.allowedRoutes = ROLE_DEFAULT_ROUTES[role]
-    await update(dbRef($realtimeDb, `alberr/users/${uid}`), patch)
+    await update(dbRef($realtimeDb, `alinayah/users/${uid}`), patch)
   }
   async function setAllowedRoutes(uid: string, routes: string[]) {
-    await update(dbRef($realtimeDb, `alberr/users/${uid}`), { allowedRoutes: routes, updatedAt: now() })
+    await update(dbRef($realtimeDb, `alinayah/users/${uid}`), { allowedRoutes: routes, updatedAt: now() })
   }
   async function setActive(uid: string, isActive: boolean) {
-    await update(dbRef($realtimeDb, `alberr/users/${uid}`), { isActive, updatedAt: now() })
+    await update(dbRef($realtimeDb, `alinayah/users/${uid}`), { isActive, updatedAt: now() })
   }
 
   // DELETE (soft)
   async function deleteUserSoft(uid: string) {
-    await update(dbRef($realtimeDb, `alberr/users/${uid}`), {
+    await update(dbRef($realtimeDb, `alinayah/users/${uid}`), {
       isActive: false,
       allowedRoutes: [],
       updatedAt: now(),
@@ -248,9 +248,9 @@ export const useUser = () => {
   // DELETE (permanent) — menghapus catatan profil di Realtime DB
   async function deleteUserPermanent(uid: string) {
     // Jika ada data turunan yang perlu dibersihkan, hapus juga di sini:
-    // await remove(dbRef($realtimeDb, `alberr/userSessions/${uid}`))
-    // await remove(dbRef($realtimeDb, `alberr/userLogs/${uid}`))
-    await remove(dbRef($realtimeDb, `alberr/users/${uid}`))
+    // await remove(dbRef($realtimeDb, `alinayah/userSessions/${uid}`))
+    // await remove(dbRef($realtimeDb, `alinayah/userLogs/${uid}`))
+    await remove(dbRef($realtimeDb, `alinayah/users/${uid}`))
     // Catatan: ini TIDAK menghapus akun Firebase Auth user tsb.
     // Untuk juga menghapus akun Auth, gunakan Cloud Function (Admin SDK) yang dipicu dengan request admin.
   }

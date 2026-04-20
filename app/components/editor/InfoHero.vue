@@ -270,7 +270,7 @@ const props = defineProps<{
 }>()
 const defaults: Shape = {
   headingPrefix: 'Kenapa Memilih',
-  brandText: 'Pondok Alberr',
+  brandText: 'Pondok alinayah',
   subtitle: 'Perpaduan diniyah dan umum, pembinaan akhlak, serta layanan digital yang memudahkan wali santri.',
   reasons: [
     { title: 'Pusat Pendidikan Akhlaq dan Ilmu Pengetahuan', desc: 'Membentuk generasi berilmu dan berakhlak mulia sebagai bekal kehidupan.', icon: 'ph:student' },

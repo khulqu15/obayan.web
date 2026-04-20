@@ -77,7 +77,7 @@ export function useAgenda() {
 
     const { start, end } = monthRange(year, month0)
 
-    const baseRef = dref($realtimeDb, 'alberr/agendas')
+    const baseRef = dref($realtimeDb, 'alinayah/agendas')
     const q = dquery(baseRef, orderByChild('startAt'), dStartAt(start), dEndAt(end))
 
     const handler = onValue(q, (snap) => {
@@ -116,7 +116,7 @@ export function useAgenda() {
   async function uploadThumb(id: string, file: File) {
     if (!isClient || !storage || !file) return { url: '', path: '' }
     const ext = file.name?.split('.').pop() || 'jpg'
-    const path = `alberr/agenda/${id}/thumb_${Date.now()}.${ext}`
+    const path = `alinayah/agenda/${id}/thumb_${Date.now()}.${ext}`
     const storageRef = sref(storage, path)
     const snap = await uploadBytes(storageRef, file, { contentType: file.type || 'image/jpeg' })
     const url = await getDownloadURL(sref(storage, snap.metadata.fullPath))
@@ -133,7 +133,7 @@ export function useAgenda() {
     try {
       const startAt = toEpoch(payload.start)!
       const endAt   = toEpoch(payload.end)
-      const baseRef = dref($realtimeDb, 'alberr/agendas')
+      const baseRef = dref($realtimeDb, 'alinayah/agendas')
       const draftRef = push(baseRef)
       const id = draftRef.key as string
       await set(draftRef, {
@@ -167,7 +167,7 @@ export function useAgenda() {
   async function updateAgenda(id: string, patch: UpdatePayload) {
     loading.value = true
     try {
-      const nodeRef = dref($realtimeDb, `alberr/agendas/${id}`)
+      const nodeRef = dref($realtimeDb, `alinayah/agendas/${id}`)
 
       let curr: any
       try { curr = (await get(nodeRef)).val() } catch {}
@@ -209,7 +209,7 @@ export function useAgenda() {
   async function deleteAgenda(id: string) {
     loading.value = true
     try {
-      const nodeRef = dref($realtimeDb, `alberr/agendas/${id}`)
+      const nodeRef = dref($realtimeDb, `alinayah/agendas/${id}`)
       let curr: any
       try { curr = (await get(nodeRef)).val() } catch {}
       if (curr?.thumbPath) await deleteThumb(curr.thumbPath)

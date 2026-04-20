@@ -28,7 +28,7 @@ export const useSantri = () => {
     error.value = null
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snapshot = await get(dbRef($realtimeDb, 'alberr/santri'))
+      const snapshot = await get(dbRef($realtimeDb, 'alinayah/santri'))
       const val = snapshot.val() || {}
       rows.value = Object.entries(val).map(([key, v]: any) => ({
         id: key,
@@ -56,7 +56,7 @@ export const useSantri = () => {
   async function createSantri(payload: Omit<SantriRow, 'id'>, opts: { refresh?: boolean } = {}) {
     const { refresh = true } = opts
     const { $realtimeDb } = useNuxtApp()
-    const listRef = dbRef($realtimeDb, 'alberr/santri')
+    const listRef = dbRef($realtimeDb, 'alinayah/santri')
     const newRef = push(listRef)
     const data = {
       gen: payload.gen ?? '',
@@ -80,7 +80,7 @@ export const useSantri = () => {
   async function updateSantri(id: string, payload: Partial<Omit<SantriRow, 'id'>>, opts: { refresh?: boolean } = {}) {
     const { refresh = true } = opts
     const { $realtimeDb } = useNuxtApp()
-    const nodeRef = dbRef($realtimeDb, `alberr/santri/${id}`)
+    const nodeRef = dbRef($realtimeDb, `alinayah/santri/${id}`)
     const data: any = {}
     if (payload.gen !== undefined) data.gen = payload.gen
     if (payload.santri !== undefined) data.santri = payload.santri
@@ -166,14 +166,14 @@ export const useSantri = () => {
 
   async function deleteSantri(id: string) {
     const { $realtimeDb } = useNuxtApp()
-    const nodeRef = dbRef($realtimeDb, `alberr/santri/${id}`)
+    const nodeRef = dbRef($realtimeDb, `alinayah/santri/${id}`)
     await remove(nodeRef)
     await fetchSantri()
   }
 
   function subscribeSantri() {
     const { $realtimeDb } = useNuxtApp()
-    const ref = dbRef($realtimeDb, 'alberr/santri')
+    const ref = dbRef($realtimeDb, 'alinayah/santri')
     const cb = (snap: any) => {
       const val = snap.val() || {}
       rows.value = Object.entries(val).map(([key, v]: any) => ({

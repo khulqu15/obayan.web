@@ -284,7 +284,7 @@ const defaults: EditorShape = {
   titlePrefix: 'Ayo',
   titleUnderline: 'Mondok',
   titleSuffix: 'di',
-  brand: 'Ponpes Alberr',
+  brand: 'Ponpes alinayah',
   subtitle: 'Lingkungan yang menumbuhkan adab, ilmu, dan kemandirian. Kurikulum diniyah & formal terpadu, pembinaan tahfidz, serta program kepemimpinan dan pengabdian.',
   primaryCTA: { label: 'Al Berr', href: '/profile', icon: 'ph:student' },
   secondaryCTA: { label: 'Pelajari lebih lanjut', href: '/program', icon: 'ph:arrow-right' },

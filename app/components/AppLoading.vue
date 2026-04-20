@@ -13,8 +13,8 @@
           background-size:22px 22px;">
         </div>
         <div class="relative mx-4 rounded-2xl max-w-sm w-full bg-white/90 backdrop-blur p-5 shadow-2xl ring-1 ring-white/50 text-center">
-        <img src="/assets/logo.png" class="w-20 inline-block mx-auto mb-3" alt="Alberr Logo">
-        <h1 class="mb-4 font-semibold">ALBERR</h1>
+        <img src="/assets/logo.png" class="w-20 inline-block mx-auto mb-3" alt="Alinayah Logo">
+        <h1 class="mb-4 font-semibold">Alinayah</h1>
           <div class="items-center justify-center gap-3 text-center">
             <ClientOnly class="inline-block">
               <Icon icon="line-md:loading-twotone-loop" class="size-8 text-[#2D3FFF]" />

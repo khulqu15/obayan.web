@@ -34,7 +34,7 @@
               <div class="min-w-0">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Alamat</h3>
                 <p class="text-xs text-gray-600 dark:text-neutral-300 line-clamp-3">
-                  Kantor Pondok Pesantren AlBerr
+                  Kantor Pondok Pesantren Alinayah
                 </p>
                 <button @click="copy(address)" class="mt-2 text-[12px] text-blue-600 hover:text-blue-700 inline-flex items-center gap-1">
                   <ClientOnly><Icon icon="ph:copy" class="size-3.5" /></ClientOnly> Salin
@@ -172,18 +172,18 @@ import { ref as dbRef, onValue, off } from 'firebase/database'
 import { Icon } from '@iconify/vue'
 
 const address = ref('Jl. Pesantren No. 1, Pandaan, Pasuruan, Jawa Timur 67156')
-const email = ref('info@alberr.sch.id')
+const email = ref('info@alinayah.sch.id')
 const phone = ref('085856376399')
 const waIntl = ref('6285856376399')
-const mapSrc = ref('https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3954.154822990777!2d112.68858257934568!3d-7.666498699999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7d9e72d847345%3A0xb58b63681aec9b37!2sPondok%20Pesantren%20ALBERR%20(Putra)%20-%20Karangjati%20Pandaan!5e0!3m2!1sid!2sid!4v1755450928977!5m2!1sid!2sid')
-const mapQuery = ref('Pondok Pesantren Alberr, Pandaan, Pasuruan')
+const mapSrc = ref('https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3954.154822990777!2d112.68858257934568!3d-7.666498699999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7d9e72d847345%3A0xb58b63681aec9b37!2sPondok%20Pesantren%20ALINAYAH%20(Putra)%20-%20Karangjati%20Pandaan!5e0!3m2!1sid!2sid!4v1755450928977!5m2!1sid!2sid')
+const mapQuery = ref('Pondok Pesantren Alinayah, Pandaan, Pasuruan')
 const hours = ref<string[]>(['Senin–Jumat 08.00–15.30 WIB', 'Sabtu 08.00–12.00 WIB'])
 const directionsHref = ref(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery.value)}`)
 
 let unbind: null | (() => void) = null
 function bindContact() {
   const { $realtimeDb } = useNuxtApp() as any
-  const r = dbRef($realtimeDb, 'alberr/contact')
+  const r = dbRef($realtimeDb, 'alinayah/contact')
   const h = onValue(r, (s) => {
     const data = s.val() || {}
     const c = data.contact || {}

@@ -57,7 +57,7 @@ export function useSettings(pathOrOpts?: string | UseSettingsOpts) {
   const opts = typeof pathOrOpts === 'string'
     ? { path: pathOrOpts }
     : (pathOrOpts || {})
-  const path = opts.path ?? '/alberr/settings'
+  const path = opts.path ?? '/alinayah/settings'
   const debounceMs = opts.debounceMs ?? 600
 
   const { $realtimeDb } = useNuxtApp() as any
@@ -171,7 +171,7 @@ export function useSettings(pathOrOpts?: string | UseSettingsOpts) {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'alberr-settings.json'
+    a.download = 'alinayah-settings.json'
     a.click()
     URL.revokeObjectURL(url)
   }

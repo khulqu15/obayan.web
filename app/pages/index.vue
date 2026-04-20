@@ -18,7 +18,6 @@
       <HeroFacilityHero />
       <InvitationHero />
       <HeroProgramHero />
-      <HeroProgramHero />
     </template>
   </div>
 </template>
@@ -83,8 +82,8 @@ function resolveSection(key: string) {
 
 const route = useRoute()
 const config = useRuntimeConfig()
-const fallbackTitle = 'Ponpes Alberr | Pesantren Inovatif & Informatif'
-const fallbackDescription = 'Selamat datang di Ponpes Alberr Pandaan: KMI/Diniyah, Tahfidz, MTs/MA, kegiatan santri, dan PPDB online.'
+const fallbackTitle = 'Ponpes Alinayah | Pesantren Inovatif & Informatif'
+const fallbackDescription = 'Selamat datang di Ponpes Alinayah Purwosari: KMI/Diniyah, Tahfidz, MTs/MA, kegiatan santri, dan PPDB online.'
 const url = computed(() => new URL(route.fullPath || '/', config.public.siteUrl).toString())
 
 const seoTitle = computed(() => meta.value?.title || fallbackTitle)
@@ -127,12 +126,12 @@ useHead({
       children: computed(() => JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'Organization',
-        name: 'Pondok Pesantren Alberr',
+        name: 'Pondok Pesantren Alinayah',
         url: config.public.siteUrl,
         logo: `${config.public.siteUrl}/assets/logo.png`,
         sameAs: [
-          'https://facebook.com/alberr',
-          'https://instagram.com/alberr'
+          'https://facebook.com/alinayah',
+          'https://instagram.com/alinayah'
         ]
       }))
     }

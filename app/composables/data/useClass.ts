@@ -148,7 +148,7 @@ export function useClass() {
   function subscribeAll() {
     if (!isClient || !$realtimeDb) return
     unbindList()
-    const baseRef = dref($realtimeDb, 'alberr/classes')
+    const baseRef = dref($realtimeDb, 'alinayah/classes')
     const qRef = dquery(baseRef, orderByChild('title'))
     listUnsub.value = bindOnValue(qRef)
   }
@@ -178,7 +178,7 @@ export function useClass() {
   async function uploadCover(id: string, file: File) {
     if (!isClient || !$storage || !file) return { url: '', path: '' }
     const ext = file.name?.split('.').pop() || 'jpg'
-    const path = `alberr/classes/${id}/cover_${Date.now()}.${ext}`
+    const path = `alinayah/classes/${id}/cover_${Date.now()}.${ext}`
     const s = sref($storage, path)
     const snap = await uploadBytes(s, file, { contentType: file.type || 'image/jpeg' })
     const url = await getDownloadURL(sref($storage, snap.metadata.fullPath))
@@ -193,7 +193,7 @@ export function useClass() {
 
   async function uploadMaterialFile(cid: string, f: File) {
     const ext = f.name?.split('.').pop() || 'bin'
-    const path = `alberr/classMaterials/${cid}/${Date.now()}.${ext}`
+    const path = `alinayah/classMaterials/${cid}/${Date.now()}.${ext}`
     const s = sref($storage, path)
     const snap = await uploadBytes(s, f, { contentType: f.type || 'application/octet-stream' })
     const url = await getDownloadURL(sref($storage, snap.metadata.fullPath))
@@ -207,7 +207,7 @@ export function useClass() {
   }
 
   async function isCodeTaken(code: string) {
-    const baseRef = dref($realtimeDb, 'alberr/classes')
+    const baseRef = dref($realtimeDb, 'alinayah/classes')
     const qRef = dquery(baseRef, orderByChild('code'), equalTo(code))
     const snap = await get(qRef)
     return snap.exists()
@@ -223,7 +223,7 @@ export function useClass() {
   async function createClass(payload: CreateClassPayload) {
     loading.value = true
     try {
-      const baseRef = dref($realtimeDb, 'alberr/classes')
+      const baseRef = dref($realtimeDb, 'alinayah/classes')
       const draftRef = push(baseRef)
       const id = draftRef.key as string
 
@@ -262,7 +262,7 @@ export function useClass() {
   async function updateClass(id: string, patch: UpdateClassPayload) {
     loading.value = true
     try {
-      const nodeRef = dref($realtimeDb, `alberr/classes/${id}`)
+      const nodeRef = dref($realtimeDb, `alinayah/classes/${id}`)
       let curr: any
       try { curr = (await get(nodeRef)).val() } catch {}
 
@@ -307,16 +307,16 @@ export function useClass() {
   async function deleteClass(id: string) {
     loading.value = true
     try {
-      const nodeRef = dref($realtimeDb, `alberr/classes/${id}`)
+      const nodeRef = dref($realtimeDb, `alinayah/classes/${id}`)
       let curr: any
       try {
         curr = (await get(nodeRef)).val()
       } catch {}
       if (curr?.coverPath) await deleteCover(curr.coverPath)
       await remove(nodeRef)
-      await remove(dref($realtimeDb, `alberr/classTasks/${id}`))
-      await remove(dref($realtimeDb, `alberr/classMaterials/${id}`))
-      await remove(dref($realtimeDb, `alberr/classForum/${id}`))
+      await remove(dref($realtimeDb, `alinayah/classTasks/${id}`))
+      await remove(dref($realtimeDb, `alinayah/classMaterials/${id}`))
+      await remove(dref($realtimeDb, `alinayah/classForum/${id}`))
     } catch (e) {
       error.value = e
       throw e
@@ -356,7 +356,7 @@ export function useClass() {
     currentCode.value = (kode || '').toUpperCase()
     unbindDetail()
 
-    const baseRef = dref($realtimeDb, 'alberr/classes')
+    const baseRef = dref($realtimeDb, 'alinayah/classes')
     const qRef = dquery(baseRef, orderByChild('code'), equalTo(currentCode.value))
     const snap = await get(qRef)
 
@@ -371,14 +371,14 @@ export function useClass() {
 
     currentId.value = firstId
 
-    const kRef = dref($realtimeDb, `alberr/classes/${firstId}`)
+    const kRef = dref($realtimeDb, `alinayah/classes/${firstId}`)
     const hK = onValue(kRef, (s) => {
       const d = s.val() || null
       klass.value = d
     })
     detailUnsubs.push(() => off(kRef, 'value', hK as any))
 
-    const tRef = dref($realtimeDb, `alberr/classTasks/${firstId}`)
+    const tRef = dref($realtimeDb, `alinayah/classTasks/${firstId}`)
     const hT = onValue(tRef, (s) => {
       const arr: TaskItem[] = []
       s.forEach((ch: any) => arr.push({ id: ch.key, ...(ch.val() || {}) }))
@@ -386,7 +386,7 @@ export function useClass() {
     })
     detailUnsubs.push(() => off(tRef, 'value', hT as any))
 
-    const mRef = dref($realtimeDb, `alberr/classMaterials/${firstId}`)
+    const mRef = dref($realtimeDb, `alinayah/classMaterials/${firstId}`)
     const hM = onValue(mRef, (s) => {
       const arr: MaterialItem[] = []
       s.forEach((ch: any) => arr.push({ id: ch.key, ...(ch.val() || {}) }))
@@ -394,7 +394,7 @@ export function useClass() {
     })
     detailUnsubs.push(() => off(mRef, 'value', hM as any))
 
-    const pRef = dref($realtimeDb, `alberr/classForum/${firstId}`)
+    const pRef = dref($realtimeDb, `alinayah/classForum/${firstId}`)
     const hP = onValue(pRef, (s) => {
       const arr: PostItem[] = []
       s.forEach((ch: any) => arr.push({ id: ch.key, ...(ch.val() || {}) }))
@@ -432,7 +432,7 @@ export function useClass() {
 
   async function createTask(input: { title: string; desc?: string; due?: string | null }) {
     if (!currentId.value) return
-    const base = dref($realtimeDb, `alberr/classTasks/${currentId.value}`)
+    const base = dref($realtimeDb, `alinayah/classTasks/${currentId.value}`)
     const node = push(base)
     await set(node, {
       title: input.title,
@@ -444,7 +444,7 @@ export function useClass() {
   }
   async function updateTask(taskId: string, input: { title?: string; desc?: string; due?: string | null }) {
     if (!currentId.value) return
-    const node = dref($realtimeDb, `alberr/classTasks/${currentId.value}/${taskId}`)
+    const node = dref($realtimeDb, `alinayah/classTasks/${currentId.value}/${taskId}`)
     const patch: any = { updatedAt: serverTimestamp() }
     if (input.title !== undefined) patch.title = input.title
     if (input.desc !== undefined) patch.desc = input.desc || ''
@@ -453,12 +453,12 @@ export function useClass() {
   }
   async function deleteTask(taskId: string) {
     if (!currentId.value) return
-    await remove(dref($realtimeDb, `alberr/classTasks/${currentId.value}/${taskId}`))
+    await remove(dref($realtimeDb, `alinayah/classTasks/${currentId.value}/${taskId}`))
   }
 
   async function createMaterial(input: { title: string; desc?: string; file?: File | null }) {
     if (!currentId.value) return
-    const base = dref($realtimeDb, `alberr/classMaterials/${currentId.value}`)
+    const base = dref($realtimeDb, `alinayah/classMaterials/${currentId.value}`)
     const node = push(base)
     let fileUrl: string | null = null
     let filePath: string | null = null
@@ -478,7 +478,7 @@ export function useClass() {
   }
   async function updateMaterial(materialId: string, input: { title?: string; desc?: string; file?: File | null }) {
     if (!currentId.value) return
-    const node = dref($realtimeDb, `alberr/classMaterials/${currentId.value}/${materialId}`)
+    const node = dref($realtimeDb, `alinayah/classMaterials/${currentId.value}/${materialId}`)
     const patch: any = { updatedAt: serverTimestamp() }
 
     if (input.title !== undefined) patch.title = input.title
@@ -499,7 +499,7 @@ export function useClass() {
   }
   async function deleteMaterial(materialId: string) {
     if (!currentId.value) return
-    const node = dref($realtimeDb, `alberr/classMaterials/${currentId.value}/${materialId}`)
+    const node = dref($realtimeDb, `alinayah/classMaterials/${currentId.value}/${materialId}`)
     let curr: any
     try {
       curr = (await get(node)).val()
@@ -510,7 +510,7 @@ export function useClass() {
 
   async function createPost(input: { title: string; content?: string }) {
     if (!currentId.value) return
-    const base = dref($realtimeDb, `alberr/classForum/${currentId.value}`)
+    const base = dref($realtimeDb, `alinayah/classForum/${currentId.value}`)
     const node = push(base)
     await set(node, {
       title: input.title,
@@ -521,7 +521,7 @@ export function useClass() {
   }
   async function updatePost(postId: string, input: { title?: string; content?: string }) {
     if (!currentId.value) return
-    const node = dref($realtimeDb, `alberr/classForum/${currentId.value}/${postId}`)
+    const node = dref($realtimeDb, `alinayah/classForum/${currentId.value}/${postId}`)
     const patch: any = { updatedAt: serverTimestamp() }
     if (input.title !== undefined) patch.title = input.title
     if (input.content !== undefined) patch.content = input.content || ''
@@ -529,7 +529,7 @@ export function useClass() {
   }
   async function deletePost(postId: string) {
     if (!currentId.value) return
-    await remove(dref($realtimeDb, `alberr/classForum/${currentId.value}/${postId}`))
+    await remove(dref($realtimeDb, `alinayah/classForum/${currentId.value}/${postId}`))
   }
 
   onUnmounted(() => {

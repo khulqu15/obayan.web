@@ -44,8 +44,8 @@ export const useRFID = () => {
     try {
       const { $realtimeDb } = useNuxtApp()
       const [s1, s2] = await Promise.all([
-        get(child(dbRef($realtimeDb), 'alberr/rfid/bySantri')),
-        get(child(dbRef($realtimeDb), 'alberr/rfid/bindings')),
+        get(child(dbRef($realtimeDb), 'alinayah/rfid/bySantri')),
+        get(child(dbRef($realtimeDb), 'alinayah/rfid/bindings')),
       ])
       bySantri.value = s1.val() || {}
       byCard.value   = s2.val() || {}
@@ -58,7 +58,7 @@ export const useRFID = () => {
 
   async function isCardBound(uid: string) {
     const { $realtimeDb } = useNuxtApp()
-    const snap = await get(child(dbRef($realtimeDb), `alberr/rfid/bindings/${uid}`))
+    const snap = await get(child(dbRef($realtimeDb), `alinayah/rfid/bindings/${uid}`))
     const v = snap.val()
     if (!v) return null
     return { santriId: String(v.santriId || ''), name: String(v.name || 'Santri Fulan') }
@@ -69,14 +69,14 @@ export const useRFID = () => {
     const cur = bySantri.value?.[santriId]?.uid
     const updates: any = {}
     if (cur) {
-      updates[`alberr/rfid/bindings/${cur}`] = null
+      updates[`alinayah/rfid/bindings/${cur}`] = null
     }
-    updates[`alberr/rfid/bySantri/${santriId}`] = null
+    updates[`alinayah/rfid/bySantri/${santriId}`] = null
     // sinkron ke data santri
-    updates[`alberr/santri/${santriId}/rfid`] = ''
+    updates[`alinayah/santri/${santriId}/rfid`] = ''
 
-    const audit = push(dbRef($realtimeDb, 'alberr/rfid/audit'))
-    updates[`alberr/rfid/audit/${audit.key}`] = {
+    const audit = push(dbRef($realtimeDb, 'alinayah/rfid/audit'))
+    updates[`alinayah/rfid/audit/${audit.key}`] = {
       action: 'unbind',
       santriId, uid: cur || '',
       ts: serverTimestamp(),
@@ -105,7 +105,7 @@ async function bindCardToSantri(payload: {
 
   // hapus binding lama jika replace
   if (cur && cur !== uid) {
-    updates[`alberr/rfid/bindings/${cur}`] = null
+    updates[`alinayah/rfid/bindings/${cur}`] = null
   }
 
   // rakit payload binding TANPA undefined
@@ -121,15 +121,15 @@ async function bindCardToSantri(payload: {
     // jika ingin kosong eksplisit, alternatif: binding.replacedFrom = null
   }
 
-  updates[`alberr/rfid/bindings/${uid}`] = binding
-  updates[`alberr/rfid/bySantri/${santriId}`] = { uid, createdAt: serverTimestamp() }
+  updates[`alinayah/rfid/bindings/${uid}`] = binding
+  updates[`alinayah/rfid/bySantri/${santriId}`] = { uid, createdAt: serverTimestamp() }
 
   // sinkron juga ke data santri
-  updates[`alberr/santri/${santriId}/rfid`] = uid
+  updates[`alinayah/santri/${santriId}/rfid`] = uid
 
   // audit
-  const audit = push(dbRef($realtimeDb, 'alberr/rfid/audit'))
-  updates[`alberr/rfid/audit/${audit.key}`] = {
+  const audit = push(dbRef($realtimeDb, 'alinayah/rfid/audit'))
+  updates[`alinayah/rfid/audit/${audit.key}`] = {
     action: cur && cur !== uid ? 'replace' : 'bind',
     santriId, uid, prevUid: cur || '',
     ts: serverTimestamp(),
@@ -147,7 +147,7 @@ async function bindCardToSantri(payload: {
     lastTap.value = null
     startedAt = Date.now() - 2000
 
-    const q = query(dbRef($realtimeDb, 'alberr/rfid/scans'), limitToLast(50))
+    const q = query(dbRef($realtimeDb, 'alinayah/rfid/scans'), limitToLast(50))
     const off = onChildAdded(q, (snap) => {
       if (!waiting.value) return
       const v = snap.val() || {}
@@ -169,13 +169,13 @@ async function bindCardToSantri(payload: {
     if (unsubInbox) { unsubInbox(); unsubInbox = null }
   }
 
-  // Live singleton dari MODE_REG_RFID → /alberr/rfid/live { rfid, timestamp }
+  // Live singleton dari MODE_REG_RFID → /alinayah/rfid/live { rfid, timestamp }
   const live = vRef<RfidLive | null>(null)
   let unsubLive: null | (() => void) = null
   function subscribeLive() {
     const { $realtimeDb } = useNuxtApp()
     if (unsubLive) unsubLive()
-    const liveRef = dbRef($realtimeDb, 'alberr/rfid/live')
+    const liveRef = dbRef($realtimeDb, 'alinayah/rfid/live')
     const off = onValue(liveRef, (snap) => {
       const v = snap.val()
       if (v && v.rfid) {
@@ -190,7 +190,7 @@ async function bindCardToSantri(payload: {
   }
   async function clearLive() {
     const { $realtimeDb } = useNuxtApp()
-    await set(dbRef($realtimeDb, 'alberr/rfid/live'), null)
+    await set(dbRef($realtimeDb, 'alinayah/rfid/live'), null)
     live.value = null
   }
   function unsubscribeLive() {

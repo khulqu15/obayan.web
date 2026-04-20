@@ -201,8 +201,8 @@ const props = defineProps<{
 const defaults: Shape = {
   hero: {
     cover: '/assets/images/activity1.jpg',
-    badge: 'Galeri ALBERR',
-    title: 'Galeri ALBERR',
+    badge: 'Galeri alinayah',
+    title: 'Galeri alinayah',
     subtitle: 'Dokumentasi kegiatan, fasilitas, dan momen terbaik di pesantren.',
     heightSm: '36vh',
     heightLg: '44vh'

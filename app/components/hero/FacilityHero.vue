@@ -189,7 +189,7 @@ type Shape = {
 
 /* Default values */
 const defaults: Shape = {
-  eyebrow: 'Fasilitas Pondok Alberr',
+  eyebrow: 'Fasilitas Pondok Alinayah',
   headingMain: 'Nyaman, Tertib,',
   headingHi1: 'Inklusif',
   headingHi2: 'dirancang untuk bertumbuh',

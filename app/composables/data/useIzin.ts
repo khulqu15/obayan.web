@@ -30,7 +30,7 @@ async function resolveByUID(uid?: string) {
   if (!uid) return null
   const { $realtimeDb } = useNuxtApp()
   try {
-    const s = await get(child(dbRef($realtimeDb), `alberr/rfid/bindings/${uid}`))
+    const s = await get(child(dbRef($realtimeDb), `alinayah/rfid/bindings/${uid}`))
     const v = s.val(); if (!v) return null
     return { santriId: String(v.santriId || ''), name: String(v.name || 'Santri Fulan'), maskan: String(v.maskan || ''), kamar: String(v.kamar || '') }
   } catch { return null }
@@ -46,7 +46,7 @@ export const useIzin = () => {
     loading.value = true; error.value = null
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snap = await get(child(dbRef($realtimeDb), 'alberr/izin/current'))
+      const snap = await get(child(dbRef($realtimeDb), 'alinayah/izin/current'))
       const val = snap.val() || {}
       const arr: IzinRow[] = Object.entries<any>(val).map(([id, v]) => ({
         id,
@@ -77,7 +77,7 @@ export const useIzin = () => {
 
   async function createIzin(payload: Omit<IzinRow,'id'|'requestedAt'|'status'> & { status?: IzinStatus }) {
     const { $realtimeDb } = useNuxtApp()
-    const node = push(dbRef($realtimeDb, 'alberr/izin/current'))
+    const node = push(dbRef($realtimeDb, 'alinayah/izin/current'))
 
     const p: any = {
       santriId: String(payload.santriId || ''),
@@ -106,7 +106,7 @@ export const useIzin = () => {
 
   async function updateIzin(id: string, patch: Partial<Omit<IzinRow,'id'>>) {
     const { $realtimeDb } = useNuxtApp()
-    const node = dbRef($realtimeDb, `alberr/izin/current/${id}`)
+    const node = dbRef($realtimeDb, `alinayah/izin/current/${id}`)
     const u: any = {}
 
     if (patch.santriId !== undefined) u.santriId = String(patch.santriId || '')
@@ -133,7 +133,7 @@ export const useIzin = () => {
     await fetchIzin()
   }
 
-  async function deleteIzin(id: string) { const { $realtimeDb } = useNuxtApp(); await remove(dbRef($realtimeDb, `alberr/izin/current/${id}`)); await fetchIzin() }
+  async function deleteIzin(id: string) { const { $realtimeDb } = useNuxtApp(); await remove(dbRef($realtimeDb, `alinayah/izin/current/${id}`)); await fetchIzin() }
 
   async function approveIzin(id: string) { await updateIzin(id, { status:'approved', approvedAt: Date.now() }) }
   async function rejectIzin(id: string)  { const r = rows.value.find(x => x.id === id); if (!r) return; await archiveAndRemove(r, 'rejected') }
@@ -150,7 +150,7 @@ export const useIzin = () => {
     const { $realtimeDb } = useNuxtApp()
     const pad = (n:number)=> String(n).padStart(2,'0'); const d = new Date()
     const sess = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}`
-    const node = dbRef($realtimeDb, `alberr/izin/history/${sess}/${r.id}`)
+    const node = dbRef($realtimeDb, `alinayah/izin/history/${sess}/${r.id}`)
     const payload: any = {
       santriId: r.santriId || '',
       name: r.name || 'Santri Fulan',
@@ -174,13 +174,13 @@ export const useIzin = () => {
       returnedAt: finalStatus === 'returned' ? Date.now() : (r.returnedAt || 0),
     }
 
-    await set(node, payload); await remove(dbRef($realtimeDb, `alberr/izin/current/${r.id}`)); await fetchIzin()
+    await set(node, payload); await remove(dbRef($realtimeDb, `alinayah/izin/current/${r.id}`)); await fetchIzin()
   }
 
   let unsubLive: null | (()=>void) = null
   async function pushLive(ev: Omit<LiveIzinEvent,'id'|'ts'>) {
     const { $realtimeDb } = useNuxtApp()
-    const node = push(dbRef($realtimeDb, 'alberr/izin/live'))
+    const node = push(dbRef($realtimeDb, 'alinayah/izin/live'))
     await set(node, {
       uid: ev.uid || '', santriId: String(ev.santriId || ''), name: String(ev.name || 'Santri Fulan'),
       maskan: String(ev.maskan || ''), kamar: String(ev.kamar || ''), action: ev.action || 'request', by: ev.by || 'manual', deviceId: String(ev.deviceId || ''), ts: serverTimestamp(),
@@ -191,7 +191,7 @@ export const useIzin = () => {
     const { $realtimeDb } = useNuxtApp()
     if (unsubLive) unsubLive()
     live.value = []
-    const q = query(dbRef($realtimeDb, 'alberr/izin/live'), limitToLast(limit))
+    const q = query(dbRef($realtimeDb, 'alinayah/izin/live'), limitToLast(limit))
     const off = onChildAdded(q, async (snap) => {
       const v = snap.val() || {}
       const uid = String(v.uid || '')

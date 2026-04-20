@@ -110,7 +110,7 @@ type Props = {
 
 const defaults: Required<Props> = {
   headingPrefix: 'Kenapa Memilih',
-  brandText: 'Pondok Alberr',
+  brandText: 'Pondok Alinayah',
   subtitle:
     'Perpaduan diniyah dan umum, pembinaan akhlak, serta layanan digital yang memudahkan wali santri.',
   reasons: [

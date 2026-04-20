@@ -145,12 +145,12 @@ export function useBook() {
     let coverPath: string | null = null
 
     if (payload.pdfFile) {
-      pdfPath = `alberr/library/books/${id}/${Date.now()}_${safeName(payload.pdfFile.name)}`
+      pdfPath = `alinayah/library/books/${id}/${Date.now()}_${safeName(payload.pdfFile.name)}`
       await uploadBytes(sRef($storage, pdfPath), payload.pdfFile)
       pdfUrl = await getDownloadURL(sRef($storage, pdfPath))
     }
     if (payload.coverFile) {
-      coverPath = `alberr/library/books/${id}/cover_${Date.now()}_${safeName(payload.coverFile.name)}`
+      coverPath = `alinayah/library/books/${id}/cover_${Date.now()}_${safeName(payload.coverFile.name)}`
       await uploadBytes(sRef($storage, coverPath), payload.coverFile)
       coverUrl = await getDownloadURL(sRef($storage, coverPath))
     }

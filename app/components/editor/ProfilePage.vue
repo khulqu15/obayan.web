@@ -95,7 +95,7 @@
             <div class="mb-6">
               <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-blue-200">
                 <span class="inline-block size-2 rounded-full bg-blue-400" />
-                {{ form.hero.badge || 'Profil Pondok Pesantren Alberr' }}
+                {{ form.hero.badge || 'Profil Pondok Pesantren alinayah' }}
               </p>
               <h3 class="mt-1 text-xl sm:text-2xl lg:text-3xl font-bold text-white">
                 {{ form.hero.title || 'Mencetak berilmu, beradab, dan mandiri' }}
@@ -323,7 +323,7 @@
             <div class="mb-6">
               <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-blue-200">
                 <span class="inline-block size-2 rounded-full bg-blue-400" />
-                {{ form.hero.badge || 'Profil Pondok Pesantren Alberr' }}
+                {{ form.hero.badge || 'Profil Pondok Pesantren alinayah' }}
               </p>
               <h3 class="mt-1 text-xl sm:text-2xl font-bold text-white">{{ form.hero.title || 'Mencetak berilmu, beradab, dan mandiri' }}</h3>
               <p class="mt-1 text-blue-100">{{ form.hero.subtitle || 'Berlandaskan Al-Qur’an dan Sunnah…' }}</p>
@@ -509,7 +509,7 @@ const props = defineProps<{
 const defaults: Shape = {
   hero: {
     cover: '/assets/images/profile.png',
-    badge: 'Profil Pondok Pesantren Alberr',
+    badge: 'Profil Pondok Pesantren alinayah',
     title: 'Mencetak berilmu, beradab, dan mandiri',
     subtitle: 'Berlandaskan Al-Qur’ān dan Sunnah, mengintegrasikan diniyah, akademik, dan keterampilan abad 21.',
     heightSm: '44vh',
@@ -519,7 +519,7 @@ const defaults: Shape = {
     img: '/assets/images/kyai.jpg',
     title: 'Sambutan Pengasuh',
     content:
-      'Alhamdulillāh, Pondok Pesantren Alberr berkomitmen melahirkan santri yang mendalam ilmunya, kokoh akhlaknya, dan tangguh menghadapi tantangan zaman. Melalui disiplin, adab, dan ikhtiar berkelanjutan, kami berharap para santri menjadi pribadi yang bermanfaat bagi umat.',
+      'Alhamdulillāh, Pondok Pesantren alinayah berkomitmen melahirkan santri yang mendalam ilmunya, kokoh akhlaknya, dan tangguh menghadapi tantangan zaman. Melalui disiplin, adab, dan ikhtiar berkelanjutan, kami berharap para santri menjadi pribadi yang bermanfaat bagi umat.',
     signer: '— KH. Izud'
   },
   visi: 'Mencetak generasi berilmu, berakhlak karimah, dan berdaya saing global berlandaskan Al-Qur’ān dan Sunnah.',
@@ -620,7 +620,7 @@ async function onPickImage(ev: Event, setter: (url: string)=>void, key: string) 
     const path = normalize(props.pagePath || '/profile')
     web?.setActivePath?.(path)
     const up = await web.uploadMedia(file, {
-      folder: 'media',                 // hasil: alberr/web/media/<pathKey>/
+      folder: 'media',                 // hasil: alinayah/web/media/<pathKey>/
       pathOverride: path,              // simpan sesuai halaman
       filenamePrefix: key.replace(/[^a-z0-9_-]/gi, '-') // rapikan nama file
     })

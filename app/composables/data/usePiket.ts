@@ -35,7 +35,7 @@ export const usePiket = () => {
     error.value = null
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snap = await get(child(dbRef($realtimeDb), 'alberr/piket'))
+      const snap = await get(child(dbRef($realtimeDb), 'alinayah/piket'))
       const val: any = snap.val() || {}
       const map: PiketMap = {}
       for (const [maskanId, days] of Object.entries(val)) {
@@ -95,7 +95,7 @@ export const usePiket = () => {
     const { $realtimeDb } = useNuxtApp()
     if (hasMember(maskanId, day, { santriId: member.santriId, name: member.name })) return null
 
-    const node = dbRef($realtimeDb, `alberr/piket/${maskanId}/${day}/members`)
+    const node = dbRef($realtimeDb, `alinayah/piket/${maskanId}/${day}/members`)
     const newRef = push(node)
     const m = normalizeMember(member)
     const payload:any = { name: m.name }
@@ -108,7 +108,7 @@ export const usePiket = () => {
 
   async function removeMember(maskanId: string, day: DayKey, memberId: string) {
     const { $realtimeDb } = useNuxtApp()
-    await remove(dbRef($realtimeDb, `alberr/piket/${maskanId}/${day}/members/${memberId}`))
+    await remove(dbRef($realtimeDb, `alinayah/piket/${maskanId}/${day}/members/${memberId}`))
     await fetchPiket()
   }
 
@@ -121,7 +121,7 @@ export const usePiket = () => {
 
     if (hasMember(maskanId, day, { santriId: nextSantriId, name: nextName }, memberId)) return false
 
-    const node = dbRef($realtimeDb, `alberr/piket/${maskanId}/${day}/members/${memberId}`)
+    const node = dbRef($realtimeDb, `alinayah/piket/${maskanId}/${day}/members/${memberId}`)
     const m = normalizeMember(patch)
     const payload:any = {}
     if (patch.name !== undefined) payload.name = m.name
@@ -135,7 +135,7 @@ export const usePiket = () => {
   // ---- Day Ops ----
   async function clearDay(maskanId: string, day: DayKey) {
     const { $realtimeDb } = useNuxtApp()
-    await remove(dbRef($realtimeDb, `alberr/piket/${maskanId}/${day}/members`))
+    await remove(dbRef($realtimeDb, `alinayah/piket/${maskanId}/${day}/members`))
     await fetchPiket()
   }
 

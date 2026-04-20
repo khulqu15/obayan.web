@@ -53,7 +53,7 @@ export const useFaults = () => {
     error.value = null
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snapshot = await get(dbRef($realtimeDb, 'alberr/faults'))
+      const snapshot = await get(dbRef($realtimeDb, 'alinayah/faults'))
       const val = snapshot.val() || {}
       const list = Object.entries(val).map(([key, v]: any) => normalize(key, v))
       // urut terbaru di atas
@@ -71,7 +71,7 @@ export const useFaults = () => {
     if (!payload?.santri && payload?.santriId) {
       try {
         const { $realtimeDb } = useNuxtApp()
-        const snap = await get(dbRef($realtimeDb, `alberr/santri/${payload.santriId}`))
+        const snap = await get(dbRef($realtimeDb, `alinayah/santri/${payload.santriId}`))
         const s = snap.val()
         if (s) {
           payload.santri = s.santri || s.nama || ''
@@ -86,7 +86,7 @@ export const useFaults = () => {
   async function createFault(payload: Omit<FaultRow, 'id'>, opts: { refresh?: boolean } = {}) {
     const { refresh = true } = opts
     const { $realtimeDb } = useNuxtApp()
-    const listRef = dbRef($realtimeDb, 'alberr/faults')
+    const listRef = dbRef($realtimeDb, 'alinayah/faults')
 
     const data: Partial<FaultRow> = {
       santriId: payload.santriId ?? '',
@@ -116,7 +116,7 @@ export const useFaults = () => {
   async function updateFault(id: string, payload: Partial<Omit<FaultRow, 'id'>>, opts: { refresh?: boolean } = {}) {
     const { refresh = true } = opts
     const { $realtimeDb } = useNuxtApp()
-    const nodeRef = dbRef($realtimeDb, `alberr/faults/${id}`)
+    const nodeRef = dbRef($realtimeDb, `alinayah/faults/${id}`)
 
     const data: any = {}
     if (payload.santriId !== undefined) data.santriId = payload.santriId
@@ -150,7 +150,7 @@ export const useFaults = () => {
 
   async function deleteFault(id: string) {
     const { $realtimeDb } = useNuxtApp()
-    const nodeRef = dbRef($realtimeDb, `alberr/faults/${id}`)
+    const nodeRef = dbRef($realtimeDb, `alinayah/faults/${id}`)
     await remove(nodeRef)
     await fetchFaults()
   }
@@ -246,7 +246,7 @@ export const useFaults = () => {
     _unsubscribe = null
 
     const { $realtimeDb } = useNuxtApp()
-    const ref = dbRef($realtimeDb, 'alberr/faults')
+    const ref = dbRef($realtimeDb, 'alinayah/faults')
     const cb = (snap: any) => {
       const val = snap.val() || {}
       const list = Object.entries(val).map(([key, v]: any) => normalize(key, v))

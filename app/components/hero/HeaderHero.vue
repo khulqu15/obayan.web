@@ -8,8 +8,8 @@
           :alt="`Lingkungan pesantren ${c.brand}`"
           class="h-full w-full object-cover"
         />
-        <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/30" />
-        <div class="absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)] bg-black/10" />
+        <div class="absolute inset-0 bg-linear-to-r from-black/90 via-black/60 to-black/30" />
+        <div class="absolute inset-0 mask-[radial-gradient(ellipse_at_center,black,transparent_70%)] bg-black/10" />
       </div>
 
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 md:pb-24">
@@ -153,13 +153,13 @@ type HeaderHeroComputed = Required<Omit<HeaderHeroProps, 'badges' | 'ctaPPDB'>> 
 
 /** DEFAULTS */
 const defaults: HeaderHeroComputed = {
-  brand: 'Al-Berr',
+  brand: 'Alinayah',
   bgImage: '/assets/images/masjid.jpg',
   titleMain: 'Pesantren Pencetak Insan ',
   titleHighlight: 'Berakhlaqul Karimah',
   tagline: 'Pondok Pesantren Inovatif',
   subtitle:
-    'Pondok Pesantren Al-Berr hadir sebagai pusat pendidikan akhlaq mulia dan ilmu pengetahuan, mengintegrasikan agama-umum, salaf-modern, metode Amtsilati, pembelajaran aktif, fasilitas memadai, serta lingkungan bersih, indah, dan nyaman.',
+    'Pondok Pesantren Alinayah hadir sebagai pusat pendidikan akhlaq mulia dan ilmu pengetahuan, mengintegrasikan agama-umum, salaf-modern, metode Amtsilati, pembelajaran aktif, fasilitas memadai, serta lingkungan bersih, indah, dan nyaman.',
   photos: [
     '/assets/images/activity.jpg',
     '/assets/images/activity1.jpg',
@@ -184,7 +184,7 @@ const defaults: HeaderHeroComputed = {
   ],
   quicks: [
     { label: 'PPDB Berakhir', value: '1 Oktober - Kuota Terpenuhi', icon: 'ph:calendar-check' },
-    { label: 'Jenjang', value: 'SMP - SMA Al Berr', icon: 'ph:student' },
+    { label: 'Jenjang', value: 'SMP - SMK Alinayah', icon: 'ph:student' },
     { label: 'Admin', value: 'WA: 085856376399', icon: 'ph:phone' }
   ]
 }

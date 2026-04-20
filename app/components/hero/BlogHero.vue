@@ -1,3 +1,4 @@
+<!-- components/hero/BlogHero.vue -->
 <template>
   <section class="relative overflow-hidden bg-white/90 dark:bg-neutral-900 dark:border-neutral-800" id="news">
     <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 -top-40 h-64 bg-gradient-to-b from-blue-100/70 to-transparent dark:from-emerald-900/20" />
@@ -176,7 +177,7 @@ type Featured = Post
 
 const defaults = {
   headingTitle: 'Kegiatan Harian & Mingguan Santri',
-  headingDesc: 'Pantau jadwal kajian, ibadah, dan aktivitas santri Pondok Pesantren Alberr Pandaan secara teratur. Temukan kegiatan yang sesuai dengan minat dan kebutuhan Anda.',
+  headingDesc: 'Pantau jadwal kajian, ibadah, dan aktivitas santri Pondok Pesantren Al-Inayah Purwosari secara teratur. Temukan kegiatan yang sesuai dengan minat dan kebutuhan Anda.',
   featured: {
     title: 'Tahfidz Berbasis Target & Analitik: Metrik Hafalan yang Membumi',
     cover: '/assets/images/activity.jpg',
@@ -230,7 +231,7 @@ watch(mySection, async (sec, _, onCleanup) => {
     const { $realtimeDb } = useNuxtApp()
     const { ref: dbRef, onValue, off } = await import('firebase/database')
     const k = web.currentKey.value
-    const r = dbRef($realtimeDb, `alberr/web/pages/${k}/sections/${sec.id}/props/newsSource/mode`)
+    const r = dbRef($realtimeDb, `alinayah/web/pages/${k}/sections/${sec.id}/props/newsSource/mode`)
     const handler = onValue(r, (snap) => {
       const v = String(snap.val() ?? '')
       liveMode.value = (v === 'custom' || v === 'auto' || v === 'manual') ? (v as any) : null

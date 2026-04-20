@@ -139,7 +139,7 @@ type FooterSection = { title: string; items: FooterItem[] }
 type Language = { code: string; label: string; icon: string }
 
 const year = 2025
-const footerBrand = ref({ name: 'ALBERR', desc: `© ${year} Ponpes ALBERR.` })
+const footerBrand = ref({ name: 'ALINAYAH', desc: `© ${year} Ponpes ALINAYAH.` })
 
 /* sections & bottom links tetap default */
 const footerSections = ref<FooterSection[]>([
@@ -184,11 +184,11 @@ function setLanguage(code: string) {
   if (found) selectedLanguage.value = found
 }
 
-/* Subscribe brand & socials dari /alberr/contact */
+/* Subscribe brand & socials dari /alinayah/contact */
 let unbind: null | (() => void) = null
 function bindFooter() {
   const { $realtimeDb } = useNuxtApp() as any
-  const r = dbRef($realtimeDb, 'alberr/contact')
+  const r = dbRef($realtimeDb, 'alinayah/contact')
   const h = onValue(r, (s) => {
     const data = s.val() || {}
     const brand = data?.footer?.brand

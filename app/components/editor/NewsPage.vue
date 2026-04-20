@@ -144,7 +144,7 @@ const defaults: Shape = {
   hero: {
     cover: '/assets/images/profile.png',
     badge: 'Kabar Terbaru',
-    title: 'Berita Pondok Pesantren Alberr',
+    title: 'Berita Pondok Pesantren alinayah',
     subtitle: 'Informasi kegiatan, pengumuman, dan liputan santri.',
     heightSm: '36vh',
     heightLg: '44vh'

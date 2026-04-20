@@ -115,9 +115,9 @@ type Shape = {
 
 const defaults: Shape = {
   eyebrow: 'Informasi Pondok Putri',
-  title: 'Pondok Pesantren ALBERR Putri',
+  title: 'Pondok Pesantren ALINAYAH Putri',
   description:
-    'Pondok Pesantren Al-Berr membuka unit pendidikan putri dengan sekitar 70 santri awal dan dibina ustadzah berkompeten. Mengusung kemandirian, disiplin, serta program pendidikan setara santri putra, unit ini menegaskan Al-Berr sebagai pesantren komprehensif bagi putra-putri.',
+    'Pondok Pesantren Al-Inayah membuka unit pendidikan putri dengan sekitar 70 santri awal dan dibina ustadzah berkompeten. Mengusung kemandirian, disiplin, serta program pendidikan setara santri putra, unit ini menegaskan Al-Inayah sebagai pesantren komprehensif bagi putra-putri.',
   image: '/assets/images/gallery/12.jpg',
   ctaLocation: { label: 'Lihat Lokasi', href: 'https://maps.app.goo.gl/BTtkMt27swwav4TA8', icon: 'ph:map-pin-area' },
   ctaContact:  { label: 'Kontak Pengurus', href: 'tel:+6281234567890', icon: 'ph:phone-call' },

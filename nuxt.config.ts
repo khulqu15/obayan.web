@@ -31,10 +31,14 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      siteUrl: 'https://alberr-obayan.sencra.io',
-      siteName: 'Pondok Pesantren Alberr',
+      siteUrl: 'https://alinayah.sencra.io',
+      siteName: 'Pondok Pesantren alinayah',
       siteDescription: 'Pondok pesantren inovatif: diniyah, tahfidz, dan pendidikan formal berkarakter.',
-      twitterSite: '@alberr'
+      twitterSite: '@alinayah',
+      public: {
+        cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '',
+        cloudinaryUploadPreset: process.env.NUXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '',
+      },
     }
   },
 

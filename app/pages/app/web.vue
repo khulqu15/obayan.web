@@ -1,269 +1,558 @@
 <template>
-  <div class="p-4">
-    <div class="grid grid-cols-12 gap-4">
-      <aside v-show="ui.showSidebar" class="col-span-12 lg:col-span-3">
-        <div class="rounded-xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 overflow-hidden">
-          <div class="p-3 border-b border-gray-200 dark:border-neutral-700 flex items-center justify-between">
-            <h2 class="font-semibold text-sm">Halaman</h2>
-            <div class="flex items-center gap-1">
-              <button class="px-2 py-1 text-xs rounded border dark:border-neutral-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-800" @click="openNewPage">Baru</button>
-              <button class="px-2 py-1 text-xs rounded border dark:border-neutral-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-800" @click="reloadPages">Muat Ulang</button>
+  <div class="min-h-full bg-transparent text-gray-800 dark:text-neutral-200">
+    <div class="mx-auto max-w-[1800px] space-y-8 px-5 py-5 md:px-8 md:py-8 xl:px-10 xl:py-10">
+      <section class="relative overflow-hidden rounded-[34px] border border-green-100 bg-gradient-to-br from-green-600 via-green-600 to-lime-500 p-5 text-white shadow-[0_26px_60px_-18px_rgba(22,163,74,0.36)] md:p-8">
+        <div class="absolute inset-0 opacity-20">
+          <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white blur-3xl"></div>
+          <div class="absolute bottom-0 left-8 h-32 w-32 rounded-full bg-lime-100 blur-3xl"></div>
+        </div>
+
+        <div class="relative z-10 grid gap-5 xl:grid-cols-[1.18fr,0.82fr] xl:items-end">
+          <div>
+            <div class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold ring-1 ring-white/20">
+              <span class="inline-block h-2 w-2 rounded-full bg-lime-300"></span>
+              Website CMS Workspace
+            </div>
+            <h1 class="mt-4 text-2xl font-black tracking-tight md:text-4xl">Editor Halaman Website</h1>
+            <p class="mt-3 max-w-2xl text-sm leading-6 text-green-50/95 md:text-base">
+              Kelola struktur halaman, metadata, section komponen, dan aset media website dalam workspace yang lebih visual, lebih rapi, dan lebih nyaman dipakai seperti CMS website modern.
+            </p>
+          </div>
+
+          <div class="grid gap-3 md:grid-cols-3 grid-cols-1">
+            <div class="rounded-[24px] bg-white/12 p-4 ring-1 ring-white/15 backdrop-blur">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-green-100">Total Halaman</div>
+              <div class="mt-2 text-2xl font-black">{{ pages.length }}</div>
+              <div class="mt-1 text-xs text-green-50/90">path aktif di CMS</div>
+            </div>
+            <div class="rounded-[24px] bg-white/12 p-4 ring-1 ring-white/15 backdrop-blur">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-green-100">Total Section</div>
+              <div class="mt-2 text-2xl font-black">{{ sortedSections.length }}</div>
+              <div class="mt-1 text-xs text-green-50/90">blok editor di halaman aktif</div>
+            </div>
+            <div class="rounded-[24px] bg-white/12 p-4 ring-1 ring-white/15 backdrop-blur">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-green-100">Status</div>
+              <div class="mt-2 text-base font-black leading-6">{{ meta?.status === 'published' ? 'Published' : 'Draft' }}</div>
+              <div class="mt-1 text-xs text-green-50/90">untuk path {{ currentPath }}</div>
             </div>
           </div>
-          <div class="p-3 border-b border-gray-200 dark:border-neutral-700">
-            <div class="relative">
-              <Icon icon="lucide:search" class="size-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input v-model="qPage" type="search" placeholder="Cari path/title…" class="pl-8 pr-3 py-2 text-sm rounded-lg border border-gray-200 w-full bg-white dark:bg-neutral-800 dark:border-neutral-700 focus:outline-none">
-            </div>
-          </div>
-          <ul class="max-h-[60vh] overflow-auto divide-y dark:divide-neutral-800">
-            <li v-for="p in filteredPages" :key="p.pathKey"
-                class="p-3 text-sm cursor-pointer border-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-800"
-                :class="isCurrent(p) ? 'bg-blue-50/60 dark:bg-blue-950/20' : ''"
-                @click="selectPath(p.path)">
-              <div class="flex items-center justify-between">
-                <div class="min-w-0">
-                  <p class="font-medium truncate">{{ p.title || p.path }}</p>
-                  <p class="text-[11px] text-gray-500 dark:text-neutral-400 truncate">{{ p.path }}</p>
-                </div>
-                <span class="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded border border-gray-200"
-                      :class="p.status==='published' ? 'border-emerald-300 text-emerald-700 dark:text-emerald-300' : 'border-amber-300 text-amber-700 dark:text-amber-300'">
-                  {{ p.status==='published' ? 'Published' : 'Draft' }}
+        </div>
+      </section>
+
+      <section class="rounded-[30px] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+        <div class="border-b border-gray-200 px-5 py-4 dark:border-neutral-800 md:px-6">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white">Page Explorer</h2>
+                <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-700 dark:bg-neutral-800 dark:text-neutral-200">
+                  {{ filteredPages.length }} halaman
                 </span>
               </div>
-            </li>
-          </ul>
-        </div>
-      </aside>
-
-      <main :class="ui.showSidebar ? 'col-span-12 lg:col-span-9' : 'col-span-12'">
-        <div class="rounded-xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-3 flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 flex-wrap">
-            <h1 class="text-base font-semibold">Editor Halaman</h1>
-            <span class="text-sm text-gray-500">{{ currentPath }}</span>
-            <a :href="currentPath" target="_blank" class="text-xs px-2 py-1 rounded border hover:bg-gray-50 border-gray-200 dark:border-neutral-700 dark:hover:bg-neutral-800">
-              Lihat Halaman
-            </a>
-          </div>
-          <div class="flex flex-wrap gap-1">
-            <button class="text-xs px-2 py-1 rounded border hover:bg-gray-50 border-gray-200 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="ui.showSidebar = !ui.showSidebar">
-              {{ ui.showSidebar ? 'Sembunyikan Sidebar' : 'Tampilkan Sidebar' }}
-            </button>
-            <button class="text-xs px-2 py-1 rounded border hover:bg-gray-50 border-gray-200 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="ui.showMeta = !ui.showMeta">
-              {{ ui.showMeta ? 'Sembunyikan Meta' : 'Tampilkan Meta' }}
-            </button>
-            <button class="text-xs px-2 py-1 rounded border hover:bg-gray-50 border-gray-200 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="openRenamePage" :disabled="!meta">Rename</button>
-            <button class="text-xs px-2 py-1 rounded border hover:bg-gray-50 border-gray-200 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="openClonePage" :disabled="!meta">Clone</button>
-            <button class="text-xs px-2 py-1 rounded border text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" @click="askDeletePage" :disabled="!meta">Hapus</button>
-            <button class="text-xs px-2 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700" @click="publish" :disabled="!meta || meta?.status==='published'">Publish</button>
-          </div>
-        </div>
-
-        <div class="mt-4 grid gap-4 lg:grid-cols-5">
-          <section v-show="ui.showMeta" class="lg:col-span-2 rounded-xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-4">
-            <h3 class="font-semibold">Meta</h3>
-            <div class="mt-3 space-y-3">
-              <div>
-                <label class="text-xs text-gray-500">Path</label>
-                <input type="text" :value="currentPath" readonly class="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700">
-              </div>
-              <div>
-                <label class="text-xs text-gray-500">Judul</label>
-                <input type="text" v-model.trim="formMeta.title" @input="debouncedSaveMeta()" class="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
-              </div>
-              <div>
-                <label class="text-xs text-gray-500">Deskripsi</label>
-                <textarea rows="3" v-model.trim="formMeta.description" @input="debouncedSaveMeta()" class="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700"></textarea>
-              </div>
-              <div class="flex items-center justify-between">
-                <label class="inline-flex items-center gap-2 text-sm">
-                  <input type="checkbox" :checked="meta?.status==='published'" @change="toggleStatus" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                  Published
-                </label>
-                <span class="text-xs text-gray-500">Status saat ini: <b>{{ meta?.status || 'draft' }}</b></span>
-              </div>
-
-              <div class="pt-2 border-t border-gray-200 dark:border-neutral-800">
-                <label class="text-xs text-gray-500">OG Image</label>
-                <div class="mt-1 flex items-center gap-3">
-                  <input ref="ogPicker" type="file" accept="image/*" class="hidden" @change="onPickOg">
-                  <button class="px-2 py-1 text-xs rounded-md border hover:bg-gray-50 border-gray-200 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="ogPicker?.click()">Upload</button>
-                  <button v-if="meta?.ogImage" class="px-2 py-1 text-xs rounded-md border text-rose-600 hover:bg-rose-50 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="removeOg">Hapus</button>
-                </div>
-                <div v-if="meta?.ogImage" class="mt-2">
-                  <img :src="meta.ogImage" alt="OG" class="w-full rounded-lg border border-gray-200 dark:border-neutral-700">
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section :class="ui.showMeta ? 'lg:col-span-3' : 'lg:col-span-5'" class="rounded-xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-4">
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2">
-                <input v-model.trim="newSection.key" placeholder="Key komponen (mis. HeaderHero, InfoHero)" class="pl-3 pr-3 py-2 text-sm rounded-lg border w-64 border-gray-200 dark:bg-neutral-900 dark:border-neutral-700 focus:outline-none">
-                <button class="px-3 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700" @click="addNewSection" :disabled="!newSection.key">Tambah</button>
-              </div>
+              <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Daftar halaman tampil sebagai kumpulan card agar lebih mudah dipindai dan tidak kalah oleh area editor.</p>
             </div>
 
-            <div class="flex gap-1 flex-wrap mt-3 mb-1">
-              <button v-for="tab in sortedSections" :key="tab.id"
-                      class="px-3 py-2 text-xs rounded-lg"
-                      :class="activeTab === tab.key ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-300'"
-                      @click="activeTab = tab.key">
-                {{ tab.key }}
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="relative min-w-[240px] flex-1 sm:min-w-[320px] lg:w-[360px] lg:flex-none">
+                <Icon icon="lucide:search" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  v-model.trim="qPage"
+                  type="search"
+                  placeholder="Cari path atau judul halaman..."
+                  class="block h-12 w-full rounded-2xl border border-gray-200 bg-gradient-to-b from-white to-gray-50 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.12)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                />
+              </div>
+              <button class="inline-flex h-12 items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800" @click="reloadPages">
+                <Icon icon="lucide:refresh-cw" class="mr-2 h-4 w-4" /> Muat Ulang
+              </button>
+              <button class="inline-flex h-12 items-center justify-center rounded-2xl bg-green-600 px-4 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700" @click="openNewPage">
+                <Icon icon="lucide:file-plus-2" class="mr-2 h-4 w-4" /> Halaman Baru
+              </button>
+              <button
+                type="button"
+                class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                @click="ui.pagesCollapsed = !ui.pagesCollapsed"
+              >
+                <Icon :icon="ui.pagesCollapsed ? 'lucide:chevron-down' : 'lucide:chevron-up'" class="h-4 w-4" />
               </button>
             </div>
+          </div>
+        </div>
 
-            <div class="mt-4 space-y-3">
-              <div v-for="(s, i) in sortedSections" :key="s.id" :class="{'hidden': s.key != activeTab}" class="rounded-xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
-                <div class="p-3 flex items-center flex-wrap justify-between gap-2 border-b border-gray-200 dark:border-neutral-800">
-                  <div class="min-w-0">
-                    <div class="flex items-center gap-2">
-                      <span class="inline-flex items-center justify-center w-6 h-6 text-[11px] rounded bg-gray-100 dark:bg-neutral-800">{{ i+1 }}</span>
-                      <input v-model.trim="localEdits[s.id].key" class="px-2 py-1 rounded border border-gray-200 text-sm w-48 dark:bg-neutral-900 dark:border-neutral-700" @change="saveSection(s.id, { key: localEdits[s.id].key })">
-                      <span class="text-[11px] text-gray-500">ID: {{ s.id }}</span>
+        <div v-show="!ui.pagesCollapsed" class="p-5 md:p-6">
+          <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <article
+              v-for="p in filteredPages"
+              :key="p.pathKey"
+              class="group rounded-[26px] border transition"
+              :class="isCurrent(p)
+                ? 'border-green-200 bg-green-50/70 shadow-md dark:border-green-900/30 dark:bg-green-900/10'
+                : 'border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md dark:border-neutral-800 dark:bg-neutral-800/60 dark:hover:bg-neutral-800'"
+            >
+              <div class="p-4 md:p-5">
+                <div class="flex items-start justify-between gap-3">
+                  <button type="button" class="min-w-0 flex-1 text-left" @click="selectPath(p.path)">
+                    <div class="flex items-center gap-3">
+                      <div class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
+                           :class="isCurrent(p)
+                             ? 'bg-green-600 text-white'
+                             : 'bg-white text-gray-700 ring-1 ring-black/5 dark:bg-neutral-900 dark:text-neutral-200 dark:ring-white/10'">
+                        <Icon :icon="p.status === 'published' ? 'lucide:file-check-2' : 'lucide:file-pen-line'" class="h-4 w-4" />
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <div class="truncate text-sm font-bold text-gray-900 dark:text-white">{{ p.title || p.path }}</div>
+                        <div class="mt-1 truncate text-[12px] text-gray-500 dark:text-neutral-400">{{ p.path }}</div>
+                      </div>
                     </div>
+                  </button>
+
+                  <details class="relative shrink-0">
+                    <summary class="flex list-none cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white p-2.5 text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800">
+                      <Icon icon="lucide:ellipsis" class="h-4 w-4" />
+                    </summary>
+                    <div class="absolute right-0 z-30 mt-2 w-48 overflow-hidden rounded-[22px] border border-gray-200 bg-white p-2 shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+                      <button class="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-neutral-200 dark:hover:bg-neutral-800" @click="openRenameFor(p.path)">
+                        <Icon icon="lucide:pencil-line" class="h-4 w-4" /> Rename
+                      </button>
+                      <button class="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-neutral-200 dark:hover:bg-neutral-800" @click="openCloneFor(p.path)">
+                        <Icon icon="lucide:copy" class="h-4 w-4" /> Clone
+                      </button>
+                      <button class="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm text-rose-600 transition hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-900/10" @click="askDeleteFor(p.path)">
+                        <Icon icon="lucide:trash-2" class="h-4 w-4" /> Hapus
+                      </button>
+                    </div>
+                  </details>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between gap-3">
+                  <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold"
+                    :class="p.status === 'published'
+                      ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
+                      : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'">
+                    {{ p.status === 'published' ? 'Published' : 'Draft' }}
+                  </span>
+
+                  <button
+                    type="button"
+                    class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    @click="selectPath(p.path)"
+                  >
+                    Edit Halaman
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <main class="space-y-6">
+        <section class="sticky top-4 z-20 rounded-[30px] border border-gray-200/80 bg-white/92 shadow-sm backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/92">
+          <div class="flex flex-col gap-4 px-5 py-4 md:px-6">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h2 class="text-lg font-bold text-gray-900 dark:text-white">Workspace Editor</h2>
+                  <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-700 dark:bg-neutral-800 dark:text-neutral-200">
+                    {{ currentPath }}
+                  </span>
+                </div>
+                <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Saat halaman dibuka, data root <span class="font-semibold">/</span> atau path aktif langsung dimuat dan field editor langsung terisi.</p>
+              </div>
+
+              <div class="hidden flex-wrap items-center gap-2 md:flex">
+                <button class="inline-flex h-12 items-center justify-center rounded-2xl border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:opacity-60 dark:border-rose-900/30 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10" @click="askDeletePage" :disabled="!meta">
+                  <Icon icon="lucide:trash-2" class="mr-2 h-4 w-4" /> Hapus
+                </button>
+                <button class="inline-flex h-12 items-center justify-center rounded-2xl bg-green-600 px-4 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700 disabled:opacity-60" @click="publish" :disabled="!meta || meta?.status === 'published'">
+                  <Icon icon="lucide:rocket" class="mr-2 h-4 w-4" /> Publish
+                </button>
+              </div>
+
+              <details class="relative md:hidden">
+                <summary class="flex list-none cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white p-3 text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800">
+                  <Icon icon="lucide:ellipsis" class="h-5 w-5" />
+                </summary>
+                <div class="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-[22px] border border-gray-200 bg-white p-2 shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+                  <a :href="currentPath" target="_blank" class="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-neutral-200 dark:hover:bg-neutral-800">
+                    <Icon icon="lucide:external-link" class="h-4 w-4" /> Lihat Halaman
+                  </a>
+                  <button class="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-neutral-200 dark:hover:bg-neutral-800" @click="ui.showMeta = !ui.showMeta">
+                    <Icon :icon="ui.showMeta ? 'lucide:panel-right-close' : 'lucide:panel-right-open'" class="h-4 w-4" />
+                    {{ ui.showMeta ? 'Hide Meta' : 'Show Meta' }}
+                  </button>
+                  <button class="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:text-neutral-200 dark:hover:bg-neutral-800" @click="openRenamePage" :disabled="!meta">
+                    <Icon icon="lucide:pencil-line" class="h-4 w-4" /> Rename
+                  </button>
+                  <button class="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:text-neutral-200 dark:hover:bg-neutral-800" @click="openClonePage" :disabled="!meta">
+                    <Icon icon="lucide:copy" class="h-4 w-4" /> Clone
+                  </button>
+                  <button class="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm text-rose-600 transition hover:bg-rose-50 disabled:opacity-60 dark:text-rose-300 dark:hover:bg-rose-900/10" @click="askDeletePage" :disabled="!meta">
+                    <Icon icon="lucide:trash-2" class="h-4 w-4" /> Hapus
+                  </button>
+                  <button class="mt-1 flex w-full items-center gap-2 rounded-2xl bg-green-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-green-700 disabled:opacity-60" @click="publish" :disabled="!meta || meta?.status === 'published'">
+                    <Icon icon="lucide:rocket" class="h-4 w-4" /> Publish
+                  </button>
+                </div>
+              </details>
+            </div>
+          </div>
+        </section>
+
+        <div class="grid gap-6" :class="ui.showMeta ? '2xl:grid-cols-[minmax(0,1fr),390px]' : 'grid-cols-1'">
+          <section class="order-2 min-w-0 space-y-6 2xl:order-1">
+            <section class="rounded-[30px] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+              <div class="border-b border-gray-200 px-5 py-4 dark:border-neutral-800 md:px-6">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Section Builder</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Tambah, pilih, urutkan, dan edit section per halaman dengan pola component-first.</p>
                   </div>
-                  <div class="flex items-center gap-1">
-                    <button class="px-2 py-1 text-xs rounded border hover:bg-gray-50 border-gray-200 dark:border-neutral-700 dark:hover:bg-neutral-800" :disabled="i===0" @click="moveUp(s.id)">
-                      <Icon icon="lucide:arrow-up" class="size-4" />
+
+                  <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div class="relative">
+                      <Icon icon="lucide:component" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <input
+                        v-model.trim="newSection.key"
+                        placeholder="Key komponen, mis. HeaderHero"
+                        class="block h-12 w-full rounded-2xl border border-gray-200 bg-gradient-to-b from-white to-gray-50 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.12)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-white sm:w-80"
+                      />
+                    </div>
+                    <button class="inline-flex h-12 items-center justify-center rounded-2xl bg-green-600 px-4 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700 disabled:opacity-60" @click="addNewSection" :disabled="!newSection.key">
+                      <Icon icon="lucide:plus" class="mr-2 h-4 w-4" /> Tambah Section
                     </button>
-                    <button class="px-2 py-1 text-xs rounded border hover:bg-gray-50 border-gray-200 dark:border-neutral-700 dark:hover:bg-neutral-800" :disabled="i===sortedSections.length-1" @click="moveDown(s.id)">
-                      <Icon icon="lucide:arrow-down" class="size-4" />
+                    <button
+                      type="button"
+                      class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      @click="ui.sectionsCollapsed = !ui.sectionsCollapsed"
+                    >
+                      <Icon :icon="ui.sectionsCollapsed ? 'lucide:chevron-down' : 'lucide:chevron-up'" class="h-4 w-4" />
                     </button>
-                    <button class="px-2 py-1 text-xs rounded border hover:bg-gray-50 border-gray-200 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="duplicateSec(s.id)">Duplikat</button>
-                    <button class="px-2 py-1 text-xs rounded border text-rose-600 hover:bg-rose-50 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="deleteSec(s.id)">Hapus</button>
-                    <label class="inline-flex items-center gap-1 text-xs ml-2">
-                      <input type="checkbox" v-model="localEdits[s.id].enabled" @change="saveSection(s.id, { enabled: localEdits[s.id].enabled })" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                      Aktif
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-5 p-5 md:p-6">
+                <div class="flex min-w-0 gap-2 overflow-x-auto pb-1">
+                  <button
+                    v-for="tab in sortedSections"
+                    :key="tab.id"
+                    class="inline-flex shrink-0 items-center rounded-full px-3.5 py-2 text-xs font-semibold transition"
+                    :class="activeTab === tab.key
+                      ? 'bg-green-600 text-white shadow-lg shadow-green-500/20'
+                      : 'border border-gray-200 bg-gray-50 text-gray-700 hover:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700'"
+                    @click="activeTab = tab.key"
+                  >
+                    {{ tab.key }}
+                  </button>
+                </div>
+
+                <input ref="sectionMediaPicker" type="file" accept="image/*" class="hidden" @change="onPickSectionMedia" />
+
+                <div v-show="!ui.sectionsCollapsed" class="space-y-4">
+                  <article
+                    v-for="(s, i) in sortedSections"
+                    :key="s.id"
+                    v-show="s.key === activeTab"
+                    class="overflow-hidden rounded-[28px] border border-gray-200 bg-gray-50 shadow-sm dark:border-neutral-800 dark:bg-neutral-800/50"
+                  >
+                    <div class="border-b border-gray-200 px-5 py-4 dark:border-neutral-800">
+                      <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                        <div class="min-w-0">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-white text-xs font-bold text-gray-700 ring-1 ring-black/5 dark:bg-neutral-900 dark:text-neutral-200 dark:ring-white/10">{{ i + 1 }}</span>
+                            <input
+                              v-model.trim="localEdits[s.id].key"
+                              class="min-w-[220px] rounded-2xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-semibold text-gray-900 outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.10)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
+                              @change="saveSection(s.id, { key: localEdits[s.id].key })"
+                            />
+                            <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-600 dark:bg-neutral-900 dark:text-neutral-300">ID: {{ s.id }}</span>
+                          </div>
+                          <p class="mt-2 text-sm text-gray-500 dark:text-neutral-400">Jika key dikenali, editor akan tampil langsung sebagai komponen. Kalau tidak, fallback ke editor JSON.</p>
+                        </div>
+
+                        <div class="hidden flex-wrap items-center gap-2 md:flex">
+                          <button class="inline-flex h-10 items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800" :disabled="i === 0" @click="moveUp(s.id)">
+                            <Icon icon="lucide:arrow-up" class="mr-1 h-4 w-4" /> Atas
+                          </button>
+                          <button class="inline-flex h-10 items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800" :disabled="i === sortedSections.length - 1" @click="moveDown(s.id)">
+                            <Icon icon="lucide:arrow-down" class="mr-1 h-4 w-4" /> Bawah
+                          </button>
+                          <button class="inline-flex h-10 items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800" @click="duplicateSec(s.id)">
+                            <Icon icon="lucide:copy" class="mr-1 h-4 w-4" /> Duplikat
+                          </button>
+                          <label class="inline-flex h-10 items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200">
+                            <input type="checkbox" v-model="localEdits[s.id].enabled" @change="saveSection(s.id, { enabled: localEdits[s.id].enabled })" class="rounded border-gray-300 text-green-600 focus:ring-green-500" /> Aktif
+                          </label>
+                          <button class="inline-flex h-10 items-center justify-center rounded-2xl border border-rose-200 bg-white px-3 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 dark:border-rose-900/30 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10" @click="deleteSec(s.id)">
+                            <Icon icon="lucide:trash-2" class="mr-1 h-4 w-4" /> Hapus
+                          </button>
+                        </div>
+
+                        <details class="relative md:hidden">
+                          <summary class="flex list-none cursor-pointer items-center justify-center rounded-2xl border border-gray-200 bg-white p-3 text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800">
+                            <Icon icon="lucide:ellipsis" class="h-5 w-5" />
+                          </summary>
+                          <div class="absolute right-0 z-30 mt-2 w-48 overflow-hidden rounded-[22px] border border-gray-200 bg-white p-2 shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+                            <button class="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:text-neutral-200 dark:hover:bg-neutral-800" :disabled="i === 0" @click="moveUp(s.id)">
+                              <Icon icon="lucide:arrow-up" class="h-4 w-4" /> Pindah Atas
+                            </button>
+                            <button class="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:text-neutral-200 dark:hover:bg-neutral-800" :disabled="i === sortedSections.length - 1" @click="moveDown(s.id)">
+                              <Icon icon="lucide:arrow-down" class="h-4 w-4" /> Pindah Bawah
+                            </button>
+                            <button class="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-neutral-200 dark:hover:bg-neutral-800" @click="duplicateSec(s.id)">
+                              <Icon icon="lucide:copy" class="h-4 w-4" /> Duplikat
+                            </button>
+                            <button class="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm text-rose-600 transition hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-900/10" @click="deleteSec(s.id)">
+                              <Icon icon="lucide:trash-2" class="h-4 w-4" /> Hapus
+                            </button>
+                          </div>
+                        </details>
+                      </div>
+                    </div>
+
+                    <div class="space-y-5 p-5 md:p-6">
+                      <component
+                        v-if="resolveSectionComponent(s.key)"
+                        :is="resolveSectionComponent(s.key)"
+                        :section="s"
+                        :pagePath="needsPagePath(s.key) ? currentPath : undefined"
+                        :web="needsPagePath(s.key) ? web : undefined"
+                      />
+
+                      <template v-else>
+                        <div class="space-y-4">
+                          <div class="rounded-[22px] border border-gray-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+                            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                              <div>
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white">Props JSON</h4>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Fallback editor untuk section yang belum punya komponen CMS khusus.</p>
+                              </div>
+                              <div class="flex items-center gap-2">
+                                <button class="inline-flex h-10 items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800" @click="resetPropsFromServer(s.id)">
+                                  Reset
+                                </button>
+                                <button class="inline-flex h-10 items-center justify-center rounded-2xl bg-green-600 px-3 text-xs font-semibold text-white transition hover:bg-green-700 disabled:opacity-60" :disabled="!!jsonErrors[s.id]" @click="saveProps(s.id)">
+                                  Simpan Props
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <textarea
+                            v-model="localEdits[s.id].propsText"
+                            class="min-h-[320px] w-full rounded-[24px] border border-gray-200 bg-white px-4 py-4 font-mono text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.10)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
+                            @input="validateJson(s.id)"
+                          ></textarea>
+
+                          <p class="text-sm font-medium" :class="jsonErrors[s.id] ? 'text-rose-600 dark:text-rose-300' : 'text-green-600 dark:text-green-300'">
+                            {{ jsonErrors[s.id] ? jsonErrors[s.id] : 'JSON valid dan siap disimpan.' }}
+                          </p>
+                        </div>
+                      </template>
+                    </div>
+                  </article>
+
+                  <div v-if="!sortedSections.length" class="rounded-[26px] border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center dark:border-neutral-700 dark:bg-neutral-800/40">
+                    <div class="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-green-700 ring-1 ring-black/5 dark:bg-neutral-900 dark:text-green-300 dark:ring-white/10">
+                      <Icon icon="lucide:layout-template" class="h-6 w-6" />
+                    </div>
+                    <h4 class="mt-4 text-base font-bold text-gray-900 dark:text-white">Belum ada section di halaman ini</h4>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-neutral-400">Tambahkan komponen pertama, misalnya <span class="font-semibold">HeaderHero</span> atau <span class="font-semibold">BlogHero</span>.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <aside v-if="ui.showMeta" class="order-1 min-w-0 2xl:order-2 2xl:self-start">
+            <section class="overflow-hidden rounded-[30px] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900 2xl:sticky 2xl:top-24">
+              <div class="border-b border-gray-200 px-5 py-4 dark:border-neutral-800 md:px-6">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Meta Halaman</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">SEO title, description, publish state, dan OG image.</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    @click="ui.metaCollapsed = !ui.metaCollapsed"
+                  >
+                    <Icon :icon="ui.metaCollapsed ? 'lucide:chevron-down' : 'lucide:chevron-up'" class="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div v-show="!ui.metaCollapsed" class="space-y-6 p-5 md:p-6">
+                <div class="space-y-5 rounded-[26px] border border-gray-200 bg-gradient-to-b from-white to-gray-50 p-4 dark:border-neutral-800 dark:from-neutral-900 dark:to-neutral-900">
+                  <div class="space-y-2">
+                    <label class="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Path</label>
+                    <div class="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">{{ currentPath }}</div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Judul</label>
+                    <input type="text" v-model.trim="formMeta.title" @input="debouncedSaveMeta()" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.12)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" placeholder="Judul SEO halaman" />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Deskripsi</label>
+                    <textarea rows="4" v-model.trim="formMeta.description" @input="debouncedSaveMeta()" class="block w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.12)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" placeholder="Deskripsi singkat untuk SEO dan preview halaman"></textarea>
+                  </div>
+                </div>
+
+                <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/60">
+                  <div class="flex items-center justify-between gap-3">
+                    <div>
+                      <div class="text-sm font-semibold text-gray-900 dark:text-white">Publish State</div>
+                      <div class="mt-1 text-xs text-gray-500 dark:text-neutral-400">Status saat ini: {{ meta?.status || 'draft' }}</div>
+                    </div>
+                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-neutral-200">
+                      <input type="checkbox" :checked="meta?.status === 'published'" @change="toggleStatus" class="rounded border-gray-300 text-green-600 focus:ring-green-500" /> Published
                     </label>
                   </div>
                 </div>
 
-                <div class="p-3">
-                  <EditorHeaderHero v-if="s.key === 'HeaderHero'" :section="s" />
-                  <EditorInfoHero v-else-if="s.key === 'InfoHero'" :section="s" />
-                  <EditorInvitationHero v-else-if="s.key === 'InvitationHero'" :section="s" />
-                  <EditorFacilityHero v-else-if="s.key === 'HeroFacilityHero'" :section="s" />
-                  <EditorBlogHero v-else-if="s.key === 'BlogHero'" :section="s" />
-                  <EditorGirlHero v-else-if="s.key === 'GirlHero'" :section="s" />
-                  <EditorNewsPage v-else-if="s.key === 'NewsPage'" :section="s" :pagePath="currentPath" :web="web"/>
-                  <EditorGalleryPage v-else-if="s.key === 'GalleryPage'" :section="s" :pagePath="currentPath" :web="web"/>
-                  <EditorProfilePage v-else-if="s.key === 'ProfilePage'" :section="s" :pagePath="currentPath" :web="web"/>
-                  <EditorProgramPage v-else-if="s.key === 'ProgramPage'" :section="s" :pagePath="currentPath" :web="web"/>
-                  <template v-else>
-                    <label class="text-xs text-gray-500">Props (JSON)</label>
-                    <textarea v-model="localEdits[s.id].propsText" class="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm min-h-28 font-mono dark:bg-neutral-900 dark:border-neutral-700" @input="validateJson(s.id)"></textarea>
-                    <div class="mt-1 flex items-center justify-between">
-                      <p class="text-[11px]" :class="jsonErrors[s.id] ? 'text-rose-600' : 'text-emerald-600'">
-                        {{ jsonErrors[s.id] ? jsonErrors[s.id] : 'JSON valid' }}
-                      </p>
-                      <div class="flex items-center gap-2">
-                        <button class="px-2 py-1 text-xs rounded border hover:bg-gray-50 border-gray-200 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="resetPropsFromServer(s.id)">
-                          Reset
-                        </button>
-                        <button class="px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700" :disabled="!!jsonErrors[s.id]" @click="saveProps(s.id)">
-                          Simpan Props
-                        </button>
+                <div class="space-y-4 rounded-[26px] border border-gray-200 bg-gradient-to-b from-white to-gray-50 p-4 dark:border-neutral-800 dark:from-neutral-900 dark:to-neutral-900">
+                  <div>
+                    <div class="flex items-center justify-between gap-3">
+                      <div>
+                        <div class="text-sm font-bold text-gray-900 dark:text-white">OG Image</div>
+                        <div class="mt-1 text-xs text-gray-500 dark:text-neutral-400">Pilih sumber gambar lewat link atau upload ke Cloudinary.</div>
+                      </div>
+                      <div class="inline-flex rounded-2xl border border-gray-200 bg-gray-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
+                        <button type="button" class="rounded-2xl px-3 py-2 text-xs font-semibold transition" :class="ogMode === 'link' ? 'bg-white text-gray-900 shadow-sm dark:bg-neutral-200' : 'text-gray-500 hover:text-gray-900 dark:text-neutral-300 dark:hover:text-white'" @click="ogMode = 'link'">Link</button>
+                        <button type="button" class="rounded-2xl px-3 py-2 text-xs font-semibold transition" :class="ogMode === 'upload' ? 'bg-white text-gray-900 shadow-sm dark:bg-neutral-200' : 'text-gray-500 hover:text-gray-900 dark:text-neutral-300 dark:hover:text-white'" @click="ogMode = 'upload'">Upload</button>
                       </div>
                     </div>
-                  </template>
+                  </div>
+
+                  <div v-if="ogMode === 'link'" class="space-y-3">
+                    <div class="relative">
+                      <Icon icon="lucide:link-2" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <input v-model.trim="ogLinkInput" type="url" placeholder="https://..." class="block h-12 w-full rounded-2xl border border-gray-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.12)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <button class="inline-flex h-11 items-center justify-center rounded-2xl bg-green-600 px-4 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700 disabled:opacity-60" :disabled="!ogLinkInput" @click="applyOgLink">
+                        <Icon icon="lucide:check" class="mr-2 h-4 w-4" /> Gunakan Link
+                      </button>
+                      <button v-if="meta?.ogImage" class="inline-flex h-11 items-center justify-center rounded-2xl border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 dark:border-rose-900/30 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10" @click="removeOg">
+                        <Icon icon="lucide:trash-2" class="mr-2 h-4 w-4" /> Hapus Gambar
+                      </button>
+                    </div>
+                  </div>
+
+                  <div v-else class="space-y-3">
+                    <div class="rounded-[24px] border border-dashed border-green-200 bg-green-50/70 p-4 dark:border-green-900/30 dark:bg-green-900/10">
+                      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <div class="text-sm font-semibold text-gray-900 dark:text-white">Upload ke Cloudinary</div>
+                          <div class="mt-1 text-xs text-gray-500 dark:text-neutral-400">Pilih gambar, upload, lalu URL akan langsung dipakai sebagai OG image.</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <input ref="ogPicker" type="file" accept="image/*" class="hidden" @change="onPickOg" />
+                          <button class="inline-flex h-11 items-center justify-center rounded-2xl bg-green-600 px-4 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700 disabled:opacity-60" @click="ogPicker?.click()" :disabled="uploading">
+                            <Icon :icon="uploading ? 'lucide:loader-circle' : 'lucide:upload-cloud'" class="mr-2 h-4 w-4" :class="uploading ? 'animate-spin' : ''" />
+                            {{ uploading ? 'Uploading...' : 'Upload Gambar' }}
+                          </button>
+                          <button v-if="meta?.ogImage" class="inline-flex h-11 items-center justify-center rounded-2xl border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 dark:border-rose-900/30 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10" @click="removeOg">
+                            <Icon icon="lucide:trash-2" class="mr-2 h-4 w-4" /> Hapus
+                          </button>
+                        </div>
+                      </div>
+                      <p v-if="uploadError" class="mt-3 text-sm text-rose-600 dark:text-rose-300">{{ uploadError }}</p>
+                    </div>
+                  </div>
+
+                  <div class="overflow-hidden rounded-[24px] border border-gray-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+                    <img v-if="meta?.ogImage" :src="meta.ogImage" alt="OG" class="h-56 w-full object-cover" />
+                    <div v-else class="grid h-56 place-items-center p-6 text-center">
+                      <div>
+                        <div class="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-gray-600 dark:bg-neutral-800 dark:text-neutral-300">
+                          <Icon icon="lucide:image" class="h-5 w-5" />
+                        </div>
+                        <div class="mt-3 text-sm font-semibold text-gray-900 dark:text-white">Belum ada OG image</div>
+                        <div class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Pakai link langsung atau upload ke Cloudinary.</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </aside>
         </div>
       </main>
     </div>
 
-    <!-- Modals -->
     <teleport to="body">
-      <!-- New Page -->
-      <div v-if="modal.newPage" class="fixed inset-0 z-[100]">
-        <div class="absolute inset-0 bg-black/40" @click="modal.newPage=false"></div>
-        <div class="absolute inset-0 p-4 flex items-center justify-center">
-          <div class="w-full max-w-md rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
-            <div class="p-4 border-b border-gray-200 dark:border-neutral-700 flex items-center justify-between">
-              <h3 class="font-semibold">Halaman Baru</h3>
-              <button class="p-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800" @click="modal.newPage=false">
-                <Icon icon="lucide:x" class="size-4" />
-              </button>
-            </div>
-            <div class="p-4 space-y-3">
-              <div>
-                <label class="text-xs text-gray-500">Path</label>
-                <input v-model.trim="formNew.path" placeholder="/, /profile, /program" class="mt-1 w-full rounded border px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
-              </div>
-              <div>
-                <label class="text-xs text-gray-500">Judul</label>
-                <input v-model.trim="formNew.title" class="mt-1 w-full rounded border px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
-              </div>
-              <div>
-                <label class="text-xs text-gray-500">Deskripsi</label>
-                <textarea v-model.trim="formNew.description" rows="2" class="mt-1 w-full rounded border px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700"></textarea>
+      <div v-if="modal.newPage || modal.rename || modal.clone" class="fixed inset-0 z-[100]">
+        <div class="absolute inset-0 bg-black/45 backdrop-blur-sm" @click="closeAllModals"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4 md:p-8">
+          <div class="w-full max-w-xl overflow-hidden rounded-[30px] border border-gray-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+            <div class="border-b border-gray-200 px-5 py-4 dark:border-neutral-800 md:px-6">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="text-base font-bold text-gray-900 dark:text-white">
+                    {{ modal.newPage ? 'Halaman Baru' : modal.rename ? 'Rename Path' : 'Clone Halaman' }}
+                  </h3>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
+                    {{ modal.newPage
+                      ? 'Buat halaman baru beserta metadata awal.'
+                      : modal.rename
+                        ? 'Ubah path halaman yang dipilih dengan aman.'
+                        : 'Duplikat halaman ke path baru.' }}
+                  </p>
+                </div>
+                <button class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800" @click="closeAllModals">
+                  <Icon icon="lucide:x" class="h-4 w-4" />
+                </button>
               </div>
             </div>
-            <div class="p-4 border-t dark:border-neutral-700 flex items-center justify-end gap-2">
-              <button class="px-3 py-1.5 rounded border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="modal.newPage=false">Batal</button>
-              <button class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700" @click="createPageNow">Buat</button>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Rename -->
-      <div v-if="modal.rename" class="fixed inset-0 z-[100]">
-        <div class="absolute inset-0 bg-black/40" @click="modal.rename=false"></div>
-        <div class="absolute inset-0 p-4 flex items-center justify-center">
-          <div class="w-full max-w-md rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
-            <div class="p-4 border-b border-gray-200 dark:border-neutral-700 flex items-center justify-between">
-              <h3 class="font-semibold">Rename Path</h3>
-              <button class="p-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800" @click="modal.rename=false">
-                <Icon icon="lucide:x" class="size-4" />
-              </button>
-            </div>
-            <div class="p-4 space-y-3">
-              <div>
-                <label class="text-xs text-gray-500">Path Lama</label>
-                <input :value="currentPath" readonly class="mt-1 w-full rounded border px-3 py-2 text-sm bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700">
-              </div>
-              <div>
-                <label class="text-xs text-gray-500">Path Baru</label>
-                <input v-model.trim="formRename.newPath" placeholder="/profile, /program" class="mt-1 w-full rounded border px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
-              </div>
-            </div>
-            <div class="p-4 border-t dark:border-neutral-700 flex items-center justify-end gap-2">
-              <button class="px-3 py-1.5 rounded border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="modal.rename=false">Batal</button>
-              <button class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700" @click="renameNow">Rename</button>
-            </div>
-          </div>
-        </div>
-      </div>
+            <div class="space-y-4 p-5 md:p-6">
+              <template v-if="modal.newPage">
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Path</label>
+                  <input v-model.trim="formNew.path" placeholder="/, /profile, /program" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.12)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Judul</label>
+                  <input v-model.trim="formNew.title" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.12)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Deskripsi</label>
+                  <textarea v-model.trim="formNew.description" rows="3" class="block w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.12)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"></textarea>
+                </div>
+              </template>
 
-      <!-- Clone -->
-      <div v-if="modal.clone" class="fixed inset-0 z-[100]">
-        <div class="absolute inset-0 bg-black/40" @click="modal.clone=false"></div>
-        <div class="absolute inset-0 p-4 flex items-center justify-center">
-          <div class="w-full max-w-md rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
-            <div class="p-4 border-b border-gray-200 dark:border-neutral-700 flex items-center justify-between">
-              <h3 class="font-semibold">Clone Halaman</h3>
-              <button class="p-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-800" @click="modal.clone=false">
-                <Icon icon="lucide:x" class="size-4" />
+              <template v-else-if="modal.rename">
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Path Lama</label>
+                  <input :value="actionPath" readonly class="block h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm text-gray-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Path Baru</label>
+                  <input v-model.trim="formRename.newPath" placeholder="/profile, /program" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.12)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+                </div>
+              </template>
+
+              <template v-else>
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Sumber</label>
+                  <input :value="actionPath" readonly class="block h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm text-gray-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Path Baru</label>
+                  <input v-model.trim="formClone.dstPath" placeholder="/new-page" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.12)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+                </div>
+              </template>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 border-t border-gray-200 px-5 py-4 dark:border-neutral-800 md:px-6">
+              <button class="inline-flex h-11 items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800" @click="closeAllModals">Batal</button>
+              <button class="inline-flex h-11 items-center justify-center rounded-2xl bg-green-600 px-4 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700" @click="modal.newPage ? createPageNow() : modal.rename ? renameNow() : cloneNow()">
+                {{ modal.newPage ? 'Buat' : modal.rename ? 'Rename' : 'Clone' }}
               </button>
-            </div>
-            <div class="p-4 space-y-3">
-              <div>
-                <label class="text-xs text-gray-500">Sumber</label>
-                <input :value="currentPath" readonly class="mt-1 w-full rounded border px-3 py-2 text-sm bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700">
-              </div>
-              <div>
-                <label class="text-xs text-gray-500">Path Baru</label>
-                <input v-model.trim="formClone.dstPath" placeholder="/new-page" class="mt-1 w-full rounded border px-3 py-2 text-sm dark:bg-neutral-900 dark:border-neutral-700">
-              </div>
-            </div>
-            <div class="p-4 border-t dark:border-neutral-700 flex items-center justify-end gap-2">
-              <button class="px-3 py-1.5 rounded border hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800" @click="modal.clone=false">Batal</button>
-              <button class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700" @click="cloneNow">Clone</button>
             </div>
           </div>
         </div>
@@ -277,6 +566,7 @@ import { Icon } from '@iconify/vue'
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useWeb } from '~/composables/data/useWeb'
+import { useCloudinaryUpload } from '~/composables/useCloudinaryUpload'
 
 import EditorHeaderHero from '~/components/editor/HeaderHero.vue'
 import EditorInfoHero from '~/components/editor/InfoHero.vue'
@@ -285,20 +575,24 @@ import EditorFacilityHero from '~/components/editor/FacilityHero.vue'
 import EditorBlogHero from '~/components/editor/BlogHero.vue'
 import EditorNewsPage from '~/components/editor/NewsPage.vue'
 import EditorGirlHero from '~/components/editor/GirlHero.vue'
+import EditorGalleryPage from '~/components/editor/GalleryPage.vue'
+import EditorProfilePage from '~/components/editor/ProfilePage.vue'
+import EditorProgramPage from '~/components/editor/ProgramPage.vue'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Website' } })
 
-const activeTab = ref<string>('') 
+const activeTab = ref<string>('')
+const { uploadImage, uploading, uploadError } = useCloudinaryUpload()
 
 const {
   pages, subscribePages,
   meta, sections, sortedSections,
   subscribePage,
-  upsertMeta, uploadOgImage, deleteOgImage,
+  upsertMeta, deleteOgImage,
   addSection, updateSection, duplicateSection, deleteSection,
   moveSection,
   createPage, deletePage, renamePage, clonePage, publishPage,
-  normalizePath, currentPath, currentKey
+  normalizePath, currentPath
 } = useWeb()
 
 const web = useWeb()
@@ -306,80 +600,138 @@ const ensureActivePath = (p = currentPath.value) => {
   ;(web as any)?.setActivePath?.(p)
 }
 
-const ui = reactive({ showSidebar: true, showMeta: true })
+const ui = reactive({
+  showMeta: true,
+  pagesCollapsed: false,
+  metaCollapsed: false,
+  sectionsCollapsed: false,
+})
 
 const route = useRoute()
 const router = useRouter()
+const actionPath = ref('/')
+const ogMode = ref<'link' | 'upload'>('link')
+const ogLinkInput = ref('')
+
+type SectionMediaState = {
+  mode: 'link' | 'upload'
+  link: string
+  url: string
+}
+const sectionMediaStates = reactive<Record<string, SectionMediaState>>({})
+const sectionMediaPicker = ref<HTMLInputElement | null>(null)
+const currentMediaSectionId = ref('')
+
+function sectionMedia(id: string): SectionMediaState {
+  if (!sectionMediaStates[id]) {
+    sectionMediaStates[id] = { mode: 'link', link: '', url: '' }
+  }
+  return sectionMediaStates[id]
+}
+
 watch(() => route.query.path, (p) => {
   const np = normalizePath(String(p || '/'))
   if (np !== currentPath.value) currentPath.value = np
 }, { immediate: true })
+
 watch(currentPath, async (p) => {
+  Object.keys(localEdits).forEach((key) => delete localEdits[key])
+  Object.keys(jsonErrors).forEach((key) => delete jsonErrors[key])
   await subscribePage(p)
   hydrateMetaForm()
+  ensureActivePath(p)
+  actionPath.value = p
   await nextTick()
 }, { immediate: true })
-function selectPath(p: string) { router.replace({ query: { ...route.query, path: normalizePath(p) } }) }
-function isCurrent(p: any) { return normalizePath(p.path) === currentPath.value }
 
-/* ---------------- Sidebar search ---------------- */
+watch(meta, (val) => {
+  ogLinkInput.value = val?.ogImage || ''
+}, { immediate: true, deep: true })
+
+function selectPath(p: string) {
+  const np = normalizePath(p)
+  actionPath.value = np
+  router.replace({ query: { ...route.query, path: np } })
+}
+function isCurrent(p: any) {
+  return normalizePath(p.path) === currentPath.value
+}
+
 const qPage = ref('')
 const filteredPages = computed(() => {
   const q = qPage.value.trim().toLowerCase()
   if (!q) return pages.value
-  return pages.value.filter(p =>
+  return pages.value.filter((p) =>
     (p.path || '').toLowerCase().includes(q) ||
     (p.title || '').toLowerCase().includes(q)
   )
 })
 
-/* ---------------- Meta form ---------------- */
 const formMeta = reactive<{ title: string; description: string }>({ title: '', description: '' })
 function hydrateMetaForm() {
   formMeta.title = meta.value?.title || ''
   formMeta.description = meta.value?.description || ''
 }
-let metaSaveTimer: any = null
+
+let metaSaveTimer: ReturnType<typeof setTimeout> | null = null
 function debouncedSaveMeta() {
-  clearTimeout(metaSaveTimer)
+  if (metaSaveTimer) clearTimeout(metaSaveTimer)
   metaSaveTimer = setTimeout(() => {
     upsertMeta({ title: formMeta.title, description: formMeta.description })
   }, 450)
 }
+
 function toggleStatus(e: Event) {
   const checked = (e.target as HTMLInputElement).checked
   upsertMeta({ status: checked ? 'published' : 'draft' })
 }
+
 const ogPicker = ref<HTMLInputElement | null>(null)
 async function onPickOg(e: Event) {
   const f = (e.target as HTMLInputElement).files?.[0] || null
   if (!f) return
-  const up = await uploadOgImage(f)
-  if (up.url) await upsertMeta({ ogImage: up.url, ogImagePath: up.path })
+  const upload = await uploadImage(f, { folder: `alinayah/web/og/${(currentPath.value || '/').replace(/\//g, '_')}` })
+  if (upload?.secure_url) {
+    await upsertMeta({ ogImage: upload.secure_url, ogImagePath: null })
+    ogLinkInput.value = upload.secure_url
+    ogMode.value = 'link'
+  }
   if (ogPicker.value) ogPicker.value.value = ''
 }
+
+async function applyOgLink() {
+  if (!ogLinkInput.value.trim()) return
+  await upsertMeta({ ogImage: ogLinkInput.value.trim(), ogImagePath: null })
+}
+
 async function removeOg() {
-  if (!meta.value?.ogImagePath) { await upsertMeta({ ogImage: null, ogImagePath: null }); return }
-  try { await deleteOgImage(meta.value.ogImagePath) } catch {}
+  if (!meta.value?.ogImagePath) {
+    await upsertMeta({ ogImage: null, ogImagePath: null })
+    ogLinkInput.value = ''
+    return
+  }
+  try {
+    await deleteOgImage(meta.value.ogImagePath)
+  } catch {}
   await upsertMeta({ ogImage: null, ogImagePath: null })
+  ogLinkInput.value = ''
 }
 
 watch(sortedSections, (list) => {
-  const keys = list.map(s => s.key)
+  const keys = list.map((s) => s.key)
   if (!keys.length) {
     activeTab.value = ''
     return
   }
   if (!keys.includes(activeTab.value)) {
-    activeTab.value = keys[0]! // pick pertama
+    activeTab.value = keys[0] || ''
   }
-}, { immediate: true })
 
-watch(currentPath, async (p) => {
-  activeTab.value = ''
-  await subscribePage(p)
-  hydrateMetaForm()
-  await nextTick()
+  const ids = new Set(list.map((s) => s.id))
+  for (const s of list) sectionMedia(s.id)
+  for (const id of Object.keys(sectionMediaStates)) {
+    if (!ids.has(id)) delete sectionMediaStates[id]
+  }
 }, { immediate: true })
 
 const newSection = reactive<{ key: string }>({ key: '' })
@@ -389,10 +741,13 @@ async function addNewSection() {
   ensureActivePath()
   await addSection({ key, enabled: true })
   activeTab.value = key
+  newSection.key = ''
   await nextTick()
 }
+
 const localEdits = reactive<Record<string, { key: string; enabled: boolean; propsText: string }>>({})
 const jsonErrors = reactive<Record<string, string | ''>>({})
+
 watch(sections, (list) => {
   for (const s of list) {
     if (!localEdits[s.id]) {
@@ -404,20 +759,30 @@ watch(sections, (list) => {
       jsonErrors[s.id] = ''
     }
   }
-  // cleanup removed
-  const ids = new Set(list.map(s => s.id))
+  const ids = new Set(list.map((s) => s.id))
   for (const k of Object.keys(localEdits)) if (!ids.has(k)) delete localEdits[k]
+  for (const k of Object.keys(jsonErrors)) if (!ids.has(k)) delete jsonErrors[k]
 }, { immediate: true })
 
 function validateJson(id: string) {
   const t = localEdits[id]?.propsText || ''
-  if (!t.trim()) { jsonErrors[id] = ''; return }
-  try { JSON.parse(t); jsonErrors[id] = '' } catch (e:any) { jsonErrors[id] = e?.message || 'JSON invalid' }
+  if (!t.trim()) {
+    jsonErrors[id] = ''
+    return
+  }
+  try {
+    JSON.parse(t)
+    jsonErrors[id] = ''
+  } catch (e: any) {
+    jsonErrors[id] = e?.message || 'JSON invalid'
+  }
 }
+
 async function saveSection(id: string, patch: { key?: string; enabled?: boolean }) {
   ensureActivePath()
   await updateSection(id, patch)
 }
+
 async function saveProps(id: string) {
   if (jsonErrors[id]) return
   ensureActivePath()
@@ -425,71 +790,208 @@ async function saveProps(id: string) {
   const props = t.trim() ? JSON.parse(t) : null
   await updateSection(id, { props })
 }
+
 function resetPropsFromServer(id: string) {
-  const s = sections.value.find(x => x.id === id)
+  const s = sections.value.find((x) => x.id === id)
   if (!s) return
   localEdits[id]!.propsText = s.props ? JSON.stringify(s.props, null, 2) : ''
   jsonErrors[id] = ''
 }
+
 async function duplicateSec(id: string) {
   ensureActivePath()
-  const src = sections.value.find(x => x.id === id)
+  const src = sections.value.find((x) => x.id === id)
   await duplicateSection(id)
-  if (src?.key) activeTab.value = src.key 
+  if (src?.key) activeTab.value = src.key
 }
-async function deleteSec(id: string) { 
-  if (!confirm('Hapus section ini?')) return; 
-  ensureActivePath(); 
-  await deleteSection(id) 
+
+async function deleteSec(id: string) {
+  if (!confirm('Hapus section ini?')) return
+  ensureActivePath()
+  await deleteSection(id)
 }
-async function moveUp(id: string) { 
-  ensureActivePath(); 
-  await moveSection(id, 'up') 
+
+async function moveUp(id: string) {
+  ensureActivePath()
+  await moveSection(id, 'up')
 }
-async function moveDown(id: string) { 
-  ensureActivePath(); 
-  await moveSection(id, 'down') 
+
+async function moveDown(id: string) {
+  ensureActivePath()
+  await moveSection(id, 'down')
+}
+
+function triggerSectionMediaPick(id: string) {
+  currentMediaSectionId.value = id
+  sectionMediaPicker.value?.click()
+}
+
+async function onPickSectionMedia(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0] || null
+  const id = currentMediaSectionId.value
+  if (!file || !id) return
+  const upload = await uploadImage(file, { folder: `alinayah/web/sections/${(currentPath.value || '/').replace(/\//g, '_')}/${id}` })
+  if (upload?.secure_url) {
+    sectionMedia(id).url = upload.secure_url
+    sectionMedia(id).link = upload.secure_url
+    sectionMedia(id).mode = 'link'
+  }
+  if (sectionMediaPicker.value) sectionMediaPicker.value.value = ''
+}
+
+function applySectionMediaLink(id: string) {
+  const value = sectionMedia(id).link.trim()
+  if (!value) return
+  sectionMedia(id).url = value
+}
+
+async function copySectionMediaUrl(id: string) {
+  const value = sectionMedia(id).url
+  if (!value) return
+  try {
+    await navigator.clipboard.writeText(value)
+  } catch {}
+}
+
+function insertMediaIntoJson(id: string) {
+  const value = sectionMedia(id).url
+  if (!value || !localEdits[id]) return
+  try {
+    const raw = localEdits[id].propsText?.trim()
+    if (!raw) {
+      localEdits[id].propsText = JSON.stringify({ image: value }, null, 2)
+      validateJson(id)
+      return
+    }
+    const parsed = JSON.parse(raw)
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      if (!('image' in parsed)) parsed.image = value
+      else if (!('media' in parsed)) parsed.media = value
+      else if (Array.isArray(parsed.media)) parsed.media.push(value)
+      else parsed.media = [parsed.media, value]
+      localEdits[id].propsText = JSON.stringify(parsed, null, 2)
+      validateJson(id)
+    }
+  } catch {}
+}
+
+const componentMap: Record<string, any> = {
+  HeaderHero: EditorHeaderHero,
+  InfoHero: EditorInfoHero,
+  InvitationHero: EditorInvitationHero,
+  HeroFacilityHero: EditorFacilityHero,
+  BlogHero: EditorBlogHero,
+  GirlHero: EditorGirlHero,
+  NewsPage: EditorNewsPage,
+  GalleryPage: EditorGalleryPage,
+  ProfilePage: EditorProfilePage,
+  ProgramPage: EditorProgramPage,
+}
+
+function resolveSectionComponent(key: string) {
+  return componentMap[key] || null
+}
+function needsPagePath(key: string) {
+  return ['NewsPage', 'GalleryPage', 'ProfilePage', 'ProgramPage'].includes(key)
 }
 
 const modal = reactive<{ newPage: boolean; rename: boolean; clone: boolean }>({ newPage: false, rename: false, clone: false })
 const formNew = reactive<{ path: string; title: string; description: string }>({ path: '/', title: '', description: '' })
-function openNewPage() { formNew.path = '/'; formNew.title = ''; formNew.description = ''; modal.newPage = true }
+const formRename = reactive<{ newPath: string }>({ newPath: '/' })
+const formClone = reactive<{ dstPath: string }>({ dstPath: '/' })
+
+function closeAllModals() {
+  modal.newPage = false
+  modal.rename = false
+  modal.clone = false
+}
+
+function openNewPage() {
+  formNew.path = '/'
+  formNew.title = ''
+  formNew.description = ''
+  modal.newPage = true
+}
+
+function openRenameFor(path: string) {
+  actionPath.value = normalizePath(path)
+  formRename.newPath = actionPath.value
+  modal.rename = true
+}
+
+function openCloneFor(path: string) {
+  actionPath.value = normalizePath(path)
+  formClone.dstPath = '/'
+  modal.clone = true
+}
+
+async function askDeleteFor(path: string) {
+  const target = normalizePath(path)
+  if (!confirm(`Hapus halaman \"${target}\" beserta seluruh section?`)) return
+  await deletePage(target)
+  if (target === currentPath.value) selectPath('/')
+}
+
 async function createPageNow() {
   const p = normalizePath(formNew.path || '/')
   await createPage({ path: p, title: formNew.title, description: formNew.description, status: 'draft' })
   modal.newPage = false
   selectPath(p)
 }
-function openRenamePage() { formRename.newPath = currentPath.value; modal.rename = true }
-const formRename = reactive<{ newPath: string }>({ newPath: '/' })
+
+function openRenamePage() {
+  openRenameFor(currentPath.value)
+}
+
 async function renameNow() {
   const np = normalizePath(formRename.newPath || '/')
-  const old = currentPath.value
-  if (np === old) { modal.rename = false; return }
+  const old = actionPath.value || currentPath.value
+  if (np === old) {
+    modal.rename = false
+    return
+  }
   await renamePage(old, np)
   modal.rename = false
-  selectPath(np)
+  if (old === currentPath.value) selectPath(np)
 }
-function openClonePage() { formClone.dstPath = '/'; modal.clone = true }
-const formClone = reactive<{ dstPath: string }>({ dstPath: '/' })
+
+function openClonePage() {
+  openCloneFor(currentPath.value)
+}
+
 async function cloneNow() {
+  const src = actionPath.value || currentPath.value
   const dst = normalizePath(formClone.dstPath || '/')
-  await clonePage(currentPath.value, dst)
+  await clonePage(src, dst)
   modal.clone = false
   selectPath(dst)
 }
+
 async function askDeletePage() {
-  if (!confirm(`Hapus halaman "${currentPath.value}" beserta seluruh section?`)) return
-  await deletePage(currentPath.value)
-  selectPath('/')
+  await askDeleteFor(currentPath.value)
 }
-async function publish() { 
-  ensureActivePath(); 
-  await publishPage(currentPath.value) 
+
+async function publish() {
+  ensureActivePath()
+  await publishPage(currentPath.value)
 }
-async function reloadPages() { subscribePages() }
+
+async function reloadPages() {
+  subscribePages()
+}
+
 watch(currentPath, (p) => {
   ensureActivePath(p)
 })
-onMounted(() => { subscribePages() })
+
+onMounted(async () => {
+  subscribePages()
+  const initial = normalizePath(String(route.query.path || '/'))
+  currentPath.value = initial
+  actionPath.value = initial
+  ensureActivePath(initial)
+  await subscribePage(initial)
+  hydrateMetaForm()
+  ogLinkInput.value = meta.value?.ogImage || ''
+})
 </script>

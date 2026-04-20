@@ -301,7 +301,7 @@
           <div class="relative h-56 sm:h-64 flex items-end px-4 sm:px-6 lg:px-8">
             <div class="mb-6">
               <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-blue-200">
-                <span class="inline-block size-2 rounded-full bg-blue-400" /> {{ form.hero.badge || 'Pondok Pesantren Alberr' }}
+                <span class="inline-block size-2 rounded-full bg-blue-400" /> {{ form.hero.badge || 'Pondok Pesantren alinayah' }}
               </p>
               <h3 class="mt-1 text-2xl font-bold text-white">{{ form.hero.title || 'Pelajari Program' }}</h3>
               <p class="mt-1 text-blue-100">{{ form.hero.subtitle || 'Integrasi diniyah–akademik–karakter' }}</p>
@@ -413,7 +413,7 @@ const props = defineProps<{ section: { id: string; key: string; props?: Partial<
 const defaults: Shape = {
   hero: {
     cover: '/assets/images/activity2.jpg',
-    badge: 'Pondok Pesantren Alberr',
+    badge: 'Pondok Pesantren alinayah',
     title: 'Pelajari Program',
     subtitle: 'Integrasi diniyah–akademik–karakter: kurikulum terpadu, tahfidz, bahasa, kepemimpinan, kewirausahaan.',
     heightSm: '40vh',
@@ -429,7 +429,7 @@ const defaults: Shape = {
   programs: [],
   curriculum: [
     {
-      level: 'SMP ALBERR',
+      level: 'SMP alinayah',
       subtitle: 'Fokus pembentukan dasar diniyah & akademik',
       icon: 'ph:student',
       description: 'Pondok Pesantren Modern Terpadu untuk SMP',
@@ -448,7 +448,7 @@ const defaults: Shape = {
   faqs: [
     { q: 'Apakah ada target hafalan?', a: 'SMP min 5 juz, SMA min 10 juz.' }
   ],
-  cta: { enabled: true, title: 'Siap bergabung dengan program AlBerr?', subtitle: 'Daftar PPDB Online tahun ajaran berjalan.', buttonText: 'Daftar Sekarang', buttonHref: '#' },
+  cta: { enabled: true, title: 'Siap bergabung dengan program alinayah?', subtitle: 'Daftar PPDB Online tahun ajaran berjalan.', buttonText: 'Daftar Sekarang', buttonHref: '#' },
 }
 
 function normalizeCurriculum(c: Curriculum): Curriculum {

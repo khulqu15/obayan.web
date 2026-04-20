@@ -64,7 +64,7 @@ function pickFirstNonEmpty(...vals: (string | number | undefined | null)[]): str
 
 function phoneToEmail(phone: string) {
   const digits = phone.replace(/[^0-9]/g, '').replace(/^0/, '62')
-  return `${digits}-wali@alberr.sch.id`
+  return `${digits}-wali@alinayah.sch.id`
 }
 
 function generatePassword(len = 12) {
@@ -91,7 +91,7 @@ export const useWali = () => {
     error.value = null
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snapshot = await get(child(dbRef($realtimeDb), 'alberr/santri'))
+      const snapshot = await get(child(dbRef($realtimeDb), 'alinayah/santri'))
       const val = snapshot.val() || {}
 
       const map = new Map<string, WaliRow>()
@@ -151,7 +151,7 @@ export const useWali = () => {
   }
 
   async function fetchAllSantri(): Promise<Record<string, any>> {
-    const snap = await get(child(dbRef($realtimeDb), 'alberr/santri'))
+    const snap = await get(child(dbRef($realtimeDb), 'alinayah/santri'))
     return snap.val() || {}
   }
 
@@ -263,8 +263,8 @@ export const useWali = () => {
         santriIds: [santri.id],
         createdAt: Date.now()
       }
-      await set(dbRef($realtimeDb, `alberr/waliUsers/${uid}`), profile)
-      await update(dbRef($realtimeDb, `alberr/santri/${santri.id}`), {
+      await set(dbRef($realtimeDb, `alinayah/waliUsers/${uid}`), profile)
+      await update(dbRef($realtimeDb, `alinayah/santri/${santri.id}`), {
         wali_uid: uid,
         walisantri: waliname || undefined,
         wali_nohp: phone || undefined
@@ -281,7 +281,7 @@ export const useWali = () => {
   
   function downloadPasswordFile(phoneOrEmail: string, password: string) {
     const blob = new Blob([
-      `Akun Wali Ponpes Alberr\n`+
+      `Akun Wali Ponpes alinayah\n`+
       `=======================\n`+
       `Username : ${phoneOrEmail}\n`+
       `Password : ${password}\n`+

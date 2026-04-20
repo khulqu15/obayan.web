@@ -100,12 +100,12 @@ const defaults: Shape = {
   preText: 'Ayo',
   highlightText: 'Mondok',
   suffixText: 'di',
-  brandText: 'Ponpes Alberr',
+  brandText: 'Ponpes Alinayah',
   subtitle: 'Lingkungan yang menumbuhkan adab, ilmu, dan kemandirian. Kurikulum diniyah & formal terpadu, pembinaan tahfidz, serta program kepemimpinan dan pengabdian.',
   hadithArabic: 'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ',
   hadithTranslation: '“Barangsiapa menempuh jalan untuk mencari ilmu, Allah akan mudahkan baginya jalan menuju Surga.”',
   hadithSource: 'HR. Muslim',
-  ctaPrimary: { label: 'Al Berr', href: '/profile', icon: 'ph:student' },
+  ctaPrimary: { label: 'Alinayah', href: '/profile', icon: 'ph:student' },
   ctaSecondary: { label: 'Pelajari lebih lanjut', href: '/program', icon: 'ph:arrow-right' }
 }
 
@@ -136,7 +136,7 @@ function subscribeFromRTDBByKey() {
   const { $realtimeDb } = useNuxtApp()
 
   // /alberr/web/pages/home/sections where each child has { key, enabled, props, ... }
-  const sectionsPath = 'alberr/web/pages/home/sections'
+  const sectionsPath = 'alinayah/web/pages/home/sections'
   const q: Query = query(dbRef($realtimeDb, sectionsPath), orderByChild('key'), equalTo(KEY))
 
   unsub = onValue(q, (snap) => {

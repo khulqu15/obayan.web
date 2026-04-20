@@ -135,7 +135,7 @@ export const useAnnouncements = () => {
     error.value = null
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snap = await get(dbRef($realtimeDb, 'alberr/announcements'))
+      const snap = await get(dbRef($realtimeDb, 'alinayah/announcements'))
       const val = snap.val() || {}
       const list = Object.entries(val).map(([key, v]: any) => normalizeAnnouncement(key, v))
       // urut level urgent dulu, lalu warning, lalu info; di dalamnya by title
@@ -157,7 +157,7 @@ export const useAnnouncements = () => {
   async function createAnnouncement(payload: Omit<AnnouncementRow, 'id' | 'createdAt' | 'updatedAt'>, opts: { refresh?: boolean } = {}) {
     const { refresh = true } = opts
     const { $realtimeDb } = useNuxtApp()
-    const listRef = dbRef($realtimeDb, 'alberr/announcements')
+    const listRef = dbRef($realtimeDb, 'alinayah/announcements')
 
     const data: Partial<AnnouncementRow> = {
       title: payload.title ?? '',
@@ -196,7 +196,7 @@ export const useAnnouncements = () => {
   async function updateAnnouncement(id: string, payload: Partial<Omit<AnnouncementRow, 'id'>>, opts: { refresh?: boolean } = {}) {
     const { refresh = true } = opts
     const { $realtimeDb } = useNuxtApp()
-    const nodeRef = dbRef($realtimeDb, `alberr/announcements/${id}`)
+    const nodeRef = dbRef($realtimeDb, `alinayah/announcements/${id}`)
 
     const data: any = { updatedAt: Date.now() }
     const assign = (k: keyof AnnouncementRow) => { if ((payload as any)[k] !== undefined) data[k] = (payload as any)[k] }
@@ -216,7 +216,7 @@ export const useAnnouncements = () => {
 
   async function deleteAnnouncement(id: string) {
     const { $realtimeDb } = useNuxtApp()
-    const nodeRef = dbRef($realtimeDb, `alberr/announcements/${id}`)
+    const nodeRef = dbRef($realtimeDb, `alinayah/announcements/${id}`)
     await remove(nodeRef)
     await fetchAnnouncements()
   }
@@ -323,7 +323,7 @@ export const useAnnouncements = () => {
     _unsubscribe = null
 
     const { $realtimeDb } = useNuxtApp()
-    const ref = dbRef($realtimeDb, 'alberr/announcements')
+    const ref = dbRef($realtimeDb, 'alinayah/announcements')
     const cb = (snap: any) => {
       const val = snap.val() || {}
       const list = Object.entries(val).map(([key, v]: any) => normalizeAnnouncement(key, v))

@@ -153,7 +153,7 @@
           <div class="sm:col-span-2">
             <div class="p-3 rounded-lg bg-gray-50 dark:bg-neutral-800/40 border border-dashed dark:border-neutral-700">
               <p class="text-xs text-gray-600 dark:text-neutral-300">
-                Akan otomatis mengambil berita terbaru (urut <em>publishedAt</em>) dari <code>alberr/news</code>.
+                Akan otomatis mengambil berita terbaru (urut <em>publishedAt</em>) dari <code>alinayah/news</code>.
                 Item pertama menjadi Featured, sisanya menjadi Posts.
               </p>
             </div>
@@ -267,7 +267,7 @@ const props = defineProps<{ section: { id: string; key: string; props?: Partial<
 
 const defaults: Shape = {
   headingTitle: 'Kegiatan Harian & Mingguan Santri',
-  headingDesc: 'Pantau jadwal kajian, ibadah, dan aktivitas santri Pondok Pesantren Alberr Pandaan secara teratur. Temukan kegiatan yang sesuai dengan minat dan kebutuhan Anda.',
+  headingDesc: 'Pantau jadwal kajian, ibadah, dan aktivitas santri Pondok Pesantren alinayah Pandaan secara teratur. Temukan kegiatan yang sesuai dengan minat dan kebutuhan Anda.',
   featured: {
     title: 'Tahfidz Berbasis Target & Analitik: Metrik Hafalan yang Membumi',
     cover: '/assets/images/activity.jpg',
@@ -410,7 +410,7 @@ async function upload(e: Event, key: string) {
     const { getStorage, ref, uploadBytesResumable, getDownloadURL } = await import('firebase/storage')
     const storage = getStorage()
     const safe = file.name.replace(/\s+/g,'_')
-    const path = `alberr/web/blog/${Date.now()}_${safe}`
+    const path = `alinayah/web/blog/${Date.now()}_${safe}`
     const r = ref(storage, path)
     const task = uploadBytesResumable(r, file, { contentType: file.type })
     await new Promise<void>((res, rej) => {
