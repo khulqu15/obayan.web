@@ -24,42 +24,17 @@
       </div>
     </div>
 
-    <div
-      ref="arenaRef"
-      class="relative w-full h-[360px] sm:h-[420px] rounded-2xl ring-1 ring-inset ring-emerald-200/70
-             bg-gradient-to-b from-emerald-50/80 to-blue-50/60 dark:from-neutral-800 dark:to-neutral-900
-             overflow-hidden select-none"
-      @click="spawnTap($event)"
-    >
+    <div ref="arenaRef" class="relative w-full h-[360px] sm:h-[420px] rounded-2xl ring-1 ring-inset ring-emerald-200/70 bg-linear-to-b from-emerald-50/80 to-blue-50/60 dark:from-neutral-800 dark:to-neutral-900 overflow-hidden select-none" @click="spawnTap($event)" >
       <transition-group name="pop" tag="div">
-        <button
-          v-for="item in items"
-          :key="item.id"
-          class="absolute -translate-x-1/2 -translate-y-1/2 rounded-2xl p-2 sm:p-2.5
-                 bg-white/80 dark:bg-neutral-800/80 backdrop-blur-md shadow-md
-                 hover:scale-110 active:scale-95 transition"
-          :style="{ left: item.x + 'px', top: item.y + 'px' }"
-          @click.stop="collect(item.id)"
-          @touchstart.stop.prevent="collect(item.id)"
-          :aria-label="item.kind"
-        >
-          <Icon
-            :icon="iconFor(item.kind)"
-            class="size-6 sm:size-7"
-            :class="item.kind==='bomb' ? 'text-rose-500' : 'text-green-600'"
-          />
+        <button v-for="item in items" :key="item.id" class="absolute -translate-x-1/2 -translate-y-1/2 rounded-2xl p-2 sm:p-2.5 bg-white/80 dark:bg-neutral-800/80 backdrop-blur-md shadow-md hover:scale-110 active:scale-95 transition" :style="{ left: item.x + 'px', top: item.y + 'px' }" @click.stop="collect(item.id)" @touchstart.stop.prevent="collect(item.id)" :aria-label="item.kind" >
+          <Icon :icon="iconFor(item.kind)" class="size-6 sm:size-7" :class="item.kind==='bomb' ? 'text-rose-500' : 'text-green-600'" />
         </button>
       </transition-group>
 
       <div v-if="state==='idle'" class="absolute inset-0 grid place-items-center">
         <div class="text-center">
           <p class="text-sm 900/70 dark:text-neutral-300">Klik/tap permata & bintang. Hindari bom!</p>
-          <button
-            @click="start()"
-            class="mt-3 inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 font-semibold
-                   bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700 transition
-                   shadow-lg shadow-emerald-500/20"
-          >
+          <button @click="start()" class="mt-3 inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 font-semibold bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700 transition shadow-lg shadow-emerald-500/20" >
             <Icon icon="ph:play-duotone" class="size-5" />
             Mulai Game (30s)
           </button>
@@ -70,12 +45,7 @@
         <div class="text-center rounded-2xl px-5 py-4 bg-white/80 dark:bg-neutral-800/80 backdrop-blur-md ring-1 ring-neutral-200/60 dark:ring-neutral-700">
           <h3 class="text-lg font-bold text-green-900 dark:100">Waktu Habis!</h3>
           <p class="mt-1 text-sm text-green-900/70 dark:text-neutral-300">Skor kamu: <span class="font-semibold">{{ score }}</span></p>
-          <button
-            @click="start()"
-            class="mt-3 inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 font-semibold
-                   bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 transition
-                   shadow-lg shadow-blue-600/20"
-          >
+          <button @click="start()" class="mt-3 inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 font-semibold bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 transition shadow-lg shadow-blue-600/20" >
             <Icon icon="ph:arrow-counter-clockwise-duotone" class="size-5" />
             Main Lagi
           </button>
@@ -175,13 +145,13 @@ function collect(id: number) {
   const it = items.value[i]
   items.value.splice(i, 1)
 
-  if (it.kind === 'bomb') {
+  if (it!.kind === 'bomb') {
     // penalty
     combo.value = 0
     score.value = Math.max(0, score.value - 5)
   } else {
     combo.value = Math.min(10, combo.value + 1)
-    const base = it.kind === 'gem' ? 3 : 2
+    const base = it!.kind === 'gem' ? 3 : 2
     score.value += base + Math.floor(combo.value * 0.6)
     // occasional bonus time
     if (Math.random() < 0.12) timeLeft.value = Math.min(duration, timeLeft.value + 1)

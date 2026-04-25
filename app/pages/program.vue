@@ -201,8 +201,12 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useWeb } from '~/composables/data/useWeb'
-import { useRoute, useRuntimeConfig } from '#imports'
+import { useRoute } from 'vue-router'
 import { onValue, ref as dref, off as dbOff } from 'firebase/database'
+import { useHead, useRuntimeConfig, useNuxtApp, useSeoMeta } from 'nuxt/app'
+
+const config = useRuntimeConfig()
+const clientName = config.public.clientName || 'alinayah'
 
 defineOptions({ name: 'ProgramPage' })
 
@@ -225,10 +229,11 @@ type MetaShape = { title?: string; description?: string; ogImage?: string | null
 const DEFAULTS: Shape = {
   hero: {
     cover: '/assets/images/activity2.jpg',
-    badge: 'Pondok Pesantren Alberr',
-    title: 'Pelajari Program',
-    subtitle: 'Integrasi diniyah–akademik–karakter: kurikulum terpadu, tahfidz, bahasa, kepemimpinan, kewirausahaan.',
-    heightSm: '40vh', heightLg: '52vh'
+    badge: 'Platform Obayan',
+    title: 'Pendidikan dengan platform obayan',
+    subtitle: 'Platform digital untuk mendukung pengelolaan pendidikan, publikasi program, kurikulum, komunikasi, dan layanan akademik dalam satu ekosistem.',
+    heightSm: '40vh',
+    heightLg: '52vh'
   },
   stats: [
     { label: 'Target Hafalan', value: '5–15 Juz', icon: 'ph:book-open-text' },
@@ -248,7 +253,13 @@ const DEFAULTS: Shape = {
     { time: '22.00', title: 'Istirahat Malam', note: 'Tidur' }
   ],
   faqs: [{ q:'Apakah ada target hafalan?', a:'SMP min 5 juz, SMA min 10 juz.' }],
-  cta: { enabled:true, title:'Siap bergabung dengan program AlBerr?', subtitle:'Daftar PPDB Online tahun ajaran berjalan.', buttonText:'Daftar Sekarang', buttonHref:'#' }
+  cta: {
+    enabled: true,
+    title: 'Siap menggunakan platform Obayan?',
+    subtitle: 'Kelola pendidikan dan publikasi lembaga dalam satu platform.',
+    buttonText: 'Lihat Selengkapnya',
+    buttonHref: '#'
+  }
 }
 
 /* ===== Helpers ===== */
@@ -320,15 +331,15 @@ function toggleFaq(i: number){ openFaq.value = openFaq.value===i ? null : i }
 /* ===== SEO from RTDB: alberr/web/program/meta ===== */
 const { $realtimeDb } = useNuxtApp() as any
 const runtime = useRuntimeConfig()
-const siteUrl = runtime.public?.siteUrl || ''
+const siteUrl: any = runtime.public?.siteUrl || ''
 
 const canonical = computed(() => {
   try { return new URL(route.fullPath || '/', siteUrl).toString() } catch { return siteUrl || '/' }
 })
 
 const pageMeta = reactive<Required<MetaShape>>({
-  title: 'Program | Pondok Pesantren Alberr',
-  description: 'Program unggulan Pondok Pesantren Alberr.',
+  title: 'Pendidikan dengan platform obayan',
+  description: 'Platform Obayan untuk mendukung pengelolaan program pendidikan, kurikulum, jadwal, publikasi, dan layanan akademik.',
   ogImage: '/assets/logo.png',
   status: 'draft'
 })
@@ -336,7 +347,7 @@ const pageMeta = reactive<Required<MetaShape>>({
 let metaUnsub: (() => void) | null = null
 onMounted(() => {
   if (!$realtimeDb) return
-  const node = dref($realtimeDb, 'alberr/web/pages/program/meta')
+  const node = dref($realtimeDb, `${clientName}/web/pages/program/meta`)
   const handler = onValue(node, (snap) => {
     const v = (snap.val() || {}) as MetaShape
     console.log(v)

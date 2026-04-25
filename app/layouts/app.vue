@@ -3,20 +3,11 @@
     <AppLoading v-if="authLoading" :force="true" label="Memuat dashboard" sublabel="Menyiapkan sesi dan hak akses" />
 
     <div v-else class="min-h-screen">
-      <div
-        v-if="mobileSidebarOpen"
-        class="fixed inset-0 z-[70] bg-neutral-950/50 backdrop-blur-sm lg:hidden"
-        @click="mobileSidebarOpen = false"
-      />
+      <div v-if="mobileSidebarOpen" class="fixed inset-0 z-70 bg-neutral-950/50 backdrop-blur-sm lg:hidden" @click="mobileSidebarOpen = false"/>
+      <div v-if="rightOpen" class="fixed inset-0 z-65 bg-black/20 backdrop-blur-[1px] lg:hidden" @click="rightOpen = false"/>
 
-      <div
-        v-if="rightOpen"
-        class="fixed inset-0 z-[65] bg-black/20 backdrop-blur-[1px] lg:hidden"
-        @click="rightOpen = false"
-      />
-
-      <header class="fixed inset-x-0 top-0 z-[80] px-3 pt-3 lg:px-4">
-        <div class="mx-auto flex h-16 max-w-[1920px] items-center justify-between rounded-[24px] border border-white/70 bg-white/90 px-3 shadow-[0_10px_30px_-12px_rgba(15,23,42,0.18)] backdrop-blur dark:border-white/10 dark:bg-neutral-900/85 dark:shadow-[0_14px_36px_-14px_rgba(0,0,0,0.55)]">
+      <header class="fixed inset-x-0 top-0 z-80 px-3 pt-3 lg:px-4">
+        <div class="mx-auto flex h-16 max-w-[1920px] items-center justify-between rounded-3xl border border-white/70 bg-white/90 px-3 shadow-[0_10px_30px_-12px_rgba(15,23,42,0.18)] backdrop-blur dark:border-white/10 dark:bg-neutral-900/85 dark:shadow-[0_14px_36px_-14px_rgba(0,0,0,0.55)]">
           <div class="flex min-w-0 items-center gap-2 lg:gap-3">
             <button
               type="button"
@@ -29,7 +20,7 @@
 
             <div class="flex min-w-0 items-center gap-3">
               <div class="grid h-11 w-11 place-items-center overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-                <img src="/assets/logo.png" alt="Logo Alinayah" class="h-9 w-9 object-contain" />
+                <img :src="appLogo" :alt="`Logo ${clientDisplayName}`" class="h-9 w-9 object-contain" />
               </div>
               <div class="min-w-0">
                 <p class="truncate text-sm font-bold text-gray-900 dark:text-white">{{ titleSidebar }}</p>
@@ -70,7 +61,7 @@
 
               <div
                 v-if="accountOpen"
-                class="absolute right-0 top-[calc(100%+10px)] z-[90] w-72 overflow-hidden rounded-[24px] border border-gray-200 bg-white p-2 shadow-[0_24px_48px_-18px_rgba(15,23,42,0.25)] dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-[0_24px_48px_-18px_rgba(0,0,0,0.55)]"
+                class="absolute right-0 top-[calc(100%+10px)] z-90 w-72 overflow-hidden rounded-3xl border border-gray-200 bg-white p-2 shadow-[0_24px_48px_-18px_rgba(15,23,42,0.25)] dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-[0_24px_48px_-18px_rgba(0,0,0,0.55)]"
               >
                 <div class="rounded-2xl bg-gray-50 p-3 dark:bg-neutral-800">
                   <div class="flex items-center gap-3">
@@ -111,7 +102,7 @@
 
       <aside
         :class="[
-          'fixed bottom-4 left-3 top-[84px] z-[75] w-[280px] transition-transform duration-300 lg:left-4',
+          'fixed bottom-4 left-3 top-[84px] z-75 w-[280px] transition-transform duration-300 lg:left-4',
           mobileSidebarOpen ? 'translate-x-0' : '-translate-x-[110%] lg:translate-x-0'
         ]"
       >
@@ -151,7 +142,7 @@
               <section
                 v-for="group in sidebarGroups"
                 :key="group.title"
-                class="rounded-[24px] border border-white/8 bg-white/[0.03] p-2"
+                class="rounded-3xl border border-white/8 bg-white/3 p-2"
               >
                 <button
                   type="button"
@@ -201,7 +192,7 @@
         <div class="mx-auto max-w-[1920px]">
           <div class="h-[calc(100vh-108px)] overflow-hidden rounded-[30px] border border-white/70 bg-white/92 shadow-[0_24px_50px_-18px_rgba(15,23,42,0.18)] backdrop-blur dark:border-white/10 dark:bg-neutral-900/92 dark:shadow-[0_30px_60px_-20px_rgba(0,0,0,0.55)]">
             <div class="flex h-full min-h-0">
-              <div class="min-w-0 flex-1 overflow-y-auto">
+              <div class="min-w-0 flex-1 overflow-y-auto" ref="mainScrollEl" @scroll.passive="handleMainScroll">
                 <template v-if="!isProtectedRoute(route.path) || !aclReady || hasAccessTo(route.path)">
                   <div class="min-h-full">
                     <slot />
@@ -236,7 +227,7 @@
 
       <aside
         :class="[
-          'fixed bottom-4 right-3 top-[84px] z-[76] w-[340px] transition-transform duration-300 lg:right-4',
+          'fixed bottom-4 right-3 top-[84px] z-76 w-[340px] transition-transform duration-300 lg:right-4',
           rightOpen ? 'translate-x-0' : 'translate-x-[112%]'
         ]"
       >
@@ -261,8 +252,66 @@
         </div>
       </aside>
 
+      <div
+        class="fixed bottom-5 left-1/2 z-[79] scale-75 -translate-x-1/2 transition-all duration-500 ease-out"
+        :class="footerLogoVisible
+          ? 'translate-y-0 opacity-100'
+          : 'translate-y-8 opacity-0 pointer-events-none'"
+      >
+        <div class="relative">
+          <!-- Fire Animation Layer -->
+          <div class="pointer-events-none absolute inset-x-3 bottom-0 -z-10 h-16 overflow-hidden rounded-full blur-md">
+            <div class="absolute bottom-0 left-1/2 h-12 w-24 -translate-x-1/2 animate-pulse rounded-full bg-gradient-to-t from-orange-600 via-amber-400 to-transparent opacity-70"></div>
+
+            <div class="absolute bottom-1 left-[28%] h-10 w-8 animate-bounce rounded-full bg-gradient-to-t from-red-600 via-orange-400 to-transparent opacity-70 blur-sm"></div>
+
+            <div class="absolute bottom-0 left-[45%] h-14 w-10 animate-pulse rounded-full bg-gradient-to-t from-orange-600 via-yellow-300 to-transparent opacity-80 blur-sm"></div>
+
+            <div class="absolute bottom-1 right-[26%] h-11 w-8 animate-bounce rounded-full bg-gradient-to-t from-red-500 via-amber-400 to-transparent opacity-70 blur-sm [animation-delay:180ms]"></div>
+
+            <div class="absolute bottom-0 left-1/2 h-8 w-32 -translate-x-1/2 rounded-full bg-orange-500/40 blur-xl"></div>
+          </div>
+
+          <!-- Fire Sparks -->
+          <div class="pointer-events-none absolute inset-x-0 -top-5 -z-10 mx-auto h-10 w-36">
+            <span class="absolute left-4 top-5 h-1.5 w-1.5 animate-ping rounded-full bg-orange-400 opacity-70"></span>
+            <span class="absolute left-16 top-2 h-1 w-1 animate-ping rounded-full bg-yellow-300 opacity-80 [animation-delay:250ms]"></span>
+            <span class="absolute right-8 top-6 h-1.5 w-1.5 animate-ping rounded-full bg-red-400 opacity-60 [animation-delay:420ms]"></span>
+            <span class="absolute right-16 top-1 h-1 w-1 animate-ping rounded-full bg-amber-300 opacity-70 [animation-delay:650ms]"></span>
+          </div>
+
+          <NuxtLink
+            to="https://obayan.id"
+            aria-label="Obayan"
+            class="group relative flex items-center gap-3 overflow-hidden rounded-full border border-white/80 bg-white/90 px-4 py-2.5 shadow-[0_20px_45px_-18px_rgba(15,23,42,0.35)] backdrop-blur-xl transition hover:-translate-y-1 hover:bg-white dark:border-white/10 dark:bg-neutral-900/90 dark:hover:bg-neutral-900"
+          >
+            <!-- Warm shine -->
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-r from-orange-500/10 via-yellow-300/10 to-red-500/10 opacity-0 transition duration-300 group-hover:opacity-100"></div>
+
+            <span class="relative grid h-10 w-10 place-items-center overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-orange-200/60 dark:bg-neutral-950 dark:ring-orange-500/20">
+              <span class="pointer-events-none absolute inset-x-1 bottom-0 h-4 animate-pulse rounded-full bg-gradient-to-t from-orange-500/40 to-transparent blur-sm"></span>
+
+              <img
+                src="/logo.png"
+                alt="Obayan"
+                class="relative h-8 w-8 object-contain transition duration-300 group-hover:scale-110"
+              />
+            </span>
+
+            <span class="relative hidden pr-1 text-left sm:block">
+              <span class="block text-xs font-black leading-none text-slate-900 dark:text-white">
+                Powered by Obayan
+              </span>
+              <span class="mt-1 block text-[10px] font-bold leading-none text-slate-400 dark:text-neutral-500">
+                Smart Education System
+              </span>
+            </span>
+          </NuxtLink>
+        </div>
+      </div>
+
       <Teleport to="body">
-        <div v-if="logoutOpen" class="fixed inset-0 z-[100]">
+        <div v-if="logoutOpen" class="fixed inset-0 z-100">
           <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="logoutOpen = false" />
           <div class="relative mx-auto mt-24 w-[92%] max-w-md">
             <div class="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
@@ -307,9 +356,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Icon } from '@iconify/vue'
-import AppLoading from '~/components/AppLoading.vue'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { get, off, onValue, ref as dbRef } from 'firebase/database'
+import { useRoute, useRouter } from 'vue-router'
+import { useRuntimeConfig, useNuxtApp, useHead, useState, useSeoMeta } from 'nuxt/app'
 
 type Item = { label: string; href: string; icon?: string }
 type SidebarGroup = { title: string; key?: string; items: Item[] }
@@ -336,41 +386,96 @@ const router = useRouter()
 const config = useRuntimeConfig()
 const { $realtimeDb, $auth } = useNuxtApp() as any
 
-const AUTH_KEY = 'alinayah:auth'
-const PASSPHRASE = 'alinayah-admin-secret'
-const SALT = 'alinayah-static-salt'
-const ITER = 120_000
+const clientName = String(config.public.clientName || 'alinayah')
 
-const titleSidebar = ref('SINAYAH')
-const subtitileSidebar = ref('SIAKAD Ponpes. ALINAYAH')
+const siteUrl = String(config.public.siteUrl || 'https://alinayah.sencra.io')
+const siteName = String(config.public.siteName || 'Pondok Pesantren Al-Inayah')
+const siteDescription = String(config.public.siteDescription || '')
+const twitterSite = String(config.public.twitterSite || '@alinayah')
+
+const appName = String(config.public.appName || 'SINAYAH')
+const clientDisplayName = String(config.public.clientDisplayName || 'Al-Inayah')
+const appSubtitle = String(config.public.appSubtitle || 'SIAKAD Ponpes. AL-INAYAH')
+const appLogo = String(config.public.appLogo || '/assets/logo.png')
+const appThemeColor = String(config.public.appThemeColor || '#0ea5e9')
+
+const firebaseRoot = clientName
+const userPath = `${firebaseRoot}/users`
+
+const AUTH_KEY = `${clientName}:auth`
+const PASSPHRASE = `${clientName}-admin-secret`
+const SALT = `${clientName}-static-salt`
+const STORAGE_KEY = `${clientName}:sidebar:collapsed`
+
+const titleSidebar = ref(appName)
+const subtitileSidebar = ref(appSubtitle)
 
 const mobileSidebarOpen = ref(false)
 const rightOpen = ref(false)
 const accountOpen = ref(false)
 const logoutOpen = ref(false)
+const mainScrollEl = ref<HTMLElement | null>(null)
+const footerLogoVisible = ref(true)
+const lastMainScrollTop = ref(0)
+
+let footerScrollTimer: ReturnType<typeof setTimeout> | null = null
+
+function handleMainScroll(event?: Event) {
+  const target = (event?.target as HTMLElement | null) || mainScrollEl.value
+  if (!target) return
+
+  const currentTop = target.scrollTop
+  const diff = currentTop - lastMainScrollTop.value
+
+  if (currentTop <= 8) {
+    footerLogoVisible.value = true
+    lastMainScrollTop.value = currentTop
+    return
+  }
+
+  if (Math.abs(diff) < 6) return
+
+  footerLogoVisible.value = diff < 0
+  lastMainScrollTop.value = currentTop
+
+  if (footerScrollTimer) clearTimeout(footerScrollTimer)
+
+  footerScrollTimer = setTimeout(() => {
+    if (mainScrollEl.value && mainScrollEl.value.scrollTop <= 8) {
+      footerLogoVisible.value = true
+    }
+  }, 160)
+}
 
 const authLoading = useState<boolean>('authLoading', () => true)
 const sessionUser = useState<any>('sessionUser', () => ({}))
 const tokenUser = ref<{ uid: string; email: string; role: string; name: string; allowedRoutes: string[] } | null>(null)
 const aclReady = ref(false)
 
+const ITER = 120_000
+
 let aclRef: ReturnType<typeof dbRef> | null = null
 let profileRef: ReturnType<typeof dbRef> | null = null
 
-const url = computed(() => new URL(route.fullPath || '/', config.public.siteUrl).toString())
+const url = computed(() => new URL(route.fullPath || '/', siteUrl).toString())
+
 useSeoMeta({
-  title: 'Ponpes ALINAYAH | Pesantren Inovatif & Informatif',
-  description: 'Selamat datang di Ponpes ALINAYAH Purwosari: KMI/Diniyah, Tahfidz, MTs/MA, kegiatan santri, dan PPDB online.',
-  ogTitle: 'Ponpes ALINAYAH | Pesantren Inovatif & Informatif',
-  ogDescription: 'Selamat datang di Ponpes ALINAYAH Purwosari: KMI/Diniyah, Tahfidz, MTs/MA, kegiatan santri, dan PPDB online.',
+  title: siteName,
+  description: siteDescription,
+  ogTitle: siteName,
+  ogDescription: siteDescription,
   ogType: 'website',
   ogUrl: url.value,
-  ogImage: '/assets/logo.png',
+  ogImage: appLogo,
   twitterCard: 'summary_large_image',
-  themeColor: '#0ea5e9',
+  twitterSite,
+  themeColor: appThemeColor,
   robots: 'index, follow'
 })
-useHead({ link: [{ rel: 'canonical', href: url.value }] })
+
+useHead({
+  link: [{ rel: 'canonical', href: url.value }]
+})
 
 const ADMIN_SIDEBAR: SidebarGroup[] = [
   {
@@ -463,8 +568,12 @@ const WALI_SIDEBAR: SidebarGroup[] = [
   }
 ]
 
+
 const collapsedGroups = useState<Record<string, boolean>>('sidebarCollapsed', () => ({}))
-const STORAGE_KEY = 'alinayah:sidebar:collapsed'
+
+function roleHome(role?: string) {
+  return role === 'wali' ? '/wali' : '/app'
+}
 
 function normalize(path: string) {
   try {
@@ -578,8 +687,7 @@ function isGroupActive(g: SidebarGroup) {
 
 function menuClass(item: Item) {
   const active = isItemActive(route.path, item.href)
-  return [
-    'flex items-center justify-between rounded-[22px] px-3 py-3 text-sm transition focus:outline-none',
+  return [ 'flex items-center justify-between rounded-[22px] px-3 py-3 text-sm transition focus:outline-none',
     active
       ? 'bg-blue-600/18 text-white ring-1 ring-blue-500/35 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
       : 'text-neutral-300 hover:bg-white/6 hover:text-white'
@@ -621,13 +729,25 @@ function primaryContactFromSession(sess?: PlainSession | null) {
 
 async function deriveKey(pass: string, salt: string) {
   const enc = new TextEncoder()
-  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(pass), { name: 'PBKDF2' }, false, ['deriveKey'])
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(pass),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveKey']
+  )
+
   return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: enc.encode(salt), iterations: ITER, hash: 'SHA-256' },
+    {
+      name: 'PBKDF2',
+      salt: enc.encode(salt),
+      iterations: ITER,
+      hash: 'SHA-256'
+    },
     keyMaterial,
     { name: 'AES-GCM', length: 256 },
     false,
-    ['decrypt']
+    ['encrypt', 'decrypt']
   )
 }
 
@@ -689,7 +809,7 @@ async function startProfileWatcher(uid?: string | null) {
     if (profileRef) off(profileRef)
   } catch {}
 
-  profileRef = dbRef($realtimeDb, `/alinayah/users/${uid}`)
+  profileRef = dbRef($realtimeDb, `${userPath}/${uid}`)
 
   try {
     const snap = await get(profileRef)
@@ -744,7 +864,7 @@ async function startAclWatcher(uidHint?: string | null) {
     return
   }
 
-  aclRef = dbRef($realtimeDb, `/alinayah/users/${uid}/allowedRoutes`)
+  aclRef = dbRef($realtimeDb, `${userPath}/${uid}/allowedRoutes`)
   const r = aclRef
 
   try {
@@ -763,14 +883,17 @@ function enforceRouteAccess(path: string) {
   if (!aclReady.value) return
 
   if (!tokenUser.value) {
-    if (path !== '/cakAdmin') router.replace('/cakAdmin')
+    if (normalize(path) !== '/cakAdmin') router.replace('/cakAdmin')
     return
   }
 
   if (hasAccessTo(path)) return
 
-  const fallback = firstAllowedPath.value || (tokenUser.value.role === 'wali' ? '/wali' : '/cakAdmin')
-  if (path !== fallback) router.replace(fallback)
+  const fallback = firstAllowedPath.value || roleHome(tokenUser.value.role)
+
+  if (normalize(path) !== normalize(fallback)) {
+    router.replace(fallback)
+  }
 }
 
 function handleNavClick(to: string, e: MouseEvent) {
@@ -819,6 +942,10 @@ function handleWindowClick(e: MouseEvent) {
 }
 
 onMounted(async () => {
+  nextTick(() => {
+    lastMainScrollTop.value = mainScrollEl.value?.scrollTop || 0
+    footerLogoVisible.value = true
+  })
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) collapsedGroups.value = JSON.parse(saved)
@@ -844,16 +971,21 @@ onMounted(async () => {
       allowedRoutes: Array.isArray(sess.allowedRoutes) ? sess.allowedRoutes : []
     }
 
-    if (route.path === '/' || route.path === '/login' || route.path === '/cakAdmin') {
-      router.replace(role === 'wali' ? '/wali' : '/app')
-    }
-
     await nextTick()
+
     if (uid) {
       await startAclWatcher(uid)
       await startProfileWatcher(uid)
     } else {
       applyAllowedRoutes(uid, tokenUser.value?.allowedRoutes || [])
+    }
+
+    const landing = firstAllowedPath.value || roleHome(role)
+
+    if (['/', '/login', '/cakAdmin'].includes(normalize(route.path)) && normalize(route.path) !== normalize(landing)) {
+      router.replace(landing)
+    } else {
+      enforceRouteAccess(route.path)
     }
   } catch {
     localStorage.removeItem(AUTH_KEY)
@@ -876,6 +1008,9 @@ watch(() => route.fullPath, () => {
 watch(collapsedGroups, persistCollapsed, { deep: true })
 
 onUnmounted(() => {
+  if (footerScrollTimer) {
+    clearTimeout(footerScrollTimer)
+  }
   try {
     if (aclRef) off(aclRef)
   } catch {}

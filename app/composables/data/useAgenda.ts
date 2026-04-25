@@ -1,29 +1,8 @@
 import { ref, computed, onUnmounted } from 'vue'
 import { useNuxtApp } from '#app'
 
-// RTDB
-import {
-  ref as dref,
-  query as dquery,
-  orderByChild,
-  startAt as dStartAt,
-  endAt as dEndAt,
-  onValue,
-  off,
-  push,
-  set,
-  update,
-  remove,
-  serverTimestamp,
-  get
-} from 'firebase/database'
-
-import {
-  ref as sref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject
-} from 'firebase/storage'
+import { ref as dref, query as dquery, orderByChild, startAt as dStartAt, endAt as dEndAt, onValue, off, push, set, update, remove, serverTimestamp, get } from 'firebase/database'
+import { ref as sref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
 export type AgendaItem = {
   id: string
@@ -59,7 +38,10 @@ function monthRange(year: number, month0: number) {
   return { start, end }
 }
 
-export function useAgenda() {
+export function useAgenda() {  
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+
   const nuxtApp = useNuxtApp() as any
   const { $realtimeDb, $storage } = useNuxtApp() as any
   const isClient = typeof window !== 'undefined'
@@ -77,7 +59,7 @@ export function useAgenda() {
 
     const { start, end } = monthRange(year, month0)
 
-    const baseRef = dref($realtimeDb, 'alinayah/agendas')
+    const baseRef = dref($realtimeDb, `${clientName}/agendas`)
     const q = dquery(baseRef, orderByChild('startAt'), dStartAt(start), dEndAt(end))
 
     const handler = onValue(q, (snap) => {
@@ -116,7 +98,7 @@ export function useAgenda() {
   async function uploadThumb(id: string, file: File) {
     if (!isClient || !storage || !file) return { url: '', path: '' }
     const ext = file.name?.split('.').pop() || 'jpg'
-    const path = `alinayah/agenda/${id}/thumb_${Date.now()}.${ext}`
+    const path = `${clientName}/agendas/${id}/thumb_${Date.now()}.${ext}`
     const storageRef = sref(storage, path)
     const snap = await uploadBytes(storageRef, file, { contentType: file.type || 'image/jpeg' })
     const url = await getDownloadURL(sref(storage, snap.metadata.fullPath))
@@ -133,7 +115,7 @@ export function useAgenda() {
     try {
       const startAt = toEpoch(payload.start)!
       const endAt   = toEpoch(payload.end)
-      const baseRef = dref($realtimeDb, 'alinayah/agendas')
+      const baseRef = dref($realtimeDb, `${clientName}/agendas`)
       const draftRef = push(baseRef)
       const id = draftRef.key as string
       await set(draftRef, {
@@ -167,7 +149,7 @@ export function useAgenda() {
   async function updateAgenda(id: string, patch: UpdatePayload) {
     loading.value = true
     try {
-      const nodeRef = dref($realtimeDb, `alinayah/agendas/${id}`)
+      const nodeRef = dref($realtimeDb, `${clientName}/agendas/${id}`)
 
       let curr: any
       try { curr = (await get(nodeRef)).val() } catch {}
@@ -209,7 +191,7 @@ export function useAgenda() {
   async function deleteAgenda(id: string) {
     loading.value = true
     try {
-      const nodeRef = dref($realtimeDb, `alinayah/agendas/${id}`)
+      const nodeRef = dref($realtimeDb, `${clientName}/agendas/${id}`)
       let curr: any
       try { curr = (await get(nodeRef)).val() } catch {}
       if (curr?.thumbPath) await deleteThumb(curr.thumbPath)

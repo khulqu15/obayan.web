@@ -1,51 +1,9 @@
 // composables/data/useWeb.ts
-// Lightweight CMS for site pages (meta + ordered sections) using Firebase RTDB + Storage.
-// Data shape:
-// alinayah/web/pages/{pathKey}/meta
-// alinayah/web/pages/{pathKey}/sections/{sectionId}
-// alinayah/web/pages/{pathKey}/sectionsOrder: string[]
-//
-// Recommended RTDB rules (add indexes):
-// {
-//   "rules": {
-//     ".read": true,
-//     ".write": true,
-//     "alinayah": {
-//       "web": {
-//         "pages": {
-//           ".indexOn": ["meta/path", "meta/title"]
-//         }
-//       }
-//     }
-//   }
-// }
-// Storage rules (dev): allow read, write: if true;
 
 import { ref, computed, onUnmounted } from 'vue'
 import { useNuxtApp } from '#app'
-import {
-  ref as dref,
-  query as dquery,
-  orderByChild,
-  onValue,
-  off,
-  push,
-  set,
-  update,
-  remove,
-  serverTimestamp,
-  get
-} from 'firebase/database'
-import {
-  ref as sref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject
-} from 'firebase/storage'
-
-/* =======================
- * Types
- * ======================= */
+import { ref as dref, query as dquery, orderByChild, onValue, off, push, set, update, remove, serverTimestamp, get } from 'firebase/database'
+import { ref as sref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
 export type WebStatus = 'draft' | 'published'
 
@@ -57,8 +15,8 @@ export type WebPageMeta = {
   ogImage?: string | null
   ogImagePath?: string | null
   status?: WebStatus
-  createdAt?: number | { '.sv': 'timestamp' }
-  updatedAt?: number | { '.sv': 'timestamp' }
+  createdAt?: number | ReturnType<typeof serverTimestamp>
+  updatedAt?: number | ReturnType<typeof serverTimestamp>
 }
 
 export type WebSection = {
@@ -117,6 +75,10 @@ export function safeJSON<T = any>(v: any, fallback: T): T {
  * ======================= */
 
 export function useWeb() {
+
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+  
   const nuxt = useNuxtApp() as any
   const { $realtimeDb, $storage } = nuxt
   const isClient = typeof window !== 'undefined'
@@ -139,7 +101,7 @@ export function useWeb() {
   function subscribePages() {
     if (!isClient || !$realtimeDb) return
     unbindPages()
-    const baseRef = dref($realtimeDb, 'alinayah/web/pages')
+    const baseRef = dref($realtimeDb, `${clientName}/web/pages`)
     // order by meta/path for stable listing
     const qRef = dquery(baseRef, orderByChild('meta/path'))
     const handler = onValue(qRef, (snap) => {
@@ -195,7 +157,7 @@ export function useWeb() {
 
   async function ensurePage(path: string, init?: Partial<WebPageMeta>) {
     const key = pathToKey(path)
-    const mRef = dref($realtimeDb, `alinayah/web/pages/${key}/meta`)
+    const mRef = dref($realtimeDb, `${clientName}/web/pages/${key}/meta`)
     const snap = await get(mRef)
     if (!snap.exists()) {
       const payload: WebPageMeta = {
@@ -222,7 +184,7 @@ export function useWeb() {
     const key = await ensurePage(normalized)
 
     // meta
-    const mRef = dref($realtimeDb, `alinayah/web/pages/${key}/meta`)
+    const mRef = dref($realtimeDb, `${clientName}/web/pages/${key}/meta`)
     const hM = onValue(mRef, (s) => {
       const v = s.val() || null
       meta.value = v
@@ -230,7 +192,7 @@ export function useWeb() {
     detailUnsubs.push(() => off(mRef, 'value', hM as any))
 
     // sections
-    const sRef = dref($realtimeDb, `alinayah/web/pages/${key}/sections`)
+    const sRef = dref($realtimeDb, `${clientName}/web/pages/${key}/sections`)
     const hS = onValue(sRef, (s) => {
       const arr: WebSection[] = []
       s.forEach((ch: any) => {
@@ -250,7 +212,7 @@ export function useWeb() {
     detailUnsubs.push(() => off(sRef, 'value', hS as any))
 
     // sectionsOrder
-    const oRef = dref($realtimeDb, `alinayah/web/pages/${key}/sectionsOrder`)
+    const oRef = dref($realtimeDb, `${clientName}/web/pages/${key}/sectionsOrder`)
     const hO = onValue(oRef, (s) => {
       const val = s.val()
       sectionsOrder.value = Array.isArray(val) ? (val as string[]) : []
@@ -284,7 +246,7 @@ export function useWeb() {
 
   async function upsertMeta(patch: Partial<WebPageMeta>) {
     const key = currentKey.value
-    const node = dref($realtimeDb, `alinayah/web/pages/${key}/meta`)
+    const node = dref($realtimeDb, `${clientName}/web/pages/${key}/meta`)
     const data: any = { updatedAt: serverTimestamp() }
     if (patch.title !== undefined) data.title = patch.title
     if (patch.description !== undefined) data.description = patch.description
@@ -303,7 +265,7 @@ export function useWeb() {
     if (!isClient || !$storage) return { url: '', path: '' }
     const key = currentKey.value
     const ext = (file.name?.split('.').pop() || 'jpg').toLowerCase()
-    const path = `alinayah/web/media/${key}/og_${Date.now()}.${ext}`
+    const path = `${clientName}/web/media/${key}/og_${Date.now()}.${ext}`
     const sr = sref($storage, path)
     const snap = await uploadBytes(sr, file, { contentType: file.type || 'image/jpeg' })
     const url = await getDownloadURL(sref($storage, snap.metadata.fullPath))
@@ -319,7 +281,7 @@ export function useWeb() {
 
   async function addSection(input: { key: string; props?: any; enabled?: boolean; index?: number }) {
     const key = currentKey.value
-    const base = dref($realtimeDb, `alinayah/web/pages/${key}/sections`)
+    const base = dref($realtimeDb, `${clientName}/web/pages/${key}/sections`)
     const node = push(base)
     const id = node.key as string
     const nextOrder = sections.value.length ? Math.max(...sections.value.map(s => s.order)) + 1 : 1
@@ -337,7 +299,7 @@ export function useWeb() {
     const orderArr = sectionsOrder.value.slice()
     const idx = typeof input.index === 'number' ? Math.max(0, Math.min(input.index, orderArr.length)) : orderArr.length
     orderArr.splice(idx, 0, id)
-    await set(dref($realtimeDb, `alinayah/web/pages/${key}/sectionsOrder`), orderArr)
+    await set(dref($realtimeDb, `${clientName}/web/pages/${key}/sectionsOrder`), orderArr)
     return id
   }
 
@@ -347,7 +309,7 @@ export function useWeb() {
     pathOverride?: string
   ) {
     const targetKey = pathOverride ? pathToKey(normalizePath(pathOverride)) : currentKey.value
-    const node = dref($realtimeDb, `alinayah/web/pages/${targetKey}/sections/${id}`)
+    const node = dref($realtimeDb, `${clientName}/web/pages/${targetKey}/sections/${id}`)
     const data: any = { updatedAt: serverTimestamp() }
     if (patch.key !== undefined) data.key = patch.key
     if (patch.enabled !== undefined) data.enabled = !!patch.enabled
@@ -377,21 +339,21 @@ export function useWeb() {
 
   async function deleteSection(id: string) {
     const key = currentKey.value
-    await remove(dref($realtimeDb, `alinayah/web/pages/${key}/sections/${id}`))
+    await remove(dref($realtimeDb, `${clientName}/web/pages/${key}/sections/${id}`))
     const orderArr = sectionsOrder.value.slice().filter(x => x !== id)
-    await set(dref($realtimeDb, `alinayah/web/pages/${key}/sectionsOrder`), orderArr)
+    await set(dref($realtimeDb, `${clientName}/web/pages/${key}/sectionsOrder`), orderArr)
   }
 
   async function reorderSections(newOrder: string[]) {
     const key = currentKey.value
     const clean = newOrder.filter(Boolean)
-    await set(dref($realtimeDb, `alinayah/web/pages/${key}/sectionsOrder`), clean)
+    await set(dref($realtimeDb, `${clientName}/web/pages/${key}/sectionsOrder`), clean)
 
     // optional: sync numeric order (nice for fallback/queries)
     const updates: Record<string, any> = {}
     clean.forEach((id, i) => {
-      updates[`alinayah/web/pages/${key}/sections/${id}/order`] = i + 1
-      updates[`alinayah/web/pages/${key}/sections/${id}/updatedAt`] = serverTimestamp()
+      updates[`${clientName}/web/pages/${key}/sections/${id}/order`] = i + 1
+      updates[`${clientName}/web/pages/${key}/sections/${id}/updatedAt`] = serverTimestamp()
     })
     if (Object.keys(updates).length) {
       await update(dref($realtimeDb), updates)
@@ -425,8 +387,8 @@ export function useWeb() {
     const fname = `${prefix ? prefix + '_' : ''}${stamp}.${ext}`
     const folder = (opts?.folder ?? 'media').replace(/^\/+|\/+$/g, '')
     const path = folder
-      ? `alinayah/web/${folder}/${key}/${fname}`
-      : `alinayah/web/${key}/${fname}`
+      ? `${clientName}/web/${folder}/${key}/${fname}`
+      : `${clientName}/web/${key}/${fname}`
 
     const sr = sref($storage, path)
     const snap = await uploadBytes(sr, file, { contentType: file.type || 'application/octet-stream' })
@@ -447,7 +409,7 @@ export function useWeb() {
 
   async function deletePage(path: string) {
     const key = pathToKey(path)
-    await remove(dref($realtimeDb, `alinayah/web/pages/${key}`))
+    await remove(dref($realtimeDb, `${clientName}/web/pages/${key}`))
   }
 
   async function renamePage(oldPath: string, newPath: string) {
@@ -457,13 +419,13 @@ export function useWeb() {
     const oldKey = pathToKey(oldP)
     const newKey = pathToKey(newP)
 
-    const srcRef = dref($realtimeDb, `alinayah/web/pages/${oldKey}`)
+    const srcRef = dref($realtimeDb, `${clientName}/web/pages/${oldKey}`)
     const snap = await get(srcRef)
     if (!snap.exists()) return
     const data = snap.val()
 
     // write new with patched meta
-    await set(dref($realtimeDb, `alinayah/web/pages/${newKey}`), {
+    await set(dref($realtimeDb, `${clientName}/web/pages/${newKey}`), {
       ...data,
       meta: {
         ...(data?.meta || {}),
@@ -484,7 +446,7 @@ export function useWeb() {
     const dstKey = pathToKey(dstP)
     if (srcKey === dstKey) return
 
-    const srcRef = dref($realtimeDb, `alinayah/web/pages/${srcKey}`)
+    const srcRef = dref($realtimeDb, `${clientName}/web/pages/${srcKey}`)
     const snap = await get(srcRef)
     if (!snap.exists()) return
 
@@ -501,12 +463,12 @@ export function useWeb() {
       sections: data?.sections || null,
       sectionsOrder: data?.sectionsOrder || null
     }
-    await set(dref($realtimeDb, `alinayah/web/pages/${dstKey}`), cloned)
+    await set(dref($realtimeDb, `${clientName}/web/pages/${dstKey}`), cloned)
   }
 
   async function getPageSnapshot(path: string): Promise<WebPage> {
     const key = pathToKey(path)
-    const base = dref($realtimeDb, `alinayah/web/pages/${key}`)
+    const base = dref($realtimeDb, `${clientName}/web/pages/${key}`)
     const snap = await get(base)
     const node = snap.val() || {}
     const meta: WebPageMeta | null = node.meta || null
@@ -527,7 +489,7 @@ export function useWeb() {
   async function publishPage(path?: string) {
     const p = normalizePath(path || currentPath.value)
     const key = pathToKey(p)
-    await update(dref($realtimeDb, `alinayah/web/pages/${key}/meta`), {
+    await update(dref($realtimeDb, `${clientName}/web/pages/${key}/meta`), {
       status: 'published',
       updatedAt: serverTimestamp()
     })

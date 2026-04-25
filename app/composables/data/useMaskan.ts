@@ -27,6 +27,9 @@ export type MaskanRow = {
 }
 
 export const useMaskan = () => {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+  
   const loading = vRef(false)
   const error = vRef<string | null>(null)
   const rows = vRef<MaskanRow[]>([])
@@ -36,7 +39,7 @@ export const useMaskan = () => {
     error.value = null
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snapshot = await get(child(dbRef($realtimeDb), 'alinayah/maskan'))
+      const snapshot = await get(child(dbRef($realtimeDb), `${clientName}/maskan`))
       const val = snapshot.val() || {}
 
       const arr: MaskanRow[] = Object.entries(val).map(([id, v]: any) => {
@@ -79,7 +82,7 @@ export const useMaskan = () => {
 
   async function createMaskan(payload: Omit<MaskanRow, 'id' | 'rooms'>) {
     const { $realtimeDb } = useNuxtApp()
-    const listRef = dbRef($realtimeDb, 'alinayah/maskan')
+    const listRef = dbRef($realtimeDb, `${clientName}/maskan`)
     const newRef = push(listRef)
     const data: any = {
       name: payload.name.trim(),
@@ -94,7 +97,7 @@ export const useMaskan = () => {
 
   async function updateMaskan(id: string, payload: Partial<Omit<MaskanRow, 'id' | 'rooms'>>) {
     const { $realtimeDb } = useNuxtApp()
-    const node = dbRef($realtimeDb, `alinayah/maskan/${id}`)
+    const node = dbRef($realtimeDb, `${clientName}/maskan/${id}`)
     const data: any = {}
     if (payload.name !== undefined) data.name = payload.name
     if (payload.tipe !== undefined) data.tipe = payload.tipe
@@ -106,7 +109,7 @@ export const useMaskan = () => {
 
   async function deleteMaskan(id: string) {
     const { $realtimeDb } = useNuxtApp()
-    await remove(dbRef($realtimeDb, `alinayah/maskan/${id}`))
+    await remove(dbRef($realtimeDb, `${clientName}/maskan/${id}`))
     await fetchMaskan()
   }
 
@@ -121,7 +124,7 @@ export const useMaskan = () => {
 
   async function createRoom(maskanId: string, payload: Omit<KamarRow, 'id'>) {
     const { $realtimeDb } = useNuxtApp()
-    const listRef = dbRef($realtimeDb, `alinayah/maskan/${maskanId}/rooms`)
+    const listRef = dbRef($realtimeDb, `${clientName}/maskan/${maskanId}/rooms`)
     const newRef = push(listRef)
     const data: any = {
       number: String(payload.number ?? '').trim(),
@@ -137,7 +140,7 @@ export const useMaskan = () => {
 
   async function updateRoom(maskanId: string, roomId: string, payload: Partial<Omit<KamarRow, 'id'>>) {
     const { $realtimeDb } = useNuxtApp()
-    const node = dbRef($realtimeDb, `alinayah/maskan/${maskanId}/rooms/${roomId}`)
+    const node = dbRef($realtimeDb, `${clientName}/maskan/${maskanId}/rooms/${roomId}`)
     const data: any = {}
     if (payload.number !== undefined) data.number = String(payload.number).trim()
     if (payload.tipe !== undefined) data.tipe = payload.tipe
@@ -150,7 +153,7 @@ export const useMaskan = () => {
 
   async function deleteRoom(maskanId: string, roomId: string) {
     const { $realtimeDb } = useNuxtApp()
-    await remove(dbRef($realtimeDb, `alinayah/maskan/${maskanId}/rooms/${roomId}`))
+    await remove(dbRef($realtimeDb, `${clientName}/maskan/${maskanId}/rooms/${roomId}`))
     await fetchMaskan()
   }
 

@@ -1,13 +1,8 @@
 // composables/data/usePatience.ts
 import { ref as vRef } from 'vue'
 import { useNuxtApp } from '#app'
-import {
-  ref as dbRef, push, set, update, remove, get, child,
-  onValue, off, query, orderByChild, startAt, endAt, limitToLast, serverTimestamp
-} from 'firebase/database'
-import {
-  ref as sref, uploadBytes, getDownloadURL, deleteObject
-} from 'firebase/storage'
+import { ref as dbRef, push, set, update, remove, get, child, onValue, off, query, orderByChild, startAt, endAt, limitToLast, serverTimestamp } from 'firebase/database'
+import { ref as sref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
 /** ===== Types ===== */
 export type PatienceType = 'pelanggaran' | 'keteladanan'
@@ -45,10 +40,13 @@ export function makeTermKey(yearStart?: number, semester: 'Ganjil'|'Genap' = 'Ga
 }
 
 async function uploadEvidence(id: string, file: File) {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+  
   const { $storage } = useNuxtApp() as any
   if (!$storage || !file) return { url: null as string | null, path: null as string | null }
   const ext = String(file.name?.split('.').pop() || 'jpg').toLowerCase()
-  const path = `alinayah/patience/${id}/evidence_${Date.now()}.${ext}`
+  const path = `${clientName}/patience/${id}/evidence_${Date.now()}.${ext}`
   const s = sref($storage, path)
   const snap = await uploadBytes(s, file, { contentType: file.type || 'image/jpeg' })
   const url = await getDownloadURL(sref($storage, snap.metadata.fullPath))
@@ -62,6 +60,9 @@ async function deleteEvidence(path?: string | null) {
 
 /** ===== Main composable ===== */
 export const usePatience = () => {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+
   const { $realtimeDb } = useNuxtApp() as any
 
   const loading = vRef(false)
@@ -74,7 +75,7 @@ export const usePatience = () => {
   function subscribePatience(opts: { limit?: number; from?: number; to?: number; term?: string } = {}) {
     const { limit = 800, from, to, term } = opts
     unsubscribePatience()
-    const base = dbRef($realtimeDb, 'alinayah/patience/entries')
+    const base = dbRef($realtimeDb, `${clientName}/patience/entries`)
     // Default: order by createdAt. Jika filter term, tetap pakai createdAt lalu disaring client-side.
     let qRef: any = query(base, orderByChild('createdAt'), limitToLast(limit))
     if (from !== undefined && to !== undefined) {
@@ -118,7 +119,7 @@ export const usePatience = () => {
 
   async function fetchOne(id: string): Promise<PatienceEntry|null> {
     try {
-      const s = await get(child(dbRef($realtimeDb), `alinayah/patience/entries/${id}`))
+      const s = await get(child(dbRef($realtimeDb), `${clientName}/patience/entries/${id}`))
       const v = s.val(); if (!v) return null
       return {
         id,
@@ -149,7 +150,7 @@ export const usePatience = () => {
   ) {
     loading.value = true; error.value = null
     try {
-      const listRef = dbRef($realtimeDb, 'alinayah/patience/entries')
+      const listRef = dbRef($realtimeDb, `${clientName}/patience/entries`)
       const node = push(listRef); const id = node.key as string
       let evidenceUrl: string | null = null, evidencePath: string | null = null
       if (payload.evidenceFile) {
@@ -183,7 +184,7 @@ export const usePatience = () => {
   async function updatePatience(id: string, patch: Partial<Omit<PatienceEntry,'id'|'createdAt'>> & { evidenceFile?: File | null }) {
     loading.value = true; error.value = null
     try {
-      const node = dbRef($realtimeDb, `alinayah/patience/entries/${id}`)
+      const node = dbRef($realtimeDb, `${clientName}/patience/entries/${id}`)
       let curr:any; try { curr = (await get(node)).val() } catch {}
       const data:any = { updatedAt: Date.now() }
       if (patch.santriId !== undefined) data.santriId = String(patch.santriId || '')
@@ -212,7 +213,7 @@ export const usePatience = () => {
   async function deletePatience(id: string) {
     loading.value = true; error.value = null
     try {
-      const node = dbRef($realtimeDb, `alinayah/patience/entries/${id}`)
+      const node = dbRef($realtimeDb, `${clientName}/patience/entries/${id}`)
       let curr:any; try { curr = (await get(node)).val() } catch {}
       if (curr?.evidencePath) await deleteEvidence(curr.evidencePath)
       await remove(node)

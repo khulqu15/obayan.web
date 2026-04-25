@@ -76,11 +76,11 @@
 <script setup lang="ts">
 import { reactive, onMounted, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
-import { useNuxtApp } from '#app'
-import {
-  ref as dbRef,
-  query, orderByChild, equalTo, onValue, off, Query
-} from 'firebase/database'
+import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
+import { ref as dbRef, query, orderByChild, equalTo, onValue, off, Query } from 'firebase/database'
+
+const config = useRuntimeConfig()
+const clientName = config.public.clientName || 'alinayah'
 
 type CTA = { label: string; href: string; icon?: string }
 type Shape = {
@@ -133,10 +133,10 @@ let unsub: (() => void) | null = null
 
 function subscribeFromRTDBByKey() {
   if (typeof window === 'undefined') return
-  const { $realtimeDb } = useNuxtApp()
+  const { $realtimeDb }: any = useNuxtApp()
 
   // /alberr/web/pages/home/sections where each child has { key, enabled, props, ... }
-  const sectionsPath = 'alinayah/web/pages/home/sections'
+  const sectionsPath =  `${clientName}/web/pages/home/sections`
   const q: Query = query(dbRef($realtimeDb, sectionsPath), orderByChild('key'), equalTo(KEY))
 
   unsub = onValue(q, (snap) => {

@@ -446,7 +446,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useRouter } from '#app'
+import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import AreaLineChart from '~/components/widget/AreaLineChart.vue'
 import DonutChart from '~/components/widget/DonutChart.vue'
@@ -460,6 +460,10 @@ import { useFaults } from '~/composables/data/useFaults'
 import { useAnnouncements } from '~/composables/data/useAnnouncements'
 import { useAgenda } from '~/composables/data/useAgenda'
 import { get, off, onValue, ref as dbRef } from 'firebase/database'
+import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
+
+const config = useRuntimeConfig()
+const clientName = config.public.clientName || 'alinayah'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Dashboard' } })
 
@@ -482,9 +486,9 @@ const firebaseProfile = ref<any>(null)
 const allowedRoutesState = ref<string[]>([])
 let profileRef: ReturnType<typeof dbRef> | null = null
 
-const AUTH_KEY = 'alinayah:auth'
-const PASSPHRASE = 'alinayah-admin-secret'
-const SALT = 'alinayah-static-salt'
+const AUTH_KEY = `${clientName}:auth`
+const PASSPHRASE = `${clientName}-admin-secret`
+const SALT = `${clientName}-static-salt`
 const ITER = 120_000
 
 function normalize(path: string) {
@@ -1202,7 +1206,7 @@ async function bindFirebaseProfile(uid?: string | null) {
     if (profileRef) off(profileRef)
   } catch {}
 
-  profileRef = dbRef($realtimeDb, `/alinayah/users/${uid}`)
+  profileRef = dbRef($realtimeDb, `/${clientName}/users/${uid}`)
 
   try {
     const snap = await get(profileRef)

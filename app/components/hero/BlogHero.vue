@@ -54,7 +54,7 @@
               <div class="hs-dropdown-menu mt-2 w-56 z-20 hidden rounded-lg border border-gray-200 bg-white p-2 shadow-md dark:bg-neutral-800 dark:border-neutral-700">
                 <label v-for="cat in categoriesUi" :key="cat"
                        class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer">
-                  <input type="radio" name="blog-category"
+                  <input type="radio" name="blog-category" v-if="cat != undefined"
                          class="shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-600"
                          :value="cat" :checked="selectedCategory === cat" @change="setCategory(cat)">
                   <span class="text-sm text-gray-800 dark:text-neutral-200">{{ cat }}</span>
@@ -162,6 +162,8 @@
 import { computed, ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useWeb } from '~/composables/data/useWeb'
 import { useNews } from '~/composables/data/useNews'
+import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
+import { useRoute } from 'vue-router'
 
 type Post = {
   title: string
@@ -174,6 +176,9 @@ type Post = {
   tags?: string[]
 }
 type Featured = Post
+
+const config = useRuntimeConfig()
+const clientName = config.public.clientName || 'alinayah'
 
 const defaults = {
   headingTitle: 'Kegiatan Harian & Mingguan Santri',
@@ -228,10 +233,10 @@ watch(mySection, async (sec, _, onCleanup) => {
 
   if (!sec) return
   try {
-    const { $realtimeDb } = useNuxtApp()
+    const { $realtimeDb }: any = useNuxtApp()
     const { ref: dbRef, onValue, off } = await import('firebase/database')
     const k = web.currentKey.value
-    const r = dbRef($realtimeDb, `alinayah/web/pages/${k}/sections/${sec.id}/props/newsSource/mode`)
+    const r = dbRef($realtimeDb, `${clientName}/web/pages/${k}/sections/${sec.id}/props/newsSource/mode`)
     const handler = onValue(r, (snap) => {
       const v = String(snap.val() ?? '')
       liveMode.value = (v === 'custom' || v === 'auto' || v === 'manual') ? (v as any) : null

@@ -1,9 +1,7 @@
 // /composables/data/usePayment.ts
 import { ref as vRef, computed } from 'vue'
 import { useNuxtApp } from '#app'
-import {
-  ref as dbRef, get, set, update, remove, onValue, off,
-} from 'firebase/database'
+import { ref as dbRef, get, set, update, remove, onValue, off } from 'firebase/database'
 import type { SantriRow } from '~/composables/data/useSantri'
 
 export type ChargeItem = {
@@ -43,6 +41,9 @@ function ymFromDate(d = new Date()) {
 }
 
 export const usePayment = () => {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+  
   const loading = vRef(false)
   const error = vRef<string | null>(null)
 
@@ -54,7 +55,7 @@ export const usePayment = () => {
   const { $realtimeDb } = useNuxtApp() as any
 
   function subscribeRooms() {
-    const ref = dbRef($realtimeDb, 'alinayah/santri')
+    const ref = dbRef($realtimeDb, `${clientName}/santri`)
     const cb = (snap: any) => {
       const val = snap.val() || {}
       const rmMap = new Map<string, { maskan: string; kamar: string }>()
@@ -103,7 +104,7 @@ export const usePayment = () => {
 
   function subscribeCharges(month: string, maskan: string, kamar: string) {
     unsubscribeCharges()
-    const path = `alinayah/paymentSettings/${month}/${maskan}/${kamar}/charges`
+    const path = `${clientName}/paymentSettings/${month}/${maskan}/${kamar}/charges`
     const ref = dbRef($realtimeDb, path)
     const cb = (snap: any) => {
       const v = snap.val() || {}
@@ -121,7 +122,7 @@ export const usePayment = () => {
   function unsubscribeCharges() { _unsubCharges?.(); _unsubCharges = null }
 
   async function ensureDefaultCharges(month: string, maskan: string, kamar: string) {
-    const path = `alinayah/paymentSettings/${month}/${maskan}/${kamar}/charges`
+    const path = `${clientName}/paymentSettings/${month}/${maskan}/${kamar}/charges`
     const snap = await get(dbRef($realtimeDb, path))
     if (snap.exists()) return
     await update(dbRef($realtimeDb, path), {
@@ -130,7 +131,7 @@ export const usePayment = () => {
     })
   }
   async function upsertCharge(month: string, maskan: string, kamar: string, item: ChargeItem) {
-    const path = `alinayah/paymentSettings/${month}/${maskan}/${kamar}/charges/${item.key}`
+    const path = `${clientName}/paymentSettings/${month}/${maskan}/${kamar}/charges/${item.key}`
     await set(dbRef($realtimeDb, path), {
       title: item.title,
       amount: Number(item.amount || 0),
@@ -138,7 +139,7 @@ export const usePayment = () => {
     })
   }
   async function deleteCharge(month: string, maskan: string, kamar: string, key: string) {
-    await remove(dbRef($realtimeDb, `alinayah/paymentSettings/${month}/${maskan}/${kamar}/charges/${key}`))
+    await remove(dbRef($realtimeDb, `${clientName}/paymentSettings/${month}/${maskan}/${kamar}/charges/${key}`))
   }
 
   /** ========== Discounts per (month/santri) ========== */
@@ -146,7 +147,7 @@ export const usePayment = () => {
 
   async function loadDiscounts(month: string, santriIds: string[]) {
     discounts.value = {}
-    const base = `alinayah/paymentDiscounts/${month}`
+    const base = `${clientName}/paymentDiscounts/${month}`
     const snap = await get(dbRef($realtimeDb, base))
     const v = snap.val() || {}
     for (const sid of santriIds) {
@@ -160,13 +161,13 @@ export const usePayment = () => {
     }
   }
   async function setDiscount(month: string, santriId: string, d: DiscountItem) {
-    const base = `alinayah/paymentDiscounts/${month}/${santriId}`
+    const base = `${clientName}/paymentDiscounts/${month}/${santriId}`
     await update(dbRef($realtimeDb, base), {
       [d.chargeKey]: { type: d.type, value: d.value },
     })
   }
   async function deleteDiscount(month: string, santriId: string, chargeKey: string) {
-    await remove(dbRef($realtimeDb, `alinayah/paymentDiscounts/${month}/${santriId}/${chargeKey}`))
+    await remove(dbRef($realtimeDb, `${clientName}/paymentDiscounts/${month}/${santriId}/${chargeKey}`))
   }
 
   /** ========== Bills per (month/santri) ========== */
@@ -175,7 +176,7 @@ export const usePayment = () => {
 
   function subscribeBills(month: string, santriIds: string[]) {
     unsubscribeBills()
-    const path = `alinayah/bills/${month}`
+    const path = `${clientName}/bills/${month}`
     const ref = dbRef($realtimeDb, path)
     const ids = new Set(santriIds)
     const cb = (snap: any) => {
@@ -231,7 +232,7 @@ export const usePayment = () => {
   }
 
   async function upsertBill(month: string, santriId: string, billId: string, data: Partial<BillRow>) {
-    const base = `alinayah/bills/${month}/${santriId}/${billId}`
+    const base = `${clientName}/bills/${month}/${santriId}/${billId}`
     await update(dbRef($realtimeDb, base), {
       id: billId, santriId, month,
       items: data.items || [],
@@ -244,10 +245,10 @@ export const usePayment = () => {
     })
   }
   async function deleteBill(month: string, santriId: string, billId: string) {
-    await remove(dbRef($realtimeDb, `alinayah/bills/${month}/${santriId}/${billId}`))
+    await remove(dbRef($realtimeDb, `${clientName}/bills/${month}/${santriId}/${billId}`))
   }
   async function markPaid(month: string, santriId: string, billId: string, method: string) {
-    await update(dbRef($realtimeDb, `alinayah/bills/${month}/${santriId}/${billId}`), {
+    await update(dbRef($realtimeDb, `${clientName}/bills/${month}/${santriId}/${billId}`), {
       status: 'paid',
       method,
       paidAt: Date.now(),
@@ -257,7 +258,7 @@ export const usePayment = () => {
   async function generateBillsForRoom(month: string, maskan: string, kamar: string, dueAt?: number) {
     await ensureDefaultCharges(month, maskan, kamar)
     // read snapshot charges
-    const snap = await get(dbRef($realtimeDb, `alinayah/paymentSettings/${month}/${maskan}/${kamar}/charges`))
+    const snap = await get(dbRef($realtimeDb, `${clientName}/paymentSettings/${month}/${maskan}/${kamar}/charges`))
     const val = snap.val() || {}
     const baseCharges: ChargeItem[] = Object.entries<any>(val).map(([k, v]) => ({
       key: k, title: v.title, amount: Number(v.amount || 0), active: v.active !== false
@@ -271,7 +272,7 @@ export const usePayment = () => {
     for (const sid of list) {
       const { items, total } = buildItemsForSantri(sid, baseCharges)
       const billId = month // satu bill gabungan per santri per bulan
-      const base = `alinayah/bills/${month}/${sid}/${billId}`
+      const base = `${clientName}/bills/${month}/${sid}/${billId}`
       updates[`${base}/id`] = billId
       updates[`${base}/santriId`] = sid
       updates[`${base}/month`] = month

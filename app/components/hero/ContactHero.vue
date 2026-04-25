@@ -1,18 +1,18 @@
 <template>
   <section ref="wrapEl" class="relative overflow-hidden dark:bg-neutral-900 bg-gray-100" id="contact">
     <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-      <div ref="bg1" class="absolute top-10 -left-24 w-[42rem] h-[42rem] rounded-full opacity-40 blur-3xl
-                           bg-gradient-to-br from-blue-200 to-blue-200 dark:from-blue-900/40 dark:to-blue-900/30
+      <div ref="bg1" class="absolute top-10 -left-24 w-2xl h-168 rounded-full opacity-40 blur-3xl
+                           bg-linear-to-br from-blue-200 to-blue-200 dark:from-blue-900/40 dark:to-blue-900/30
                            will-change-transform" />
-      <div ref="bg2" class="absolute bottom-10 -right-24 w-[36rem] h-[36rem] rounded-full opacity-30 blur-3xl
-                           bg-gradient-to-tr from-blue-100 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/30
+      <div ref="bg2" class="absolute bottom-10 -right-24 w-xl h-144 rounded-full opacity-30 blur-3xl
+                           bg-linear-to-tr from-blue-100 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/30
                            will-change-transform" />
-      <div class="absolute inset-0 [mask-image:radial-gradient(70%_60%_at_50%_40%,#000,transparent_80%)]">
-        <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(0,0,0,.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,.06)_1px,transparent_1px)] bg-[size:32px_32px] dark:bg-[linear-gradient(to_right,rgba(255,255,255,.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,.06)_1px,transparent_1px)]" />
+      <div class="absolute inset-0 mask-[radial-linear(70%_60%_at_50%_40%,#000,transparent_80%)]">
+        <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(0,0,0,.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,.06)_1px,transparent_1px)] bg-size-[32px_32px] dark:bg-[linear-gradient(to_right,rgba(255,255,255,.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,.06)_1px,transparent_1px)]" />
       </div>
     </div>
 
-    <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-14">
+    <div class="relative max-w-340 mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-14">
       <div class="grid lg:grid-cols-12 gap-8 items-stretch">
         <div class="lg:col-span-6 space-y-7">
           <div class="space-y-3">
@@ -122,7 +122,7 @@
         </div>
 
         <div class="lg:col-span-6">
-          <div ref="mapCard" class="relative h-[28rem] rounded-3xl overflow-hidden border border-gray-200 dark:border-neutral-700 bg-white/60 dark:bg-neutral-800/50 shadow-lg will-change-transform">
+          <div ref="mapCard" class="relative h-112 rounded-3xl overflow-hidden border border-gray-200 dark:border-neutral-700 bg-white/60 dark:bg-neutral-800/50 shadow-lg will-change-transform">
             <div class="absolute z-10 top-4 left-4 inline-flex items-center gap-2 rounded-full bg-black/40 text-white backdrop-blur px-3 py-1.5 text-xs">
               <ClientOnly><Icon icon="ph:map-trifold" class="size-4" /></ClientOnly>
               Peta Lokasi Pondok
@@ -139,7 +139,7 @@
               />
             </ClientOnly>
 
-            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+            <div class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent" />
           </div>
 
           <div class="mt-4 flex flex-wrap gap-3">
@@ -167,9 +167,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useNuxtApp } from '#app'
+import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
 import { ref as dbRef, onValue, off } from 'firebase/database'
 import { Icon } from '@iconify/vue'
+
+const config = useRuntimeConfig()
+const clientName = config.public.clientName || 'alinayah'
 
 const address = ref('Jl. Pesantren No. 1, Pandaan, Pasuruan, Jawa Timur 67156')
 const email = ref('info@alinayah.sch.id')
@@ -183,7 +186,7 @@ const directionsHref = ref(`https://www.google.com/maps/dir/?api=1&destination=$
 let unbind: null | (() => void) = null
 function bindContact() {
   const { $realtimeDb } = useNuxtApp() as any
-  const r = dbRef($realtimeDb, 'alinayah/contact')
+  const r = dbRef($realtimeDb, `${clientName}/contact`)
   const h = onValue(r, (s) => {
     const data = s.val() || {}
     const c = data.contact || {}

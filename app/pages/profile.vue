@@ -169,6 +169,11 @@ import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useWeb } from '~/composables/data/useWeb'
 import { onValue, ref as dref } from 'firebase/database'
+import { useHead, useNuxtApp, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
+import { useRoute } from 'vue-router'
+
+const config = useRuntimeConfig()
+const clientName = config.public.clientName || 'alinayah'
 
 defineOptions({ name: 'ProfilePage' })
 const web = useWeb()
@@ -282,7 +287,7 @@ watch(() => web?.meta?.value, (m: any) => {
 /** ====== CMS Bind: ambil path dinamis & subscribe ====== */
 const route = useRoute()
 const runtime = useRuntimeConfig()
-const siteUrl = runtime.public?.siteUrl || ''
+const siteUrl: any = runtime.public?.siteUrl || ''
 
 function absUrl(u?: string | null) {
   if (!u) return ''
@@ -364,7 +369,7 @@ const { $realtimeDb } = useNuxtApp() as any
 
 onMounted(() => {
   if (!$realtimeDb) return
-  const node = dref($realtimeDb, 'alberr/web/profile/meta')
+  const node = dref($realtimeDb, `${clientName}/web/profile/meta`)
   const handler = onValue(node, (snap) => {
     const v = (snap.val() || {}) as MetaShape
     if (v.title) pageMeta.title = v.title

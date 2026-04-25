@@ -1,26 +1,8 @@
 // composables/data/useTeacher.ts
 import { ref, computed, onUnmounted } from 'vue'
 import { useNuxtApp } from '#app'
-import {
-  ref as dref,
-  query as dquery,
-  orderByChild,
-  onValue,
-  off,
-  push,
-  set,
-  update,
-  remove,
-  serverTimestamp,
-  get,
-  equalTo
-} from 'firebase/database'
-import {
-  ref as sref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject
-} from 'firebase/storage'
+import { ref as dref, query as dquery, orderByChild, onValue, off, push, set, update, remove, serverTimestamp, get, equalTo } from 'firebase/database'
+import { ref as sref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
 /** ===== Referensi enum & daftar ===== */
 export type Jenjang = 'SD' | 'SMP' | 'SMA' | 'SMK'
@@ -113,6 +95,9 @@ function normalizeString(s?: string) {
 }
 
 export function useTeacher() {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+  
   const nuxtApp = useNuxtApp() as any
   const { $realtimeDb, $storage } = nuxtApp
   const isClient = typeof window !== 'undefined'
@@ -175,7 +160,7 @@ export function useTeacher() {
   function subscribeAll() {
     if (!isClient || !$realtimeDb) return
     unbindList()
-    const baseRef = dref($realtimeDb, 'alinayah/teachers')
+    const baseRef = dref($realtimeDb, `${clientName}/teachers`)
     const qRef = dquery(baseRef, orderByChild('nama'))
     unsubList.value = bindOnValue(qRef)
   }
@@ -184,7 +169,7 @@ export function useTeacher() {
   async function uploadPhoto(id: string, file: File) {
     if (!isClient || !$storage || !file) return { url: '', path: '' }
     const ext = file.name?.split('.').pop() || 'jpg'
-    const path = `alinayah/teachers/${id}/photo_${Date.now()}.${ext}`
+    const path = `${clientName}/teachers/${id}/photo_${Date.now()}.${ext}`
     const s = sref($storage, path)
     const snap = await uploadBytes(s, file, { contentType: file.type || 'image/jpeg' })
     const url = await getDownloadURL(sref($storage, snap.metadata.fullPath))
@@ -199,7 +184,7 @@ export function useTeacher() {
   async function createTeacher(payload: CreateTeacherPayload) {
     loading.value = true
     try {
-      const baseRef = dref($realtimeDb, 'alinayah/teachers')
+      const baseRef = dref($realtimeDb, `${clientName}/teachers`)
       const node = push(baseRef)
       const id = node.key as string
 
@@ -258,7 +243,7 @@ export function useTeacher() {
   async function updateTeacher(id: string, patch: UpdateTeacherPayload) {
     loading.value = true
     try {
-      const nodeRef = dref($realtimeDb, `alinayah/teachers/${id}`)
+      const nodeRef = dref($realtimeDb, `${clientName}/teachers/${id}`)
       let curr: any
       try { curr = (await get(nodeRef)).val() } catch {}
 
@@ -325,7 +310,7 @@ export function useTeacher() {
   async function deleteTeacher(id: string) {
     loading.value = true
     try {
-      const nodeRef = dref($realtimeDb, `alinayah/teachers/${id}`)
+      const nodeRef = dref($realtimeDb, `${clientName}/teachers/${id}`)
       let curr: any
       try { curr = (await get(nodeRef)).val() } catch {}
       if (curr?.photoPath) await deletePhoto(curr.photoPath)

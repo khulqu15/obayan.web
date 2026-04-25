@@ -76,6 +76,8 @@ function generatePassword(len = 12) {
 
 
 export const useWali = () => {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
   const loading = vRef(false)
   const error = vRef<string | null>(null)
   const rows = vRef<WaliRow[]>([])
@@ -91,12 +93,12 @@ export const useWali = () => {
     error.value = null
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snapshot = await get(child(dbRef($realtimeDb), 'alinayah/santri'))
+      const snapshot = await get(child(dbRef($realtimeDb), `${clientName}/santri`))
       const val = snapshot.val() || {}
 
       const map = new Map<string, WaliRow>()
 
-      for (const [_, raw]: [string, any] of Object.entries(val)) {
+      for (const [id, raw] of Object.entries(val as Record<string, any>)) {
         const walinameRaw =
           raw.walisantri ?? raw.wali ?? raw.ortu ?? ''
         const waliname = String(walinameRaw || '').trim()
@@ -110,7 +112,7 @@ export const useWali = () => {
         )
 
         const brief: SantriBrief = {
-            id: String(_ /* atau key, tergantung variabel destructuring kamu */), // <--- PENTING: isi id santri
+            id: String(id),
             status: String(raw.status ?? '').trim(),
             jenjang: String(raw.jenjang ?? raw.jenjang_pendidikan ?? raw.kelas ?? '').trim(),
             gen: String(raw.gen ?? '').trim(),
@@ -151,7 +153,7 @@ export const useWali = () => {
   }
 
   async function fetchAllSantri(): Promise<Record<string, any>> {
-    const snap = await get(child(dbRef($realtimeDb), 'alinayah/santri'))
+    const snap = await get(child(dbRef($realtimeDb), `${clientName}/santri`))
     return snap.val() || {}
   }
 
@@ -263,8 +265,8 @@ export const useWali = () => {
         santriIds: [santri.id],
         createdAt: Date.now()
       }
-      await set(dbRef($realtimeDb, `alinayah/waliUsers/${uid}`), profile)
-      await update(dbRef($realtimeDb, `alinayah/santri/${santri.id}`), {
+      await set(dbRef($realtimeDb, `${clientName}/waliUsers/${uid}`), profile)
+      await update(dbRef($realtimeDb, `${clientName}/santri/${santri.id}`), {
         wali_uid: uid,
         walisantri: waliname || undefined,
         wali_nohp: phone || undefined
@@ -281,7 +283,7 @@ export const useWali = () => {
   
   function downloadPasswordFile(phoneOrEmail: string, password: string) {
     const blob = new Blob([
-      `Akun Wali Ponpes alinayah\n`+
+      `Akun Wali Ponpes ${clientName}\n`+
       `=======================\n`+
       `Username : ${phoneOrEmail}\n`+
       `Password : ${password}\n`+

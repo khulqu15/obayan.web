@@ -65,7 +65,7 @@
               <div class="border rounded-lg overflow-hidden h-64 overflow-y-auto divide-y border-gray-200">
                 <template v-if="live.length">
                   <div v-for="e in [...live].slice().reverse()" :key="e.id" class="p-3 flex items-center gap-3 border-gray-100">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-200 to-emerald-400 flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-full bg-linear-to-br from-emerald-200 to-emerald-400 flex items-center justify-center">
                       <Icon icon="ri:rfid-fill" width="22" height="22" class="text-emerald-800"/>
                     </div>
                     <div class="min-w-0">
@@ -151,7 +151,7 @@
         </div>
 
         <teleport to="body">
-          <div v-if="openSettings" class="fixed inset-0 z-[100]">
+          <div v-if="openSettings" class="fixed inset-0 z-100">
             <div class="absolute inset-0 bg-black/40" @click="openSettings=false" />
             <div class="absolute inset-0 grid place-items-center p-4">
               <div class="w-full max-w-xl rounded-2xl bg-white border border-gray-200 shadow-xl">

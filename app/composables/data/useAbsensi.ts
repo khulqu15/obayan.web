@@ -18,6 +18,9 @@ function playToneOnce() {
 }
 
 export const useAbsensi = () => {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+
   const loading = vRef(false)
   const error = vRef<string|null>(null)
   const history = vRef<{ id:string; meta:any }[]>([])
@@ -44,14 +47,14 @@ export const useAbsensi = () => {
 
   async function fetchSettings() {
     const { $realtimeDb } = useNuxtApp()
-    const snap = await get(child(dbRef($realtimeDb), 'alinayah/absensi/settings'))
+    const snap = await get(child(dbRef($realtimeDb), `${clientName}/absensi/settings`))
     const val = snap.val() || {}
     const times = normalizeTimes([...objToArrayMaybe(val.resetTimes), ...(val.resetTime ? [String(val.resetTime)] : [])])
     settings.value = { resetTimes: times, resetTime: val.resetTime ? String(val.resetTime) : '', lastResetAt: +val.lastResetAt || 0, lastResetKey: String(val.lastResetKey || '') }
   }
   async function saveSettings(patch: Partial<AbsensiSettings>) {
     const { $realtimeDb } = useNuxtApp()
-    const node = dbRef($realtimeDb, 'alinayah/absensi/settings'); const p:any = {}
+    const node = dbRef($realtimeDb, `${clientName}/absensi/settings`); const p:any = {}
     if (patch.resetTimes !== undefined) p.resetTimes = normalizeTimes(patch.resetTimes || [])
     if (patch.resetTime !== undefined) p.resetTime = String(patch.resetTime || '')
     if (patch.lastResetAt !== undefined) p.lastResetAt = Number(patch.lastResetAt) || 0
@@ -63,7 +66,7 @@ export const useAbsensi = () => {
     loading.value = true; error.value = null
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snap = await get(child(dbRef($realtimeDb), 'alinayah/absensi/current'))
+      const snap = await get(child(dbRef($realtimeDb), `${clientName}/absensi/current`))
       current.value = snap.val() || {}
     } catch (e:any) { console.error(e); error.value = e?.message ?? 'Gagal memuat absensi' }
     finally { loading.value = false }
@@ -74,7 +77,7 @@ export const useAbsensi = () => {
     if (!uid) return null
     const { $realtimeDb } = useNuxtApp()
     try {
-      const s = await get(child(dbRef($realtimeDb), `alinayah/rfid/bindings/${uid}`))
+      const s = await get(child(dbRef($realtimeDb), `${clientName}/rfid/bindings/${uid}`))
       const v = s.val(); if (!v) return null
       return { santriId: String(v.santriId || ''), name: String(v.name || 'Santri Fulan'), maskan: String(v.maskan || ''), kamar: String(v.kamar || '') }
     } catch { return null }
@@ -84,7 +87,7 @@ export const useAbsensi = () => {
   let unsubLive: (()=>void)|null = null
   function subscribeLive(limit = 30) {
     const { $realtimeDb } = useNuxtApp()
-    const q = query(dbRef($realtimeDb, 'alinayah/absensi/live'), limitToLast(limit))
+    const q = query(dbRef($realtimeDb, `${clientName}/absensi/live`), limitToLast(limit))
     live.value = []
     if (unsubLive) unsubLive()
     const offs: Array<() => void> = []
@@ -111,7 +114,7 @@ export const useAbsensi = () => {
       }
     }))
 
-    offs.push(onValue(dbRef($realtimeDb, 'alinayah/absensi/current'), (snap) => {
+    offs.push(onValue(dbRef($realtimeDb, `${clientName}/absensi/current`), (snap) => {
       current.value = snap.val() || {}
     }))
 
@@ -120,30 +123,30 @@ export const useAbsensi = () => {
 
   async function markPresentBySantriId(santriId: string, name: string, extra?: { maskan?: string; kamar?: string; deviceId?: string }) {
     const { $realtimeDb } = useNuxtApp()
-    await set(dbRef($realtimeDb, `alinayah/absensi/current/${santriId}`), {
+    await set(dbRef($realtimeDb, `${clientName}/absensi/current/${santriId}`), {
       name, santriId, maskan: extra?.maskan || '', kamar: extra?.kamar || '', by: extra?.deviceId ? `rfid:${extra.deviceId}` : 'manual', ts: serverTimestamp(),
     })
-    const liveNode = push(dbRef($realtimeDb, 'alinayah/absensi/live'))
+    const liveNode = push(dbRef($realtimeDb, `${clientName}/absensi/live`))
     await set(liveNode, { name, santriId, maskan: extra?.maskan || '', kamar: extra?.kamar || '', deviceId: extra?.deviceId || '', by: extra?.deviceId ? 'rfid' : 'manual', ts: serverTimestamp() })
   }
   async function markPresentManual(name: string, extra?: { maskan?: string; kamar?: string; deviceId?: string }) {
     const { $realtimeDb } = useNuxtApp()
-    const tmpRef = push(dbRef($realtimeDb, 'alinayah/absensi/_keys')); const key = tmpRef.key!; await remove(tmpRef)
+    const tmpRef = push(dbRef($realtimeDb, `${clientName}/absensi/_keys`)); const key = tmpRef.key!; await remove(tmpRef)
     const curKey = `manual:${key}`
-    await set(dbRef($realtimeDb, `alinayah/absensi/current/${curKey}`), {
+    await set(dbRef($realtimeDb, `${clientName}/absensi/current/${curKey}`), {
       name: name || 'Santri Fulan', maskan: extra?.maskan || '', kamar: extra?.kamar || '', by: extra?.deviceId ? `rfid:${extra.deviceId}` : 'manual', ts: serverTimestamp(),
     })
-    const liveNode = push(dbRef($realtimeDb, 'alinayah/absensi/live'))
+    const liveNode = push(dbRef($realtimeDb, `${clientName}/absensi/live`))
     await set(liveNode, { name: name || 'Santri Fulan', maskan: extra?.maskan || '', kamar: extra?.kamar || '', deviceId: extra?.deviceId || '', by: extra?.deviceId ? 'rfid' : 'manual', ts: serverTimestamp() })
   }
 
   async function resetSession(options?: { resetBy?: string }) {
     const { $realtimeDb } = useNuxtApp()
-    const snap = await get(child(dbRef($realtimeDb), 'alinayah/absensi/current'))
+    const snap = await get(child(dbRef($realtimeDb), `${clientName}/absensi/current`))
     const cur = snap.val() || {}; const now = new Date(); const pad = (n:number)=> String(n).padStart(2,'0')
     const sessionId = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`
-    await set(dbRef($realtimeDb, `alinayah/absensi/history/${sessionId}`), { meta: { startedAt: settings.value.lastResetAt || 0, endedAt: Date.now(), resetBy: options?.resetBy || 'manual', total: Object.keys(cur).length }, members: cur })
-    await remove(dbRef($realtimeDb, 'alinayah/absensi/current'))
+    await set(dbRef($realtimeDb, `${clientName}/absensi/history/${sessionId}`), { meta: { startedAt: settings.value.lastResetAt || 0, endedAt: Date.now(), resetBy: options?.resetBy || 'manual', total: Object.keys(cur).length }, members: cur })
+    await remove(dbRef($realtimeDb, `${clientName}/absensi/current`))
     const key = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}|${pad(now.getHours())}:${pad(now.getMinutes())}`
     await saveSettings({ lastResetAt: Date.now(), lastResetKey: key })
   }
@@ -160,7 +163,7 @@ export const useAbsensi = () => {
 
   async function fetchHistory(options?: { limit?: number; date?: string }) {
     const { $realtimeDb } = useNuxtApp()
-    const base = dbRef($realtimeDb, 'alinayah/abs ensi/history'); const lim = options?.limit ?? 30
+    const base = dbRef($realtimeDb, `${clientName}/abs ensi/history`); const lim = options?.limit ?? 30
     const q = query(base, limitToLast(lim)); const snap = await get(q); const val = snap.val() || {}
     let arr = Object.entries<any>(val).map(([id, v]) => ({ id, meta: { startedAt:+(v?.meta?.startedAt||0), endedAt:+(v?.meta?.endedAt||0), resetBy:String(v?.meta?.resetBy||''), total:+(v?.meta?.total||0) }}))
     arr.sort((a,b)=> (a.id > b.id ? -1 : 1))
@@ -172,7 +175,7 @@ export const useAbsensi = () => {
   }
   async function readHistorySession(sessionId: string) {
     const { $realtimeDb } = useNuxtApp()
-    const snap = await get(child(dbRef($realtimeDb), `alinayah/absensi/history/${sessionId}/members`))
+    const snap = await get(child(dbRef($realtimeDb), `${clientName}/absensi/history/${sessionId}/members`))
     return snap.val() || {}
   }
 

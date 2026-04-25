@@ -33,10 +33,9 @@ import BlogHero from '~/components/hero/BlogHero.vue'
 import InvitationHero from '~/components/hero/InvitationHero.vue'
 import HeroFacilityHero from '~/components/hero/FacilityHero.vue'
 import HeroProgramHero from '~/components/hero/ProgramHero.vue'
+import { useHead, useSeoMeta } from 'nuxt/app'
 
-const {
-  meta, sortedSections, subscribePage,
-} = useWeb()
+const { meta, sortedSections, subscribePage } = useWeb()
 
 onMounted(() => {
   subscribePage('/')

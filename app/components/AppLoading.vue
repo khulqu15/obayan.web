@@ -3,10 +3,10 @@
     <transition name="fade" appear>
       <div
         v-if="visible"
-        class="fixed inset-0 z-[9999] flex items-center justify-center"
+        class="fixed inset-0 z-9999 flex items-center justify-center"
         aria-live="polite" :aria-label="label"
       >
-        <div class="absolute inset-0 bg-gradient-to-br from-[#121EA1]/85 via-[#2D3FFF]/90 to-[#FF7F00]/85"></div>
+        <div class="absolute inset-0 bg-linear-to-br from-[#121EA1]/85 via-[#2D3FFF]/90 to-[#FF7F00]/85"></div>
         <div class="absolute inset-0 opacity-15" style="background-image:
           linear-gradient(to right,rgba(255,255,255,.25) 1px,transparent 1px),
           linear-gradient(to bottom,rgba(255,255,255,.25) 1px,transparent 1px);
@@ -36,6 +36,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useState } from 'nuxt/app';
 
 const props = withDefaults(defineProps<{
   force?: boolean

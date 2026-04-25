@@ -1,11 +1,12 @@
 <template>
   <div class="dark:bg-neutral-900 bg-gray-100">
     <HeroContactHero/>
-    <footer class="mt-auto w-full py-10 max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto">
+    <footer class="mt-auto w-full py-10 max-w-340 px-4 sm:px-6 lg:px-8 mx-auto">
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-10">
         <div class="col-span-full hidden lg:col-span-1 lg:block">
-          <a class="flex-none font-semibold text-xl text-black dark:text-white" href="#" aria-label="Brand">
-            {{ footerBrand.name }}
+          <a class="inline-flex items-center gap-3 font-semibold text-xl text-black dark:text-white" href="#" :aria-label="clientDisplayName">
+            <img :src="footerBrand.logo" :alt="`Logo ${clientDisplayName}`" class="h-10 w-10 rounded-xl object-contain bg-white p-1 shadow-sm"/>
+            <span>{{ footerBrand.name }}</span>
           </a>
           <p class="mt-3 text-xs sm:text-sm text-gray-600 dark:text-neutral-400">
             {{ footerBrand.desc }}
@@ -18,10 +19,7 @@
           </h4>
           <div class="mt-3 grid space-y-3 text-sm">
             <p v-for="item in section.items" :key="item.label">
-              <a
-                :href="item.href"
-                class="inline-flex items-center gap-x-2 text-gray-600 hover:text-gray-800 dark:text-neutral-400 dark:hover:text-neutral-200"
-              >
+              <a :href="item.href" class="inline-flex items-center gap-x-2 text-gray-600 hover:text-gray-800 dark:text-neutral-400 dark:hover:text-neutral-200">
                 <ClientOnly v-if="item.icon">
                   <Icon :icon="item.icon" class="shrink-0 size-4" aria-hidden="true" />
                   <template #fallback>
@@ -96,8 +94,9 @@
 
           <div class="flex flex-wrap justify-between items-center gap-3">
             <div class="mt-3 sm:hidden">
-              <a class="flex-none font-semibold text-xl text-black dark:text-white" href="#" aria-label="Brand">
-                {{ footerBrand.name }}
+              <a class="inline-flex items-center gap-3 font-semibold text-xl text-black dark:text-white" href="#" :aria-label="clientDisplayName">
+                <img :src="footerBrand.logo" :alt="`Logo ${clientDisplayName}`" class="h-10 w-10 rounded-xl object-contain bg-white p-1 shadow-sm"/>
+                <span>{{ footerBrand.name }}</span>
               </a>
               <p class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-neutral-400">
                 {{ footerBrand.desc }}
@@ -131,80 +130,119 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { Icon } from '@iconify/vue'
-import { useNuxtApp } from '#app'
+import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
 import { ref as dbRef, onValue, off } from 'firebase/database'
 
 type FooterItem = { label: string; href: string; icon?: string; badge?: string }
 type FooterSection = { title: string; items: FooterItem[] }
 type Language = { code: string; label: string; icon: string }
 
-const year = 2025
-const footerBrand = ref({ name: 'ALINAYAH', desc: `© ${year} Ponpes ALINAYAH.` })
+type FooterBrand = {
+  name: string
+  desc: string
+  logo: string
+}
+
+const config = useRuntimeConfig()
+
+const clientName = String(config.public.clientName || 'alinayah')
+const clientDisplayName = String(config.public.clientDisplayName || 'Al-Inayah')
+const appName = String(config.public.appName || 'ALINAYAH')
+const appLogo = String(config.public.appLogo || '/assets/logo.png')
+const siteName = String(config.public.siteName || 'Pondok Pesantren Al-Inayah')
+
+const year = new Date().getFullYear()
+
+const footerBrand = ref<FooterBrand>({
+  name: appName,
+  desc: `© ${year} ${siteName}.`,
+  logo: appLogo,
+})
 
 /* sections & bottom links tetap default */
 const footerSections = ref<FooterSection[]>([
-  { title: 'Program', items: [
-    { label: 'Kurikulum', href: '/program', icon: 'ph:book-open' },
-    { label: 'Kegiatan Santri', href: '/#news', icon: 'ph:calendar-check' },
-  ]},
-  { title: 'Tentang Kami', items: [
-    { label: 'Profil Pesantren', href: '/profile', icon: 'ph:student' },
-    { label: 'Visi & Misi', href: '/#information', icon: 'ph:target' },
-    { label: 'Berita', href: '/news', icon: 'ph:newspaper' },
-    { label: 'Kontak', href: '#contact', icon: 'ph:phone' },
-  ]},
-  { title: 'Layanan Digital', items: [
-    { label: 'Portal WaliSantri', href: '/waliLogin', icon: 'ph:graduation-cap' },
-    { label: 'Sistem Informasi Akademik', href: '/program', icon: 'ph:desktop' },
-    { label: 'Pembayaran', href: '/waliLogin', icon: 'ph:qr-code' },
-  ]},
+  {
+    title: 'Program',
+    items: [
+      { label: 'Kurikulum', href: '/program', icon: 'ph:book-open' },
+      { label: 'Kegiatan Santri', href: '/#news', icon: 'ph:calendar-check' },
+    ],
+  },
+  {
+    title: 'Tentang Kami',
+    items: [
+      { label: 'Profil Pesantren', href: '/profile', icon: 'ph:student' },
+      { label: 'Visi & Misi', href: '/#information', icon: 'ph:target' },
+      { label: 'Berita', href: '/news', icon: 'ph:newspaper' },
+      { label: 'Kontak', href: '#contact', icon: 'ph:phone' },
+    ],
+  },
+  {
+    title: 'Layanan Digital',
+    items: [
+      { label: 'Portal WaliSantri', href: '/waliLogin', icon: 'ph:graduation-cap' },
+      { label: 'Sistem Informasi Akademik', href: '/program', icon: 'ph:desktop' },
+      { label: 'Pembayaran', href: '/waliLogin', icon: 'ph:qr-code' },
+    ],
+  },
 ])
+
 const footerBottomLinks = ref([
   { label: 'Terms', href: '#' },
   { label: 'Privacy', href: '#' },
-  { label: 'Status', href: '#' }
+  { label: 'Status', href: '#' },
 ])
 
-/* Sosial: replace oleh RTDB */
 const socialLinks = ref([
   { label: 'Instagram', href: '#', icon: 'mdi:instagram' },
   { label: 'YouTube', href: '#', icon: 'mdi:youtube' },
   { label: 'Facebook', href: '#', icon: 'mdi:facebook' },
 ])
 
-/* Bahasa (dummy) */
 const languages = ref<Language[]>([
   { code: 'id', label: 'Bahasa Indonesia', icon: 'circle-flags:id' },
   { code: 'en', label: 'English (US)', icon: 'circle-flags:us' },
   { code: 'ar', label: 'العربية', icon: 'circle-flags:sa' },
 ])
+
 const selectedLanguage = ref<Language>(languages.value[0]!)
+
 function setLanguage(code: string) {
   const found = languages.value.find((l) => l.code === code)
   if (found) selectedLanguage.value = found
 }
 
-/* Subscribe brand & socials dari /alinayah/contact */
 let unbind: null | (() => void) = null
+
 function bindFooter() {
   const { $realtimeDb } = useNuxtApp() as any
-  const r = dbRef($realtimeDb, 'alinayah/contact')
+  const r = dbRef($realtimeDb, `${clientName}/contact`)
+
   const h = onValue(r, (s) => {
     const data = s.val() || {}
     const brand = data?.footer?.brand
     const socials = Array.isArray(data?.socials) ? data.socials : null
-    if (brand?.name || brand?.desc) {
+
+    if (brand?.name || brand?.desc || brand?.logo) {
       footerBrand.value = {
         name: brand?.name || footerBrand.value.name,
-        desc: brand?.desc || footerBrand.value.desc
+        desc: brand?.desc || footerBrand.value.desc,
+        logo: brand?.logo || footerBrand.value.logo,
       }
     }
+
     if (socials) {
       socialLinks.value = socials
     }
   })
+
   unbind = () => off(r, 'value', h as any)
 }
+
 onMounted(bindFooter)
-onBeforeUnmount(()=>{ unbind?.(); unbind=null })
+
+onBeforeUnmount(() => {
+  unbind?.()
+  unbind = null
+})
 </script>

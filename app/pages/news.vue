@@ -345,6 +345,8 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useNews } from '~/composables/data/useNews'
 import { useWeb } from '~/composables/data/useWeb'
+import { useAsyncData, useHead, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
+import { useRoute } from 'vue-router'
 
 defineOptions({ name: 'NewsPage' })
 
@@ -383,10 +385,10 @@ const runtime = useRuntimeConfig()
 const siteUrl = runtime.public?.siteUrl || ''
 
 const web = useWeb()
-const { data: pageSnap } = await useAsyncData(`webpage-${route.path}`, () => web.getPageSnapshot(route.path))
+const { data: pageSnap } = useAsyncData(`webpage-${route.path}`, () => web.getPageSnapshot(route.path))
 
 const newsSectionProps = computed<any>(() => {
-  const sections = pageSnap.value?.sections || []
+  const sections: any = pageSnap.value?.sections || []
   return sections.find((s: any) => s?.key === 'NewsPage')?.props || {}
 })
 

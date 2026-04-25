@@ -1,6 +1,6 @@
 <template>
   <div>
-    <NuxtLoadingIndicator :color="settings.primaryColor || '#2563eb'" :height="3" :throttle="0" :duration="2000" />
+    <NuxtLoadingIndicator :color="settings?.primaryColor || '#2563eb'" :height="3" :throttle="0" :duration="2000" />
     <AppLoading :force="forced" label="Memuat..." sublabel="Menyiapkan halaman" />
     <NuxtLayout v-bind="page?.meta?.layoutProps">
       <Maintenance v-if="maintenance"></Maintenance>
@@ -13,13 +13,17 @@
 import { onMounted, ref, nextTick, watch, onBeforeUnmount } from 'vue'
 import { useSettings } from '~/composables/data/useSettings'
 import { ref as dbRef, onValue, off } from 'firebase/database'
-import Maintenance from './components/Maintenance.vue'
+import { useRoute } from 'vue-router'
+import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
 
 const maintenance = ref(false)
 const page = useRoute()
 const forced = ref(false)
 
-const { settings, load } = useSettings('/alinayah/settings')
+const config = useRuntimeConfig()
+const clientName = config.public.clientName || 'alinayah'
+
+const { settings, load } = useSettings(`${clientName}/settings`)
 function hexToRgbStr(hex: string) {
   let c = (hex || '').replace('#',''); if (!c) return '37,99,235'
   if (c.length === 3) c = c.split('').map(h => h+h).join('')
@@ -92,13 +96,14 @@ const cb = (snap: any) => {
 }
 
 onMounted(() => {
+  console.log(config.public.clientName)
   applyPrimary('#2563eb')
   applySecondary('#10b981')
   applyTheme('system')
   applyFontScale(1)
   applyDensity('comfortable')
   const { $realtimeDb } = useNuxtApp() as any
-  rtdbRef = dbRef($realtimeDb, '/alinayah/settings')
+  rtdbRef = dbRef($realtimeDb, `${clientName}/settings`)
   onValue(rtdbRef, cb, (err) => console.error('RTDB settings error:', err))
 })
 

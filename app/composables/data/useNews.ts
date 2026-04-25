@@ -58,6 +58,9 @@ function estimateReadTimeFromTiptap(json?: any, html?: string) {
 }
 
 export const useNews = () => {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+
   const pending = ref(false)
   const error = ref<string|null>(null)
   const items = ref<NewsItem[]>([])
@@ -152,7 +155,7 @@ export const useNews = () => {
     try {
       const { $realtimeDb } = useNuxtApp()
       const { get, ref: dbRef } = await import('firebase/database')
-      const snap = await get(dbRef($realtimeDb, 'alinayah/news'))
+      const snap = await get(dbRef($realtimeDb, `${clientName}/news`))
       const val = snap.val() || {}
         
       const arr: NewsItem[] = Object.entries(val).map(([key, v]: any) => {
@@ -230,7 +233,7 @@ export const useNews = () => {
     const now = Date.now()
     const read = payload.readTime ?? estimateReadTimeFromTiptap(json, html)
 
-    const listRef = dbRef($realtimeDb, 'alinayah/news')
+    const listRef = dbRef($realtimeDb, `${clientName}/news`)
     const nodeRef = push(listRef)
 
     await set(nodeRef, {
@@ -255,7 +258,7 @@ export const useNews = () => {
   async function updateNews(id: string, patch: Partial<NewsItem> & { slug?: string; content?: NewsContent }) {
     const { $realtimeDb } = useNuxtApp()
     const { update, ref: dbRef } = await import('firebase/database')
-    const nodeRef = dbRef($realtimeDb, `alinayah/news/${id}`)
+    const nodeRef = dbRef($realtimeDb, `${clientName}/news/${id}`)
 
     const data: any = {}
     if (patch.title !== undefined) data.title = patch.title
@@ -294,7 +297,7 @@ export const useNews = () => {
   async function deleteNews(id: string) {
     const { $realtimeDb } = useNuxtApp()
     const { remove, ref: dbRef } = await import('firebase/database')
-    await remove(dbRef($realtimeDb, `alinayah/news/${id}`))
+    await remove(dbRef($realtimeDb, `${clientName}/news/${id}`))
     await loadNews()
   }
 

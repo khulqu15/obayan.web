@@ -14,7 +14,7 @@
       <path d="M50 72h40v40H50z"/>
     </svg>
 
-    <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-12">
+    <div class="relative max-w-340 mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-12">
       <div class="grid lg:grid-cols-12 gap-8 items-center">
         <!-- Copy -->
         <div class="lg:col-span-6">
@@ -36,7 +36,7 @@
           <div class="mt-7 grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div v-for="s in stats" :key="(s.label||'') + (s.value||'')" class="rounded-xl border border-gray-200 bg-white/70 backdrop-blur p-4 dark:bg-neutral-800/60 dark:border-neutral-700">
               <div class="flex-col items-center gap-3 flex-wrap">
-                <ClientOnly>
+                <ClientOnly v-if="s.icon != undefined">
                   <Icon :icon="s.icon" class="size-5 text-blue-600 dark:text-blue-400" />
                   <template #fallback><span class="size-5 inline-block" /></template>
                 </ClientOnly>
@@ -119,7 +119,7 @@
             <div v-if="tiles[0]" class="col-span-7">
               <div class="relative h-64 sm:h-80 rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-neutral-800">
                 <img :src="tiles[0].src" :alt="tiles[0].label" class="absolute inset-0 w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
+                <div class="absolute inset-0 bg-linear-to-t from-black/40 via-black/10 to-transparent"></div>
                 <div class="absolute bottom-3 left-3 rounded-lg bg-black/40 backdrop-blur px-3 py-1.5 text-white text-xs inline-flex items-center gap-1.5">
                   <ClientOnly><Icon :icon="tiles[0].icon" class="size-3.5" /></ClientOnly>
                   {{ tiles[0].label }}
@@ -172,6 +172,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useRuntimeConfig } from 'nuxt/app';
 
 type Stat = { label?: string; value?: string | number; icon?: string }
 type Tile = { src: string; label: string; icon: string }
@@ -186,6 +187,9 @@ type Shape = {
   brochures: string[]
   galleryHref: string
 }
+
+const config = useRuntimeConfig()
+const clientName = config.public.clientName || 'alinayah'
 
 /* Default values */
 const defaults: Shape = {
@@ -273,10 +277,41 @@ const imgStyle = computed(()=>({ transform:`translate(${tx.value}px, ${ty.value}
 function resetZoom(){ scale.value=0.1; tx.value=0; ty.value=0 }
 function clampPan(){ if(scale.value<=0.1){ tx.value=0; ty.value=0; return } const el=stageRef.value; if(!el) return; const r=el.getBoundingClientRect(); const bx=(r.width*(scale.value-0.1))/2; const by=(r.height*(scale.value-0.1))/2; tx.value=Math.max(Math.min(tx.value,bx),-bx); ty.value=Math.max(Math.min(ty.value,by),-by) }
 function onWheel(e:WheelEvent){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); const cx=e.clientX-rect.left-rect.width/2; const cy=e.clientY-rect.top-rect.height/2; if(e.ctrlKey){ e.preventDefault(); const prev=scale.value; let next=prev*(1-e.deltaY*0.0005); next=Math.min(Math.max(next,minScale),maxScale); if(next===prev) return; const k=next/prev; tx.value=cx-k*(cx-tx.value); ty.value=cy-k*(cy-ty.value); scale.value=next; clampPan(); return } if(scale.value>1){ e.preventDefault(); tx.value-=e.deltaX; ty.value-=e.deltaY; clampPan() } }
-function onPointerDown(e:MouseEvent){ if(e.button!==0) return; isDragging.value=true; startX=e.clientX; startY=e.clientY; startTx=tx.value; startTy=ty.value }
-function onPointerMove(e:MouseEvent){ if(!isDragging.value) return; tx.value=startTx+(e.clientX-startX); ty.value=startTy+(e.clientY-startY); clampPan() }
-function onPointerUp(){ isDragging.value=false }
-function onDblClick(e:MouseEvent){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); const cx=e.clientX-rect.left-rect.width/2; const cy=e.clientY-rect.top-rect.height/2; const prev=scale.value; const next=prev<2?2:1; const k=next/prev; tx.value=cx-k*(cx-tx.value); ty.value=cy-k*(cy-ty.value); scale.value=next; if(next===1){ tx.value=0; ty.value=0 } clampPan() }
+function onPointerDown(e:MouseEvent) { 
+  if(e.button!==0) return; 
+  isDragging.value=true; 
+  startX=e.clientX; 
+  startY=e.clientY; 
+  startTx=tx.value; 
+  startTy=ty.value 
+}
+
+function onPointerMove(e:MouseEvent) { 
+  if(!isDragging.value) return; 
+  tx.value=startTx+(e.clientX-startX); 
+  ty.value=startTy+(e.clientY-startY); 
+  clampPan() 
+}
+
+function onPointerUp() { 
+  isDragging.value=false 
+}
+
+function onDblClick(e:MouseEvent) { 
+  const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); 
+  const cx=e.clientX-rect.left-rect.width/2; 
+  const cy=e.clientY-rect.top-rect.height/2; 
+  const prev=scale.value; const next=prev<2?2:1; 
+  const k=next/prev; tx.value=cx-k*(cx-tx.value); 
+  ty.value=cy-k*(cy-ty.value); 
+  scale.value=next; 
+  if(next===1) { 
+    tx.value=0; 
+    ty.value=0 
+  } 
+  clampPan() 
+}
+
 function distance(t1:Touch,t2:Touch){ const dx=t2.clientX-t1.clientX, dy=t2.clientY-t1.clientY; return Math.hypot(dx,dy) }
 function midpoint(t1:Touch,t2:Touch,rect:DOMRect){ return { x:((t1.clientX+t2.clientX)/2)-rect.left-rect.width/2, y:((t1.clientY+t2.clientY)/2)-rect.top-rect.height/2 } }
 function onTouchStart(e:TouchEvent){ if(e.touches.length===1){ isDragging.value=true; startX=e.touches[0]!.clientX; startY=e.touches[0]!.clientY; startTx=tx.value; startTy=ty.value } else if(e.touches.length===2){ const rect=(e.currentTarget as HTMLElement).getBoundingClientRect(); pinchStartDist=distance(e.touches[0]!,e.touches[1]!); pinchStartScale=scale.value; pinchCenter=midpoint(e.touches[0]!,e.touches[1]!,rect) } }

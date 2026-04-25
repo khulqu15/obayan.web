@@ -1,15 +1,9 @@
 // composables/data/useHafalan.ts
 import { ref as vRef } from 'vue'
 import { useNuxtApp } from '#app'
-import {
-  ref as dbRef, push, set, update, remove, get, child,
-  onValue, off, query, orderByChild, startAt, endAt, limitToLast, serverTimestamp
-} from 'firebase/database'
-import {
-  ref as sref, uploadBytes, getDownloadURL, deleteObject
-} from 'firebase/storage'
+import { ref as dbRef, push, set, update, remove, get, child, onValue, off, query, orderByChild, startAt, endAt, limitToLast, serverTimestamp } from 'firebase/database'
+import { ref as sref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
-/** ===== Types ===== */
 export type HafalanType = 'alquran' | 'kitab' | 'pelajaran'
 export type HafalanStatus = 'pending'|'accepted'|'rejected'|'revisi'
 
@@ -52,11 +46,14 @@ function predFromScore(score?: number): HafalanEntry['predikat'] {
 
 /** ===== Storage helpers ===== */
 async function uploadAudio(id: string, file: File) {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+  
   const nuxt = useNuxtApp() as any
   const { $storage } = nuxt
   if (!$storage || !file) return { url: null as string|null, path: null as string|null }
   const ext = file.name?.split('.').pop() || 'mp3'
-  const path = `alinayah/hafalan/${id}/audio_${Date.now()}.${ext}`
+  const path = `${clientName}/hafalan/${id}/audio_${Date.now()}.${ext}`
   const s = sref($storage, path)
   const snap = await uploadBytes(s, file, { contentType: file.type || 'audio/mpeg' })
   const url = await getDownloadURL(sref($storage, snap.metadata.fullPath))
@@ -71,6 +68,9 @@ async function deleteAudio(path?: string|null) {
 
 /** ===== Main composable ===== */
 export const useHafalan = () => {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+  
   const nuxt = useNuxtApp() as any
   const { $realtimeDb } = nuxt
 
@@ -85,7 +85,7 @@ export const useHafalan = () => {
   function subscribeHafalan(opts: { limit?: number; from?: number; to?: number } = {}) {
     const { limit = 800, from, to } = opts
     unsubscribeHafalan()
-    const base = dbRef($realtimeDb, 'alinayah/hafalan/entries')
+    const base = dbRef($realtimeDb, `${clientName}/hafalan/entries`)
     let qRef: any = query(base, orderByChild('submittedAt'), limitToLast(limit))
     if (from !== undefined && to !== undefined) {
       qRef = query(base, orderByChild('submittedAt'), startAt(from), endAt(to), limitToLast(limit))
@@ -123,7 +123,7 @@ export const useHafalan = () => {
 
   async function fetchOne(id: string): Promise<HafalanEntry|null> {
     try {
-      const snap = await get(child(dbRef($realtimeDb), `alinayah/hafalan/entries/${id}`))
+      const snap = await get(child(dbRef($realtimeDb), `${clientName}/hafalan/entries/${id}`))
       const v = snap.val()
       if (!v) return null
       return {
@@ -148,7 +148,7 @@ export const useHafalan = () => {
   async function createHafalan(payload: CreateHafalanPayload) {
     loading.value = true; error.value = null
     try {
-      const listRef = dbRef($realtimeDb, 'alinayah/hafalan/entries')
+      const listRef = dbRef($realtimeDb, `${clientName}/hafalan/entries`)
       const node = push(listRef)
       const id = node.key as string
       let audioUrl: string|null = null, audioPath: string|null = null
@@ -179,7 +179,7 @@ export const useHafalan = () => {
   async function updateHafalan(id: string, patch: UpdateHafalanPayload) {
     loading.value = true; error.value = null
     try {
-      const node = dbRef($realtimeDb, `alinayah/hafalan/entries/${id}`)
+      const node = dbRef($realtimeDb, `${clientName}/hafalan/entries/${id}`)
       let curr: any
       try { curr = (await get(node)).val() } catch {}
       const data:any = {}
@@ -201,7 +201,7 @@ export const useHafalan = () => {
   async function deleteHafalan(id: string) {
     loading.value = true; error.value = null
     try {
-      const node = dbRef($realtimeDb, `alinayah/hafalan/entries/${id}`)
+      const node = dbRef($realtimeDb, `${clientName}/hafalan/entries/${id}`)
       let curr:any; try { curr = (await get(node)).val() } catch {}
       if (curr?.audioPath) await deleteAudio(curr.audioPath)
       await remove(node)

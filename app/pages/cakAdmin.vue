@@ -178,6 +178,26 @@ import { Icon } from '@iconify/vue'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { getDatabase, ref as dref, get } from 'firebase/database'
 import { ROLE_DEFAULT_ROUTES, type AppRole } from '~/composables/data/useUser'
+import { useRuntimeConfig } from 'nuxt/app'
+
+export type PlainSession = {
+  sub?: string
+  uid?: string
+  role?: string
+  name?: string
+  email?: string
+  phone?: string
+  waliPhone?: string
+  waliName?: string
+  santriId?: string
+  santriName?: string
+  allowedRoutes?: string[]
+  iat?: number
+  exp?: number
+}
+
+const config = useRuntimeConfig()
+const clientName = config.public.clientName || 'alinayah'
 
 const form = ref({
   email: '',
@@ -188,9 +208,9 @@ const form = ref({
 const showPassword = ref(false)
 const loading = ref(false)
 
-const AUTH_KEY = 'alinayah:auth'
-const PASSPHRASE = 'alinayah-admin-secret'
-const SALT = 'alinayah-static-salt'
+const AUTH_KEY = `${clientName}:auth`
+const PASSPHRASE = `${clientName}-admin-secret`
+const SALT = `${clientName}-static-salt`
 const ITER = 120_000
 const IV_BYTES = 12
 
@@ -218,15 +238,64 @@ async function deriveKey(pass: string, salt: string) {
   )
 }
 
+function fromB64(b64: string) {
+  return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)).buffer
+}
+
+function isLikelyEncryptedToken(raw: string) {
+  try {
+    const o = JSON.parse(raw)
+    return !!(o && typeof o === 'object' && o.iv && o.ct)
+  } catch {
+    return false
+  }
+}
+
+async function decryptJSON(serialized: string) {
+  const obj = JSON.parse(serialized)
+  const key = await deriveKey(PASSPHRASE, SALT)
+  const iv = new Uint8Array(fromB64(obj.iv))
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, fromB64(obj.ct))
+  return JSON.parse(new TextDecoder().decode(plain))
+}
+
+async function readAuthToken(): Promise<PlainSession | null> {
+  const raw = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
+  if (!raw) return null
+  try {
+    if (isLikelyEncryptedToken(raw)) {
+      return (await decryptJSON(raw)) as PlainSession
+    }
+    return JSON.parse(raw) as PlainSession
+  } catch {
+    return null
+  }
+}
+
 function toB64(buf: ArrayBuffer | Uint8Array) {
   const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf)
   return btoa(String.fromCharCode(...bytes))
 }
 
-onMounted(() => {
-  const hasToken = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
-  if (hasToken) {
-    window.location.replace('/app')
+onMounted(async () => {
+  const raw = localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)
+  if (!raw) return
+
+  try {
+    const sess = await readAuthToken()
+    if (!sess) throw new Error('invalid token')
+
+    const now = Math.floor(Date.now() / 1000)
+    if (!sess.exp || now >= sess.exp) throw new Error('expired token')
+
+    const role = (sess.role || 'admin') as AppRole
+    const routes = Array.isArray(sess.allowedRoutes) ? sess.allowedRoutes : []
+    const dest = pickFirstAllowedPath(routes, role)
+
+    window.location.replace(dest)
+  } catch {
+    localStorage.removeItem(AUTH_KEY)
+    sessionStorage.removeItem(AUTH_KEY)
   }
 })
 
@@ -266,8 +335,15 @@ function coerceRoutes(v: unknown): string[] {
   return []
 }
 
-function pickFirstAllowedPath(routes: string[]): string {
-  const arr = routes.map(normalize).filter(Boolean)
+function pickFirstAllowedPath(routes: string[], role?: AppRole): string {
+  const arr = Array.from(new Set(routes.map(normalize).filter(Boolean)))
+
+  if (role === 'wali') {
+    if (arr.includes('/wali')) return '/wali'
+    const firstWali = arr.find((p) => p.startsWith('/wali'))
+    return firstWali || '/wali'
+  }
+
   if (arr.includes('/app')) return '/app'
   const firstApp = arr.find((p) => p.startsWith('/app'))
   return firstApp || '/app'
@@ -287,9 +363,9 @@ const login = async () => {
 
     const db = getDatabase()
 
-    let snap = await get(dref(db, `alinayah/user/${user.uid}`))
+    let snap = await get(dref(db, `${clientName}/user/${user.uid}`))
     if (!snap.exists()) {
-      snap = await get(dref(db, `alinayah/users/${user.uid}`))
+      snap = await get(dref(db, `${clientName}/users/${user.uid}`))
     }
 
     if (!snap.exists()) {

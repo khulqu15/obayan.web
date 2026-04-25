@@ -7,6 +7,9 @@ export type PengurusToday = {
 }
 
 export const usePengurus = () => {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+
   const today = useState<PengurusToday>('pengurus:today', () => ({ present: 0, total: 0, ts: Date.now() }))
   const _subId = useState<number | null>('pengurus:subId', () => null)
 

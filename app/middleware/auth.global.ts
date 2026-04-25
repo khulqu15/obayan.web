@@ -1,6 +1,9 @@
 // middleware/auth.global.ts
 export default defineNuxtRouteMiddleware(async (to) => {
   if (!to.path.startsWith('/app')) return
+  
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
 
   const authLoading = useState<boolean>('authLoading', () => true)
   const authChecked = useState<boolean>('authChecked', () => false)
@@ -46,10 +49,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   authLoading.value = true
 
-  // ===== Crypto utils =====
-  const AUTH_KEY   = 'alinayah:auth'
-  const PASSPHRASE = 'alinayah-admin-secret'
-  const SALT       = 'alinayah-static-salt'
+  const AUTH_KEY   = `${clientName}:auth`
+  const PASSPHRASE = `${clientName}-admin-secret`
+  const SALT       = `${clientName}-static-salt`
   const ITER       = 120_000
 
   function fromB64(b64: string) {

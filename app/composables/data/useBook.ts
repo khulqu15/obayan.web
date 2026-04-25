@@ -1,22 +1,8 @@
 // composables/data/useBook.ts
 import { ref, computed } from 'vue'
 import { useNuxtApp } from '#app'
-import {
-  ref as dbRef,
-  onValue,
-  off,
-  push,
-  set,
-  update as rtdbUpdate,
-  remove,
-  DataSnapshot
-} from 'firebase/database'
-import {
-  ref as sRef,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject
-} from 'firebase/storage'
+import { ref as dbRef, onValue, off, push, set, update as rtdbUpdate, remove, DataSnapshot } from 'firebase/database'
+import { ref as sRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
 export const BOOK_CATEGORIES = ['Buku', 'Kitab', 'Modul', 'Lainnya'] as const
 export type BookCategory = typeof BOOK_CATEGORIES[number]
@@ -60,6 +46,8 @@ type UpdatePayload = Partial<CreatePayload> & {
 const BOOKS_NODE = 'obayan/library/books'
 
 export function useBook() {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
   const { $realtimeDb, $storage } = useNuxtApp()
 
   // ===== STATE =====
@@ -145,12 +133,12 @@ export function useBook() {
     let coverPath: string | null = null
 
     if (payload.pdfFile) {
-      pdfPath = `alinayah/library/books/${id}/${Date.now()}_${safeName(payload.pdfFile.name)}`
+      pdfPath = `${clientName}/library/books/${id}/${Date.now()}_${safeName(payload.pdfFile.name)}`
       await uploadBytes(sRef($storage, pdfPath), payload.pdfFile)
       pdfUrl = await getDownloadURL(sRef($storage, pdfPath))
     }
     if (payload.coverFile) {
-      coverPath = `alinayah/library/books/${id}/cover_${Date.now()}_${safeName(payload.coverFile.name)}`
+      coverPath = `${clientName}/library/books/${id}/cover_${Date.now()}_${safeName(payload.coverFile.name)}`
       await uploadBytes(sRef($storage, coverPath), payload.coverFile)
       coverUrl = await getDownloadURL(sRef($storage, coverPath))
     }

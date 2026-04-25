@@ -26,6 +26,9 @@ function normalizeMember(m: Partial<PiketMember>): Omit<PiketMember,'id'> {
 }
 
 export const usePiket = () => {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+  
   const loading = vRef(false)
   const error = vRef<string|null>(null)
   const data = vRef<PiketMap>({})
@@ -33,16 +36,23 @@ export const usePiket = () => {
   async function fetchPiket() {
     loading.value = true
     error.value = null
+
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snap = await get(child(dbRef($realtimeDb), 'alinayah/piket'))
-      const val: any = snap.val() || {}
+      const snap = await get(child(dbRef($realtimeDb), `${clientName}/piket`))
+      const val = snap.val() || {}
+
       const map: PiketMap = {}
-      for (const [maskanId, days] of Object.entries(val)) {
-        map[maskanId] = {} as any
+
+      for (const [maskanId, daysRaw] of Object.entries(val)) {
+        const days = daysRaw as Partial<Record<DayKey, { members?: Record<string, any> }>>
+
+        map[maskanId] = {} as Record<DayKey, PiketDay>
+
         for (const d of DAY_KEYS) {
-          const membersObj = (days?.[d]?.members) || {}
+          const membersObj = days[d]?.members || {}
           const day: PiketDay = {}
+
           for (const [mid, mv] of Object.entries<any>(membersObj)) {
             day[mid] = {
               id: mid,
@@ -51,11 +61,13 @@ export const usePiket = () => {
               note: mv?.note ?? '',
             }
           }
+
           map[maskanId]![d] = day
         }
       }
+
       data.value = map
-    } catch (e:any) {
+    } catch (e: any) {
       console.error(e)
       error.value = e?.message ?? 'Gagal memuat piket'
     } finally {
@@ -95,7 +107,7 @@ export const usePiket = () => {
     const { $realtimeDb } = useNuxtApp()
     if (hasMember(maskanId, day, { santriId: member.santriId, name: member.name })) return null
 
-    const node = dbRef($realtimeDb, `alinayah/piket/${maskanId}/${day}/members`)
+    const node = dbRef($realtimeDb, `${clientName}/piket/${maskanId}/${day}/members`)
     const newRef = push(node)
     const m = normalizeMember(member)
     const payload:any = { name: m.name }
@@ -108,7 +120,7 @@ export const usePiket = () => {
 
   async function removeMember(maskanId: string, day: DayKey, memberId: string) {
     const { $realtimeDb } = useNuxtApp()
-    await remove(dbRef($realtimeDb, `alinayah/piket/${maskanId}/${day}/members/${memberId}`))
+    await remove(dbRef($realtimeDb, `${clientName}/piket/${maskanId}/${day}/members/${memberId}`))
     await fetchPiket()
   }
 
@@ -121,7 +133,7 @@ export const usePiket = () => {
 
     if (hasMember(maskanId, day, { santriId: nextSantriId, name: nextName }, memberId)) return false
 
-    const node = dbRef($realtimeDb, `alinayah/piket/${maskanId}/${day}/members/${memberId}`)
+    const node = dbRef($realtimeDb, `${clientName}/piket/${maskanId}/${day}/members/${memberId}`)
     const m = normalizeMember(patch)
     const payload:any = {}
     if (patch.name !== undefined) payload.name = m.name
@@ -135,7 +147,7 @@ export const usePiket = () => {
   // ---- Day Ops ----
   async function clearDay(maskanId: string, day: DayKey) {
     const { $realtimeDb } = useNuxtApp()
-    await remove(dbRef($realtimeDb, `alinayah/piket/${maskanId}/${day}/members`))
+    await remove(dbRef($realtimeDb, `${clientName}/piket/${maskanId}/${day}/members`))
     await fetchPiket()
   }
 

@@ -11,18 +11,22 @@ export type PendaftaranRow = {
 export type PendaftaranSettings = {
   isClosed: boolean
   autoCloseEnabled: boolean
-  autoCloseAt: string | null // ISO
+  autoCloseAt: string | null
   year: number
   updatedAt?: number
 }
 
-const SETTINGS_PATH = 'alberr/form/pendaftaran'
 const TZ_JKT = 'Asia/Jakarta'
 function tzYearFromMs(ms: number, tz = TZ_JKT) {
   return Number(new Intl.DateTimeFormat('en-CA', { timeZone: tz, year:'numeric' }).format(new Date(ms)))
 }
 
 export const usePendaftaran = () => {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+  
+  const SETTINGS_PATH = `${clientName}/form/pendaftaran`
+  
   const loading = vRef(false)
   const error   = vRef<string | null>(null)
   const allRows = vRef<PendaftaranRow[]>([])
@@ -36,7 +40,7 @@ export const usePendaftaran = () => {
     loading.value = true; error.value = null
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snap = await get(dbRef($realtimeDb, 'alberr/santri'))
+      const snap = await get(dbRef($realtimeDb, `${clientName}/santri`))
       const val = snap.val() || {}
       const rows: PendaftaranRow[] = Object.entries(val).map(([id, v]: any) => ({
         id, gen: v.gen || '', santri: v.santri || v.nama || '', walisantri: v.walisantri || v.wali || v.ortu || '',

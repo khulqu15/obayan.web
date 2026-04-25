@@ -18,6 +18,9 @@ export type SantriRow = {
 }
 
 export const useSantri = () => {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+  
   const loading = vRef(false)
   const error = vRef<string | null>(null)
   const rows = vRef<SantriRow[]>([])
@@ -28,7 +31,7 @@ export const useSantri = () => {
     error.value = null
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snapshot = await get(dbRef($realtimeDb, 'alinayah/santri'))
+      const snapshot = await get(dbRef($realtimeDb, `${clientName}/santri`))
       const val = snapshot.val() || {}
       rows.value = Object.entries(val).map(([key, v]: any) => ({
         id: key,
@@ -56,7 +59,7 @@ export const useSantri = () => {
   async function createSantri(payload: Omit<SantriRow, 'id'>, opts: { refresh?: boolean } = {}) {
     const { refresh = true } = opts
     const { $realtimeDb } = useNuxtApp()
-    const listRef = dbRef($realtimeDb, 'alinayah/santri')
+    const listRef = dbRef($realtimeDb, `${clientName}/santri`)
     const newRef = push(listRef)
     const data = {
       gen: payload.gen ?? '',
@@ -80,7 +83,7 @@ export const useSantri = () => {
   async function updateSantri(id: string, payload: Partial<Omit<SantriRow, 'id'>>, opts: { refresh?: boolean } = {}) {
     const { refresh = true } = opts
     const { $realtimeDb } = useNuxtApp()
-    const nodeRef = dbRef($realtimeDb, `alinayah/santri/${id}`)
+    const nodeRef = dbRef($realtimeDb, `${clientName}/santri/${id}`)
     const data: any = {}
     if (payload.gen !== undefined) data.gen = payload.gen
     if (payload.santri !== undefined) data.santri = payload.santri
@@ -166,14 +169,14 @@ export const useSantri = () => {
 
   async function deleteSantri(id: string) {
     const { $realtimeDb } = useNuxtApp()
-    const nodeRef = dbRef($realtimeDb, `alinayah/santri/${id}`)
+    const nodeRef = dbRef($realtimeDb, `${clientName}/santri/${id}`)
     await remove(nodeRef)
     await fetchSantri()
   }
 
   function subscribeSantri() {
     const { $realtimeDb } = useNuxtApp()
-    const ref = dbRef($realtimeDb, 'alinayah/santri')
+    const ref = dbRef($realtimeDb, `${clientName}/santri`)
     const cb = (snap: any) => {
       const val = snap.val() || {}
       rows.value = Object.entries(val).map(([key, v]: any) => ({

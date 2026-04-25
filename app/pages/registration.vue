@@ -1,25 +1,25 @@
 <template>
   <main class="relative min-h-screen overflow-hidden pt-24 pb-12">
     <!-- Soft gradient cap -->
-    <div class="absolute w-full bg-gradient-to-b from-blue-700/40 to-blue-700/0 top-0 left-0 h-[18vh]"></div>
+    <div class="absolute w-full bg-linear-to-b from-blue-700/40 to-blue-700/0 top-0 left-0 h-[18vh]"></div>
 
     <!-- Decorative blobs -->
     <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-      <div class="absolute -top-28 -left-24 w-[48rem] h-[48rem] rounded-full opacity-30 blur-3xl bg-gradient-to-br from-blue-200 to-emerald-200 dark:from-emerald-900/40 dark:to-blue-900/30"></div>
-      <div class="absolute -bottom-32 -right-24 w-[42rem] h-[42rem] rounded-full opacity-25 blur-3xl bg-gradient-to-tr from-blue-100 to-emerald-100 dark:from-blue-900/30 dark:to-emerald-900/30"></div>
+      <div class="absolute -top-28 -left-24 w-3xl h-192 rounded-full opacity-30 blur-3xl bg-linear-to-br from-blue-200 to-emerald-200 dark:from-emerald-900/40 dark:to-blue-900/30"></div>
+      <div class="absolute -bottom-32 -right-24 w-2xl h-168 rounded-full opacity-25 blur-3xl bg-linear-to-tr from-blue-100 to-emerald-100 dark:from-blue-900/30 dark:to-emerald-900/30"></div>
     </div>
 
-    <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 text-gray-800 dark:text-neutral-100">
+    <div class="relative max-w-340 mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 text-gray-800 dark:text-neutral-100">
       <!-- HERO -->
       <header class="mb-7">
         <div class="flex items-start justify-between gap-4">
           <div>
             <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide">
               <Icon icon="ph:student" class="size-4" />
-              PSB Online {{ PPDB_YEAR }}/{{ Number(PPDB_YEAR)+1 }}
+              PSB Online {{ ppdbYear }}/{{ Number(ppdbYear) + 1 }}
             </p>
-            <h1 class="mt-1 text-2xl sm:text-3xl font-bold">Formulir Pendaftaran Santri Baru</h1>
-            <p class="text-gray-600 dark:text-neutral-300">Isi data secara benar. Draf tersimpan otomatis di perangkat Anda.</p>
+            <h1 class="mt-1 text-2xl sm:text-3xl font-bold">{{ registrationConfig.title }}</h1>
+            <p class="text-gray-600 dark:text-neutral-300">{{ registrationConfig.subtitle }}</p>
           </div>
 
           <div class="shrink-0 flex items-center gap-2">
@@ -68,8 +68,8 @@
               <!-- STEP 0: COVER -->
               <section v-if="step===0" class="relative mt-4">
                 <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
-                  <div class="absolute -top-24 -left-24 w-[42rem] h-[42rem] rounded-full opacity-30 blur-3xl bg-gradient-to-br from-emerald-200 to-lime-200 dark:from-emerald-900/40 dark:to-lime-900/30" />
-                  <div class="absolute -bottom-28 -right-20 w-[38rem] h-[38rem] rounded-full opacity-25 blur-3xl bg-gradient-to-tr from-lime-100 to-emerald-100 dark:from-lime-900/30 dark:to-emerald-900/30" />
+                  <div class="absolute -top-24 -left-24 w-2xl h-168 rounded-full opacity-30 blur-3xl bg-linear-to-br from-emerald-200 to-lime-200 dark:from-emerald-900/40 dark:to-lime-900/30" />
+                  <div class="absolute -bottom-28 -right-20 w-3xl h-168 rounded-full opacity-25 blur-3xl bg-linear-to-tr from-lime-100 to-emerald-100 dark:from-lime-900/30 dark:to-emerald-900/30" />
                 </div>
 
                 <div class="relative rounded-3xl border border-emerald-200/60 dark:border-emerald-900/40 bg-white/85 dark:bg-neutral-900/80 backdrop-blur-xl shadow-[0_14px_60px_rgba(16,185,129,.18)]">
@@ -411,7 +411,7 @@
                       Pilih File
                     </label>
                   </div>
-                  <img v-if="isImage(files.kk.file) && files.kk.url" :src="files.kk.url!" class="max-h-48 rounded" @error="hideImg($event)" />
+                  <img v-if="isImage(files.kk.file) && files.kk.url" :src="files.kk.url" class="max-h-48 rounded" @error="hideImg($event)" />
                 </div>
 
                 <!-- Tile: Akta -->
@@ -436,7 +436,7 @@
                       Pilih File
                     </label>
                   </div>
-                  <img v-if="isImage(files.akte.file) && files.akte.url" :src="files.akte.url!" class="max-h-48 rounded" @error="hideImg($event)" />
+                  <img v-if="isImage(files.akte.file) && files.akte.url" :src="files.akte.url" class="max-h-48 rounded" @error="hideImg($event)" />
                 </div>
 
                 <!-- Tile: KTP Ayah -->
@@ -461,7 +461,7 @@
                       Pilih File
                     </label>
                   </div>
-                  <img v-if="isImage(files.ktpAyah.file) && files.ktpAyah.url" :src="files.ktpAyah.url!" class="max-h-48 rounded" @error="hideImg($event)" />
+                  <img v-if="isImage(files.ktpAyah.file) && files.ktpAyah.url" :src="files.ktpAyah.url" class="max-h-48 rounded" @error="hideImg($event)" />
                 </div>
 
                 <!-- Tile: KTP Ibu -->
@@ -486,7 +486,7 @@
                       Pilih File
                     </label>
                   </div>
-                  <img v-if="isImage(files.ktpIbu.file) && files.ktpIbu.url" :src="files.ktpIbu.url!" class="max-h-48 rounded" @error="hideImg($event)" />
+                  <img v-if="isImage(files.ktpIbu.file) && files.ktpIbu.url" :src="files.ktpIbu.url" class="max-h-48 rounded" @error="hideImg($event)" />
                 </div>
 
                 <div class="sm:col-span-2">
@@ -587,9 +587,9 @@
         <!-- CLOSED -->
         <section v-else class="lg:col-span-8">
           <div class="relative rounded-3xl border border-rose-200/60 dark:border-rose-900/40 bg-white/85 dark:bg-neutral-900/80 backdrop-blur-xl shadow-[0_14px_60px_rgba(244,63,94,.18)] overflow-hidden">
-            <div aria-hidden="true" class="absolute -top-24 -right-24 w-[42rem] h-[42rem] rounded-full opacity-30 blur-3xl bg-gradient-to-br from-rose-200 to-amber-200 dark:from-rose-900/40 dark:to-amber-900/30"></div>
+            <div aria-hidden="true" class="absolute -top-24 -right-24 w-2xl h-168 rounded-full opacity-30 blur-3xl bg-linear-to-br from-rose-200 to-amber-200 dark:from-rose-900/40 dark:to-amber-900/30"></div>
 
-            <div class="p-6 sm:p-10 relative z-[10]">
+            <div class="p-6 sm:p-10 relative z-10">
               <div class="flex items-start gap-4">
                 <div class="size-12 grid place-items-center rounded-2xl bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">
                   <Icon icon="ph:lock" class="size-6" />
@@ -645,9 +645,9 @@
                 <h3 class="font-semibold">Timeline</h3>
               </div>
               <ul class="mt-3 text-sm space-y-2">
-                <li>Pendaftaran: 1 Jan — 30 Mar {{ PPDB_YEAR }}</li>
-                <li>Seleksi: 5—15 Apr {{ PPDB_YEAR }}</li>
-                <li>Pengumuman: 25 Apr {{ PPDB_YEAR }}</li>
+                <li>Pendaftaran: {{ registrationConfig.timeline.registration }}</li>
+                <li>Seleksi: {{ registrationConfig.timeline.selection }}</li>
+                <li>Pengumuman: {{ registrationConfig.timeline.announcement }}</li>
               </ul>
             </div>
 
@@ -661,9 +661,11 @@
                   <Icon icon="ph:whatsapp-logo" class="size-4 text-green-600 dark:text-green-400" />
                   <a :href="waUrl" target="_blank" class="hover:underline">{{ waText }}</a>
                 </li>
-                <li class="flex items-center gap-2">
+                <li v-if="registrationConfig.email" class="flex items-center gap-2">
                   <Icon icon="ph:envelope-simple" class="size-4 600 dark:300" />
-                  <a href="mailto:ppdb@alberr.sch.id" class="hover:underline">ppdb@alberr.sch.id</a>
+                  <a :href="`mailto:${registrationConfig.email}`" class="hover:underline">
+                    {{ registrationConfig.email }}
+                  </a>
                 </li>
               </ul>
               <div class="mt-4 rounded-lg border border-dashed border-gray-300 dark:border-neutral-700 p-3 text-[12px] text-gray-500 dark:text-neutral-400">
@@ -675,7 +677,7 @@
       </div>
 
       <!-- Brosur viewer (modal) -->
-      <div v-show="brochureOpen" class="fixed inset-0 z-[999] overflow-y-auto" role="dialog" aria-modal="true" @keydown.esc="brochureOpen = false">
+      <div v-show="brochureOpen" class="fixed inset-0 z-999 overflow-y-auto" role="dialog" aria-modal="true" @keydown.esc="brochureOpen = false">
         <div class="fixed inset-0 bg-black/50" @click="brochureOpen = false"></div>
         <div class="relative md:max-w-5xl md:w-full m-3 md:mx-auto mt-7">
           <div class="relative flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl overflow-hidden dark:bg-neutral-900 dark:border-neutral-800">
@@ -750,48 +752,138 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { Icon } from '@iconify/vue'
-import { useRoute } from '#imports'
-import { useSeoMeta, useHead, useRuntimeConfig, useNuxtApp } from '#app'
+import { useRoute } from 'vue-router'
+import { useSeoMeta, useHead, useRuntimeConfig, useNuxtApp } from 'nuxt/app'
+import { set, push, ref as dbRef, serverTimestamp, onValue } from 'firebase/database'
+import { getApps } from 'firebase/app'
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+const { $realtimeDb } = useNuxtApp() as any
+const config = useRuntimeConfig()
+const clientName = config.public.clientName || 'alinayah'
+const route = useRoute()
 
 /** ===== Configurable ===== */
-const PPDB_YEAR = 2025
-const waText = '082131690186'
-const waUrl  = 'https://wa.me/6282131690186'
-const ppdbBrochureImages = ref<string[]>(['/assets/images/brochures/1.jpg','/assets/images/brochures/2.jpg'])
+type RegistrationPageConfig = {
+  year: number
+  title: string
+  subtitle: string
+  institutionName: string
+  institutionShortName: string
+  description: string
+  email: string
+  whatsapp: string
+  brochures: string[]
+  timeline: {
+    registration: string
+    selection: string
+    announcement: string
+  }
+}
+
+const defaultRegistrationConfig: RegistrationPageConfig = {
+  year: new Date().getFullYear(),
+  title: 'Formulir Pendaftaran Santri Baru',
+  subtitle: 'Isi data secara benar. Draf tersimpan otomatis di perangkat Anda.',
+  institutionName: 'Lembaga Pendidikan',
+  institutionShortName: 'Lembaga',
+  description: 'Daftar peserta didik baru secara online.',
+  email: '',
+  whatsapp: '',
+  brochures: [],
+  timeline: {
+    registration: '-',
+    selection: '-',
+    announcement: '-'
+  }
+}
+
+const registrationConfig = ref<RegistrationPageConfig>({ ...defaultRegistrationConfig })
+const ppdbYear = computed(() => registrationConfig.value.year || new Date().getFullYear())
+const ppdbBrochureImages = computed(() => registrationConfig.value.brochures || [])
+
+function subscribeRegistrationConfig() {
+  const path = `${clientName}/form/pendaftaran`
+  onValue(dbRef($realtimeDb, path), (snap) => {
+    const val = snap.val() || {}
+    registrationConfig.value = {
+      year: Number(val.year) || defaultRegistrationConfig.year,
+      title: val.title || defaultRegistrationConfig.title,
+      subtitle: val.subtitle || defaultRegistrationConfig.subtitle,
+      institutionName: val.institutionName || defaultRegistrationConfig.institutionName,
+      institutionShortName: val.institutionShortName || defaultRegistrationConfig.institutionShortName,
+      description: val.description || defaultRegistrationConfig.description,
+      email: val.email || defaultRegistrationConfig.email,
+      whatsapp: val.whatsapp || defaultRegistrationConfig.whatsapp,
+      brochures: Array.isArray(val.brochures) ? val.brochures : defaultRegistrationConfig.brochures,
+      timeline: {
+        registration: val.timeline?.registration || defaultRegistrationConfig.timeline.registration,
+        selection: val.timeline?.selection || defaultRegistrationConfig.timeline.selection,
+        announcement: val.timeline?.announcement || defaultRegistrationConfig.timeline.announcement
+      }
+    }
+  })
+}
 
 /** ===== SEO ===== */
-const route = useRoute()
-const config = useRuntimeConfig()
-const origin = config.public.siteUrl || (process.client ? window.location.origin : '')
-const url = computed(() => origin ? new URL(route.fullPath || '/registration', origin).toString() : '/registration')
-const title = `PSB  Online ${PPDB_YEAR}/${PPDB_YEAR+1} — Ponpes Alberr`
-const description = 'Daftar santri baru Ponpes Alberr secara online. Isi data, unggah dokumen, dan pantau status pendaftaran.'
+const pageTitle = computed(() => `PSB Online ${ppdbYear.value}/${ppdbYear.value + 1} — ${registrationConfig.value.institutionShortName}`)
+const pageDescription = computed(() => registrationConfig.value.description)
+const origin: any = computed(() => {
+  return config.public.siteUrl || (process.client ? window.location.origin : '')
+})
+const canonicalUrl = computed(() => {
+  const path = route.fullPath || '/registration'
+  return origin.value ? new URL(path, origin.value).toString() : path
+})
 
 useSeoMeta({
-  title, description,
-  ogTitle: title, ogDescription: description, ogType: 'website',
-  ogUrl: url.value, ogImage: origin ? `${origin}/assets/logo.png` : '/assets/logo.png',
-  twitterCard: 'summary_large_image', themeColor: '#0ea5e9', robots: 'index, follow'
+  title: pageTitle,
+  description: pageDescription,
+  ogTitle: pageTitle,
+  ogDescription: pageDescription,
+  ogType: 'website',
+  ogUrl: '/registration',
+  ogImage: origin ? `${origin}/assets/logo.png` : '/assets/logo.png',
+  twitterCard: 'summary_large_image',
+  themeColor: '#0ea5e9',
+  robots: 'index, follow'
 })
-useHead({ link: [{ rel: 'canonical', href: url.value }],
-  script: [{
-    type: 'application/ld+json',
-    children: JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'Event',
-      name: `PSB Ponpes Alberr ${PPDB_YEAR}/${PPDB_YEAR+1}`,
-      description,
-      eventStatus: 'https://schema.org/EventScheduled',
-      eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
-      startDate: `${PPDB_YEAR}-01-01`,
-      endDate: `${PPDB_YEAR}-03-30`,
-      url: url.value,
-      organizer: { '@type': 'EducationalOrganization', name: 'Pondok Pesantren Alberr', url: origin || '/' },
-      location: { '@type': 'VirtualLocation', url: url.value },
-      image: [ origin ? `${origin}/assets/logo.png` : '/assets/logo.png' ]
-    })
-  }]
-})
+
+const jsonLd = computed(() =>
+  JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: `PSB ${registrationConfig.value.institutionShortName} ${ppdbYear.value}/${ppdbYear.value + 1}`,
+    description: registrationConfig.value.description,
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
+    startDate: `${ppdbYear.value}-01-01`,
+    endDate: `${ppdbYear.value}-12-31`,
+    url: canonicalUrl.value,
+    organizer: {
+      '@type': 'EducationalOrganization',
+      name: registrationConfig.value.institutionName,
+      url: origin.value || '/'
+    },
+    location: {
+      '@type': 'VirtualLocation',
+      url: canonicalUrl.value
+    },
+    image: [origin.value ? `${origin.value}/assets/logo.png` : '/assets/logo.png']
+  })
+)
+
+useHead(() => ({
+  link: [
+    { rel: 'canonical', href: canonicalUrl.value }
+  ],
+  script: [
+    {
+      key: 'ppdb-jsonld',
+      type: 'application/ld+json',
+      innerHTML: jsonLd.value
+    }
+  ]
+}))
 
 /** ===== Steps ===== */
 const steps = [
@@ -841,24 +933,26 @@ const canNext   = computed(() => validStep(step.value))
 const canSubmit = computed(() => validStep(5))
 
 /** ===== Local draft ===== */
-const DRAFT_KEY = 'ppdb_registration_v3_santrirow'
+const DRAFT_KEY = computed(() => `${clientName}_ppdb_registration_v3`)
 onMounted(() => {
   try {
     subscribePPDBSettings()
+    subscribeRegistrationConfig()
     startTicker()
-    const raw = localStorage.getItem(DRAFT_KEY)
+
+    const raw = localStorage.getItem(DRAFT_KEY.value)
     if (raw) {
       const parsed = JSON.parse(raw)
       Object.assign(form, parsed.form || {})
-      Object.keys(files).forEach(k => (files as any)[k] = {file:null,url:null})
+      Object.keys(files).forEach(k => (files as any)[k] = { file: null, url: null })
       step.value = parsed.step ?? 0
     }
   } catch {}
 })
 watch(form, () => {
-  localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step: step.value }))
+  localStorage.setItem(DRAFT_KEY.value, JSON.stringify({ form, step: step.value }))
 }, { deep:true })
-function clearDraft(){ localStorage.removeItem(DRAFT_KEY); window.location.reload() }
+function clearDraft(){ localStorage.removeItem(DRAFT_KEY.value); window.location.reload() }
 
 /** ===== UI helpers (NON-HTML) ===== */
 const alamatSingkat = computed(() => {
@@ -883,13 +977,59 @@ function handleDrop(key:'kk'|'akte'|'ktpAyah'|'ktpIbu', e: DragEvent) {
   const url = f ? URL.createObjectURL(f) : null
   ;(files as any)[key] = { file: f, url }
 }
+const normalizedWhatsapp = computed(() => {
+  const raw = registrationConfig.value?.whatsapp
+
+  if (raw == null) return ''
+
+  if (typeof raw === 'string') return raw.trim()
+
+  if (typeof raw === 'number') return String(raw)
+
+  if (typeof raw === 'object') {
+    // jaga-jaga kalau ternyata formatnya { number: "..."} atau { phone: "..." }
+    const candidate =
+      (raw as any).number ??
+      (raw as any).phone ??
+      (raw as any).value ??
+      ''
+
+    return String(candidate).trim()
+  }
+
+  return String(raw).trim()
+})
+
+const waDigits = computed(() => normalizedWhatsapp.value.replace(/\D/g, ''))
+
+const waText = computed(() => {
+  const digits = waDigits.value
+  if (!digits) return '-'
+
+  if (digits.startsWith('62')) return `0${digits.slice(2)}`
+  if (digits.startsWith('8')) return `0${digits}`
+
+  return digits
+})
+
+const waUrl = computed(() => {
+  const digits = waDigits.value
+  if (!digits) return '#'
+
+  if (digits.startsWith('62')) return `https://wa.me/${digits}`
+  if (digits.startsWith('0')) return `https://wa.me/62${digits.slice(1)}`
+  if (digits.startsWith('8')) return `https://wa.me/62${digits}`
+
+  return `https://wa.me/${digits}`
+})
+
 function isImage(f?: File|null){ return !!f && f.type.startsWith('image/') }
 function hideImg(e:any){ e.target.style.display='none' }
 function fileSizeText(size?: number){ if(!size) return ''; const kb=Math.round(size/1024); return `${kb} KB` }
 
 /** ===== Token & jenjang helpers ===== */
 const BASE62 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-function randomBase62(len: number){ const arr=new Uint32Array(len); crypto.getRandomValues(arr); let out=''; for(let i=0;i<len;i++) out+=BASE62[arr[i]%BASE62.length]; return out }
+function randomBase62(len: number){ const arr=new Uint32Array(len); crypto.getRandomValues(arr); let out=''; for(let i=0;i<len;i++) out+=BASE62[arr[i]!%BASE62.length]; return out }
 function slugName(n: string){ return (n||'').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,12)||'user' }
 function genUsername(name: string, regId: string){ return `${slugName(name)}_${(regId||'').slice(-4).toLowerCase()}` }
 function jenjangFromStatus(_s: string){
@@ -899,9 +1039,6 @@ function jenjangFromStatus(_s: string){
 async function sha256Hex(input: string){ const enc=new TextEncoder().encode(input); const hash=await crypto.subtle.digest('SHA-256',enc); return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('') }
 
 /** ===== Firebase ===== */
-import { getApps } from 'firebase/app'
-import { set, push, ref as dbRef, serverTimestamp, onValue } from 'firebase/database'
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 function storageSafe() {
   try {
@@ -968,15 +1105,20 @@ const nowTick = ref(Date.now())
 let _ticker: any = null
 function startTicker(){ _ticker = setInterval(() => nowTick.value = Date.now(), 1000) }
 
-function formatInJktMs(iso: string){
-  try { const d = new Date(iso)
-    return new Intl.DateTimeFormat('id-ID', { timeZone: TZ_JKT, dateStyle: 'full', timeStyle: 'short' }).format(d)
-  } catch { return '' }
+function formatInJktMs(input: string | number | Date) {
+  const d = input instanceof Date ? input : new Date(input)
+  if (Number.isNaN(d.getTime())) return ''
+  return new Intl.DateTimeFormat('id-ID', {
+    timeZone: TZ_JKT,
+    dateStyle: 'full',
+    timeStyle: 'short'
+  }).format(d)
 }
+
 const serverOffsetMs = ref(0)
 onBeforeUnmount(() => { _unsubs.forEach(fn => fn?.()) })
 const nowMs = computed(() => nowTick.value + serverOffsetMs.value)
-const fallbackHardStopMs = computed(() => Date.parse(`${PPDB_YEAR}-03-30T23:59:59+07:00`))
+const fallbackHardStopMs = computed(() => Date.parse(`${ppdbYear.value}-03-30T23:59:59+07:00`))
 const isAutoDue = computed(() => autoEnabled.value && !!autoAtMs.value ? nowMs.value >= (autoAtMs.value as number) : false)
 const isFormClosed = computed(() => isClosedManual.value || isAutoDue.value)
 const closedReason = computed(() => {
@@ -990,9 +1132,8 @@ watch(brochureOpen, (v) => { document.body.style.overflow = v ? 'hidden' : '' })
 const _unsubs: Array<() => void> = []
 function subscribePPDBSettings(){
   try {
-    const { $realtimeDb } = useNuxtApp() as any
     if (!$realtimeDb) return
-    const paths = ['alberr/form/pendaftaran']
+    const paths = [`${clientName}/form/pendaftaran`]
     paths.forEach(p => {
       const off = onValue(dbRef($realtimeDb, p), snap => {
         const v = snap.val()
@@ -1030,14 +1171,14 @@ async function submit(){
     if (!$realtimeDb) throw new Error('Realtime Database tidak tersedia.')
 
     // ID
-    const baseRef = dbRef($realtimeDb, 'alberr/santri')
+    const baseRef = dbRef($realtimeDb, '/santri')
     const newRef  = push(baseRef)
     const regId   = newRef.key as string
     const code    = niceCode(regId)
 
     // Upload dokumen
     const store = storageSafe()
-    const pathBase = `alberr/santri/berkas/${regId}`
+    const pathBase = `${clientName}/santri/berkas/${regId}`
     const up = async (key:'kk'|'akte'|'ktpAyah'|'ktpIbu') => {
       const f = files[key].file as File
       const storagePath = `${pathBase}/${key}${extOf(f)}`
@@ -1059,7 +1200,7 @@ async function submit(){
     // Row ringkas
     const santriRow = {
       id: regId,
-      gen: String(PPDB_YEAR),
+      gen: String(ppdbYear.value),
       santri: (form.siswa.nama || '').trim(),
       walisantri: primaryWaliName(),
       nohp: (form.ortu.hp1 || '').trim(),
@@ -1073,15 +1214,12 @@ async function submit(){
       ppdbCode: code
     } as const
 
-    // Record penuh
     const record = {
       ...santriRow,
       username,
       publicToken,
       createdAt: serverTimestamp(),
-      // dokumen
       dokumen: { kkUrl, akteUrl, ktpAyahUrl, ktpIbuUrl },
-      // form lengkap
       ppdb: {
         siswa: form.siswa,
         alamat: form.alamat,
@@ -1092,15 +1230,15 @@ async function submit(){
       meta: { ua: navigator.userAgent, tz: Intl.DateTimeFormat().resolvedOptions().timeZone }
     }
 
-    await set(dbRef($realtimeDb, `alberr/santri/${regId}`), record)
-    await set(dbRef($realtimeDb, `alberr/credentials/${regId}`), { secretHash, createdAt: serverTimestamp(), issuer: 'ppdb-form' })
+    await set(dbRef($realtimeDb, `${clientName}/santri/${regId}`), record)
+    await set(dbRef($realtimeDb, `${clientName}/credentials/${regId}`), { secretHash, createdAt: serverTimestamp(), issuer: 'ppdb-form' })
 
     ok.value = true
     feedback.value = 'Pendaftaran terkirim. Nomor pendaftaran & kredensial sementara telah dibuat.'
     regInfo.value = { id: regId, code }
     receipt.value = { username, publicToken }
 
-    localStorage.removeItem(DRAFT_KEY)
+    localStorage.removeItem(DRAFT_KEY.value)
   } catch (e:any) {
     console.error(e); ok.value = false; feedback.value = e?.message || 'Gagal mengirim pendaftaran.'
   } finally { loading.value = false }

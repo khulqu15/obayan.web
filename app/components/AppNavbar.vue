@@ -1,93 +1,34 @@
 <template>
-  <!-- NAVBAR -->
-  <header
-    :class="[
-      'fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out transform-gpu will-change-transform',
-      isScrolledOrOpen ? scrolledHeaderClass : topHeaderClass
-    ]"
-  >
+  <header :class="[ 'fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out transform-gpu will-change-transform', isScrolledOrOpen ? scrolledHeaderClass : topHeaderClass ]">
     <div class="px-3 sm:px-5 lg:px-6 pt-3">
-      <nav
-        :class="[
-          'relative max-w-[86rem] mx-auto rounded-[1.75rem] border backdrop-blur-xl transition-all duration-300',
-          navbarShellClass
-        ]"
-      >
+      <nav :class="[ 'relative max-w-344 mx-auto rounded-[1.75rem] border backdrop-blur-xl transition-all duration-300', navbarShellClass ]">
         <div class="flex items-center justify-between gap-3 px-4 py-3 sm:px-5 lg:px-6">
-          <!-- Brand -->
-          <a
-            href="/"
-            aria-label="Brand"
-            class="group flex min-w-0 items-center gap-3 focus:outline-none"
-          >
-            <div
-              :class="[
-                'flex h-11 w-11 items-center justify-center rounded-2xl ring-1 transition-all duration-300 overflow-hidden',
-                isLightSurface
-                  ? 'bg-green-500 ring-green-200 shadow-lg shadow-green-200/60'
-                  : 'bg-white/14 ring-white/20 shadow-lg shadow-black/10'
-              ]"
-            >
-              <img :src="brandLogo" class="h-7 w-7 object-contain" alt="logo" />
+          <a href="/" aria-label="Brand" class="group flex min-w-0 items-center gap-3 focus:outline-none" >
+            <div :class="[ 'flex h-11 w-11 items-center justify-center rounded-2xl ring-1 transition-all duration-300 overflow-hidden', isLightSurface ? 'bg-green-500 ring-green-200 shadow-lg shadow-green-200/60' : 'bg-white/14 ring-white/20 shadow-lg shadow-black/10']">
+              <img :src="brandLogo" class="h-7 w-7 object-contain" :alt="`Logo ${clientDisplayName}`" />
             </div>
 
             <div class="min-w-0">
-              <span
-                :class="[
-                  'hidden lg:block truncate text-[1.02rem] font-extrabold tracking-tight transition-colors',
-                  adaptiveTextClass
-                ]"
-              >
+              <span :class="[ 'hidden lg:block truncate text-[1.02rem] font-extrabold tracking-tight transition-colors', adaptiveTextClass ]">
                 {{ brand }}
               </span>
-              <span
-                :class="[
-                  'block lg:hidden truncate text-[1rem] font-extrabold tracking-tight transition-colors',
-                  adaptiveTextClass
-                ]"
-              >
+              <span :class="[ 'block lg:hidden truncate text-[1rem] font-extrabold tracking-tight transition-colors', adaptiveTextClass ]">
                 {{ brandShorten }}
               </span>
-              <p
-                :class="[
-                  'hidden sm:block text-xs font-medium transition-colors',
-                  adaptiveSubTextClass
-                ]"
-              >
-                Islamic Boarding School
-              </p>
+              <p :class="[ 'hidden sm:block text-xs font-medium transition-colors', adaptiveSubTextClass ]"> {{ brandSubtitle }} </p>
             </div>
           </a>
 
-          <!-- Desktop -->
           <div class="hidden md:flex items-center gap-2">
-            <a
-              v-for="l in navLinks"
-              :key="l.label"
-              :href="l.href"
-              :class="[desktopLinkClass]"
-            >
+            <a v-for="l in navLinks" :key="l.label" :href="l.href" :class="[desktopLinkClass]">
               {{ l.label }}
             </a>
 
-            <!-- Mega Dropdown -->
             <div class="hs-dropdown relative inline-flex [--strategy:fixed] [--adaptive:none]">
-              <button
-                id="hs-header-program"
-                type="button"
-                :class="[desktopLinkClass, 'hs-dropdown-toggle gap-2']"
-                aria-haspopup="menu"
-                aria-expanded="false"
-              >
+              <button id="hs-header-program" type="button" :class="[desktopLinkClass, 'hs-dropdown-toggle gap-2']" aria-haspopup="menu" aria-expanded="false">
                 Program
                 <ClientOnly>
-                  <Icon
-                    icon="lucide:chevron-down"
-                    :class="[
-                      'size-4 transition-transform duration-300',
-                      isLightSurface ? 'text-slate-500' : 'text-white/75'
-                    ]"
-                  />
+                  <Icon icon="lucide:chevron-down" :class="[ 'size-4 transition-transform duration-300', isLightSurface ? 'text-slate-500' : 'text-white/75' ]"/>
                 </ClientOnly>
               </button>
 
@@ -157,7 +98,7 @@
                       </div>
                     </button>
 
-                    <div class="mt-4 rounded-[1.5rem] bg-gradient-to-br from-green-500 to-green-500 p-4 text-white shadow-lg shadow-green-200/60">
+                    <div class="mt-4 rounded-3xl bg-linear-to-br from-green-500 to-green-500 p-4 text-white shadow-lg shadow-green-200/60">
                       <div class="flex items-center gap-3">
                         <img class="h-16 w-16 rounded-2xl object-cover ring-2 ring-white/30" :src="ppdbCta.image" alt="PPDB" />
                         <div class="min-w-0">
@@ -239,7 +180,7 @@
               </a>
 
               <div
-                class="mt-2 rounded-[1.5rem] border p-2"
+                class="mt-2 rounded-3xl border p-2"
                 :class="isLightSurface ? 'border-slate-200 bg-slate-50/80' : 'border-white/10 bg-white/5'"
               >
                 <button
@@ -300,14 +241,14 @@
   <transition name="fade" appear>
     <div
       v-if="showMegaModal && selectedMegaItem"
-      class="fixed inset-0 z-[80]"
+      class="fixed inset-0 z-80"
       aria-modal="true"
       role="dialog"
     >
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" @click="closeMega" />
 
       <div class="relative flex h-full w-full items-stretch overflow-y-auto">
-        <div class="relative mx-auto my-auto h-[90vh] min-h-0 w-[95vw] max-w-6xl overflow-hidden rounded-[2rem] bg-white shadow-xl transition-all dark:bg-neutral-900">
+        <div class="relative mx-auto my-auto h-[90vh] min-h-0 w-[95vw] max-w-6xl overflow-hidden rounded-4xl bg-white shadow-xl transition-all dark:bg-neutral-900">
           <div class="grid h-full min-h-0 min-w-0 grid-cols-1 lg:grid-cols-2">
             <div class="relative h-64 lg:h-full">
               <img
@@ -315,7 +256,7 @@
                 class="absolute inset-0 h-full w-full object-cover"
                 :alt="selectedMegaItem.label"
               />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent"></div>
+              <div class="absolute inset-0 bg-linear-to-t from-black/60 via-black/15 to-transparent"></div>
 
               <div class="absolute left-5 top-5 flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-white backdrop-blur-md">
                 <ClientOnly>
@@ -382,16 +323,32 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Icon } from '@iconify/vue'
-import { useNuxtApp } from '#app'
+import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
 import { ref as dbRef, onValue } from 'firebase/database'
+import { useRoute } from 'vue-router'
 
+const config = useRuntimeConfig()
 const { $realtimeDb } = useNuxtApp() as any
-const NAVBAR_PATH = 'alinayah/site/navbar'
-const NAVBAR_MEGA_ROOT = 'alinayah/site/navbar/megaMenu'
 
-const brand = ref('Pondok Pesantren ALINAYAH')
-const brandShorten = ref('ALINAYAH')
-const brandLogo = ref('/assets/logo.png')
+const clientName = String(config.public.clientName || 'alinayah')
+const clientDisplayName = String(config.public.clientDisplayName || 'Al-Inayah')
+const siteName = String(config.public.siteName || 'Pondok Pesantren Al-Inayah')
+const appName = String(config.public.appName || 'SINAYAH')
+const appSubtitle = String(config.public.appSubtitle || 'SIAKAD Ponpes. AL-INAYAH')
+const appLogo = String(config.public.appLogo || '/assets/logo.png')
+
+const NAVBAR_PATH = `${clientName}/site/navbar`
+const NAVBAR_MEGA_ROOT = `${clientName}/site/navbar/megaMenu`
+
+const route = useRoute()
+
+const isHomePage = computed(() => route.path === '/')
+const forceLightNavbar = computed(() => !isHomePage.value)
+
+const brand = ref(siteName)
+const brandShorten = ref(appName)
+const brandLogo = ref(appLogo)
+const brandSubtitle = ref(appSubtitle)
 
 const isTop = ref(true)
 const threshold = 8
@@ -429,8 +386,12 @@ onBeforeUnmount(() => {
 const isMobileOpen = ref(false)
 const showMegaModal = ref(false)
 const selectedMegaItem = ref<MegaItem | null>(null)
-
-const isScrolledOrOpen = computed(() => !isTop.value || isMobileOpen.value || showMegaModal.value)
+const isScrolledOrOpen = computed(() =>
+  forceLightNavbar.value ||
+  !isTop.value ||
+  isMobileOpen.value ||
+  showMegaModal.value
+)
 
 /**
  * Light surface:
@@ -438,10 +399,19 @@ const isScrolledOrOpen = computed(() => !isTop.value || isMobileOpen.value || sh
  * Dark surface:
  * - saat di hero/top transparan => anggap background hero cenderung gelap
  */
-const isLightSurface = computed(() => isScrolledOrOpen.value)
+const isLightSurface = computed(() =>
+  forceLightNavbar.value ||
+  !isTop.value ||
+  isMobileOpen.value ||
+  showMegaModal.value
+)
 
 const adaptiveTextClass = computed(() =>
-  isLightSurface.value ? 'text-slate-900 dark:text-white' : 'text-white'
+  forceLightNavbar.value
+    ? 'text-slate-900'
+    : isLightSurface.value
+      ? 'text-slate-900 dark:text-white'
+      : 'text-white'
 )
 
 const adaptiveSubTextClass = computed(() =>
@@ -599,7 +569,10 @@ if ($realtimeDb) {
 
       brand.value = val.brand ?? brand.value
       brandShorten.value = val.brandShorten ?? brandShorten.value
-      if (val.coverPonpes) brandLogo.value = val.coverPonpes
+      brandSubtitle.value = val.brandSubtitle ?? brandSubtitle.value
+
+      if (val.brandLogo) brandLogo.value = val.brandLogo
+      else if (val.coverPonpes) brandLogo.value = val.coverPonpes
       if (val.ppdbCta) ppdbCta.value = { ...ppdbCta.value, ...val.ppdbCta }
       if (Array.isArray(val.ctaButtons)) ctaButtons.value = val.ctaButtons
     })

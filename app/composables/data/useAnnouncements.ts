@@ -34,17 +34,29 @@ export type AnnouncementRow = {
   lastAnnouncedAt?: number|null
 }
 
-const INDO_DOW: Record<string, number> = {
-  'minggu': 0, 'ahad': 0, 'min': 0,
-  'senin': 1, 'sen': 1,
-  'selasa': 2, 'sel': 2,
-  'rabu': 3,
-  'kamis': 4,
-  'jumat': 5, 'jum’at': 5, 'jum\'at': 5, 'jumat\'' : 5, 'jum': 5,
-  'sabtu': 6, 'sab': 6
-}
+const INDO_DOW = {
+  minggu: 0,
+  ahad: 0,
+  senin: 1,
+  sen: 1,
+  selasa: 2,
+  sel: 2,
+  rabu: 3,
+  rab: 3,
+  kamis: 4,
+  kam: 4,
+  jumat: 5,
+  jum: 5,
+  "jum'at": 5,
+  sabtu: 6,
+  sab: 6,
+} as const
 
 const DOW_LABEL_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+
+function isValidDay(n: unknown): n is number {
+  return typeof n === 'number' && Number.isInteger(n) && n >= 0 && n <= 6
+}
 
 function clampTimeStr(s: string): string | null {
   // Normalisasi "7:0" -> "07:00", validasi "HH:mm"
@@ -66,33 +78,48 @@ function parseTimes(input: any): string[] {
 
 function parseDays(input: any): number[] {
   if (Array.isArray(input)) {
-    // angka langsung (0..6) atau nama
-    const xs = input.map(x => {
-      if (typeof x === 'number') return x
-      const k = String(x || '').trim().toLowerCase()
-      if (k in INDO_DOW) return INDO_DOW[k]
-      return NaN
-    }).filter(n => !isNaN(n!) && n! >= 0 && n! <= 6)
+    const xs = input
+      .map((x): number | undefined => {
+        if (typeof x === 'number') return x
+
+        const k = String(x || '').trim().toLowerCase()
+        if (k in INDO_DOW) return INDO_DOW[k as keyof typeof INDO_DOW]
+
+        return undefined
+      })
+      .filter(isValidDay)
+
     return Array.from(new Set(xs))
   }
+
   const raw = String(input || '').trim().toLowerCase()
   if (!raw) return []
-  if (['harian', 'setiap hari', 'daily', 'semua', 'all'].includes(raw)) return [0,1,2,3,4,5,6]
-  const parts = raw.split(/[;,|]/).map(s => s.trim()).filter(Boolean)
-  const xs = parts.map(p => {
-    // coba angka
-    const num = Number(p)
-    if (!isNaN(num) && num >= 0 && num <= 6) return num
-    // coba nama indo
-    if (p in INDO_DOW) return INDO_DOW[p]
-    // coba singkatan "sen/rab/jum"
-    const key = p.replace(/\.$/, '')
-    if (key in INDO_DOW) return INDO_DOW[key]
-    return NaN
-  }).filter(n => !isNaN(n))
+
+  if (['harian', 'setiap hari', 'daily', 'semua', 'all'].includes(raw)) {
+    return [0, 1, 2, 3, 4, 5, 6]
+  }
+
+  const parts = raw
+    .split(/[;,|]/)
+    .map(s => s.trim())
+    .filter(Boolean)
+
+  const xs = parts
+    .map((p): number | undefined => {
+      const num = Number(p)
+      if (Number.isInteger(num) && num >= 0 && num <= 6) return num
+
+      if (p in INDO_DOW) return INDO_DOW[p as keyof typeof INDO_DOW]
+
+      const key = p.replace(/\.$/, '')
+      if (key in INDO_DOW) return INDO_DOW[key as keyof typeof INDO_DOW]
+
+      return undefined
+    })
+    .filter(isValidDay)
+
   return Array.from(new Set(xs))
 }
-
 function nowLocalHHmm(d = new Date()): string {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`
@@ -125,6 +152,9 @@ function normalizeAnnouncement(id: string, v: any): AnnouncementRow {
 }
 
 export const useAnnouncements = () => {
+  const config = useRuntimeConfig()
+  const clientName = config.public.clientName || 'alinayah'
+  
   const loading = vRef(false)
   const error = vRef<string | null>(null)
   const rows = vRef<AnnouncementRow[]>([])
@@ -135,7 +165,7 @@ export const useAnnouncements = () => {
     error.value = null
     try {
       const { $realtimeDb } = useNuxtApp()
-      const snap = await get(dbRef($realtimeDb, 'alinayah/announcements'))
+      const snap = await get(dbRef($realtimeDb, `${clientName}/announcements`))
       const val = snap.val() || {}
       const list = Object.entries(val).map(([key, v]: any) => normalizeAnnouncement(key, v))
       // urut level urgent dulu, lalu warning, lalu info; di dalamnya by title
@@ -157,7 +187,7 @@ export const useAnnouncements = () => {
   async function createAnnouncement(payload: Omit<AnnouncementRow, 'id' | 'createdAt' | 'updatedAt'>, opts: { refresh?: boolean } = {}) {
     const { refresh = true } = opts
     const { $realtimeDb } = useNuxtApp()
-    const listRef = dbRef($realtimeDb, 'alinayah/announcements')
+    const listRef = dbRef($realtimeDb, `${clientName}/announcements`)
 
     const data: Partial<AnnouncementRow> = {
       title: payload.title ?? '',
@@ -196,7 +226,7 @@ export const useAnnouncements = () => {
   async function updateAnnouncement(id: string, payload: Partial<Omit<AnnouncementRow, 'id'>>, opts: { refresh?: boolean } = {}) {
     const { refresh = true } = opts
     const { $realtimeDb } = useNuxtApp()
-    const nodeRef = dbRef($realtimeDb, `alinayah/announcements/${id}`)
+    const nodeRef = dbRef($realtimeDb, `${clientName}/announcements/${id}`)
 
     const data: any = { updatedAt: Date.now() }
     const assign = (k: keyof AnnouncementRow) => { if ((payload as any)[k] !== undefined) data[k] = (payload as any)[k] }
@@ -216,7 +246,7 @@ export const useAnnouncements = () => {
 
   async function deleteAnnouncement(id: string) {
     const { $realtimeDb } = useNuxtApp()
-    const nodeRef = dbRef($realtimeDb, `alinayah/announcements/${id}`)
+    const nodeRef = dbRef($realtimeDb, `${clientName}/announcements/${id}`)
     await remove(nodeRef)
     await fetchAnnouncements()
   }
@@ -323,7 +353,7 @@ export const useAnnouncements = () => {
     _unsubscribe = null
 
     const { $realtimeDb } = useNuxtApp()
-    const ref = dbRef($realtimeDb, 'alinayah/announcements')
+    const ref = dbRef($realtimeDb, `${clientName}/announcements`)
     const cb = (snap: any) => {
       const val = snap.val() || {}
       const list = Object.entries(val).map(([key, v]: any) => normalizeAnnouncement(key, v))

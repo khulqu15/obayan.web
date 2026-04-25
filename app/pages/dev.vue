@@ -117,7 +117,7 @@
                 <a
                   v-for="p in dev.projects"
                   :key="p.title"
-                  :href="p.href || '#'"
+                  :href="p.href"
                   target="_blank" rel="noopener"
                   class="group/card block rounded-xl border border-gray-200 dark:border-neutral-800 bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900/60 dark:to-neutral-900/20 p-4 hover:shadow transition"
                 >
@@ -154,6 +154,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useRoute } from 'vue-router'
+import { useHead, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
 
 const team = {
   name: 'sencra.io',
@@ -164,9 +166,9 @@ const team = {
 }
 
 const route = useRoute()
-const config = useRuntimeConfig()
+const config: any = useRuntimeConfig()
 const canonical = computed(() =>
-  new URL(route.fullPath || '/developers', (config.public.siteUrl || 'https://alberr.sch.id')).toString()
+  new URL(route.fullPath || '/developers', (config.public.siteUrl)).toString()
 )
 
 const pageTitle = `Tim Pengembang: ${team.display}`
