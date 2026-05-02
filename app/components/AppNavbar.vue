@@ -138,7 +138,7 @@
                         <NuxtLink
                           v-for="it in col.items"
                           :key="it.label"
-                          :to="{path: '/produk', query: {slug: it.href}}"
+                          :to="!it.redirect ? {path: '/produk', query: {slug: it.href}} : it.href"
                           class="p-3 flex gap-x-4 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
                         >
                           <ClientOnly>
@@ -274,7 +274,7 @@ const produkMenu = ref([
     title: 'Mobile App',
     items: [
       { label: 'Obayan App', href: 'obayan-app', icon: 'duo-icons:app', desc: 'Aplikasi Monitoring Santri / Murid' },
-      { label: 'Obayan CBT', href: 'obayan-cbt', icon: 'garden:app-26', desc: 'Aplikasi Ujian Pendidikan' },
+      { label: 'Obayan CBT', href: 'https://cbt.obayan.id', icon: 'garden:app-26', desc: 'Aplikasi Ujian Pendidikan', redirect: true },
     ]
   },
   {

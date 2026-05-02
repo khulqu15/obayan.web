@@ -168,9 +168,9 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { Icon } from '@iconify/vue'
 
 const address = 'Jl. Remaja RT 6 RW 6, Martopuro, Purwosari, Pasuruan'
-const email = 'team.sencra@gmail.com'
-const phone = '0895396004952'
-const waIntl = '62895396004952'
+const email = 'info@obayan.id'
+const phone = '085775184873'
+const waIntl = '6285775184873'
 const mapQuery = encodeURIComponent('Jl. Remaja RT 6 RW 6, Martopuro, Purwosari, Pasuruan')
 const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d988.2888441620331!2d112.74534226966536!3d-7.773343570734113!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7d37a331c2ac9%3A0x4bf659be1fca851!2sSidescript%20Developer!5e0!3m2!1sen!2sid!4v1756724609264!5m2!1sen!2sid`
 const directionsHref = `https://www.google.com/maps/dir/?api=1&destination=${mapQuery}`

@@ -1,578 +1,803 @@
 <template>
-  <div class="text-gray-800 dark:text-neutral-200">
-    <!-- HERO: Full-width background -->
-    <section
-      class="relative w-full overflow-hidden pt-24"
-      :style="{
-        backgroundImage: `url('${heroImage}')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }"
-    >
-      <div class="absolute inset-0 bg-black/50"></div>
-
-      <!-- Deco grid & blobs -->
-      <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-        <div class="absolute -top-28 -left-28 w-[42rem] h-[42rem] rounded-full opacity-30 blur-3xl bg-gradient-to-br from-emerald-400/40 to-cyan-400/30"></div>
-        <div class="absolute top-32 -right-24 w-[34rem] h-[34rem] rounded-full opacity-25 blur-3xl bg-gradient-to-tr from-amber-300/40 to-fuchsia-300/30"></div>
-        <div class="absolute inset-0 [mask-image:radial-gradient(60%_60%_at_50%_40%,#000,transparent_70%)]">
-          <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
-        </div>
-      </div>
-
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
-        <div class="max-w-3xl">
-          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase bg-white/15 text-white/90 ring-1 ring-white/25">
-            <Icon icon="solar:stars-line-duotone" class="size-4" />
-            Tentang Kami
-          </span>
-          <h1 class="mt-4 text-3xl sm:text-5xl font-extrabold leading-tight text-white">
-            Obayan by <span class="text-emerald-300">sencra.io</span>
-          </h1>
-          <p class="mt-3 sm:mt-4 text-white/90">
-            Platform terpadu untuk sekolah & pesantren di Indonesia—mengelola akademik, operasional,
-            dan keuangan dengan antarmuka yang ramah dan terintegrasi.
-          </p>
-
-          <div class="mt-6 flex flex-wrap items-center gap-2 sm:gap-3">
-            <a href="#visi-misi" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl font-semibold bg-emerald-500 text-white hover:bg-emerald-600">
-              <Icon icon="lucide:target" class="size-4" /> Visi & Misi
-            </a>
-            <a href="#careers" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl font-semibold bg-white/15 text-white hover:bg-white/25 ring-1 ring-white/25">
-              <Icon icon="lucide:briefcase" class="size-4" /> Karier di Obayan
-            </a>
-          </div>
-
-          <p class="mt-3 text-xs text-white/70">
-            Dibangun dengan oleh Sencra.io • Terintegrasi penuh antar modul.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Tentang Perusahaan -->
-    <section class="relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-        <div class="grid lg:grid-cols-12 gap-6 lg:gap-10 items-center">
-          <div class="lg:col-span-7">
-            <h2 class="text-2xl sm:text-3xl font-extrabold">Tentang Obayan</h2>
-            <p class="mt-3 text-gray-600 dark:text-neutral-400">
-              Obayan adalah ekosistem perangkat lunak pendidikan dari <strong>sencra.io</strong> yang
-              menghadirkan SIAKAD, kelas akademik, pembayaran, laporan keuangan, presensi RFID/QR/Face,
-              hingga automasi notifikasi. Tujuan kami sederhana: <em>membebaskan pendidik dari pekerjaan
-              administratif berulang agar fokus pada pembelajaran</em>.
-            </p>
-            <ul class="mt-4 grid sm:grid-cols-2 gap-3">
-              <li class="flex items-start gap-2">
-                <Icon icon="lucide:link" class="size-5 text-emerald-600" />
-                <span>Modul saling terhubung—data mengalir tanpa hambatan</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <Icon icon="lucide:sparkles" class="size-5 text-emerald-600" />
-                <span>Antarmuka ramah ala aplikasi favorit siswa</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <Icon icon="lucide:shield-check" class="size-5 text-emerald-600" />
-                <span>Keamanan & audit bawaan, kontrol akses granular</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <Icon icon="lucide:rocket" class="size-5 text-emerald-600" />
-                <span>Implementasi cepat, dukungan onboarding menyeluruh</span>
-              </li>
-            </ul>
-          </div>
-          <div class="lg:col-span-5">
-            <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-700">
-              <img :src="aboutImage" class="w-full h-64 object-cover" alt="About Obayan" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Visi & Misi -->
-    <section id="visi-misi" class="relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10 sm:pb-14">
-        <div class="grid lg:grid-cols-2 gap-6">
-          <div class="rounded-2xl border border-gray-200 dark:border-neutral-700 p-6 bg-white/80 dark:bg-neutral-900/70">
-            <h3 class="text-xl font-extrabold flex items-center gap-2">
-              <Icon icon="lucide:eye" class="size-5" /> Visi
-            </h3>
-            <p class="mt-2 text-gray-600 dark:text-neutral-400">
-              Menjadi platform pendidikan paling dipercaya yang mendorong efisiensi operasional
-              dan meningkatkan kualitas pembelajaran di seluruh Indonesia.
-            </p>
-            <ul class="mt-4 space-y-2">
-              <li class="flex items-start gap-2">
-                <Icon icon="lucide:check-circle-2" class="size-5 text-emerald-600 mt-[2px]" />
-                <span>Terukur, transparan, dan mudah digunakan semua pihak</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <Icon icon="lucide:check-circle-2" class="size-5 text-emerald-600 mt-[2px]" />
-                <span>Memberdayakan guru & pengurus dengan otomasi cerdas</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <Icon icon="lucide:check-circle-2" class="size-5 text-emerald-600 mt-[2px]" />
-                <span>Terjangkau dan relevan untuk konteks sekolah & pesantren</span>
-              </li>
-            </ul>
-          </div>
-          <div class="rounded-2xl border border-gray-200 dark:border-neutral-700 p-6 bg-white/80 dark:bg-neutral-900/70">
-            <h3 class="text-xl font-extrabold flex items-center gap-2">
-              <Icon icon="lucide:flag" class="size-5" /> Misi
-            </h3>
-            <ul class="mt-2 space-y-2">
-              <li class="flex items-start gap-2">
-                <Icon icon="lucide:target" class="size-5 text-emerald-600 mt-[2px]" />
-                <span>Menyatukan data akademik, keuangan, dan operasional dalam satu alur</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <Icon icon="lucide:target" class="size-5 text-emerald-600 mt-[2px]" />
-                <span>Mengutamakan keamanan, privasi, dan kepatuhan</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <Icon icon="lucide:target" class="size-5 text-emerald-600 mt-[2px]" />
-                <span>Mempercepat implementasi melalui template & onboarding</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <Icon icon="lucide:target" class="size-5 text-emerald-600 mt-[2px]" />
-                <span>Menghadirkan pengalaman yang menyenangkan bagi pengguna</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Sejarah (Timeline) -->
-    <section id="sejarah" class="relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10 sm:pb-14">
-        <div class="rounded-2xl border border-gray-200 dark:border-neutral-700 p-6 bg-white/80 dark:bg-neutral-900/70">
-          <h3 class="text-xl font-extrabold flex items-center gap-2">
-            <Icon icon="lucide:calendar-range" class="size-5" /> Sejarah Singkat
-          </h3>
-          <ol class="mt-4 relative border-s-2 border-dashed border-emerald-300 ps-4">
-            <li v-for="(t, i) in timeline" :key="i" class="mb-4 ms-2">
-              <div class="absolute -left-[9px] mt-1 size-4 rounded-full bg-emerald-600"></div>
-              <p class="font-semibold">{{ t.year }} — {{ t.title }}</p>
-              <p class="text-sm text-gray-600 dark:text-neutral-400">{{ t.desc }}</p>
-            </li>
-          </ol>
-        </div>
-      </div>
-    </section>
-
-    <!-- Founders -->
-    <section id="founders" class="relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10 sm:pb-14">
-        <h3 class="text-2xl font-extrabold">Founder & Co-Founder</h3>
-        <p class="text-gray-600 dark:text-neutral-400">Tim kecil, misi besar—mendorong transformasi digital pendidikan.</p>
-        <div class="mt-6 grid md:grid-cols-2 gap-5">
-          <div v-for="p in founders" :key="p.name" class="rounded-2xl border border-gray-200 dark:border-neutral-700 overflow-hidden">
-            <div class="h-96 w-full bg-gray-100 dark:bg-neutral-800">
-              <img :src="p.photo" alt="" class="w-full h-full object-cover" />
-            </div>
-            <div class="p-5">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="font-extrabold text-lg">{{ p.name }}</p>
-                  <p class="text-sm text-gray-500">{{ p.role }}</p>
-                </div>
-                <div class="size-10 rounded-xl flex items-center justify-center bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-                  <Icon :icon="p.icon" class="size-5" />
-                </div>
-              </div>
-              <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">{{ p.bio }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Nilai Perusahaan -->
-    <section id="values" class="relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10 sm:pb-14">
-        <h3 class="text-2xl font-extrabold">Nilai yang Kami Pegang</h3>
-        <div class="mt-6 grid md:grid-cols-3 gap-4">
-          <div v-for="v in values" :key="v.title" class="rounded-2xl p-5 border border-gray-200 bg-white/80 backdrop-blur hover:shadow-md transition dark:bg-neutral-900/70 dark:border-neutral-700">
-            <div class="size-10 rounded-xl flex items-center justify-center mb-3" :class="badgeTone(v.tone)">
-              <Icon :icon="v.icon" class="size-5" />
-            </div>
-            <h4 class="font-semibold">{{ v.title }}</h4>
-            <p class="mt-1 text-sm text-gray-600 dark:text-neutral-400">{{ v.desc }}</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Careers -->
-    <section id="careers" class="relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div class="rounded-2xl p-6 border border-gray-200 dark:border-neutral-700 bg-gradient-to-r from-emerald-50 to-cyan-50 dark:from-emerald-900/10 dark:to-cyan-900/10">
-          <div class="flex flex-col gap-6">
-            <div class="lg:w-full">
-              <h3 class="text-2xl font-extrabold">Bergabung dengan Obayan</h3>
-              <p class="mt-2 text-gray-600 dark:text-neutral-400">
-                Kami mencari orang yang peduli pada pendidikan, teliti pada detail, dan senang
-                membuat hal rumit menjadi sederhana. Remote-friendly, jam kerja sehat.
-              </p>
-              <ul class="mt-4 grid sm:grid-cols-2 gap-3">
-                <li class="flex items-start gap-2"><Icon icon="lucide:home" class="size-5 text-emerald-600" /><span>Remote / Hybrid</span></li>
-                <li class="flex items-start gap-2"><Icon icon="lucide:rocket" class="size-5 text-emerald-600" /><span>Impact nyata ke ribuan siswa</span></li>
-                <li class="flex items-start gap-2"><Icon icon="lucide:heart-handshake" class="size-5 text-emerald-600" /><span>Tim kecil, kolaborasi tinggi</span></li>
-                <li class="flex items-start gap-2"><Icon icon="lucide:graduation-cap" class="size-5 text-emerald-600" /><span>Budget belajar & sertifikasi</span></li>
-              </ul>
-            </div>
-
-            <div class="lg:w-full">
-              <div class="grid sm:grid-cols-2 gap-4">
-                <article
-                  v-for="j in jobs"
-                  :key="j.slug"
-                  class="rounded-2xl border bg-white/80 dark:bg-neutral-900/70 border-gray-200 dark:border-neutral-700 p-4"
-                >
-                  <div class="flex items-start gap-3">
-                    <div class="size-10 rounded-xl flex items-center justify-center" :class="badgeTone(j.tone)">
-                      <Icon :icon="j.icon" class="size-5" />
-                    </div>
-                    <div class="grow">
-                      <p class="font-semibold">{{ j.title }}</p>
-                      <p class="text-xs text-gray-500">{{ j.type }} • {{ j.location }}</p>
-                      <ul class="mt-2 space-y-1 text-sm text-gray-600 dark:text-neutral-400">
-                        <li v-for="(r, i) in j.resp.slice(0,3)" :key="i" class="flex items-start gap-2">
-                          <Icon icon="lucide:check" class="size-4 mt-0.5 text-emerald-600" />
-                          <span>{{ r }}</span>
-                        </li>
-                      </ul>
-                      <div class="mt-3 flex items-center gap-2">
-                        <button
-                          type="button"
-                          class="px-3 py-2 rounded-2xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700"
-                          data-hs-overlay="#apply-modal"
-                          @click="prefill(j.title)"
-                        >
-                          Lamar via WhatsApp
-                        </button>
-                        <button
-                          type="button"
-                          class="px-3 py-2 rounded-2xl text-sm font-semibold border border-gray-300 hover:bg-gray-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                          @click="quickApply(j.title)"
-                        >
-                          Kirim Cepat
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              </div>
-
-              <p class="mt-4 text-xs text-gray-500">
-                Tidak menemukan posisi yang cocok? Kirimkan profil singkat & portfolio via tombol
-                <em>Kirim Cepat</em>—kami senang mengenalmu!
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div
-      id="apply-modal"
-      class="hs-overlay hidden fixed inset-0 z-[80] overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-    >
-      <div class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 mt-0 opacity-0 transition-all max-w-xl m-3 sm:mx-auto">
-        <div class="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-200 dark:border-neutral-700 shadow-xl">
-          <div class="p-5 border-b border-gray-200 dark:border-neutral-800 flex items-center justify-between">
-            <h4 class="font-extrabold">Lamar via WhatsApp</h4>
-            <button type="button" class="size-9 inline-flex justify-center items-center rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800" data-hs-overlay="#apply-modal" aria-label="Close">
-              <Icon icon="lucide:x" class="size-5" />
-            </button>
-          </div>
-
-          <div class="p-5 space-y-4">
-            <div class="grid sm:grid-cols-2 gap-3">
-              <div>
-                <label class="text-sm font-medium">Nama Lengkap</label>
-                <input v-model="form.name" type="text" class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900" placeholder="Nama Anda" />
-              </div>
-              <div>
-                <label class="text-sm font-medium">Email</label>
-                <input v-model="form.email" type="email" class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900" placeholder="anda@email.com" />
-              </div>
-            </div>
-
-            <div class="grid sm:grid-cols-2 gap-3">
-              <div>
-                <label class="text-sm font-medium">Nomor HP</label>
-                <input v-model="form.phone" type="tel" class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900" placeholder="08xxxxxxxxxx" />
-              </div>
-              <div>
-                <label class="text-sm font-medium">Posisi Dilamar</label>
-                <select v-model="form.role" class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900">
-                  <option disabled value="">Pilih posisi</option>
-                  <option v-for="j in jobs" :key="j.slug" :value="j.title">{{ j.title }}</option>
-                  <option value="Posisi Lain">Posisi Lain</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label class="text-sm font-medium">Link CV / Portfolio (opsional)</label>
-              <input v-model="form.cv" type="url" class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900" placeholder="https://drive.google.com/..." />
-            </div>
-
-            <div>
-              <label class="text-sm font-medium">Pesan</label>
-              <textarea v-model="form.message" rows="4" class="mt-1 w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900" placeholder="Perkenalkan diri Anda, pengalaman, dan alasan tertarik."></textarea>
-            </div>
-
-            <div class="flex items-center justify-between">
-              <p class="text-xs text-gray-500">
-                Lamaran akan dibuka di WhatsApp: <strong>+{{ WA_NUMBER }}</strong>
-              </p>
-              <div class="flex items-center gap-2">
-                <button type="button" class="px-4 py-2 rounded-xl font-semibold border border-gray-300 hover:bg-gray-100 dark:border-neutral-700 dark:hover:bg-neutral-800" data-hs-overlay="#apply-modal">
-                  Batal
-                </button>
-                <button type="button" class="px-4 py-2 rounded-xl font-semibold bg-emerald-600 text-white hover:bg-emerald-700" @click="submitApplication">
-                  Kirim via WhatsApp
-                </button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
+  <main
+    ref="pageRef"
+    class="about-page relative overflow-hidden bg-white text-gray-800 antialiased dark:bg-neutral-950 dark:text-neutral-200"
+  >
+    <!-- SOFT BACKGROUND -->
+    <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div class="absolute -left-32 top-24 h-96 w-96 rounded-full bg-green-200/45 blur-3xl dark:bg-green-500/10" />
+      <div class="absolute -right-36 top-[34rem] h-[30rem] w-[30rem] rounded-full bg-lime-200/45 blur-3xl dark:bg-lime-500/10" />
+      <div class="absolute bottom-0 left-1/3 h-[26rem] w-[26rem] rounded-full bg-green-100/70 blur-3xl dark:bg-green-400/5" />
+      <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(22,163,74,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(22,163,74,0.06)_1px,transparent_1px)] [background-size:44px_44px] [mask-image:radial-gradient(70%_55%_at_50%_18%,#000,transparent_75%)]" />
     </div>
 
-    <!-- CTA Footer -->
-    <section class="relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
-        <div class="rounded-2xl p-6 border border-gray-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-900/70">
-          <div class="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-5">
-            <div class="flex items-center gap-3">
-              <div class="size-10 rounded-2xl flex items-center justify-center bg-emerald-600 text-white">
-                <Icon icon="lucide:wand-2" class="size-5" />
+    <!-- HERO -->
+    <section class="relative isolate min-h-[92vh] overflow-hidden pt-24">
+      <div class="absolute inset-0 -z-20">
+        <img
+          :src="heroImage"
+          alt="Obayan education platform"
+          draggable="false"
+          class="h-full w-full select-none object-cover"
+        >
+        <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-white dark:to-neutral-950" />
+      </div>
+
+      <div class="pointer-events-none absolute inset-0 -z-10">
+        <div class="absolute left-[-16%] top-[10%] size-[36rem] rounded-full bg-green-400/25 blur-3xl blob-soft" />
+        <div class="absolute right-[-12%] top-[26%] size-[34rem] rounded-full bg-lime-300/20 blur-3xl blob-soft blob-soft-delay" />
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.22),transparent_34%)]" />
+      </div>
+
+      <div class="mx-auto grid max-w-[90rem] grid-cols-1 items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1fr_0.9fr] lg:px-8">
+        <div
+          data-reveal
+          data-parallax
+          data-speed="0.045"
+          class="max-w-3xl"
+        >
+          <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.2em] text-white/90 shadow-2xl shadow-black/10 backdrop-blur-xl">
+            <Icon icon="solar:stars-line-duotone" class="size-4" />
+            Tentang Obayan
+          </div>
+
+          <h1 class="mt-6 text-balance text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-7xl">
+            Operasional pendidikan yang lebih rapi, cepat, dan terhubung.
+          </h1>
+
+          <p class="mt-6 max-w-2xl text-base leading-8 text-white/82 sm:text-lg">
+            Obayan by <strong class="font-black text-white">sencra.io</strong> membantu sekolah dan pesantren
+            mengelola akademik, presensi, keuangan, komunikasi wali, dan website profil dalam satu ekosistem
+            yang sederhana namun powerful.
+          </p>
+
+          <div class="mt-9 flex flex-wrap items-center gap-3">
+            <a
+              href="#visi-misi"
+              class="group inline-flex items-center gap-2 rounded-2xl bg-green-600 px-5 py-3 text-sm font-extrabold text-white shadow-xl shadow-green-600/25 transition duration-300 hover:-translate-y-1 hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300"
+            >
+              <Icon icon="lucide:target" class="size-4 transition group-hover:rotate-12" />
+              Visi & Misi
+            </a>
+
+            <a
+              href="#ecosystem"
+              class="inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-5 py-3 text-sm font-extrabold text-white shadow-xl shadow-black/5 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/20 focus:outline-none focus:ring-4 focus:ring-white/20"
+            >
+              <Icon icon="lucide:grid-2x2" class="size-4" />
+              Lihat Ekosistem
+            </a>
+          </div>
+
+          <div class="mt-10 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
+            <div
+              v-for="stat in heroStats"
+              :key="stat.label"
+              data-reveal
+              data-parallax
+              data-speed="0.025"
+              class="rounded-[1.35rem] border border-white/15 bg-white/10 p-4 shadow-2xl shadow-black/5 backdrop-blur-xl"
+            >
+              <p class="text-2xl font-black text-white">{{ stat.value }}</p>
+              <p class="mt-1 text-xs font-semibold leading-5 text-white/70">{{ stat.label }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- HERO MOCKUP -->
+        <div
+          data-reveal
+          data-parallax
+          data-speed="-0.04"
+          data-rotate="0.025"
+          class="relative hidden lg:block"
+        >
+          <div class="hero-device relative mx-auto w-full max-w-xl rounded-[2.25rem] border border-white/20 bg-white/15 p-4 shadow-2xl shadow-black/20 backdrop-blur-2xl">
+            <div class="rounded-[1.75rem] bg-white/95 p-4 shadow-2xl dark:bg-neutral-950/92">
+              <div class="mb-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="size-3 rounded-full bg-red-300" />
+                  <span class="size-3 rounded-full bg-yellow-300" />
+                  <span class="size-3 rounded-full bg-green-400" />
+                </div>
+                <span class="rounded-full bg-green-50 px-3 py-1 text-xs font-extrabold text-green-700 dark:bg-green-500/10 dark:text-green-300">
+                  Live Ecosystem
+                </span>
               </div>
-              <div>
-                <h3 class="font-extrabold text-lg">Siap mengenal Obayan lebih dekat?</h3>
-                <p class="text-sm text-gray-600 dark:text-neutral-400">Hubungkan demo singkat—kami tunjukkan alurnya end-to-end.</p>
+
+              <div class="grid grid-cols-3 gap-3">
+                <div class="col-span-2 rounded-[1.4rem] bg-green-600 p-5 text-white shadow-xl shadow-green-600/20">
+                  <Icon icon="lucide:graduation-cap" class="size-8" />
+                  <p class="mt-7 text-2xl font-black">SIAKAD</p>
+                  <p class="mt-1 text-sm font-medium text-white/80">Data, nilai, kelas, rapor</p>
+                </div>
+
+                <div class="space-y-3">
+                  <div class="widget-pulse rounded-[1.4rem] bg-green-50 p-4 dark:bg-green-500/10">
+                    <Icon icon="lucide:shield-check" class="size-6 text-green-600 dark:text-green-300" />
+                    <div class="mt-5 h-2 rounded-full bg-green-200 dark:bg-green-400/20" />
+                    <div class="mt-2 h-2 w-2/3 rounded-full bg-green-100 dark:bg-green-400/10" />
+                  </div>
+
+                  <div class="widget-pulse-delay rounded-[1.4rem] bg-lime-50 p-4 dark:bg-lime-500/10">
+                    <Icon icon="lucide:bell-ring" class="size-6 text-lime-600 dark:text-lime-300" />
+                    <div class="mt-5 h-2 rounded-full bg-lime-200 dark:bg-lime-400/20" />
+                    <div class="mt-2 h-2 w-3/4 rounded-full bg-lime-100 dark:bg-lime-400/10" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4 grid grid-cols-3 gap-3">
+                <div
+                  v-for="item in miniWidgets"
+                  :key="item.label"
+                  class="rounded-[1.3rem] bg-gray-50 p-4 ring-1 ring-gray-100 dark:bg-white/5 dark:ring-white/10"
+                >
+                  <div :class="item.boxClass" class="grid h-12 place-items-center rounded-xl">
+                    <Icon :icon="item.icon" class="size-5" />
+                  </div>
+                  <div class="mt-3 h-2 w-3/4 rounded-full bg-gray-200 dark:bg-white/10" />
+                  <p class="mt-3 text-xs font-bold text-gray-500 dark:text-neutral-400">{{ item.label }}</p>
+                </div>
               </div>
             </div>
-            <div class="ms-auto flex items-center gap-2">
-              <NuxtLink href="#demo" class="px-4 py-2 rounded-2xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700">
-                Coba Demo
-              </NuxtLink>
-              <NuxtLink href="#pricing" class="px-4 py-2 rounded-2xl border border-gray-300 hover:bg-gray-100 text-sm font-semibold dark:border-neutral-700 dark:hover:bg-neutral-800">
-                Lihat Harga
-              </NuxtLink>
+          </div>
+
+          <div class="float-card absolute -left-8 top-16 rounded-2xl border border-white/40 bg-white/90 px-4 py-3 shadow-2xl shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-neutral-950/90">
+            <p class="text-xs font-bold text-gray-500 dark:text-neutral-400">Presensi hari ini</p>
+            <p class="text-2xl font-black text-green-600">98%</p>
+          </div>
+
+          <div class="float-card-delay absolute -bottom-6 right-4 rounded-2xl border border-white/40 bg-white/90 px-4 py-3 shadow-2xl shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-neutral-950/90">
+            <p class="text-xs font-bold text-gray-500 dark:text-neutral-400">Notifikasi wali</p>
+            <p class="text-lg font-black text-gray-950 dark:text-white">Real-time</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="relative py-16 sm:py-24">
+      <div class="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
+        <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
+          <div data-reveal data-parallax data-speed="0.035">
+            <span class="inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-green-700 ring-1 ring-green-100 dark:bg-green-500/10 dark:text-green-300 dark:ring-green-400/20">
+              <Icon icon="lucide:building-2" class="size-4" />
+              Tentang Perusahaan
+            </span>
+
+            <h2 class="mt-5 max-w-3xl text-3xl font-black tracking-tight text-gray-950 dark:text-white sm:text-5xl">
+              Ekosistem digital untuk pendidikan yang lebih terhubung.
+            </h2>
+
+            <p class="mt-5 max-w-2xl text-base leading-8 text-gray-600 dark:text-neutral-300">
+              Obayan adalah platform pendidikan modern yang dirancang untuk membantu sekolah, yayasan,
+              dan pesantren mengelola operasional harian secara lebih cepat, transparan, dan mudah dipantau.
+            </p>
+
+            <div class="mt-8 grid gap-4 sm:grid-cols-2">
+              <article
+                v-for="item in aboutPoints"
+                :key="item.title"
+                data-reveal
+                data-parallax
+                data-speed="0.02"
+                class="group rounded-[1.5rem] border border-gray-200/80 bg-white/85 p-5 shadow-sm shadow-gray-200/50 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-green-200 hover:shadow-2xl hover:shadow-green-900/10 dark:border-white/10 dark:bg-white/[0.045] dark:shadow-none"
+              >
+                <div class="flex items-start gap-4">
+                  <div class="grid size-11 shrink-0 place-items-center rounded-2xl bg-green-50 text-green-600 ring-1 ring-green-100 transition duration-300 group-hover:rotate-6 group-hover:scale-110 dark:bg-green-500/10 dark:text-green-300 dark:ring-green-400/20">
+                    <Icon :icon="item.icon" class="size-5" />
+                  </div>
+                  <div>
+                    <p class="font-black text-gray-950 dark:text-white">{{ item.title }}</p>
+                    <p class="mt-1 text-sm leading-6 text-gray-600 dark:text-neutral-400">{{ item.desc }}</p>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div data-reveal data-parallax data-speed="-0.035" class="relative">
+            <div class="absolute -left-6 -top-6 hidden size-28 rounded-[2rem] bg-green-100 sm:block dark:bg-green-500/10" />
+            <div class="absolute -bottom-6 -right-6 hidden size-36 rounded-full bg-lime-100 sm:block dark:bg-lime-500/10" />
+
+            <div class="relative overflow-hidden rounded-[2.25rem] border border-gray-200 bg-white p-3 shadow-2xl shadow-green-900/10 dark:border-white/10 dark:bg-white/[0.045]">
+              <img
+                :src="aboutImage"
+                draggable="false"
+                class="h-[24rem] w-full select-none rounded-[1.7rem] object-cover sm:h-[31rem]"
+                alt="About Obayan"
+              >
+
+              <div class="pointer-events-none absolute inset-x-3 bottom-3 h-36 rounded-b-[1.7rem] bg-gradient-to-t from-black/50 to-transparent" />
+            </div>
+
+            <div class="absolute -bottom-5 left-6 right-6 rounded-[1.5rem] border border-white/60 bg-white/92 p-4 shadow-2xl shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-neutral-950/92">
+              <div class="flex items-center gap-3">
+                <div class="grid size-12 place-items-center rounded-2xl bg-green-600 text-white shadow-lg shadow-green-600/25">
+                  <Icon icon="lucide:sparkles" class="size-5" />
+                </div>
+                <div>
+                  <p class="font-black text-gray-950 dark:text-white">Sederhana untuk digunakan</p>
+                  <p class="text-sm leading-6 text-gray-600 dark:text-neutral-400">
+                    Namun tetap kuat untuk operasional harian lembaga.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
-  </div>
+
+    <!-- VISI MISI -->
+    <section id="visi-misi" class="relative py-16 sm:py-24">
+      <div class="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
+        <div
+          data-reveal
+          data-parallax
+          data-speed="0.03"
+          class="rounded-[2.25rem] border border-gray-200 bg-white/85 p-5 shadow-2xl shadow-green-900/8 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.045] sm:p-8 lg:p-10"
+        >
+          <div class="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+            <div>
+              <span class="inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-green-700 ring-1 ring-green-100 dark:bg-green-500/10 dark:text-green-300 dark:ring-green-400/20">
+                <Icon icon="lucide:target" class="size-4" />
+                Visi & Misi
+              </span>
+
+              <h2 class="mt-5 text-3xl font-black tracking-tight text-gray-950 dark:text-white sm:text-5xl">
+                Membangun sekolah yang lebih adaptif dan siap bertumbuh.
+              </h2>
+
+              <p class="mt-5 text-base leading-8 text-gray-600 dark:text-neutral-300">
+                Kami percaya teknologi pendidikan harus terasa mudah bagi pengguna, tetapi tetap memiliki fondasi
+                sistem yang kuat untuk mendukung kebutuhan lembaga dalam jangka panjang.
+              </p>
+            </div>
+
+            <div class="grid gap-4">
+              <article
+                v-for="(item, index) in missionItems"
+                :key="item.title"
+                data-reveal
+                data-parallax
+                :data-speed="index % 2 === 0 ? '0.025' : '-0.02'"
+                class="group rounded-[1.5rem] border border-gray-200 bg-gray-50/70 p-5 transition duration-300 hover:-translate-y-1 hover:border-green-200 hover:bg-white hover:shadow-xl hover:shadow-green-900/10 dark:border-white/10 dark:bg-white/[0.035] dark:hover:bg-white/[0.065]"
+              >
+                <div class="flex gap-4">
+                  <div class="grid size-12 shrink-0 place-items-center rounded-2xl bg-white text-green-600 ring-1 ring-gray-200 transition group-hover:bg-green-600 group-hover:text-white group-hover:ring-green-600 dark:bg-white/5 dark:ring-white/10">
+                    <Icon :icon="item.icon" class="size-5" />
+                  </div>
+                  <div>
+                    <p class="font-black text-gray-950 dark:text-white">{{ item.title }}</p>
+                    <p class="mt-1 text-sm leading-7 text-gray-600 dark:text-neutral-400">{{ item.desc }}</p>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ECOSYSTEM -->
+    <section id="ecosystem" class="relative py-16 sm:py-24">
+      <div class="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center" data-reveal data-parallax data-speed="0.025">
+          <span class="inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-green-700 ring-1 ring-green-100 dark:bg-green-500/10 dark:text-green-300 dark:ring-green-400/20">
+            <Icon icon="lucide:layout-dashboard" class="size-4" />
+            Ekosistem Produk
+          </span>
+
+          <h2 class="mt-5 text-3xl font-black tracking-tight text-gray-950 dark:text-white sm:text-5xl">
+            Semua kebutuhan lembaga dalam satu alur yang rapi.
+          </h2>
+
+          <p class="mt-5 text-base leading-8 text-gray-600 dark:text-neutral-300">
+            Mulai dari website profil, data akademik, pembayaran, sampai komunikasi wali bisa disusun dalam
+            satu sistem yang saling terhubung.
+          </p>
+        </div>
+
+        <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <article
+            v-for="(item, index) in ecosystemItems"
+            :key="item.title"
+            data-reveal
+            data-parallax
+            :data-speed="index % 2 === 0 ? '0.025' : '-0.018'"
+            class="group relative overflow-hidden rounded-[1.75rem] border border-gray-200 bg-white/85 p-6 shadow-sm shadow-gray-200/50 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-green-200 hover:shadow-2xl hover:shadow-green-900/10 dark:border-white/10 dark:bg-white/[0.045] dark:shadow-none"
+          >
+            <div class="absolute -right-10 -top-10 size-28 rounded-full bg-green-100 opacity-0 blur-xl transition duration-300 group-hover:opacity-100 dark:bg-green-500/10" />
+
+            <div class="relative">
+              <div class="grid size-13 place-items-center rounded-2xl bg-green-50 text-green-600 ring-1 ring-green-100 transition duration-300 group-hover:scale-110 group-hover:bg-green-600 group-hover:text-white dark:bg-green-500/10 dark:text-green-300 dark:ring-green-400/20">
+                <Icon :icon="item.icon" class="size-6" />
+              </div>
+
+              <h3 class="mt-6 text-xl font-black text-gray-950 dark:text-white">{{ item.title }}</h3>
+              <p class="mt-3 text-sm leading-7 text-gray-600 dark:text-neutral-400">{{ item.desc }}</p>
+
+              <div class="mt-6 flex flex-wrap gap-2">
+                <span
+                  v-for="tag in item.tags"
+                  :key="tag"
+                  class="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-gray-600 dark:bg-white/5 dark:text-neutral-300"
+                >
+                  {{ tag }}
+                </span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- CULTURE / WHY -->
+    <section class="relative py-16 sm:py-24">
+      <div class="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div data-reveal data-parallax data-speed="0.035">
+            <span class="inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-green-700 ring-1 ring-green-100 dark:bg-green-500/10 dark:text-green-300 dark:ring-green-400/20">
+              <Icon icon="lucide:heart-handshake" class="size-4" />
+              Cara Kami Bekerja
+            </span>
+
+            <h2 class="mt-5 text-3xl font-black tracking-tight text-gray-950 dark:text-white sm:text-5xl">
+              Dibangun dengan pendekatan yang manusiawi dan terukur.
+            </h2>
+
+            <p class="mt-5 text-base leading-8 text-gray-600 dark:text-neutral-300">
+              Fokus kami bukan hanya membuat fitur, tetapi membuat sistem yang benar-benar dapat dipakai oleh
+              admin, guru, wali, dan pengelola lembaga tanpa terasa rumit.
+            </p>
+
+            <div class="mt-8">
+              <NuxtLink
+                to="/fitur"
+                class="inline-flex items-center gap-2 rounded-2xl bg-gray-950 px-5 py-3 text-sm font-extrabold text-white shadow-xl shadow-gray-950/15 transition duration-300 hover:-translate-y-1 hover:bg-green-700 dark:bg-white dark:text-gray-950 dark:hover:bg-green-300"
+              >
+                Jelajahi Fitur
+                <Icon icon="lucide:arrow-right" class="size-4" />
+              </NuxtLink>
+            </div>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <article
+              v-for="(item, index) in cultureItems"
+              :key="item.title"
+              data-reveal
+              data-parallax
+              :data-speed="index % 2 === 0 ? '-0.02' : '0.025'"
+              class="rounded-[1.5rem] border border-gray-200 bg-white/85 p-5 shadow-sm shadow-gray-200/50 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-green-200 hover:shadow-2xl hover:shadow-green-900/10 dark:border-white/10 dark:bg-white/[0.045] dark:shadow-none"
+            >
+              <div class="grid size-11 place-items-center rounded-2xl bg-green-50 text-green-600 ring-1 ring-green-100 dark:bg-green-500/10 dark:text-green-300 dark:ring-green-400/20">
+                <Icon :icon="item.icon" class="size-5" />
+              </div>
+
+              <h3 class="mt-5 font-black text-gray-950 dark:text-white">{{ item.title }}</h3>
+              <p class="mt-2 text-sm leading-7 text-gray-600 dark:text-neutral-400">{{ item.desc }}</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CAREERS / CTA -->
+    <section id="careers" class="relative py-16 sm:py-24">
+      <div class="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
+        <div
+          data-reveal
+          data-parallax
+          data-speed="0.035"
+          class="relative overflow-hidden rounded-[2.5rem] bg-gray-950 p-6 text-white shadow-2xl shadow-green-900/20 sm:p-10 lg:p-14"
+        >
+          <div class="pointer-events-none absolute -right-24 -top-24 size-80 rounded-full bg-green-500/30 blur-3xl" />
+          <div class="pointer-events-none absolute -bottom-28 left-1/4 size-96 rounded-full bg-lime-500/20 blur-3xl" />
+          <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:44px_44px] [mask-image:radial-gradient(70%_70%_at_50%_50%,#000,transparent_78%)]" />
+
+          <div class="relative grid gap-10 lg:grid-cols-[1fr_0.75fr] lg:items-center">
+            <div>
+              <span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-white/80 backdrop-blur-xl">
+                <Icon icon="lucide:briefcase-business" class="size-4" />
+                Karier & Kolaborasi
+              </span>
+
+              <h2 class="mt-5 max-w-3xl text-3xl font-black tracking-tight sm:text-5xl">
+                Tumbuh bersama ekosistem pendidikan digital yang berdampak.
+              </h2>
+
+              <p class="mt-5 max-w-2xl text-base leading-8 text-white/70">
+                Kami terbuka untuk kolaborasi dengan sekolah, pesantren, yayasan, dan partner teknologi
+                yang ingin membangun operasional pendidikan lebih modern.
+              </p>
+
+              <div class="mt-8 flex flex-wrap gap-3">
+                <NuxtLink
+                  to="/#contact"
+                  class="inline-flex items-center gap-2 rounded-2xl bg-green-500 px-5 py-3 text-sm font-extrabold text-white shadow-xl shadow-green-500/25 transition duration-300 hover:-translate-y-1 hover:bg-green-600"
+                >
+                  Hubungi Kami
+                  <Icon icon="lucide:send" class="size-4" />
+                </NuxtLink>
+
+                <NuxtLink
+                  to="/fitur"
+                  class="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:bg-white/15"
+                >
+                  Lihat Solusi
+                  <Icon icon="lucide:arrow-up-right" class="size-4" />
+                </NuxtLink>
+              </div>
+            </div>
+
+            <div class="grid gap-3">
+              <div
+                v-for="item in ctaPoints"
+                :key="item"
+                class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl"
+              >
+                <div class="grid size-9 shrink-0 place-items-center rounded-xl bg-green-400/20 text-green-200">
+                  <Icon icon="lucide:check" class="size-4" />
+                </div>
+                <p class="text-sm font-bold text-white/82">{{ item }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useHead } from '#imports'
 import { Icon } from '@iconify/vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
-/** === CONFIG === */
-const WA_NUMBER = '62895396004952' // Ganti ke nomor WA tim rekrutmen (tanpa tanda +)
+const pageRef = ref<HTMLElement | null>(null)
 
-const heroImage = 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+const heroImage = '/assets/images/masjid.jpg'
 const aboutImage = '/assets/images/cases/0.png'
 
-/** === TIMELINE === */
-const timeline = [
-  { year: '2022', title: 'Riset & Validasi', desc: 'Eksplorasi kebutuhan sekolah & pesantren terhadap SIAKAD dan alur operasional.' },
-  { year: '2023', title: 'Produk Pertama', desc: 'Rilis modul SIAKAD, Kelas Akademik, dan Rapor; pilot di beberapa satuan pendidikan.' },
-  { year: '2024', title: 'Integrasi Presensi & Keuangan', desc: 'ToriID (RFID/QR) dan Pembayaran + Laporan Keuangan tersambung mulus.' },
-  { year: '2025', title: 'Ekosistem Obayan', desc: 'Ekspansi add-on Autobot, App Wali, dan CMS profil sekolah; fokus reliability & UX.' }
-]
-
-/** === FOUNDERS === */
-const founders = [
+const heroStats = [
   {
-    name: 'Mohammad Khusnul Khuluq',
-    role: 'Founder & CEO',
-    icon: 'lucide:crown',
-    photo: '/assets/images/devs/khuluq.png',
-    bio: 'Memimpin arah produk & kolaborasi dengan mitra pendidikan. Fokus pada dampak dan keberlanjutan implementasi.'
+    value: '1',
+    label: 'Portal terpadu'
   },
   {
-    name: 'Muhammad Fadly Robby',
-    role: 'Co-Founder & CMO',
-    icon: 'lucide:cpu',
-    photo: '/assets/images/devs/robby.png',
-    bio: 'Memimpin strategi pemasaran & kemitraan. Fokus pada brand, pertumbuhan pengguna, dan go-to-market lintas produk Obayan.'
+    value: '24/7',
+    label: 'Akses monitoring'
+  },
+  {
+    value: 'Real-time',
+    label: 'Komunikasi data'
   }
 ]
 
-/** === VALUES === */
-const values = [
-  { title: 'Customer-First', desc: 'Keputusan berangkat dari kebutuhan sekolah & pesantren.', icon: 'lucide:heart', tone: 'emerald' as const },
-  { title: 'Reliability', desc: 'Stabil, terukur, dan siap audit.', icon: 'lucide:shield-check', tone: 'blue' as const },
-  { title: 'Open Integration', desc: 'Modul & API yang bisa tumbuh bersama.', icon: 'lucide:git-merge', tone: 'amber' as const },
-  { title: 'Security by Default', desc: 'RBAC, audit, enkripsi in-transit.', icon: 'lucide:lock', tone: 'violet' as const },
-  { title: 'Playful UX', desc: 'Antarmuka yang ringan & menyenangkan.', icon: 'lucide:sparkles', tone: 'emerald' as const },
-  { title: 'Impact-Oriented', desc: 'Menghemat waktu staf & meningkatkan pembelajaran.', icon: 'lucide:rocket', tone: 'blue' as const }
+const miniWidgets = [
+  {
+    label: 'Akademik',
+    icon: 'lucide:book-open-check',
+    boxClass: 'bg-green-100 text-green-700 dark:bg-green-400/10 dark:text-green-300'
+  },
+  {
+    label: 'Keuangan',
+    icon: 'lucide:wallet-cards',
+    boxClass: 'bg-lime-100 text-lime-700 dark:bg-lime-400/10 dark:text-lime-300'
+  },
+  {
+    label: 'Wali',
+    icon: 'lucide:users-round',
+    boxClass: 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-neutral-200'
+  }
 ]
 
-/** === JOBS === */
-type Job = {
-  slug: string
-  title: string
-  type: 'Full-time' | 'Contract' | 'Intern'
-  location: string
-  icon: string
-  tone: 'emerald' | 'blue' | 'amber' | 'violet'
-  resp: string[]
-}
-const jobs: Job[] = [
+const aboutPoints = [
   {
-    slug: 'frontend-nuxt',
-    title: 'Frontend Engineer (Nuxt)',
-    type: 'Full-time',
-    location: 'Remote (ID)',
-    icon: 'lucide:layout',
-    tone: 'emerald',
-    resp: [
-      'Membangun UI/UX produktif berbasis Nuxt 3/4 + Tailwind',
-      'Integrasi Preline Pro, aksesibilitas & performa',
-      'Kolaborasi dengan desain & backend'
-    ]
+    title: 'Terpusat',
+    desc: 'Data akademik, presensi, pembayaran, dan informasi sekolah tersusun dalam satu sistem.',
+    icon: 'lucide:database-zap'
   },
   {
-    slug: 'backend-node',
-    title: 'Backend Engineer (Node)',
-    type: 'Full-time',
-    location: 'Remote (ID)',
-    icon: 'lucide:server',
-    tone: 'blue',
-    resp: [
-      'Merancang API modular & aman',
-      'Optimasi query & observability',
-      'Integrasi pembayaran & notifikasi'
-    ]
+    title: 'Mudah digunakan',
+    desc: 'Tampilan dibuat ringan, jelas, dan nyaman untuk admin, guru, wali, maupun pengelola.',
+    icon: 'lucide:mouse-pointer-click'
   },
   {
-    slug: 'customer-success',
-    title: 'Customer Success',
-    type: 'Full-time',
-    location: 'Remote/Hybrid',
-    icon: 'lucide:smile',
-    tone: 'amber',
-    resp: [
-      'Onboarding & pelatihan pengguna',
-      'Membuat panduan & SOP implementasi',
-      'Menjembatani feedback ke tim produk'
-    ]
+    title: 'Real-time',
+    desc: 'Informasi penting dapat dipantau lebih cepat sehingga keputusan operasional lebih responsif.',
+    icon: 'lucide:radio-tower'
   },
   {
-    slug: 'impl-trainer',
-    title: 'Implementasi & Trainer',
-    type: 'Contract',
-    location: 'On-site / Hybrid',
+    title: 'Fleksibel',
+    desc: 'Modul dapat disesuaikan dengan kebutuhan sekolah, yayasan, pesantren, atau lembaga pendidikan.',
+    icon: 'lucide:sliders-horizontal'
+  }
+]
+
+const missionItems = [
+  {
+    title: 'Visi',
+    desc: 'Menjadi ekosistem digital pendidikan yang membantu lembaga bergerak lebih efisien, transparan, dan siap menghadapi kebutuhan modern.',
+    icon: 'lucide:telescope'
+  },
+  {
+    title: 'Misi Produk',
+    desc: 'Menyediakan platform yang menyatukan website, akademik, keuangan, presensi, dan komunikasi wali dalam pengalaman yang mudah digunakan.',
+    icon: 'lucide:boxes'
+  },
+  {
+    title: 'Misi Implementasi',
+    desc: 'Mendampingi lembaga secara bertahap agar proses digitalisasi tidak terasa berat dan dapat berjalan sesuai kesiapan tim internal.',
+    icon: 'lucide:route'
+  }
+]
+
+const ecosystemItems = [
+  {
+    title: 'Website CMS',
+    desc: 'Kelola profil lembaga, berita, halaman, galeri, dan informasi publik dengan tampilan profesional.',
+    icon: 'lucide:globe-2',
+    tags: ['Profil', 'Berita', 'PPDB']
+  },
+  {
+    title: 'SIAKAD',
+    desc: 'Mengelola data santri/siswa, kelas, guru, nilai, jadwal, dan laporan akademik secara terstruktur.',
     icon: 'lucide:graduation-cap',
-    tone: 'violet',
-    resp: [
-      'Setup data awal & migrasi',
-      'Menjalankan sesi training modul',
-      'Pendampingan go-live di lapangan'
-    ]
+    tags: ['Kelas', 'Nilai', 'Rapor']
   },
   {
-    slug: 'uiux',
-    title: 'UI/UX Designer',
-    type: 'Full-time',
-    location: 'Remote (ID)',
-    icon: 'lucide:pencil-ruler',
-    tone: 'emerald',
-    resp: [
-      'Mendesain flow & komponen sistem',
-      'Prototyping & usability testing',
-      'Design system konsisten'
-    ]
+    title: 'Keuangan',
+    desc: 'Membantu pencatatan pembayaran, tagihan, status lunas, dan ringkasan transaksi lembaga.',
+    icon: 'lucide:wallet',
+    tags: ['Tagihan', 'SPP', 'Laporan']
   },
   {
-    slug: 'sales-bd',
-    title: 'Sales / Business Development',
-    type: 'Full-time',
-    location: 'Remote/Hybrid',
-    icon: 'lucide:megaphone',
-    tone: 'amber',
-    resp: [
-      'Mengelola pipeline & presentasi produk',
-      'Kemitraan institusi & yayasan',
-      'Negosiasi & closing deal'
-    ]
+    title: 'Presensi',
+    desc: 'Mendukung monitoring kehadiran dengan opsi QR, RFID, maupun integrasi perangkat sesuai kebutuhan.',
+    icon: 'lucide:scan-face',
+    tags: ['QR', 'RFID', 'Realtime']
+  },
+  {
+    title: 'Aplikasi Wali',
+    desc: 'Wali dapat memantau informasi akademik, presensi, pengumuman, tagihan, dan perkembangan anak.',
+    icon: 'lucide:users-round',
+    tags: ['Wali', 'Santri', 'Insight']
+  },
+  {
+    title: 'Insight Data',
+    desc: 'Menampilkan ringkasan informasi penting agar pengelola lebih mudah membaca kondisi lembaga.',
+    icon: 'lucide:chart-no-axes-combined',
+    tags: ['Dashboard', 'Analitik', 'Monitoring']
   }
 ]
 
-/** === FORM STATE (Modal) === */
-const form = reactive({
-  name: '',
-  email: '',
-  phone: '',
-  role: '',
-  cv: '',
-  message: ''
-})
-
-function prefill(role: string) {
-  form.role = role
-}
-
-function quickApply(role: string) {
-  const text =
-    `Halo Obayan,\n\nSaya ingin melamar untuk posisi *${role}*.\n` +
-    `Nama: (isi nama)\nEmail: (isi email)\nHP: (isi nomor)\nCV/Portfolio: (tautan)\n\n` +
-    `Perkenalan singkat:\n- Pengalaman relevan\n- Alasan tertarik\n\nTerima kasih.`
-  openWhatsApp(text)
-}
-
-function submitApplication() {
-  if (!form.name || !form.role) {
-    alert('Nama dan posisi wajib diisi.')
-    return
+const cultureItems = [
+  {
+    title: 'User-first',
+    desc: 'Setiap alur dibuat agar orang awam tetap bisa memahami sistem tanpa banyak penjelasan teknis.',
+    icon: 'lucide:user-round-check'
+  },
+  {
+    title: 'Clean system',
+    desc: 'Struktur data dan menu dibuat rapi supaya pengembangan fitur berikutnya tetap mudah dilakukan.',
+    icon: 'lucide:layers-3'
+  },
+  {
+    title: 'Scalable',
+    desc: 'Didesain agar dapat digunakan oleh satu lembaga kecil sampai yayasan dengan banyak unit pendidikan.',
+    icon: 'lucide:trending-up'
+  },
+  {
+    title: 'Collaborative',
+    desc: 'Implementasi dapat disesuaikan bersama tim lembaga agar fitur yang dibuat benar-benar tepat guna.',
+    icon: 'lucide:handshake'
   }
-  const text =
-    `Halo Obayan,\n\n` +
-    `Saya *${form.name}* ingin melamar posisi *${form.role}*.\n\n` +
-    `Email: ${form.email || '-'}\n` +
-    `HP: ${form.phone || '-'}\n` +
-    `CV/Portfolio: ${form.cv || '-'}\n\n` +
-    `Pesan:\n${form.message || '-'}\n\n` +
-    `Dikirim dari halaman About.`
-  openWhatsApp(text)
+]
+
+const ctaPoints = [
+  'Cocok untuk sekolah, pesantren, yayasan, dan lembaga pendidikan.',
+  'Modul dapat diaktifkan bertahap sesuai kebutuhan.',
+  'Desain sistem fleksibel untuk branding masing-masing lembaga.'
+]
+
+let rafId = 0
+let observer: IntersectionObserver | null = null
+
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
+
+const updateParallax = () => {
+  if (!pageRef.value || typeof window === 'undefined') return
+
+  const viewportHeight = window.innerHeight
+  const items = pageRef.value.querySelectorAll<HTMLElement>('[data-parallax]')
+
+  items.forEach((item) => {
+    const rect = item.getBoundingClientRect()
+    const speed = Number(item.dataset.speed || 0.02)
+    const rotateSpeed = Number(item.dataset.rotate || 0)
+    const centerDistance = rect.top + rect.height / 2 - viewportHeight / 2
+
+    const y = clamp(centerDistance * speed, -34, 34)
+    const rotate = clamp(centerDistance * rotateSpeed, -3, 3)
+
+    item.style.setProperty('--parallax-y', `${y.toFixed(2)}px`)
+    item.style.setProperty('--parallax-rotate', `${rotate.toFixed(2)}deg`)
+  })
 }
 
-function openWhatsApp(text: string) {
-  const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`
-  window.open(url, '_blank')
+const onScroll = () => {
+  cancelAnimationFrame(rafId)
+  rafId = requestAnimationFrame(updateParallax)
 }
 
-/** === SEO === */
-useHead({
-  title: 'Tentang Obayan • Visi, Misi, Sejarah, Tim & Karier',
-  meta: [
+onMounted(() => {
+  if (!pageRef.value || typeof window === 'undefined') return
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+        entry.target.classList.add('is-visible')
+        observer?.unobserve(entry.target)
+      })
+    },
     {
-      name: 'description',
-      content: 'Kenali Obayan by sencra.io: visi-misi, sejarah, tim founder, nilai perusahaan, dan peluang karier. Lamar langsung via WhatsApp.'
+      threshold: 0.16,
+      rootMargin: '0px 0px -8% 0px'
     }
-  ]
+  )
+
+  pageRef.value.querySelectorAll<HTMLElement>('[data-reveal]').forEach((item, index) => {
+    item.style.setProperty('--reveal-delay', `${Math.min(index * 45, 260)}ms`)
+    observer?.observe(item)
+  })
+
+  window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', onScroll)
+  updateParallax()
 })
 
-/** === STYLES HELPERS === */
-const badgeTone = (tone: 'emerald' | 'blue' | 'amber' | 'violet') => ({
-  emerald: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
-  blue: 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300',
-  amber: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
-  violet: 'bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300'
-}[tone])
+onBeforeUnmount(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('scroll', onScroll)
+    window.removeEventListener('resize', onScroll)
+  }
+
+  cancelAnimationFrame(rafId)
+  observer?.disconnect()
+})
 </script>
+
+<style scoped>
+.about-page {
+  scroll-behavior: smooth;
+}
+
+[data-reveal] {
+  --reveal-y: 26px;
+  --parallax-y: 0px;
+  --parallax-rotate: 0deg;
+  opacity: 0;
+  filter: blur(12px);
+  transform: translate3d(0, calc(var(--reveal-y) + var(--parallax-y)), 0)
+    rotate(var(--parallax-rotate))
+    scale(0.985);
+  transition:
+    opacity 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 300ms ease,
+    box-shadow 300ms ease,
+    background-color 300ms ease;
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, filter, transform;
+}
+
+[data-reveal].is-visible {
+  --reveal-y: 0px;
+  opacity: 1;
+  filter: blur(0);
+}
+
+[data-parallax] {
+  transform: translate3d(0, calc(var(--reveal-y, 0px) + var(--parallax-y, 0px)), 0)
+    rotate(var(--parallax-rotate, 0deg));
+  will-change: transform;
+}
+
+.blob-soft {
+  animation: blobSoft 11s ease-in-out infinite alternate;
+}
+
+.blob-soft-delay {
+  animation-delay: -4s;
+}
+
+.hero-device {
+  animation: deviceFloat 6s ease-in-out infinite;
+}
+
+.float-card {
+  animation: floatCard 5.5s ease-in-out infinite;
+}
+
+.float-card-delay {
+  animation: floatCard 5.5s ease-in-out infinite;
+  animation-delay: -2s;
+}
+
+.widget-pulse {
+  animation: widgetPulse 2.8s ease-in-out infinite;
+}
+
+.widget-pulse-delay {
+  animation: widgetPulse 2.8s ease-in-out infinite;
+  animation-delay: -1.25s;
+}
+
+@keyframes blobSoft {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate3d(28px, -22px, 0) scale(1.08);
+  }
+}
+
+@keyframes deviceFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-1deg);
+  }
+
+  50% {
+    transform: translate3d(0, -14px, 0) rotate(1deg);
+  }
+}
+
+@keyframes floatCard {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+@keyframes widgetPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.035);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-parallax],
+  .blob-soft,
+  .hero-device,
+  .float-card,
+  .float-card-delay,
+  .widget-pulse,
+  .widget-pulse-delay {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    filter: none;
+  }
+}
+</style>
