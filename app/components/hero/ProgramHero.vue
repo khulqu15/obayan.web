@@ -2,11 +2,11 @@
   <section ref="root" class="relative overflow-hidden dark:bg-neutral-950 bg-gray-50">
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
       <div class="absolute inset-0 bg-[radial-gradient(60%_50%_at_10%_60%,rgba(37,99,235,0.09),transparent_70%),radial-gradient(45%_40%_at_90%_20%,rgba(16,185,129,0.12),transparent_60%)]"></div>
-      <div class="absolute inset-0 [background-image:radial-gradient(rgba(0,0,0,0.06)_1px,transparent_1px)] [background-size:18px_18px] dark:opacity-40"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(rgba(0,0,0,0.06)_1px,transparent_1px)] bg-size-[18px_18px] dark:opacity-40"></div>
       <div class="absolute -top-24 -left-24 size-[420px] rounded-full blur-3xl opacity-25 bg-emerald-400/40"></div>
-      <div class="absolute -bottom-28 -right-28 size-[520px] rounded-full blur-3xl opacity-20 bg-blue-500/40"></div>
+      <div class="absolute -bottom-28 -right-28 size-[520px] rounded-full blur-3xl opacity-20 bg-green-500/40"></div>
     </div>
-    <div class="relative max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-18 lg:pt-20 pb-12 sm:pb-16">
+    <div class="relative max-w-340 mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-18 lg:pt-20 pb-12 sm:pb-16">
       <div class="mb-8 flex items-center justify-between">
         <a
           :href="cta.href" target="_blank" rel="noopener"
@@ -19,7 +19,7 @@
               alt="Obayan"
               class="h-8 sm:h-9 w-auto drop-shadow-sm animate-float"
             />
-            <span class="pointer-events-none absolute -inset-2 rounded-xl blur-md opacity-30 bg-gradient-to-r from-emerald-400/50 to-cyan-500/50"></span>
+            <span class="pointer-events-none absolute -inset-2 rounded-xl blur-md opacity-30 bg-linear-to-r from-emerald-400/50 to-cyan-500/50"></span>
           </span>
           <span class="text-sm font-semibold text-gray-800 dark:text-neutral-100">
             Obayan <span class="text-gray-500 dark:text-neutral-400 font-normal">• Platform Edukasi Modern</span>
@@ -33,7 +33,7 @@
           </div>
           <span>•</span>
           <div class="inline-flex items-center gap-1.5">
-            <ClientOnly><Icon icon="ph:cloud-arrow-up" class="size-3.5 text-blue-600" /></ClientOnly>
+            <ClientOnly><Icon icon="ph:cloud-arrow-up" class="size-3.5 text-green-600" /></ClientOnly>
             Cloud Production-Ready
           </div>
         </div>
@@ -41,7 +41,7 @@
 
       <div class="grid lg:grid-cols-12 gap-10 items-center">
         <div class="lg:col-span-6 space-y-7">
-          <p data-animate class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400">
+          <p data-animate class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-green-700 dark:text-green-400">
             <ClientOnly><Icon icon="ph:hand-heart" class="size-4" /></ClientOnly>
             Ekosistem Santri Inovatif
           </p>
@@ -54,7 +54,7 @@
 
           <p data-animate class="text-xl sm:text-2xl font-semibold tracking-tight">
             <span class="text-gray-700 dark:text-neutral-200 me-3">Satu pintu untuk</span>
-            <span class="typed-wrapper text-cyan-700">
+            <span class="typed-wrapper text-green-700">
               <span class="typed">{{ typedText }}</span><span class="caret" aria-hidden="true">|</span>
             </span>
           </p>
@@ -68,7 +68,7 @@
             <a
               :href="cta.href" target="_blank" rel="noopener"
               class="group inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white select-none magnetic
-                     bg-gradient-to-r from-emerald-600 to-cyan-600 hover:opacity-95 active:scale-[.99] transition will-change-transform"
+                     bg-linear-to-r from-emerald-600 to-green-600 hover:opacity-95 active:scale-[.99] transition will-change-transform"
               @mousemove="onMagnetMove"
               @mouseleave="onMagnetLeave"
             >
@@ -103,7 +103,7 @@
               <div class="tilt-card group will-change-transform rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 shadow-lg">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
-                    <ClientOnly><Icon icon="ph:books" class="size-5 text-blue-600 dark:text-blue-400" /></ClientOnly>
+                    <ClientOnly><Icon icon="ph:books" class="size-5 text-green-600 dark:text-green-400" /></ClientOnly>
                     <h3 class="text-base font-semibold text-gray-900 dark:text-white">Ringkasan Lembaga</h3>
                   </div>
                   <span class="text-[11px] px-2 py-1 rounded bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-neutral-300">Dashboard</span>
@@ -132,7 +132,7 @@
                       <span>Absensi hari ini</span><span>92%</span>
                     </div>
                     <div class="mt-1 h-2 rounded-full bg-gray-100 dark:bg-neutral-800 overflow-hidden">
-                      <div class="h-full w-[92%] bg-gradient-to-r from-emerald-500 to-green-500 rounded-full animate-[progress_2s_ease-in-out]"></div>
+                      <div class="h-full w-[92%] bg-linear-to-r from-emerald-500 to-green-500 rounded-full animate-[progress_2s_ease-in-out]"></div>
                     </div>
                   </div>
                   <div>
@@ -140,12 +140,12 @@
                       <span>SPP terbayar</span><span>86%</span>
                     </div>
                     <div class="mt-1 h-2 rounded-full bg-gray-100 dark:bg-neutral-800 overflow-hidden">
-                      <div class="h-full w-[86%] bg-gradient-to-r from-emerald-500 to-green-500 rounded-full animate-[progress_2.2s_ease-in-out]"></div>
+                      <div class="h-full w-[86%] bg-linear-to-r from-emerald-500 to-green-500 rounded-full animate-[progress_2.2s_ease-in-out]"></div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="absolute inset-0 -z-10 translate-y-4 blur-xl opacity-40 bg-gradient-to-r from-blue-500/20 to-emerald-500/20 rounded-3xl"></div>
+              <div class="absolute inset-0 -z-10 translate-y-4 blur-xl opacity-40 bg-linear-to-r from-green-500/20 to-emerald-500/20 rounded-3xl"></div>
             </div>
 
             <!-- feature pills -->
@@ -154,7 +154,7 @@
                 <button
                   v-for="f in features" :key="f.id"
                   class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-medium border border-gray-200 dark:border-neutral-800
-                         bg-white/70 dark:bg-neutral-900/60 hover:-translate-y-[1px] transition will-change-transform"
+                         bg-white/70 dark:bg-neutral-900/60 hover:-translate-y-px transition will-change-transform"
                 >
                   <ClientOnly><Icon :icon="f.icon" class="size-3.5 text-emerald-600" /></ClientOnly>
                   {{ f.title }}
@@ -164,7 +164,7 @@
                 Kelola data siswa, orang tua, guru, jadwal, keuangan, tahfidz, dan kelas digital — terintegrasi dalam satu platform.
               </p>
               <div class="mt-4">
-                <a :href="cta.href" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 dark:text-blue-400 hover:underline">
+                <a :href="cta.href" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-semibold text-green-700 dark:text-green-400 hover:underline">
                   Pelajari Obayan di obayan.sencra.io
                   <ClientOnly><Icon icon="ph:arrow-up-right" class="size-4" /></ClientOnly>
                 </a>
@@ -184,7 +184,7 @@ import { Icon } from '@iconify/vue'
 
 const root = ref<HTMLElement | null>(null)
 
-const cta = { label: 'Coba Obayan Gratis', href: 'https://obayan.sencra.io' }
+const cta = { label: 'Coba Obayan Gratis', href: 'https://obayan.id' }
 
 type Feature = { id: string; title: string; icon: string }
 const features = ref<Feature[]>([

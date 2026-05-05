@@ -33,7 +33,7 @@
         <div class="mx-auto w-full max-w-md">
           <div class="mb-5 text-center lg:hidden">
             <div class="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-lg ring-1 ring-green-100 dark:bg-neutral-900 dark:ring-neutral-800">
-              <img src="/assets/logo.png" alt="Logo" class="h-10 w-10 object-contain" />
+              <img :src="appLogo" :alt="`Logo ${clientDisplayName}`" class="h-10 w-10 object-contain" />
             </div>
             <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Portal Wali
@@ -48,8 +48,8 @@
 
             <div class="hidden lg:block">
               <div class="mb-6 flex items-center gap-4">
-                <div class="flex h-16 w-16 items-center justify-center rounded-3xl bg-green-500 text-white shadow-lg shadow-green-500/30">
-                  <img src="/assets/logo.png" alt="Logo" class="h-10 w-10 object-contain" />
+                <div class="flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-white border border-green-500 shadow-lg shadow-green-500/30">
+                  <img :src="appLogo" :alt="`Logo ${clientDisplayName}`" class="h-10 w-10 object-contain" />
                 </div>
                 <div>
                   <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
@@ -483,7 +483,7 @@ import {
   set,
   update
 } from 'firebase/database'
-import { useRuntimeConfig } from 'nuxt/app'
+import { useHead, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
 
 type ActiveTab = 'login' | 'register'
 type RegisterStep = 1 | 2
@@ -517,7 +517,72 @@ type WaliProfile = {
 }
 
 const config = useRuntimeConfig()
+
 const clientName = String(config.public.clientName || 'alinayah')
+const clientDisplayName = String(config.public.clientDisplayName || clientName)
+const siteName = String(config.public.siteName || clientDisplayName)
+const siteUrl = String(config.public.siteUrl || `https://${clientName}.sencra.io`).replace(/\/$/, '')
+const siteDescription = String(
+  config.public.siteDescription ||
+  `Portal wali ${clientDisplayName} untuk memantau data santri, pembayaran, pengumuman, dan informasi akademik secara aman.`
+)
+
+const appName = String(config.public.appName || 'Obayan')
+const appLogo = String(config.public.appLogo || '/assets/logo.png')
+const appThemeColor = String(config.public.appThemeColor || '#16a34a')
+const twitterSite = String(config.public.twitterSite || '@obayan_id')
+
+const pageTitle = `Portal Wali | ${clientDisplayName}`
+const pageDescription = `Masuk atau daftar akun wali ${clientDisplayName}. ${siteDescription}`
+const canonicalUrl = `${siteUrl}/waliLogin`
+
+function absoluteUrl(path: string) {
+  if (!path) return `${siteUrl}/assets/logo.png`
+  if (/^https?:\/\//i.test(path)) return path
+  return `${siteUrl}${path.startsWith('/') ? path : `/${path}`}`
+}
+
+const seoImage = absoluteUrl(appLogo)
+
+useHead({
+  htmlAttrs: {
+    lang: 'id'
+  },
+  title: pageTitle,
+  link: [
+    { rel: 'canonical', href: canonicalUrl },
+    { rel: 'icon', href: appLogo },
+    { rel: 'apple-touch-icon', href: appLogo }
+  ],
+  meta: [
+    { name: 'theme-color', content: appThemeColor },
+    { name: 'application-name', content: appName },
+    { name: 'apple-mobile-web-app-title', content: appName },
+    { name: 'format-detection', content: 'telephone=no' }
+  ]
+})
+
+useSeoMeta({
+  title: pageTitle,
+  description: pageDescription,
+
+  // Halaman login/register sebaiknya tidak diindeks Google
+  robots: 'noindex, nofollow, noarchive',
+
+  ogTitle: pageTitle,
+  ogDescription: pageDescription,
+  ogType: 'website',
+  ogUrl: canonicalUrl,
+  ogSiteName: siteName,
+  ogImage: seoImage,
+  ogLocale: 'id_ID',
+
+  twitterCard: 'summary_large_image',
+  twitterTitle: pageTitle,
+  twitterDescription: pageDescription,
+  twitterImage: seoImage,
+  twitterSite
+})
 
 const activeTab = ref<ActiveTab>('login')
 const registerStep = ref<RegisterStep>(1)

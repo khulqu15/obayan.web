@@ -29,7 +29,7 @@
           <div class="grid gap-3 lg:grid-cols-3 grid-cols-1">
             <div class="rounded-[24px] bg-white/12 p-4 ring-1 ring-white/15 backdrop-blur">
               <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-green-100">Total User</div>
-              <div class="mt-2 text-2xl font-black">{{ rows.length }}</div>
+              <div class="mt-2 text-2xl font-black">{{ visibleRows.length }}</div>
               <div class="mt-1 text-xs text-green-50/90">akun terdaftar di sistem</div>
             </div>
             <div class="rounded-[24px] bg-white/12 p-4 ring-1 ring-white/15 backdrop-blur">
@@ -100,7 +100,7 @@
         </article>
       </section>
 
-      <section class="grid gap-6 xl:grid-cols-[1.08fr,0.92fr]">
+      <section class="grid min-w-0 max-w-full gap-6 xl:grid-cols-1">
         <div class="space-y-6">
           <div class="sticky top-4 z-20 rounded-[28px] border border-gray-200/80 bg-white/92 p-4 shadow-sm backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/92">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -183,13 +183,15 @@
               </div>
             </div>
 
-            <div class="mt-5 overflow-hidden rounded-[26px] border border-gray-200 dark:border-neutral-800">
+            <div class="mt-5 overflow-x-auto max-w-full rounded-[26px] border border-gray-200 dark:border-neutral-800">
               <DataTable
                 title="Semua User"
                 :rows="filteredRows"
-                :show-actions="true"
                 :columns="columns"
                 :rowKey="(r) => r.uid"
+                :show-actions="true"
+                :selectable="false"
+                export-filename="data-user"
               >
                 <template #cell-role="{ row }">
                   <div class="inline-flex rounded-2xl border border-gray-200 bg-gray-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
@@ -231,11 +233,64 @@
                 </template>
 
                 <template #cell-action="{ row }">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <button @click="openEdit(row)" class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800">Edit</button>
-                    <button @click="openReset(row)" class="inline-flex items-center justify-center rounded-2xl border border-amber-200 bg-white px-3 py-1.5 text-xs font-semibold text-amber-700 transition hover:bg-amber-50 dark:border-amber-900/40 dark:bg-neutral-900 dark:text-amber-300 dark:hover:bg-amber-900/10">Reset Password</button>
-                    <button @click="openDelete(row)" class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10">Hapus</button>
-                    <button @click="openDeletePermanent(row)" class="inline-flex items-center justify-center rounded-2xl bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-rose-700">Permanen</button>
+                  <div class="relative flex justify-end">
+                    <button
+                      type="button"
+                      @click.stop="toggleActionMenu(row, $event)"
+                      class="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50 hover:text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-white"
+                      aria-label="Aksi user"
+                    >
+                      <ClientOnly>
+                        <Icon icon="lucide:ellipsis-vertical" class="h-4 w-4" />
+                      </ClientOnly>
+                    </button>
+
+                    <Teleport to="body">
+                      <div
+                        v-if="activeActionId === row.uid"
+                        :style="actionMenuStyle"
+                        class="fixed z-[9999] w-52 overflow-hidden rounded-2xl border border-gray-200 bg-white p-1 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900"
+                        @click.stop
+                      >
+                        <button
+                          type="button"
+                          @click="handleAction(() => openEdit(row))"
+                          class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        >
+                          <ClientOnly><Icon icon="lucide:pencil" class="h-4 w-4" /></ClientOnly>
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          @click="handleAction(() => openReset(row))"
+                          class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-amber-700 transition hover:bg-amber-50 dark:text-amber-300 dark:hover:bg-amber-900/10"
+                        >
+                          <ClientOnly><Icon icon="lucide:key-round" class="h-4 w-4" /></ClientOnly>
+                          Reset Password
+                        </button>
+
+                        <button
+                          type="button"
+                          @click="handleAction(() => openDelete(row))"
+                          class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-rose-700 transition hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-900/10"
+                        >
+                          <ClientOnly><Icon icon="lucide:user-x" class="h-4 w-4" /></ClientOnly>
+                          Non-aktifkan
+                        </button>
+
+                        <div class="my-1 border-t border-gray-100 dark:border-neutral-800"></div>
+
+                        <button
+                          type="button"
+                          @click="handleAction(() => openDeletePermanent(row))"
+                          class="flex w-full items-center gap-2 rounded-xl bg-rose-600 px-3 py-2 text-left text-sm font-semibold text-white transition hover:bg-rose-700"
+                        >
+                          <ClientOnly><Icon icon="lucide:trash-2" class="h-4 w-4" /></ClientOnly>
+                          Hapus Permanen
+                        </button>
+                      </div>
+                    </Teleport>
                   </div>
                 </template>
               </DataTable>
@@ -508,7 +563,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, reactive, ref } from 'vue'
 import { Icon } from '@iconify/vue'
 import DataTable from '~/components/widget/DataTable.vue'
 import ModalShell from '~/components/widget/ModalShell.vue'
@@ -523,22 +578,85 @@ const {
   sendReset, downloadPasswordFile, createdTempPassword
 } = useUser()
 
-onMounted(fetchUsers)
+function onActionOutsideClick() {
+  closeActionMenu()
+}
+
+onMounted(() => {
+  fetchUsers()
+  window.addEventListener('click', onActionOutsideClick)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('click', onActionOutsideClick)
+})
 
 const search = ref('')
 const roleFilter = ref<'all' | 'admin' | 'pengurus' | 'wali'>('all')
 const statusFilter = ref<'all' | 'active' | 'inactive'>('all')
 
-const activeUsers = computed(() => rows.value.filter((row) => row.isActive).length)
-const inactiveUsers = computed(() => rows.value.filter((row) => !row.isActive).length)
+const activeActionId = ref<string | null>(null)
+const actionMenuTop = ref(0)
+const actionMenuLeft = ref(0)
+
+const actionMenuStyle = computed(() => ({
+  top: `${actionMenuTop.value}px`,
+  left: `${actionMenuLeft.value}px`
+}))
+
+function toggleActionMenu(row: UserRow, event: MouseEvent) {
+  const target = event.currentTarget as HTMLElement
+  const rect = target.getBoundingClientRect()
+
+  const menuWidth = 208
+  const gap = 8
+
+  activeActionId.value = activeActionId.value === row.uid ? null : row.uid
+
+  actionMenuTop.value = rect.bottom + gap
+  actionMenuLeft.value = Math.max(12, rect.right - menuWidth)
+}
+
+function closeActionMenu() {
+  activeActionId.value = null
+}
+
+function handleAction(callback: () => void) {
+  closeActionMenu()
+  callback()
+}
+
+const PROTECTED_EMAILS = new Set([
+  'team.sencra@gmail.com'
+])
+
+function normalizeEmail(value?: string | null) {
+  return String(value || '').trim().toLowerCase()
+}
+
+function isProtectedUser(row?: UserRow | null) {
+  if (!row) return false
+
+  const role = String((row as any)?.role || '').trim().toLowerCase()
+  const email = normalizeEmail(row.email)
+
+  return role === 'superadmin' || PROTECTED_EMAILS.has(email)
+}
+
+const visibleRows = computed(() => {
+  return rows.value.filter((row) => !isProtectedUser(row))
+})
+
+const activeUsers = computed(() => visibleRows.value.filter((row) => row.isActive).length)
+const inactiveUsers = computed(() => visibleRows.value.filter((row) => !row.isActive).length)
 const roleCounts = computed(() => ({
-  admin: rows.value.filter((row) => row.role === 'admin').length,
-  pengurus: rows.value.filter((row) => row.role === 'pengurus').length,
-  wali: rows.value.filter((row) => row.role === 'wali').length,
+  admin: visibleRows.value.filter((row) => row.role === 'admin').length,
+  pengurus: visibleRows.value.filter((row) => row.role === 'pengurus').length,
+  wali: visibleRows.value.filter((row) => row.role === 'wali').length,
 }))
 
 const roleSummary = computed(() => {
-  const total = Math.max(rows.value.length, 1)
+  const total = Math.max(visibleRows.value.length, 1)
   return [
     { key: 'admin', label: 'Admin', count: roleCounts.value.admin, width: `${(roleCounts.value.admin / total) * 100}%`, barClass: 'bg-sky-500' },
     { key: 'pengurus', label: 'Pengurus', count: roleCounts.value.pengurus, width: `${(roleCounts.value.pengurus / total) * 100}%`, barClass: 'bg-emerald-500' },
@@ -548,10 +666,20 @@ const roleSummary = computed(() => {
 
 const filteredRows = computed(() => {
   const keyword = search.value.trim().toLowerCase()
-  return rows.value.filter((row) => {
-    const matchKeyword = !keyword || [row.displayName, row.email, row.phone, row.role].some((value) => String(value || '').toLowerCase().includes(keyword))
+
+  return visibleRows.value.filter((row) => {
+    const matchKeyword =
+      !keyword ||
+      [row.displayName, row.email, row.phone, row.role].some((value) =>
+        String(value || '').toLowerCase().includes(keyword)
+      )
+
     const matchRole = roleFilter.value === 'all' || row.role === roleFilter.value
-    const matchStatus = statusFilter.value === 'all' || (statusFilter.value === 'active' ? row.isActive : !row.isActive)
+
+    const matchStatus =
+      statusFilter.value === 'all' ||
+      (statusFilter.value === 'active' ? row.isActive : !row.isActive)
+
     return matchKeyword && matchRole && matchStatus
   })
 })
@@ -611,6 +739,8 @@ function openCreate() {
 }
 
 function openEdit(row: UserRow) {
+  if (isProtectedUser(row)) return
+
   formMode.value = 'edit'
   current.value = row
   createdTempPassword.value = ''
@@ -643,6 +773,10 @@ async function submitForm() {
       })
       await fetchUsers()
     } else if (current.value?.uid) {
+      if (isProtectedUser(current.value)) {
+        formError.value = 'Akun sistem tidak dapat diubah.'
+        return
+      }
       await updateUser(current.value.uid, {
         displayName: form.displayName.trim(),
         email: form.email?.trim(),
@@ -666,11 +800,15 @@ function downloadCred() {
 }
 
 async function onChangeRole(row: UserRow, role: 'admin' | 'pengurus' | 'wali') {
+  if (isProtectedUser(row)) return
+
   await setRole(row.uid, role, true)
   await fetchUsers()
 }
 
 async function toggleActive(row: UserRow) {
+  if (isProtectedUser(row)) return
+
   await setActive(row.uid, !row.isActive)
   await fetchUsers()
 }
@@ -681,11 +819,14 @@ const groups = ALL_SIDEBAR_GROUPS
 const accessBuffer = ref<string[]>([])
 
 function openAccess(row: UserRow) {
+  if (isProtectedUser(row)) return
+
   current.value = row
   const routes = row.allowedRoutes?.length ? row.allowedRoutes : ROLE_DEFAULT_ROUTES[row.role]
   accessBuffer.value = [...routes]
   showAccess.value = true
 }
+
 function selectAll() {
   accessBuffer.value = groups.flatMap((group) => group.items.map((item) => item.href))
 }
@@ -696,8 +837,11 @@ function applyRoleDefault() {
   if (!current.value) return
   accessBuffer.value = [...ROLE_DEFAULT_ROUTES[current.value.role]]
 }
+
 async function saveAccess() {
   if (!current.value) return
+  if (isProtectedUser(current.value)) return
+
   savingAccess.value = true
   try {
     await setAllowedRoutes(current.value.uid, [...new Set(accessBuffer.value)])
@@ -711,11 +855,15 @@ async function saveAccess() {
 const showReset = ref(false)
 const resetting = ref(false)
 function openReset(row: UserRow) {
+  if (isProtectedUser(row)) return
+
   current.value = row
   showReset.value = true
 }
 async function doReset() {
   if (!current.value?.email) return
+  if (isProtectedUser(current.value)) return
+
   resetting.value = true
   try {
     await sendReset(current.value.email)
@@ -728,11 +876,15 @@ async function doReset() {
 const showDelete = ref(false)
 const deleting = ref(false)
 function openDelete(row: UserRow) {
+  if (isProtectedUser(row)) return
+
   current.value = row
   showDelete.value = true
 }
 async function confirmDeleteSoft() {
   if (!current.value?.uid) return
+  if (isProtectedUser(current.value)) return
+
   deleting.value = true
   try {
     await deleteUserSoft(current.value.uid)
@@ -746,12 +898,16 @@ async function confirmDeleteSoft() {
 const showDeletePermanent = ref(false)
 const confirmPermanent = ref(false)
 function openDeletePermanent(row: UserRow) {
+  if (isProtectedUser(row)) return
+
   current.value = row
   confirmPermanent.value = false
   showDeletePermanent.value = true
 }
 async function confirmDeleteHard() {
   if (!current.value?.uid) return
+  if (isProtectedUser(current.value)) return
+
   deleting.value = true
   try {
     await deleteUserPermanent(current.value.uid)

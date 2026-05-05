@@ -42,16 +42,8 @@
 
             <div class="mt-8 flex flex-col sm:flex-row gap-3">
               <a
-                :href="c.ctaPPDB.href"
-                class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 focus:ring-offset-transparent"
-              >
-                <ClientOnly><Icon icon="ph:note-pencil" class="size-4" /></ClientOnly>
-                {{ c.ctaPPDB.label }}
-              </a>
-
-              <a
                 :href="c.ctaPrimary.href"
-                class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-transparent"
+                class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-transparent"
               >
                 {{ c.ctaPrimary.label }}
                 <ClientOnly><Icon icon="lucide:arrow-right" class="size-4" /></ClientOnly>
@@ -70,7 +62,7 @@
 
           <!-- RIGHT: stats + photos -->
           <div class="relative">
-            <dl class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <dl class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div
                 v-for="s in c.stats"
                 :key="s.label"
@@ -139,7 +131,6 @@ type HeaderHeroProps = {
   waIntl?: string
   ctaPrimary?: CTA
   ctaSecondary?: CTA
-  /** NEW */
   ctaPPDB?: CTA
   badges?: Badge[]
   stats?: Stat[]
@@ -168,7 +159,6 @@ const defaults: HeaderHeroComputed = {
   waIntl: '6285856376399',
   ctaPrimary: { label: 'Login Wali', href: '/waliLogin' },
   ctaSecondary: { label: 'Pelajari Program', href: '/program' },
-  /** NEW */
   ctaPPDB: { label: 'Daftar PSB', href: '/registration' },
   badges: [
     { label: 'SIAKAD',     icon: 'ph:chalkboard-teacher' },

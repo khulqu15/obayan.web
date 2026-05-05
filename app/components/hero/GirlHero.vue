@@ -1,5 +1,5 @@
 <template>
-  <section class="relative overflow-hidden bg-linear-to-b from-gray-100 via-blue-50 to-gray-100 dark:from-emerald-900/20 dark:via-blue-900/10 dark:to-neutral-900">
+  <section class="relative overflow-hidden bg-linear-to-b from-gray-100 via-green-50 to-gray-100 dark:from-emerald-900/20 dark:via-green-900/10 dark:to-neutral-900">
     <div class="max-w-352 mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-18">
       <div class="relative grid grid-cols-12 gap-8 items-center rounded-4xl
                   bg-white/75 dark:bg-neutral-900/60 backdrop-blur-xl shadow-[0_20px_60px_-20px_rgba(16,185,129,0.25)]
@@ -20,13 +20,13 @@
             <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold bg-emerald-100 800 dark:bg-emerald-900/40 dark:200">
               <ClientOnly><Icon icon="ph:sparkle" class="size-3.5" /></ClientOnly> Kemandirian
             </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold bg-blue-100 800 dark:bg-blue-900/40 dark:200">
+            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold bg-green-100 800 dark:bg-green-900/40 dark:200">
               <ClientOnly><Icon icon="ph:check-circle" class="size-3.5" /></ClientOnly> Disiplin
             </span>
             <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold bg-emerald-100 800 dark:bg-emerald-900/40 dark:200">
               <ClientOnly><Icon icon="ph:book-open-text" class="size-3.5" /></ClientOnly> Tahfidz
             </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold bg-blue-100 800 dark:bg-blue-900/40 dark:200">
+            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold bg-green-100 800 dark:bg-green-900/40 dark:200">
               <ClientOnly><Icon icon="ph:users-three" class="size-3.5" /></ClientOnly> Kepemimpinan
             </span>
           </div>
@@ -62,13 +62,13 @@
         </div>
 
         <div class="col-span-12 md:col-span-6 lg:col-span-5">
-          <div class="relative aspect-[4/3] rounded-[1.75rem] dark:ring-neutral-800 bg-white/60 dark:bg-neutral-800/40">
+          <div class="relative aspect-4/3 rounded-[1.75rem] dark:ring-neutral-800 bg-white/60 dark:bg-neutral-800/40">
             <img v-if="image" :src="image" alt="Pondok Putri" class="size-full rounded-[1.75rem] object-cover">
             <div class="absolute left-4 top-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold
                         bg-white/85 dark:bg-neutral-900/70 backdrop-blur border border-neutral-200 dark:border-neutral-700
                         text-neutral-700 dark:text-neutral-300 shadow-sm">
               <span class="inline-block size-2 rounded-full bg-emerald-500 animate-pulse" />
-              Putri Area
+              {{ clientDisplayName }}
             </div>
 
             <div class="absolute -left-3 bottom-6">
@@ -82,9 +82,9 @@
               <div class="rounded-2xl bg-white/95 dark:bg-neutral-900/80 backdrop-blur border border-neutral-200 dark:border-neutral-700 shadow-md px-3.5 py-2.5 animate-[float_7s_ease-in-out_infinite]">
                 <div class="flex items-center gap-1.5 text-xs text-neutral-500">
                   <ClientOnly><Icon v-if="floatingTopIcon" :icon="floatingTopIcon" class="size-3.5 text-neutral-500" /></ClientOnly>
-                  {{ floatingTopTitle }}
+                  {{ floatingTopSubtitle }}
                 </div>
-                <div class="text-sm font-bold text-neutral-900 dark:text-white">{{ floatingTopSubtitle }}</div>
+                <div class="text-sm font-bold text-neutral-900 dark:text-white">{{ floatingTopTitle }}</div>
               </div>
             </div>
           </div>
@@ -97,6 +97,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useRuntimeConfig } from 'nuxt/app'
+
+const config = useRuntimeConfig()
+const clientName = String(config.public.clientName || 'alinayah')
+const clientDisplayName = String(config.public.clientDisplayName || 'Al-Inayah')
+const appName = String(config.public.appName || 'ALINAYAH')
+const appLogo = String(config.public.appLogo || '/assets/logo.png')
+const siteName = String(config.public.siteName || 'Pondok Pesantren Al-Inayah')
 
 type CTA = { label: string; href: string; icon?: string }
 type Shape = {

@@ -1,4 +1,13 @@
 import { ref, computed, onMounted, watch } from 'vue'
+import { Node } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Youtube from '@tiptap/extension-youtube'
+import { Table } from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableHeader from '@tiptap/extension-table-header'
+import TableCell from '@tiptap/extension-table-cell'
+import Image from '@tiptap/extension-image'
+import Link from '@tiptap/extension-link'
 
 export type NewsContentTiptap = { kind: 'tiptap'; json?: any; html?: string }
 export type NewsContentHtml   = { kind: 'html'; html: string }
@@ -27,6 +36,8 @@ export type NewsItem = {
   updatedBy?: NewsAuthor
   createdAt?: number
   updatedAt?: number
+  segment?: 'TK' | 'SD' | 'SMP' | 'Madin' | 'Pondok' | 'Umum'
+  coverPublicId?: string
 }
 
 function slugify(s: string) {
@@ -55,6 +66,159 @@ function estimateReadTimeFromTiptap(json?: any, html?: string) {
                (html ? String(html).replace(/<[^>]+>/g, ' ') : '')
   const words = (text.match(/\w+/g) || []).length
   return Math.max(1, Math.round(words / 200))
+}
+
+const PdfEmbed = Node.create({
+  name: 'pdfEmbed',
+  group: 'block',
+  atom: true,
+
+  addAttributes() {
+    return {
+      src: { default: '' },
+      title: { default: 'Dokumen PDF' }
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'div[data-type="pdf-embed"]' }]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return [
+      'div',
+      {
+        'data-type': 'pdf-embed',
+        'data-src': HTMLAttributes.src || '',
+        'data-title': HTMLAttributes.title || 'Dokumen PDF',
+        class: 'pdf-embed'
+      },
+      ['div', { class: 'pdf-embed-title' }, HTMLAttributes.title || 'Dokumen PDF'],
+      [
+        'iframe',
+        {
+          src: HTMLAttributes.src || '',
+          loading: 'lazy',
+          class: 'pdf-embed-frame'
+        }
+      ]
+    ]
+  }
+})
+
+const MapEmbed = Node.create({
+  name: 'mapEmbed',
+  group: 'block',
+  atom: true,
+
+  addAttributes() {
+    return {
+      src: {
+        default: ''
+      },
+      title: {
+        default: 'Lokasi Google Maps'
+      }
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'div[data-type="map-embed"]'
+      }
+    ]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return [
+      'div',
+      {
+        'data-type': 'map-embed',
+        'data-src': HTMLAttributes.src || '',
+        'data-title': HTMLAttributes.title || 'Lokasi Google Maps',
+        class: 'map-embed'
+      },
+      ['div', { class: 'map-embed-title' }, HTMLAttributes.title || 'Lokasi Google Maps'],
+      [
+        'iframe',
+        {
+          src: HTMLAttributes.src || '',
+          loading: 'lazy',
+          class: 'map-embed-frame',
+          allowfullscreen: 'true',
+          referrerpolicy: 'no-referrer-when-downgrade'
+        }
+      ]
+    ]
+  }
+})
+
+function tiptapExtensions() {
+  return [
+    StarterKit.configure({
+      heading: { levels: [1, 2, 3] },
+      bulletList: {
+        keepMarks: true,
+        keepAttributes: false
+      },
+      orderedList: {
+        keepMarks: true,
+        keepAttributes: false
+      }
+    }),
+
+    Image.configure({
+      inline: false,
+      allowBase64: false,
+      HTMLAttributes: {
+        class: 'editor-image'
+      }
+    }),
+
+    Link.configure({
+      openOnClick: true,
+      autolink: true,
+      HTMLAttributes: {
+        class: 'news-content-link',
+        target: '_blank',
+        rel: 'noopener noreferrer'
+      }
+    }),
+
+    Youtube.configure({
+      controls: true,
+      nocookie: true,
+      allowFullscreen: true,
+      width: 640,
+      height: 360,
+      HTMLAttributes: {
+        class: 'youtube-embed'
+      }
+    }),
+
+    Table.configure({
+      resizable: true,
+      HTMLAttributes: {
+        class: 'editor-table'
+      }
+    }),
+
+    TableRow,
+    TableHeader,
+    TableCell,
+    PdfEmbed,
+    MapEmbed
+  ]
+}
+
+function cleanForFirebase<T>(value: T): T {
+  return JSON.parse(
+    JSON.stringify(value, (_key, val) => {
+      if (val === undefined) return null
+      return val
+    })
+  )
 }
 
 export const useNews = () => {
@@ -119,9 +283,8 @@ export const useNews = () => {
         key = 'tiptap-html:' + c.html.slice(0,120)
       } else if (c.json) {
         key = 'tiptap-json:' + JSON.stringify(c.json).slice(0,120)
-        const [{ generateHTML }] = await Promise.all([import('@tiptap/core')])
-        const StarterKit = (await import('@tiptap/starter-kit')).default
-        html = generateHTML(c.json, [StarterKit])
+        const { generateHTML } = await import('@tiptap/core')
+        html = generateHTML(c.json, tiptapExtensions())
       }
     }
 
@@ -139,7 +302,31 @@ export const useNews = () => {
     if (!html) return ''
     if (renderCache.has(key)) return renderCache.get(key)!
     const DOMPurify = (await import('isomorphic-dompurify')).default
-    const safe = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } })
+    const safe = DOMPurify.sanitize(html, {
+      USE_PROFILES: { html: true },
+      ADD_TAGS: ['iframe'],
+      ADD_ATTR: [
+        'allow',
+        'allowfullscreen',
+        'frameborder',
+        'scrolling',
+        'loading',
+        'referrerpolicy',
+        'src',
+        'href',
+        'target',
+        'rel',
+        'title',
+        'alt',
+        'width',
+        'height',
+        'class',
+        'data-type',
+        'data-src',
+        'data-title',
+        'data-public-id'
+      ]
+    })
     renderCache.set(key, safe)
     return safe
   }
@@ -186,6 +373,8 @@ export const useNews = () => {
           updatedBy: v.updatedBy || undefined,
           createdAt: Number(v.createdAt || 0) || undefined,
           updatedAt: Number(v.updatedAt || 0) || undefined,
+          segment: v.segment || 'Umum',
+          coverPublicId: v.coverPublicId || '',
         }
       })
       items.value = arr.sort((a,b) => (b.publishedAt||0) - (a.publishedAt||0))
@@ -221,9 +410,8 @@ export const useNews = () => {
       json = (content as any).json
       html = (content as any).html
       if (!html && json) {
-        const [{ generateHTML }] = await Promise.all([import('@tiptap/core')])
-        const StarterKit = (await import('@tiptap/starter-kit')).default
-        html = generateHTML(json, [StarterKit])
+        const { generateHTML } = await import('@tiptap/core')
+        html = generateHTML(json, tiptapExtensions())
       }
       content = { kind: 'tiptap', json, html }
     } else if (typeof content === 'string' && content.trim().startsWith('<')) {
@@ -236,7 +424,7 @@ export const useNews = () => {
     const listRef = dbRef($realtimeDb, `${clientName}/news`)
     const nodeRef = push(listRef)
 
-    await set(nodeRef, {
+    const data = cleanForFirebase({
       slug: candidate,
       title: payload.title || '',
       excerpt: payload.excerpt || '',
@@ -246,10 +434,14 @@ export const useNews = () => {
       publishedAt: payload.publishedAt ?? now,
       readTime: read || 3,
       content,
+      segment: (payload as any).segment || 'Umum',
       author: payload.author || null,
       createdAt: now,
       updatedAt: now,
+      coverPublicId: (payload as any).coverPublicId || '',
     })
+
+    await set(nodeRef, data)
 
     await loadNews()
     return nodeRef.key
@@ -270,6 +462,8 @@ export const useNews = () => {
     if (patch.readTime !== undefined) data.readTime = Number(patch.readTime)
     if (patch.slug) data.slug = slugify(patch.slug)
     if (patch.updatedBy !== undefined) data.updatedBy = patch.updatedBy
+    if ((patch as any).segment !== undefined) data.segment = (patch as any).segment
+    if ((patch as any).coverPublicId !== undefined) data.coverPublicId = (patch as any).coverPublicId
     data.updatedAt = Date.now()
 
     if (patch.content !== undefined) {
@@ -290,7 +484,7 @@ export const useNews = () => {
       data.content = content
     }
 
-    await update(nodeRef, data)
+    await update(nodeRef, cleanForFirebase(data))
     await loadNews()
   }
 
@@ -301,11 +495,33 @@ export const useNews = () => {
     await loadNews()
   }
 
+  const categories = computed(() => {
+    return Array.from(
+      new Set(
+        items.value
+          .map((item) => item.category)
+          .filter(Boolean)
+          .map((category) => String(category))
+      )
+    ).sort((a, b) => a.localeCompare(b))
+  })
+
+  const allTags = computed(() => {
+    return Array.from(
+      new Set(
+        items.value
+          .flatMap((item) => item.tags || [])
+          .filter(Boolean)
+          .map((tag) => String(tag))
+      )
+    ).sort((a, b) => a.localeCompare(b))
+  })
+
   return {
     pending, error, items,
     q, selectedCategory, selectedTags, sortBy, page, pageSize,
     filtered, paged, hasMore, toggleTag, resetFilters,
     slug, isDetail, current, openDetail, backToList, renderedDetailHtml, contentToHtml,
-    loadNews, createNews, updateNews, deleteNews
+    loadNews, createNews, updateNews, deleteNews, categories, allTags
   }
 }

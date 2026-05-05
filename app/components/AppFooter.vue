@@ -144,7 +144,6 @@ type FooterBrand = {
 }
 
 const config = useRuntimeConfig()
-
 const clientName = String(config.public.clientName || 'alinayah')
 const clientDisplayName = String(config.public.clientDisplayName || 'Al-Inayah')
 const appName = String(config.public.appName || 'ALINAYAH')

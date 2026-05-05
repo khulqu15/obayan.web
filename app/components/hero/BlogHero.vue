@@ -1,8 +1,8 @@
 <!-- components/hero/BlogHero.vue -->
 <template>
   <section class="relative overflow-hidden bg-white/90 dark:bg-neutral-900 dark:border-neutral-800" id="news">
-    <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 -top-40 h-64 bg-gradient-to-b from-blue-100/70 to-transparent dark:from-emerald-900/20" />
-    <div class="max-w-[85rem] relative mx-auto min-h-screen px-4 sm:px-6 lg:px-8 pt-8 pb-6">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 -top-40 h-64 bg-linear-to-b from-green-100/70 to-transparent dark:from-emerald-900/20" />
+    <div class="max-w-340 relative mx-auto min-h-screen px-4 sm:px-6 lg:px-8 pt-8 pb-6">
       <!-- heading -->
       <div class="grid lg:grid-cols-12 gap-6">
         <div class="lg:col-span-7">
@@ -18,22 +18,22 @@
       <div class="grid grid-cols-12 gap-6 mt-8">
         <!-- Featured -->
         <div class="lg:col-span-6 col-span-12">
-          <div v-if="resolvedFeatured.title" class="card-blog max-h-[34rem] min-h-[34rem] overflow-hidden relative h-full w-full border rounded-xl border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60 backdrop-blur-sm hover:shadow-md transition-shadow">
+          <div v-if="resolvedFeatured.title" class="card-blog max-h-136 min-h-136 overflow-hidden relative h-full w-full border rounded-xl border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60 backdrop-blur-sm hover:shadow-md transition-shadow">
             <img class="card-blog-image transition-all" :src="resolvedFeatured.cover" :alt="resolvedFeatured.title">
             <NuxtLink :to="resolvedFeatured.href">
               <div class="card-blog-content p-5 overflow-hidden">
-                <span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-lg text-xs font-medium bg-blue-100 dark:bg-blue-800/30 mb-3">{{ resolvedFeatured.category }}</span>
+                <span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-lg text-xs font-medium bg-green-100 dark:bg-green-800/30 mb-3">{{ resolvedFeatured.category }}</span>
                 <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-100">
                   {{ resolvedFeatured.title }}
                 </h1>
                 <div class="flex justify-between items-center flex-wrap mt-3">
-                  <div class="flex-grow flex gap-1">
+                  <div class="grow flex gap-1">
                     <span v-for="t in (resolvedFeatured.tags || [])" :key="t"
                           class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-md text-xs font-medium border border-gray-200 bg-white text-gray-800 shadow-2xs dark:bg-neutral-900 dark:border-neutral-700 dark:text-white">
                       {{ t }}
                     </span>
                   </div>
-                  <div class="flex-grow md:w-auto w-full text-right">
+                  <div class="grow md:w-auto w-full text-right">
                     <span class="text-sm text-gray-800 dark:text-white">{{ resolvedFeatured.dateText }}</span>
                   </div>
                 </div>
@@ -47,7 +47,7 @@
             <div class="hs-dropdown [--strategy:fixed] relative inline-flex">
               <button type="button"
                       class="hs-dropdown-toggle inline-flex items-center gap-x-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700">
-                <span class="inline-block w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-600"></span>
                 {{ selectedCategory }}
                 <svg class="size-4 text-gray-500 dark:text-neutral-400 hs-dropdown-open:rotate-180 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
               </button>
@@ -55,7 +55,7 @@
                 <label v-for="cat in categoriesUi" :key="cat"
                        class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer">
                   <input type="radio" name="blog-category" v-if="cat != undefined"
-                         class="shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-600"
+                         class="shrink-0 rounded border-gray-300 text-green-600 focus:ring-green-500 dark:bg-neutral-800 dark:border-neutral-600"
                          :value="cat" :checked="selectedCategory === cat" @change="setCategory(cat)">
                   <span class="text-sm text-gray-800 dark:text-neutral-200">{{ cat }}</span>
                 </label>
@@ -66,7 +66,7 @@
               <button type="button"
                       class="hs-dropdown-toggle inline-flex items-center gap-x-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700">
                 Tags
-                <span v-if="selectedTags.size" class="inline-flex items-center rounded-full bg-blue-600 text-white text-[11px] px-1.5 py-0.5">{{ selectedTags.size }}</span>
+                <span v-if="selectedTags.size" class="inline-flex items-center rounded-full bg-green-600 text-white text-[11px] px-1.5 py-0.5">{{ selectedTags.size }}</span>
                 <svg class="size-4 text-gray-500 dark:text-neutral-400 hs-dropdown-open:rotate-180 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
               </button>
               <div class="hs-dropdown-menu mt-2 w-64 z-20 hidden rounded-lg border border-gray-200 bg-white p-2 shadow-md dark:bg-neutral-800 dark:border-neutral-700">
@@ -74,14 +74,14 @@
                   <label v-for="tag in tagsUi" :key="tag"
                          class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer">
                     <input type="checkbox"
-                           class="shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-600"
+                           class="shrink-0 rounded border-gray-300 text-green-600 focus:ring-green-500 dark:bg-neutral-800 dark:border-neutral-600"
                            :checked="selectedTags.has(tag)" @change="toggleTag(tag)">
                     <span class="text-sm text-gray-800 dark:text-neutral-200">#{{ tag }}</span>
                   </label>
                 </div>
                 <div class="mt-2 flex justify-between gap-2">
                   <button @click="clearTags" class="text-xs px-2 py-1.5 rounded-md border border-gray-200 hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-700 text-gray-700 dark:text-neutral-200">Clear</button>
-                  <button @click="applyFilters" class="text-xs px-2 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700">Apply</button>
+                  <button @click="applyFilters" class="text-xs px-2 py-1.5 rounded-md bg-green-600 text-white hover:bg-green-700">Apply</button>
                 </div>
               </div>
             </div>
@@ -96,7 +96,7 @@
                     <article class="flex justify-center h-full p-0">
                       <div class="relative h-full w-full overflow-hidden rounded-lg">
                         <img :src="post.cover" :alt="post.title" class="absolute inset-0 h-full w-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent"></div>
+                        <div class="absolute inset-0 bg-linear-to-t from-black/75 via-black/35 to-transparent"></div>
                         <div class="relative h-full p-5 flex flex-col justify-end">
                           <div class="flex flex-wrap items-center gap-2">
                             <span class="inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-full bg-white/10 ring-1 ring-white/20 text-white">
@@ -149,7 +149,7 @@
         </div>
 
         <NuxtLink to="/news" class="text-right flex justify-end col-span-12">
-          <button class="py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+          <button class="py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-green-600 text-white hover:bg-green-700 focus:outline-hidden focus:bg-green-700 disabled:opacity-50 disabled:pointer-events-none">
             Berita Selengkapnya
           </button>
         </NuxtLink>
@@ -204,18 +204,13 @@ const route = useRoute()
 const web = useWeb()
 const news = useNews()
 
-/** Ensure we are bound to the current page once (safe to call if already bound by parent) */
 onMounted(async () => {
   const path = web.normalizePath((route as any).path || '/')
-  if (!web.meta.value) {
-    await web.subscribePage(path)
-  } else {
-    web.setActivePath(path)
-  }
+  if (!web.meta.value) await web.subscribePage(path)
+  else web.setActivePath(path)
   initCarousel()
 })
 
-/** Find my section config from RTDB: pick the first enabled section with key 'BlogHero' (or 'NewsHero' fallback) */
 const mySection = computed(() => {
   const list = web.enabledSections.value || []
   return list.find(s => s.key === 'BlogHero')
@@ -223,14 +218,11 @@ const mySection = computed(() => {
       || null
 })
 
-/** Live listen for newsSource.mode on this section (as requested) */
 const liveMode = ref<'custom'|'auto'|'manual'|null>(null)
 let _unsubMode: (() => void) | null = null
 
 watch(mySection, async (sec, _, onCleanup) => {
-  // cleanup old
   if (_unsubMode) { try { _unsubMode() } catch {} _unsubMode = null }
-
   if (!sec) return
   try {
     const { $realtimeDb }: any = useNuxtApp()
@@ -248,7 +240,6 @@ watch(mySection, async (sec, _, onCleanup) => {
 
 onBeforeUnmount(() => { try { _unsubMode?.() } catch {} _unsubMode = null })
 
-/** props/config effective (props from section.props; fallback to defaults) */
 const cfgProps = computed<any>(() => {
   const p = mySection.value?.props || {}
   return {

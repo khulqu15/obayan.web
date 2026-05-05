@@ -1,11 +1,11 @@
 <template>
-  <header :class="[ 'fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out transform-gpu will-change-transform', isScrolledOrOpen ? scrolledHeaderClass : topHeaderClass ]">
+  <header :class="[ 'fixed top-0 left-0 right-0 z-9999 transition-all duration-300 ease-out transform-gpu will-change-transform', isScrolledOrOpen ? scrolledHeaderClass : topHeaderClass ]">
     <div class="px-3 sm:px-5 lg:px-6 pt-3">
       <nav :class="[ 'relative max-w-344 mx-auto rounded-[1.75rem] border backdrop-blur-xl transition-all duration-300', navbarShellClass ]">
         <div class="flex items-center justify-between gap-3 px-4 py-3 sm:px-5 lg:px-6">
           <a href="/" aria-label="Brand" class="group flex min-w-0 items-center gap-3 focus:outline-none" >
-            <div :class="[ 'flex h-11 w-11 items-center justify-center rounded-2xl ring-1 transition-all duration-300 overflow-hidden', isLightSurface ? 'bg-green-500 ring-green-200 shadow-lg shadow-green-200/60' : 'bg-white/14 ring-white/20 shadow-lg shadow-black/10']">
-              <img :src="brandLogo" class="h-7 w-7 object-contain" :alt="`Logo ${clientDisplayName}`" />
+            <div :class="[ 'flex h-11 w-11 items-center justify-center rounded-2xl ring-1 transition-all duration-300 overflow-hidden', isLightSurface ? 'bg-white ring-green-200 shadow-lg shadow-green-200/60' : 'bg-white/14 ring-white/20 shadow-lg shadow-black/10']">
+              <img :src="appLogo" class="h-7 w-7 object-contain" :alt="`Logo ${clientDisplayName}`" />
             </div>
 
             <div class="min-w-0">
@@ -141,17 +141,25 @@
           <!-- Mobile toggle -->
           <button
             type="button"
-            class="hs-collapse-toggle md:hidden inline-flex h-11 w-11 items-center justify-center rounded-2xl transition-all"
+            class="relative z-10 md:hidden inline-flex h-11 w-11 items-center justify-center rounded-2xl transition-all active:scale-95"
             :class="mobileToggleClass"
             id="hs-header-base-collapse"
-            aria-expanded="false"
+            :aria-expanded="String(isMobileOpen)"
             aria-controls="hs-header-base"
             aria-label="Toggle navigation"
-            data-hs-collapse="#hs-header-base"
+            @click.stop.prevent="toggleMobileMenu"
           >
             <ClientOnly>
-              <Icon :class="['hs-collapse-open:hidden size-5', adaptiveTextClass]" icon="lucide:menu" />
-              <Icon :class="['hs-collapse-open:block hidden size-5', adaptiveTextClass]" icon="lucide:x" />
+              <Icon
+                v-if="!isMobileOpen"
+                :class="['size-5', adaptiveTextClass]"
+                icon="lucide:menu"
+              />
+              <Icon
+                v-else
+                :class="['size-5', adaptiveTextClass]"
+                icon="lucide:x"
+              />
               <template #fallback><span class="inline-block h-5 w-5" /></template>
             </ClientOnly>
           </button>
@@ -160,8 +168,11 @@
         <!-- Mobile collapse -->
         <div
           id="hs-header-base"
-          class="hs-collapse hidden basis-full border-t transition-all duration-300 md:hidden"
-          :class="isLightSurface ? 'border-slate-200/80' : 'border-white/10'"
+          class="basis-full border-t transition-all duration-300 md:hidden"
+          :class="[
+            isMobileOpen ? 'block opacity-100 translate-y-0' : 'hidden opacity-0 -translate-y-2',
+            isLightSurface ? 'border-slate-200/80' : 'border-white/10'
+          ]"
           aria-labelledby="hs-header-base-collapse"
         >
           <div class="max-h-[75vh] overflow-y-auto px-4 pb-4 pt-3">
@@ -170,6 +181,7 @@
                 v-for="l in navLinks"
                 :key="l.label"
                 :href="l.href"
+                @click="closeMobileIfOpen"
                 class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition"
                 :class="mobileLinkClass"
               >
@@ -225,6 +237,7 @@
                   v-for="btn in ctaButtons"
                   :key="btn.label"
                   :href="btn.href"
+                  @click="closeMobileIfOpen"
                   :class="btn.style === 'primary' ? primaryButtonClass : secondaryButtonClass"
                 >
                   {{ btn.label }}
@@ -356,31 +369,15 @@ const onScroll = () => {
   isTop.value = window.scrollY <= threshold
 }
 
-let collapseObserver: MutationObserver | null = null
-
 onMounted(() => {
   onScroll()
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('keydown', onKeydown)
-
-  const el = document.getElementById('hs-header-base')
-  const updateOpen = () => {
-    isMobileOpen.value = !!el && !el.classList.contains('hidden')
-  }
-
-  if (el) {
-    ;['open.hs.collapse', 'show.hs.collapse', 'close.hs.collapse', 'hide.hs.collapse']
-      .forEach(evt => el.addEventListener(evt as any, updateOpen as any))
-    collapseObserver = new MutationObserver(updateOpen)
-    collapseObserver.observe(el, { attributes: true, attributeFilter: ['class', 'style'] })
-    updateOpen()
-  }
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll)
   window.removeEventListener('keydown', onKeydown)
-  collapseObserver?.disconnect()
 })
 
 const isMobileOpen = ref(false)
@@ -504,18 +501,7 @@ const ctaButtons = ref([
 ])
 
 function closeMobileIfOpen() {
-  const el = document.getElementById('hs-header-base')
   isMobileOpen.value = false
-
-  try {
-    const HSCollapse = (window as any)?.HSCollapse
-    if (HSCollapse && el) {
-      const inst = HSCollapse.getInstance(el, true)
-      inst?.hide?.()
-    } else {
-      el?.classList.add('hidden')
-    }
-  } catch {}
 }
 
 function normalizeItem(raw: any): MegaItem {
@@ -532,6 +518,10 @@ function normalizeItem(raw: any): MegaItem {
 }
 
 const defaultCover = '/assets/images/activity.jpg'
+
+function toggleMobileMenu() {
+  isMobileOpen.value = !isMobileOpen.value
+}
 
 function megaSectionOf(item: MegaItem) {
   for (const g of megaMenu.value) {

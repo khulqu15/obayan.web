@@ -185,8 +185,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
-import { useRoute } from '#imports'
-import { useRuntimeConfig, useSeoMeta, useHead } from '#app'
+import { useRoute } from 'vue-router'
+import { useRuntimeConfig, useSeoMeta, useHead } from 'nuxt/app'
 import { useWeb } from '~/composables/data/useWeb'
 
 definePageMeta({ ssr: false }) // opsional, agar meta reaktif dari client

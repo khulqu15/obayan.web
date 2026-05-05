@@ -1,13 +1,13 @@
 <template>
   <section class="relative dark:bg-neutral-900 bg-gray-100">
-    <div class="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    <div class="max-w-340 mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
 
       <div
-        class="relative overflow-hidden rounded-[2rem] shadow-xl border border-gray-200/70 dark:border-neutral-800 isolate transition-transform duration-500 hover:scale-[1.01]">
+        class="relative overflow-hidden rounded-4xl shadow-xl border border-gray-200/70 dark:border-neutral-800 isolate transition-transform duration-500 hover:scale-[1.01]">
         <div class="absolute inset-0">
           <div class="absolute inset-0 bg-center bg-cover" :style="{ backgroundImage: `url(${state.bg})` }" />
           <div class="absolute inset-0 bg-[rgba(var(--app-primary-rgb),0.8)] mix-blend-multiply" />
-          <div class="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10" />
+          <div class="absolute inset-0 bg-linear-to-br from-white/5 via-transparent to-white/10" />
         </div>
 
         <div class="relative grid grid-cols-12 gap-6 items-center">
@@ -21,7 +21,7 @@
               {{ state.preText }}
               <span class="underline decoration-white/40">{{ state.highlightText }}</span>
               {{ state.suffixText }}
-              <span class="text-white drop-shadow">{{ state.brandText }}</span>
+              <span class="text-white drop-shadow">{{ state.brand }}</span>
             </h1>
 
             <p class="mt-3 text-white/90 max-w-xl">
@@ -77,7 +77,8 @@
 import { reactive, onMounted, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
-import { ref as dbRef, query, orderByChild, equalTo, onValue, off, Query } from 'firebase/database'
+import { ref as dbRef, query, orderByChild, equalTo, onValue } from 'firebase/database'
+import type { Query } from 'firebase/database'
 
 const config = useRuntimeConfig()
 const clientName = config.public.clientName || 'alinayah'
@@ -85,7 +86,7 @@ const clientName = config.public.clientName || 'alinayah'
 type CTA = { label: string; href: string; icon?: string }
 type Shape = {
   bg: string; pattern?: string; eyebrow: string;
-  preText: string; highlightText: string; suffixText: string; brandText: string;
+  preText: string; highlightText: string; suffixText: string; brand: string;
   subtitle: string;
   hadithArabic?: string; hadithTranslation?: string; hadithSource?: string;
   ctaPrimary: CTA; ctaSecondary: CTA
@@ -100,7 +101,7 @@ const defaults: Shape = {
   preText: 'Ayo',
   highlightText: 'Mondok',
   suffixText: 'di',
-  brandText: 'Ponpes Alinayah',
+  brand: 'Ponpes Alinayah',
   subtitle: 'Lingkungan yang menumbuhkan adab, ilmu, dan kemandirian. Kurikulum diniyah & formal terpadu, pembinaan tahfidz, serta program kepemimpinan dan pengabdian.',
   hadithArabic: 'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ',
   hadithTranslation: '“Barangsiapa menempuh jalan untuk mencari ilmu, Allah akan mudahkan baginya jalan menuju Surga.”',
@@ -118,7 +119,7 @@ function merge(b: Shape, p: Partial<Shape> = {}): Shape {
     preText: p.preText ?? b.preText,
     highlightText: p.highlightText ?? b.highlightText,
     suffixText: p.suffixText ?? b.suffixText,
-    brandText: p.brandText ?? b.brandText,
+    brand: p.brand ?? b.brand,
     subtitle: p.subtitle ?? b.subtitle,
     hadithArabic: p.hadithArabic ?? b.hadithArabic,
     hadithTranslation: p.hadithTranslation ?? b.hadithTranslation,
@@ -135,15 +136,14 @@ function subscribeFromRTDBByKey() {
   if (typeof window === 'undefined') return
   const { $realtimeDb }: any = useNuxtApp()
 
-  // /alberr/web/pages/home/sections where each child has { key, enabled, props, ... }
   const sectionsPath =  `${clientName}/web/pages/home/sections`
   const q: Query = query(dbRef($realtimeDb, sectionsPath), orderByChild('key'), equalTo(KEY))
 
   unsub = onValue(q, (snap) => {
     if (!snap.exists()) return
     const obj = snap.val() as Record<string, any>
+    console.log(`[RTDB] ${KEY} updated:`, obj)
     const first = Object.values(obj)[0] as any
-    // optional: cek enabled
     if (first && (first.enabled ?? true)) {
       const props = first.props || {}
       Object.assign(state, merge(defaults, props))

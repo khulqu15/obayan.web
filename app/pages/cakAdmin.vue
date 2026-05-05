@@ -33,7 +33,7 @@
           <!-- Mobile mini branding -->
           <div class="mb-5 text-center lg:hidden">
             <div class="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-lg ring-1 ring-green-100 dark:bg-neutral-900 dark:ring-neutral-800">
-              <img src="/assets/logo.png" alt="Logo" class="h-10 w-10 object-contain" />
+              <img :src="appLogo" alt="Logo" class="h-10 w-10 object-contain" />
             </div>
             <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Admin Login
@@ -51,8 +51,8 @@
 
             <div class="hidden lg:block">
               <div class="mb-6 flex items-center gap-4">
-                <div class="flex h-16 w-16 items-center justify-center rounded-3xl bg-green-500 text-white shadow-lg shadow-green-500/30">
-                  <img src="/assets/logo.png" alt="Logo" class="h-10 w-10 object-contain" />
+                <div class="flex h-16 w-16 items-center justify-center rounded-3xl bg-white border border-green-500 text-white shadow-lg shadow-green-500/30">
+                  <img :src="appLogo" alt="Logo" class="h-10 w-10 object-contain" />
                 </div>
                 <div>
                   <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
@@ -178,7 +178,7 @@ import { Icon } from '@iconify/vue'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { getDatabase, ref as dref, get } from 'firebase/database'
 import { ROLE_DEFAULT_ROUTES, type AppRole } from '~/composables/data/useUser'
-import { useRuntimeConfig } from 'nuxt/app'
+import { useHead, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
 
 export type PlainSession = {
   sub?: string
@@ -195,9 +195,72 @@ export type PlainSession = {
   iat?: number
   exp?: number
 }
-
 const config = useRuntimeConfig()
-const clientName = config.public.clientName || 'alinayah'
+
+const clientName = String(config.public.clientName || 'alinayah')
+const clientDisplayName = String(config.public.clientDisplayName || clientName)
+const siteName = String(config.public.siteName || clientDisplayName)
+const siteUrl = String(config.public.siteUrl || `https://${clientName}.sencra.io`).replace(/\/$/, '')
+const siteDescription = String(
+  config.public.siteDescription ||
+  `Portal admin ${clientDisplayName} untuk mengelola data, informasi, konten, dan layanan digital lembaga.`
+)
+
+const appName = String(config.public.appName || 'Obayan Admin')
+const appSubtitle = String(config.public.appSubtitle || `Admin Portal ${clientDisplayName}`)
+const appLogo = String(config.public.appLogo || '/assets/logo.png')
+const appThemeColor = String(config.public.appThemeColor || '#16a34a')
+const twitterSite = String(config.public.twitterSite || '@obayan_id')
+
+const pageTitle = `Admin Login | ${appName}`
+const pageDescription = `Masuk ke dashboard ${appName} ${clientDisplayName}. ${siteDescription}`
+const canonicalUrl = `${siteUrl}/cakAdmin`
+
+function absoluteUrl(path: string) {
+  if (!path) return `${siteUrl}/assets/logo.png`
+  if (/^https?:\/\//i.test(path)) return path
+  return `${siteUrl}${path.startsWith('/') ? path : `/${path}`}`
+}
+
+const seoImage = absoluteUrl(appLogo)
+
+useHead({
+  htmlAttrs: {
+    lang: 'id'
+  },
+  title: pageTitle,
+  link: [
+    { rel: 'canonical', href: canonicalUrl },
+    { rel: 'icon', href: appLogo },
+    { rel: 'apple-touch-icon', href: appLogo }
+  ],
+  meta: [
+    { name: 'theme-color', content: appThemeColor },
+    { name: 'application-name', content: appName },
+    { name: 'apple-mobile-web-app-title', content: appName },
+    { name: 'format-detection', content: 'telephone=no' }
+  ]
+})
+
+useSeoMeta({
+  title: pageTitle,
+  description: pageDescription,
+  robots: 'noindex, nofollow, noarchive',
+
+  ogTitle: pageTitle,
+  ogDescription: pageDescription,
+  ogType: 'website',
+  ogUrl: canonicalUrl,
+  ogSiteName: siteName,
+  ogImage: seoImage,
+  ogLocale: 'id_ID',
+
+  twitterCard: 'summary_large_image',
+  twitterTitle: pageTitle,
+  twitterDescription: pageDescription,
+  twitterImage: seoImage,
+  twitterSite
+})
 
 const form = ref({
   email: '',

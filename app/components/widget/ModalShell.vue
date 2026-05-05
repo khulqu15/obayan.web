@@ -1,23 +1,23 @@
 <template>
   <Teleport to="body">
     <transition name="fade">
-      <div v-if="modelValue" class="fixed inset-0 z-[100] dark:text-neutral-200">
+      <div v-if="modelValue" class="fixed inset-0 z-100 rounded-2xl overflow-hidden dark:text-neutral-200">
         <div class="absolute inset-0 bg-black/40" @click="close"></div>
 
         <div class="absolute inset-0 p-4 flex items-center justify-center">
           <div :class="panelClass" :style="panelStyle" role="dialog" aria-modal="true">
-            <div class="px-4 py-3 border-b border-gray-200 dark:border-neutral-700 flex items-center justify-between bg-white dark:bg-neutral-900" :class="isFullscreen ? 'sticky top-0 z-10' : ''">
+            <div class="px-4 py-3 border-b rounded-xl border-gray-200 dark:border-neutral-700 flex items-center justify-between bg-white dark:bg-neutral-900" :class="isFullscreen ? 'sticky top-0 z-10' : ''">
               <h3 class="font-semibold text-gray-800 dark:text-neutral-100">{{ title }}</h3>
               <button class="p-1 rounded hover:bg-gray-100 dark:hover:bg-neutral-800" @click="close" aria-label="Tutup dialog">
                 ✕
               </button>
             </div>
 
-            <div class="px-4 py-3" :class="isFullscreen ? 'flex-1 overflow-y-auto' : 'overflow-y-auto'" :style="bodyStyle">
+            <div class="px-4 py-3 max-h-[80vh] overflow-y-auto" :class="isFullscreen ? 'flex-1 overflow-y-auto' : 'overflow-y-auto'" :style="bodyStyle">
               <slot />
             </div>
 
-            <div v-if="$slots.footer" class="px-4 py-3 border-t border-gray-200 dark:border-neutral-700 flex justify-end gap-2 bg-white dark:bg-neutral-900" :class="isFullscreen ? 'sticky bottom-0 z-10' : ''">
+            <div v-if="$slots.footer" class="px-4 py-3 rounded-xl border-t border-gray-200 dark:border-neutral-700 flex justify-end gap-2 bg-white dark:bg-neutral-900" :class="isFullscreen ? 'sticky bottom-0 z-10' : ''">
               <slot name="footer" />
             </div>
           </div>

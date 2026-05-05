@@ -4,7 +4,7 @@
       <div class="text-center max-w-3xl mx-auto">
         <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
           {{ c.headingPrefix }}
-          <span class="text-blue-600 dark:text-blue-400">{{ c.brandText }}</span>?
+          <span class="text-green-600 dark:text-green-400">{{ c.brandText }}</span>?
         </h2>
         <p class="mt-3 text-gray-600 dark:text-neutral-300">
           {{ c.subtitle }}
@@ -19,10 +19,10 @@
         >
           <div class="flex items-start gap-3">
             <div
-              class="shrink-0 rounded-xl p-2.5 ring-1 ring-gray-200 dark:ring-neutral-700 bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-neutral-700 dark:to-neutral-700/50"
+              class="shrink-0 rounded-xl p-2.5 ring-1 ring-gray-200 dark:ring-neutral-700 bg-linear-to-b from-green-50 to-indigo-50 dark:from-neutral-700 dark:to-neutral-700/50"
             >
               <ClientOnly>
-                <Icon :icon="item.icon" class="size-5 text-blue-600 dark:text-blue-400" />
+                <Icon :icon="item.icon" class="size-5 text-green-600 dark:text-green-400" />
                 <template #fallback><span class="block size-5 rounded bg-gray-200 dark:bg-neutral-600" /></template>
               </ClientOnly>
             </div>
@@ -39,7 +39,7 @@
       </div>
     </div>
 
-    <div class="relative bg-gradient-to-b from-white to-blue-50/60 dark:from-neutral-900 dark:to-neutral-900/60">
+    <div class="relative bg-linear-to-b from-white to-green-50/60 dark:from-neutral-900 dark:to-neutral-900/60">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div class="lg:col-span-1">
@@ -51,7 +51,7 @@
             <div class="mt-6">
               <a
                 :href="c.profilHref"
-                class="inline-flex items-center gap-x-2 text-sm font-medium text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                class="inline-flex items-center gap-x-2 text-sm font-medium text-green-700 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
               >
                 Lihat Profil Pesantren
                 <ClientOnly>
@@ -70,10 +70,10 @@
                 class="flex items-start gap-3 rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60 backdrop-blur-sm p-4"
               >
                 <div
-                  class="shrink-0 mt-0.5 rounded-full p-1 ring-1 ring-blue-200 dark:ring-blue-900/40 bg-blue-50 dark:bg-blue-900/20"
+                  class="shrink-0 mt-0.5 rounded-full p-1 ring-1 ring-green-200 dark:ring-green-900/40 bg-green-50 dark:bg-green-900/20"
                 >
                   <ClientOnly>
-                    <Icon :icon="m.icon" class="size-4 text-blue-600 dark:text-blue-400" />
+                    <Icon :icon="m.icon" class="size-4 text-green-600 dark:text-green-400" />
                     <template #fallback><span class="block size-4 rounded-full bg-gray-200 dark:bg-neutral-600" /></template>
                   </ClientOnly>
                 </div>
