@@ -33,7 +33,7 @@
               </button>
 
               <div
-                class="hs-dropdown-menu hidden opacity-0 transition-[opacity,margin] duration-200 hs-dropdown-open:opacity-100 z-20 mt-3 w-[min(94vw,70rem)] rounded-[1.75rem] border border-white/60 bg-white/95 p-3 shadow-[0_20px_80px_-20px_rgba(16,185,129,0.30)] backdrop-blur-2xl dark:border-neutral-800 dark:bg-neutral-900/95"
+                class="hs-dropdown-menu hidden opacity-0 transition-[opacity,margin] duration-200 hs-dropdown-open:opacity-100 z-20 w-[min(94vw,70rem)] rounded-[1.75rem] border border-white/60 bg-white/95 p-3 shadow-[0_20px_80px_-20px_rgba(16,185,129,0.30)] backdrop-blur-2xl dark:border-neutral-800 dark:bg-neutral-900/95 md:!fixed md:!left-1/2 md:!right-auto md:!top-[1.5rem] md:!mt-0 md:!-translate-x-1/2"
                 role="menu"
                 aria-orientation="vertical"
                 aria-labelledby="hs-header-program"
@@ -351,7 +351,6 @@ const appSubtitle = String(config.public.appSubtitle || 'SIAKAD Ponpes. AL-INAYA
 const appLogo = String(config.public.appLogo || '/assets/logo.png')
 
 const NAVBAR_PATH = `${clientName}/site/navbar`
-const NAVBAR_MEGA_ROOT = `${clientName}/site/navbar/megaMenu`
 
 const route = useRoute()
 
@@ -555,47 +554,59 @@ if ($realtimeDb) {
   onMounted(() => {
     onValue(dbRef($realtimeDb, NAVBAR_PATH), (snap) => {
       const val = snap.val()
+
       if (!val) return
 
-      brand.value = val.brand ?? brand.value
-      brandShorten.value = val.brandShorten ?? brandShorten.value
-      brandSubtitle.value = val.brandSubtitle ?? brandSubtitle.value
+      brand.value = String(val.brand || siteName)
+      brandShorten.value = String(val.brandShorten || appName)
+      brandSubtitle.value = String(val.brandSubtitle || appSubtitle)
 
-      if (val.brandLogo) brandLogo.value = val.brandLogo
-      else if (val.coverPonpes) brandLogo.value = val.coverPonpes
-      if (val.ppdbCta) ppdbCta.value = { ...ppdbCta.value, ...val.ppdbCta }
-      if (Array.isArray(val.ctaButtons)) ctaButtons.value = val.ctaButtons
-    })
-
-    onValue(dbRef($realtimeDb, NAVBAR_MEGA_ROOT), (snap) => {
-      const root = snap.val()
-      if (!root) {
-        megaMenu.value = []
-        return
+      if (val.brandLogo) {
+        brandLogo.value = String(val.brandLogo)
+      } else {
+        brandLogo.value = appLogo
       }
 
-      const groups: MegaGroup[] = []
+      if (Array.isArray(val.navLinks)) {
+        navLinks.value = val.navLinks
+          .map((item: any) => ({
+            label: String(item?.label || '').trim(),
+            href: String(item?.href || '#').trim(),
+            icon: String(item?.icon || 'ph:circle').trim()
+          }))
+          .filter((item: any) => item.label)
+      }
 
-      Object.keys(root)
-        .sort((a, b) => Number(a) - Number(b))
-        .forEach((k) => {
-          const g = root[k] || {}
-          const itemsKey = 'items' + String(k)
-          let itemsList: any = g[itemsKey] ?? g.items ?? []
+      if (Array.isArray(val.megaMenu)) {
+        megaMenu.value = val.megaMenu
+          .map((group: any, index: number) => ({
+            title: String(group?.title || `Grup ${index + 1}`).trim(),
+            items: Array.isArray(group?.items)
+              ? group.items.map((raw: any) => normalizeItem(raw)).filter((item: MegaItem) => item.label)
+              : []
+          }))
+          .filter((group: MegaGroup) => group.title || group.items.length)
+      }
 
-          if (Array.isArray(itemsList)) {
-            // ok
-          } else if (itemsList && typeof itemsList === 'object') {
-            itemsList = Object.values(itemsList)
-          } else {
-            itemsList = []
-          }
+      if (val.ppdbCta && typeof val.ppdbCta === 'object') {
+        ppdbCta.value = {
+          ...ppdbCta.value,
+          title: String(val.ppdbCta.title || ppdbCta.value.title),
+          desc: String(val.ppdbCta.desc || ppdbCta.value.desc),
+          href: String(val.ppdbCta.href || ppdbCta.value.href),
+          image: String(val.ppdbCta.image || ppdbCta.value.image)
+        }
+      }
 
-          const mapped: MegaItem[] = (itemsList as any[]).map((raw) => normalizeItem(raw))
-          groups.push({ title: g.title ?? `Grup ${k}`, items: mapped })
-        })
-
-      megaMenu.value = groups
+      if (Array.isArray(val.ctaButtons)) {
+        ctaButtons.value = val.ctaButtons
+          .map((button: any) => ({
+            label: String(button?.label || '').trim(),
+            href: String(button?.href || '#').trim(),
+            style: button?.style === 'outline' ? 'outline' as const : 'primary' as const
+          }))
+          .filter((button: any) => button.label)
+      }
     })
   })
 }

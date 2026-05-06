@@ -49,7 +49,7 @@ export default defineNuxtConfig({
       appLogo: process.env.NUXT_PUBLIC_APP_LOGO || '/assets/logo.png',
       appThemeColor: process.env.NUXT_PUBLIC_APP_THEME_COLOR || '#0ea5e9',
 
-      cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '',
+      cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME || '',
       cloudinaryUploadPreset: process.env.NUXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '',
     }
   },

@@ -1,3 +1,5 @@
+<!-- pages/app/navbar.vue -->
+
 <template>
   <div class="min-h-full bg-transparent pb-28 text-gray-800 dark:text-neutral-200">
     <div class="mx-auto max-w-[1760px] space-y-6 p-4 md:p-6">
@@ -866,6 +868,8 @@ const note = ref('')
 const externalChanged = ref(false)
 const uploadTarget = ref<MediaKey | ''>('')
 
+const hasHydrated = ref(false)
+
 let mutedRemoteSync = false
 let unsubscribeNavbar: null | (() => void) = null
 
@@ -988,12 +992,19 @@ async function syncFromDatabase() {
 
     const normalized = sanitizeForm(merged as ReturnType<typeof makeDefaultForm>)
 
-    if (mutedRemoteSync) {
+    // Penting:
+    // Snapshot pertama harus selalu masuk ke form.
+    // Kalau tidak, form default dianggap dirty dan data Firebase ditolak.
+    if (!hasHydrated.value || mutedRemoteSync) {
+      applyForm(normalized as ReturnType<typeof makeDefaultForm>)
       original.value = JSON.stringify(normalized)
+      hasHydrated.value = true
       mutedRemoteSync = false
+      externalChanged.value = false
       return
     }
 
+    // Setelah hydrate awal, baru lindungi local edit dari overwrite realtime.
     if (isDirty.value) {
       externalChanged.value = true
       return
@@ -1010,7 +1021,19 @@ async function reloadFromDatabase() {
   ok.value = false
   externalChanged.value = false
   mutedRemoteSync = false
+  hasHydrated.value = false
+
   await syncFromDatabase()
+}
+
+function commitOpenItemModalToForm() {
+  if (!modal.open) return
+  if (modal.gidx < 0 || modal.idx < 0) return
+
+  const group = form.megaMenu[modal.gidx]
+  if (!group?.items?.[modal.idx]) return
+
+  group.items[modal.idx] = clone(itemDraft)
 }
 
 async function saveAll() {
@@ -1021,6 +1044,10 @@ async function saveAll() {
   ok.value = false
 
   try {
+    // Agar gambar / perubahan di modal Mega Item tetap ikut tersimpan,
+    // meskipun user belum klik tombol "Simpan Item".
+    commitOpenItemModalToForm()
+
     const payload = sanitizeForm()
     mutedRemoteSync = true
 
@@ -1028,7 +1055,9 @@ async function saveAll() {
 
     applyForm(payload as ReturnType<typeof makeDefaultForm>)
     original.value = JSON.stringify(payload)
+    hasHydrated.value = true
     externalChanged.value = false
+
     ok.value = true
     note.value = 'Perubahan navbar berhasil disimpan.'
 
@@ -1193,7 +1222,10 @@ async function onUploadItemCover(event: Event) {
   if (!file || !modal.open) return
 
   const url = await uploadToCloudinary(file, 'itemCover', `${CLOUDINARY_NAVBAR_FOLDER}/mega-items`)
-  if (url) itemDraft.cover = url
+  if (url) {
+    itemDraft.cover = url
+    commitOpenItemModalToForm()
+  }
 }
 
 async function applyMediaUrl(key: MediaKey) {
@@ -1218,7 +1250,10 @@ async function applyMediaUrl(key: MediaKey) {
 
     if (key === 'coverPonpes') form.coverPonpes = url
     if (key === 'ppdbCta') form.ppdbCta.image = url
-    if (key === 'itemCover') itemDraft.cover = url
+    if (key === 'itemCover') {
+      itemDraft.cover = url
+      commitOpenItemModalToForm()
+    }
 
     ok.value = true
     note.value = 'Link gambar berhasil digunakan. Klik Simpan untuk menyimpan.'
@@ -1234,7 +1269,10 @@ async function applyMediaUrl(key: MediaKey) {
 function removeMedia(key: MediaKey) {
   if (key === 'coverPonpes') form.coverPonpes = ''
   if (key === 'ppdbCta') form.ppdbCta.image = ''
-  if (key === 'itemCover') itemDraft.cover = ''
+  if (key === 'itemCover') {
+    itemDraft.cover = ''
+    commitOpenItemModalToForm()
+  }
 
   mediaDraft[key] = ''
 }

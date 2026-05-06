@@ -1,7 +1,9 @@
+<!-- pages/app/user.vue -->
+
 <template>
   <div class="min-h-full bg-transparent text-gray-800 dark:text-neutral-200">
     <div class="mx-auto max-w-[1720px] space-y-6 p-5 md:p-8 xl:p-10">
-      <section class="relative overflow-hidden rounded-[32px] border border-green-100 bg-gradient-to-br from-green-600 via-emerald-600 to-lime-500 p-5 text-white shadow-[0_24px_60px_-18px_rgba(22,163,74,0.35)] md:p-8">
+      <section class="relative overflow-hidden rounded-[32px] border border-green-100 bg-gradient-to-br from-green-600 via-green-600 to-lime-500 p-5 text-white shadow-[0_24px_60px_-18px_rgba(22,163,74,0.35)] md:p-8">
         <div class="absolute inset-0 opacity-20">
           <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white blur-3xl"></div>
           <div class="absolute bottom-0 left-8 h-32 w-32 rounded-full bg-lime-100 blur-3xl"></div>
@@ -66,7 +68,7 @@
               <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Pengurus</p>
               <p class="mt-2 text-3xl font-black tracking-tight text-gray-900 dark:text-white">{{ roleCounts.pengurus }}</p>
             </div>
-            <div class="inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-emerald-600 text-white dark:bg-emerald-900/20 dark:text-white">
+            <div class="inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-green-600 text-white dark:bg-green-900/20 dark:text-white">
               <ClientOnly><Icon icon="lucide:users" class="h-5 w-5" /></ClientOnly>
             </div>
           </div>
@@ -194,7 +196,7 @@
                 export-filename="data-user"
               >
                 <template #cell-role="{ row }">
-                  <div class="inline-flex rounded-2xl border border-gray-200 bg-gray-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
+                  <div v-if="canManageRole" class="inline-flex rounded-2xl border border-gray-200 bg-gray-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
                     <select
                       class="rounded-2xl bg-transparent px-3 py-1.5 text-sm font-medium outline-none"
                       :value="row.role"
@@ -205,13 +207,31 @@
                       <option value="wali">Wali</option>
                     </select>
                   </div>
+
+                  <span
+                    v-else
+                    class="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold capitalize"
+                    :class="row.role === 'admin'
+                      ? 'bg-sky-50 text-sky-700 dark:bg-sky-900/20 dark:text-sky-300'
+                      : row.role === 'pengurus'
+                        ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
+                        : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'"
+                  >
+                    {{ row.role || 'wali' }}
+                  </span>
                 </template>
 
                 <template #cell-isActive="{ row }">
                   <button
-                    @click="toggleActive(row)"
+                    type="button"
+                    @click="canManageUserAccess ? toggleActive(row) : undefined"
                     class="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold transition"
-                    :class="row.isActive ? 'bg-emerald-500 text-white dark:bg-emerald-900/20' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'"
+                    :class="[
+                      row.isActive
+                        ? 'bg-green-500 text-white dark:bg-green-900/20'
+                        : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300',
+                      !canManageUserAccess ? 'cursor-default opacity-90' : 'hover:scale-[1.02]'
+                    ]"
                   >
                     <span class="mr-1.5 inline-block h-2 w-2 rounded-full" :class="row.isActive ? 'bg-white' : 'bg-amber-500'"></span>
                     {{ row.isActive ? 'Aktif' : 'Non-aktif' }}
@@ -398,11 +418,22 @@
             </div>
             <div>
               <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Role</label>
-              <select v-model="form.role" class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
+              <select
+                v-if="canManageRole"
+                v-model="form.role"
+                class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
+              >
                 <option value="admin">Admin</option>
                 <option value="pengurus">Pengurus</option>
                 <option value="wali">Wali</option>
               </select>
+
+              <div
+                v-else
+                class="block w-full rounded-2xl border border-gray-200 bg-gray-100 px-4 py-3 text-sm font-semibold capitalize text-gray-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+              >
+                {{ form.role }}
+              </div>
             </div>
           </div>
 
@@ -434,10 +465,10 @@
 
           <p v-if="formError" class="text-sm text-rose-600 dark:text-rose-300">{{ formError }}</p>
 
-          <div v-if="createdTempPassword" class="rounded-[22px] border border-emerald-200 bg-emerald-50 p-4 text-sm dark:border-emerald-900/40 dark:bg-emerald-900/10">
+          <div v-if="createdTempPassword" class="rounded-[22px] border border-green-200 bg-green-50 p-4 text-sm dark:border-green-900/40 dark:bg-green-900/10">
             <div><strong>Password sementara:</strong> <code>{{ createdTempPassword }}</code></div>
             <div class="mt-3">
-              <button type="button" @click="downloadCred" class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700">Download credential</button>
+              <button type="button" @click="downloadCred" class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-green-700">Download credential</button>
             </div>
           </div>
         </form>
@@ -564,6 +595,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, reactive, ref } from 'vue'
+import { useState } from 'nuxt/app'
 import { Icon } from '@iconify/vue'
 import DataTable from '~/components/widget/DataTable.vue'
 import ModalShell from '~/components/widget/ModalShell.vue'
@@ -577,6 +609,53 @@ const {
   setRole, setAllowedRoutes, setActive,
   sendReset, downloadPasswordFile, createdTempPassword
 } = useUser()
+
+const sessionUser = useState<any>('sessionUser', () => ({}))
+
+const viewerEmail = computed(() => {
+  return normalizeEmail(
+    sessionUser.value?.email ||
+    sessionUser.value?.user?.email ||
+    sessionUser.value?.auth?.email ||
+    ''
+  )
+})
+
+const viewerRole = computed(() => {
+  return String(
+    sessionUser.value?.role ||
+    sessionUser.value?.user?.role ||
+    sessionUser.value?.claims?.role ||
+    ''
+  )
+    .trim()
+    .toLowerCase()
+})
+
+const viewerRow = computed(() => {
+  const email = viewerEmail.value
+  if (!email) return null
+
+  return rows.value.find((row) => normalizeEmail(row.email) === email) || null
+})
+
+const effectiveViewerRole = computed(() => {
+  return String(viewerRole.value || viewerRow.value?.role || '')
+    .trim()
+    .toLowerCase()
+})
+
+const canManageUserAccess = computed(() => {
+  return effectiveViewerRole.value === 'superadmin' || viewerEmail.value === 'team.sencra@gmail.com'
+})
+
+const canManageRole = computed(() => {
+  return (
+    effectiveViewerRole.value === 'superadmin' ||
+    effectiveViewerRole.value === 'admin' ||
+    viewerEmail.value === 'team.sencra@gmail.com'
+  )
+})
 
 function onActionOutsideClick() {
   closeActionMenu()
@@ -659,7 +738,7 @@ const roleSummary = computed(() => {
   const total = Math.max(visibleRows.value.length, 1)
   return [
     { key: 'admin', label: 'Admin', count: roleCounts.value.admin, width: `${(roleCounts.value.admin / total) * 100}%`, barClass: 'bg-sky-500' },
-    { key: 'pengurus', label: 'Pengurus', count: roleCounts.value.pengurus, width: `${(roleCounts.value.pengurus / total) * 100}%`, barClass: 'bg-emerald-500' },
+    { key: 'pengurus', label: 'Pengurus', count: roleCounts.value.pengurus, width: `${(roleCounts.value.pengurus / total) * 100}%`, barClass: 'bg-green-500' },
     { key: 'wali', label: 'Wali', count: roleCounts.value.wali, width: `${(roleCounts.value.wali / total) * 100}%`, barClass: 'bg-amber-500' },
   ]
 })
@@ -684,14 +763,21 @@ const filteredRows = computed(() => {
   })
 })
 
-const columns = [
-  { key: 'displayName', label: 'Nama', sortable: true },
-  { key: 'email', label: 'Email', sortable: true },
-  { key: 'phone', label: 'No HP', sortable: true },
-  { key: 'role', label: 'Role', sortable: true },
-  { key: 'isActive', label: 'Status', sortable: true },
-  { key: 'allowedRoutes', label: 'Akses Sidebar' },
-]
+const columns = computed(() => {
+  const base = [
+    { key: 'displayName', label: 'Nama', sortable: true },
+    { key: 'email', label: 'Email', sortable: true },
+    { key: 'phone', label: 'No HP', sortable: true },
+    { key: 'role', label: 'Role', sortable: true },
+    { key: 'isActive', label: 'Status', sortable: true },
+  ]
+
+  if (canManageUserAccess.value) {
+    base.push({ key: 'allowedRoutes', label: 'Akses Sidebar', sortable: false })
+  }
+
+  return base
+})
 
 const showForm = ref(false)
 const formMode = ref<'create' | 'edit'>('create')
@@ -767,7 +853,7 @@ async function submitForm() {
         displayName: form.displayName.trim(),
         email: form.email?.trim() || undefined,
         phone: form.phone?.trim() || undefined,
-        role: form.role,
+        role: canManageRole.value ? form.role : 'wali',
         createAuth: !!form.createAuth,
         password: form.password?.trim() || undefined,
       })
@@ -781,7 +867,7 @@ async function submitForm() {
         displayName: form.displayName.trim(),
         email: form.email?.trim(),
         phone: form.phone?.trim(),
-        role: form.role,
+        ...(canManageRole.value ? { role: form.role } : {}),
       })
       await fetchUsers()
     }
@@ -800,6 +886,7 @@ function downloadCred() {
 }
 
 async function onChangeRole(row: UserRow, role: 'admin' | 'pengurus' | 'wali') {
+  if (!canManageRole.value) return
   if (isProtectedUser(row)) return
 
   await setRole(row.uid, role, true)
@@ -807,6 +894,7 @@ async function onChangeRole(row: UserRow, role: 'admin' | 'pengurus' | 'wali') {
 }
 
 async function toggleActive(row: UserRow) {
+  if (!canManageUserAccess.value) return
   if (isProtectedUser(row)) return
 
   await setActive(row.uid, !row.isActive)
@@ -819,6 +907,7 @@ const groups = ALL_SIDEBAR_GROUPS
 const accessBuffer = ref<string[]>([])
 
 function openAccess(row: UserRow) {
+  if (!canManageUserAccess.value) return
   if (isProtectedUser(row)) return
 
   current.value = row
@@ -839,6 +928,7 @@ function applyRoleDefault() {
 }
 
 async function saveAccess() {
+  if (!canManageUserAccess.value) return
   if (!current.value) return
   if (isProtectedUser(current.value)) return
 

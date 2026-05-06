@@ -188,42 +188,63 @@ export const useCloudinaryUpload = () => {
   async function uploadImage(file: File, opts?: ResizeOptions) {
     uploadError.value = null
 
-    const allowedImageTypes = new Set([
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/webp'
-    ])
-
     const maxBytes = opts?.maxBytes || 5 * 1024 * 1024
 
-    if (!allowedImageTypes.has(file.type)) {
-      uploadError.value = 'Format gambar harus JPG, PNG, atau WebP.'
-      throw new Error(uploadError.value)
-    }
-
-    if (file.size > maxBytes) {
-      uploadError.value = `Ukuran gambar maksimal ${Math.round(maxBytes / 1024 / 1024)} MB.`
-      throw new Error(uploadError.value)
+    try {
+      validateImageFile(file, maxBytes)
+    } catch (err: any) {
+      uploadError.value = err?.message || 'File gambar tidak valid.'
+      throw err
     }
 
     uploading.value = true
 
     try {
+      const config = useRuntimeConfig()
+
+      const cloudName = String(config.public.cloudinaryCloudName || '')
+      const uploadPreset = String(config.public.cloudinaryUploadPreset || '')
+
+      if (!cloudName || !uploadPreset) {
+        throw new Error('Cloudinary cloud name atau upload preset belum diatur.')
+      }
+
+      const webpFile = await resizeImageToWebp(file, {
+        maxWidth: opts?.maxWidth || 1600,
+        maxHeight: opts?.maxHeight || 1600,
+        quality: opts?.quality ?? 0.82
+      })
+
       const form = new FormData()
-      form.append('file', file)
+      form.append('file', webpFile)
+      form.append('upload_preset', uploadPreset)
 
-      if (opts?.folder) form.append('folder', opts.folder)
-      if (opts?.maxWidth) form.append('maxWidth', String(opts.maxWidth))
-      if (opts?.maxHeight) form.append('maxHeight', String(opts.maxHeight))
-      if (opts?.quality) form.append('quality', String(opts.quality))
+      // Catatan:
+      // folder hanya bisa dipakai jika upload preset Cloudinary mengizinkan.
+      // Kalau Cloudinary menolak folder, hapus baris ini atau set folder langsung di upload preset.
+      if (opts?.folder) {
+        form.append('folder', opts.folder)
+      }
 
-      const res = await $fetch<CloudinaryUploadResult>('/api/cloudinary/upload-image-file', {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
         method: 'POST',
         body: form
       })
 
-      return res
+      const json = await res.json()
+
+      if (!res.ok) {
+        throw new Error(json?.error?.message || 'Upload gambar ke Cloudinary gagal.')
+      }
+
+      return {
+        secure_url: json.secure_url,
+        public_id: json.public_id,
+        width: json.width,
+        height: json.height,
+        bytes: json.bytes,
+        format: json.format
+      } as CloudinaryUploadResult
     } catch (err: any) {
       uploadError.value =
         err?.data?.statusMessage ||
