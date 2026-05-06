@@ -3174,16 +3174,28 @@ const nowMs = computed(() => nowLocalMs.value + serverOffsetMs.value)
 const isClosedManual = computed(() => !!ppdbSettings.value.isClosed)
 const autoEnabled = computed(() => !!ppdbSettings.value.autoCloseEnabled)
 const autoAtMs = computed(() => toMs(ppdbSettings.value.autoCloseAt))
-const fallbackHardStopMs = computed(() => new Date(`${ppdbYear.value}-12-31T23:59:59+07:00`).getTime())
-const isAutoDue = computed(() => !!autoAtMs.value && nowMs.value >= autoAtMs.value)
-const isFallbackDue = computed(() => nowMs.value >= fallbackHardStopMs.value)
-const isFormClosed = computed(() => isClosedManual.value || isAutoDue.value || isFallbackDue.value)
+const isAutoDue = computed(() => {
+  if (!autoEnabled.value) return false
+  if (!autoAtMs.value) return false
+
+  return nowMs.value >= autoAtMs.value
+})
+
+const isFormClosed = computed(() => {
+  return isClosedManual.value || isAutoDue.value
+})
 
 const closedReason = computed(() => {
   if (ppdbSettings.value.notice) return ppdbSettings.value.notice
-  if (isClosedManual.value) return 'Pendaftaran ditutup oleh panitia.'
-  if (isAutoDue.value && autoAtMs.value) return `Pendaftaran ditutup otomatis pada ${formatInJktMs(autoAtMs.value)}.`
-  if (isFallbackDue.value) return `Pendaftaran ditutup otomatis sesuai timeline (${formatInJktMs(fallbackHardStopMs.value)}).`
+
+  if (isClosedManual.value) {
+    return 'Pendaftaran ditutup oleh panitia.'
+  }
+
+  if (isAutoDue.value && autoAtMs.value) {
+    return `Pendaftaran ditutup otomatis pada ${formatInJktMs(autoAtMs.value)}.`
+  }
+
   return ''
 })
 
@@ -3220,9 +3232,13 @@ function subscribePPDBSettings() {
   const p = `${clientName}/form/pendaftaran`
 
   const off = onValue(dbRef($realtimeDb, p), (snap) => {
-    const v = snap.val()
-    if (v && typeof v === 'object') {
-      ppdbSettings.value = { ...ppdbSettings.value, ...v }
+    const v = snap.val() || {}
+
+    ppdbSettings.value = {
+      isClosed: !!v.isClosed,
+      autoCloseEnabled: !!v.autoCloseEnabled,
+      autoCloseAt: v.autoCloseAt || '',
+      notice: String(v.notice || '').trim()
     }
   })
 

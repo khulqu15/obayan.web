@@ -235,34 +235,64 @@
             icon="lucide:calendar-check"
           />
 
-          <div class="grid gap-4 md:grid-cols-3">
-            <FieldCard label="Jadwal Pendaftaran">
-              <input
-                v-model.trim="form.timeline.registration"
-                type="text"
-                :class="inputClass"
-                placeholder="1 Mei - 30 Juni 2026"
-              />
-            </FieldCard>
+          <div class="grid gap-4 md:grid-cols-2">
+  <FieldCard label="Mulai Pendaftaran" help="Tanggal dan jam mulai pendaftaran dibuka.">
+    <input
+      v-model="form.timeline.registrationStart"
+      type="datetime-local"
+      :class="inputClass"
+    />
+  </FieldCard>
 
-            <FieldCard label="Jadwal Seleksi">
-              <input
-                v-model.trim="form.timeline.selection"
-                type="text"
-                :class="inputClass"
-                placeholder="5 Juli 2026"
-              />
-            </FieldCard>
+  <FieldCard label="Akhir Pendaftaran" help="Tanggal dan jam terakhir pendaftaran diterima.">
+    <input
+      v-model="form.timeline.registrationEnd"
+      type="datetime-local"
+      :class="inputClass"
+    />
+  </FieldCard>
 
-            <FieldCard label="Pengumuman">
-              <input
-                v-model.trim="form.timeline.announcement"
-                type="text"
-                :class="inputClass"
-                placeholder="10 Juli 2026"
-              />
-            </FieldCard>
-          </div>
+  <FieldCard label="Jadwal Seleksi">
+    <input
+      v-model="form.timeline.selectionAt"
+      type="datetime-local"
+      :class="inputClass"
+    />
+  </FieldCard>
+
+  <FieldCard label="Jadwal Pengumuman">
+    <input
+      v-model="form.timeline.announcementAt"
+      type="datetime-local"
+      :class="inputClass"
+    />
+  </FieldCard>
+</div>
+
+<div class="rounded-[24px] border border-green-100 bg-green-50 p-4 dark:border-green-900/30 dark:bg-green-900/10">
+  <div class="flex items-start gap-3">
+    <Icon icon="lucide:calendar-clock" class="mt-0.5 h-5 w-5 shrink-0 text-green-700 dark:text-green-300" />
+    <div class="text-sm leading-6 text-green-800 dark:text-green-200">
+      <p class="font-black">Preview Timeline</p>
+      <div class="mt-2 grid gap-2 md:grid-cols-3">
+        <div class="rounded-2xl bg-white/70 p-3 dark:bg-neutral-900/60">
+          <p class="text-xs font-bold uppercase tracking-[0.14em] opacity-70">Pendaftaran</p>
+          <p class="mt-1 font-semibold">{{ timelineDisplay.registration }}</p>
+        </div>
+
+        <div class="rounded-2xl bg-white/70 p-3 dark:bg-neutral-900/60">
+          <p class="text-xs font-bold uppercase tracking-[0.14em] opacity-70">Seleksi</p>
+          <p class="mt-1 font-semibold">{{ timelineDisplay.selection }}</p>
+        </div>
+
+        <div class="rounded-2xl bg-white/70 p-3 dark:bg-neutral-900/60">
+          <p class="text-xs font-bold uppercase tracking-[0.14em] opacity-70">Pengumuman</p>
+          <p class="mt-1 font-semibold">{{ timelineDisplay.announcement }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
         </div>
 
         <!-- Kontak -->
@@ -750,6 +780,17 @@ import { computed, defineComponent, h, onBeforeUnmount, onMounted, reactive, ref
 import { onValue, ref as dbRef, serverTimestamp, update } from 'firebase/database'
 import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
 
+type TimelineConfig = {
+  registration: string
+  selection: string
+  announcement: string
+
+  registrationStart: string
+  registrationEnd: string
+  selectionAt: string
+  announcementAt: string
+}
+
 type RequirementItem = {
   id: string
   text: string
@@ -827,8 +868,12 @@ const defaults: RegistrationEditorConfig = {
   timeline: {
     registration: '-',
     selection: '-',
-    announcement: '-'
-  },
+    announcement: '-',
+    registrationStart: '',
+    registrationEnd: '',
+    selectionAt: '',
+    announcementAt: ''
+    },
   requirements: {
     icon: 'lucide:list-checks',
     title: 'Syarat Umum Pendaftaran',
@@ -894,6 +939,17 @@ const whatsappPreview = computed(() => {
   return `https://wa.me/${value}`
 })
 
+const timelineDisplay = computed(() => {
+  return {
+    registration: formatDateTimeRangeDisplay(
+      form.timeline.registrationStart,
+      form.timeline.registrationEnd
+    ),
+    selection: formatDateTimeDisplay(form.timeline.selectionAt),
+    announcement: formatDateTimeDisplay(form.timeline.announcementAt)
+  }
+})
+
 onMounted(() => {
   subscribe()
 })
@@ -949,10 +1005,15 @@ function normalizeFirebaseConfig(value: any): RegistrationEditorConfig {
     whatsapp: normalizeWhatsappValue(value.whatsapp || defaults.whatsapp),
     brochures: normalizeBrochures(value.brochures),
     timeline: {
-      registration: value.timeline?.registration || defaults.timeline.registration,
-      selection: value.timeline?.selection || defaults.timeline.selection,
-      announcement: value.timeline?.announcement || defaults.timeline.announcement
-    },
+  registration: value.timeline?.registration || defaults.timeline.registration,
+  selection: value.timeline?.selection || defaults.timeline.selection,
+  announcement: value.timeline?.announcement || defaults.timeline.announcement,
+
+  registrationStart: normalizeDateTimeLocal(value.timeline?.registrationStart),
+  registrationEnd: normalizeDateTimeLocal(value.timeline?.registrationEnd),
+  selectionAt: normalizeDateTimeLocal(value.timeline?.selectionAt),
+  announcementAt: normalizeDateTimeLocal(value.timeline?.announcementAt)
+},
     requirements: normalizeRequirements(value.requirements),
     isClosed: !!value.isClosed,
     autoCloseEnabled: !!value.autoCloseEnabled,
@@ -1018,6 +1079,51 @@ function assignForm(next: RegistrationEditorConfig) {
   )
 }
 
+function normalizeDateTimeLocal(value: any) {
+  const raw = String(value || '').trim()
+  if (!raw) return ''
+
+  // Sudah format input datetime-local: 2026-05-06T10:30
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(raw)) {
+    return raw.slice(0, 16)
+  }
+
+  const parsed = new Date(raw)
+  if (Number.isNaN(parsed.getTime())) return ''
+
+  const year = parsed.getFullYear()
+  const month = String(parsed.getMonth() + 1).padStart(2, '0')
+  const date = String(parsed.getDate()).padStart(2, '0')
+  const hour = String(parsed.getHours()).padStart(2, '0')
+  const minute = String(parsed.getMinutes()).padStart(2, '0')
+
+  return `${year}-${month}-${date}T${hour}:${minute}`
+}
+
+function formatDateTimeDisplay(value: string) {
+  const raw = String(value || '').trim()
+  if (!raw) return '-'
+
+  const parsed = new Date(raw)
+  if (Number.isNaN(parsed.getTime())) return '-'
+
+  return new Intl.DateTimeFormat('id-ID', {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  }).format(parsed)
+}
+
+function formatDateTimeRangeDisplay(start: string, end: string) {
+  const startText = formatDateTimeDisplay(start)
+  const endText = formatDateTimeDisplay(end)
+
+  if (startText === '-' && endText === '-') return '-'
+  if (startText !== '-' && endText === '-') return `Mulai ${startText}`
+  if (startText === '-' && endText !== '-') return `Sampai ${endText}`
+
+  return `${startText} - ${endText}`
+}
+
 function buildPayload() {
   return {
     year: Number(form.year) || defaults.year,
@@ -1030,9 +1136,14 @@ function buildPayload() {
     whatsapp: normalizedWhatsapp.value,
     brochures: cleanBrochures.value,
     timeline: {
-      registration: String(form.timeline.registration || '').trim() || '-',
-      selection: String(form.timeline.selection || '').trim() || '-',
-      announcement: String(form.timeline.announcement || '').trim() || '-'
+    registration: timelineDisplay.value.registration,
+    selection: timelineDisplay.value.selection,
+    announcement: timelineDisplay.value.announcement,
+
+    registrationStart: String(form.timeline.registrationStart || '').trim(),
+    registrationEnd: String(form.timeline.registrationEnd || '').trim(),
+    selectionAt: String(form.timeline.selectionAt || '').trim(),
+    announcementAt: String(form.timeline.announcementAt || '').trim()
     },
     requirements: {
         icon: String(form.requirements.icon || 'lucide:list-checks').trim(),
@@ -1112,6 +1223,33 @@ function validateBeforeSave() {
     activeTab.value = 'Status'
     return 'Tanggal tutup otomatis wajib diisi jika fitur tutup otomatis aktif.'
   }
+
+  if (form.timeline.registrationStart && form.timeline.registrationEnd) {
+  const start = new Date(form.timeline.registrationStart).getTime()
+  const end = new Date(form.timeline.registrationEnd).getTime()
+
+  if (!Number.isNaN(start) && !Number.isNaN(end) && end < start) {
+    activeTab.value = 'Timeline'
+    return 'Akhir pendaftaran tidak boleh lebih awal dari mulai pendaftaran.'
+  }
+}
+
+const timelineDates = [
+  form.timeline.registrationStart,
+  form.timeline.registrationEnd,
+  form.timeline.selectionAt,
+  form.timeline.announcementAt
+]
+
+const invalidTimeline = timelineDates.some((item) => {
+  if (!item) return false
+  return Number.isNaN(Date.parse(String(item)))
+})
+
+if (invalidTimeline) {
+  activeTab.value = 'Timeline'
+  return 'Ada input jadwal yang belum valid.'
+}
 
   if (form.autoCloseEnabled && Number.isNaN(Date.parse(String(form.autoCloseAt)))) {
     activeTab.value = 'Status'
