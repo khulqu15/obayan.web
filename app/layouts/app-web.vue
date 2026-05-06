@@ -850,11 +850,24 @@ const pageItems = computed<PageRow[]>(() => {
       Boolean(item?.system) ||
       DEFAULT_LOCKED_PATHS.has(path)
 
+    const metaTitle = String(item?.meta?.title || '').trim()
+    const rootTitle = String(item?.title || '').trim()
+    const metaStatus = item?.meta?.status
+    const rootStatus = item?.status
+
     return {
       path,
       pathKey: item.pathKey || path.replace(/\W+/g, '-') || 'root',
-      title: item.title || item.meta?.title || path || '/',
-      status: item.status === 'published' || item.meta?.status === 'published' ? 'published' : 'draft',
+
+      title: metaTitle || rootTitle || humanizePath(path),
+      status: metaStatus === 'published'
+        ? 'published'
+        : metaStatus === 'draft'
+          ? 'draft'
+          : rootStatus === 'published'
+            ? 'published'
+            : 'draft',
+
       protected: protectedFlag,
       raw: item
     }
@@ -963,6 +976,20 @@ function isActivePath(path: string) {
   return normalizePath(path) === selectedPath.value
 }
 
+function setActiveWebPath(path: string) {
+  const nextPath = normalizePath(path)
+
+  currentPath.value = nextPath
+  ;(web as any)?.setActivePath?.(nextPath)
+
+  router.replace({
+    query: {
+      ...route.query,
+      path: nextPath
+    }
+  })
+}
+
 function reloadPages() {
   activeMenuPath.value = null
   subscribePages?.()
@@ -1054,16 +1081,26 @@ async function submitForm() {
   if (!validateForm()) return
 
   saving.value = true
+  formError.value = ''
 
   try {
     const nextPath = normalizePath(form.path)
     const nextTitle = form.title.trim() || humanizePath(nextPath)
+    const nextStatus = form.status === 'published' ? 'published' : 'draft'
 
     if (formMode.value === 'create') {
-      await createPage(nextPath)
-      await upsertMeta(nextPath, {
+      await createPage({
+        path: nextPath,
         title: nextTitle,
-        status: form.status
+        description: '',
+        status: nextStatus
+      })
+
+      setActiveWebPath(nextPath)
+
+      await upsertMeta({
+        title: nextTitle,
+        status: nextStatus
       })
 
       selectPath(nextPath)
@@ -1074,14 +1111,14 @@ async function submitForm() {
         await renamePage(oldPath, nextPath)
       }
 
-      await upsertMeta(nextPath, {
+      setActiveWebPath(nextPath)
+
+      await upsertMeta({
         title: nextTitle,
-        status: form.status
+        status: nextStatus
       })
 
-      if (selectedPath.value === oldPath || selectedPath.value === nextPath) {
-        selectPath(nextPath)
-      }
+      selectPath(nextPath)
     }
 
     reloadPages()

@@ -832,7 +832,7 @@ const { settings, fetchSettings, saveSettings } = usePendaftaran()
 const config = useRuntimeConfig()
 
 const formUrl = computed(() => {
-  const base = config.public.siteUrl || (process.client ? window.location.origin : '')
+  const base = String(config.public.siteUrl || (import.meta.client ? window.location.origin : ''))
   return base ? new URL('/registration', base).toString() : '/registration'
 })
 
@@ -870,6 +870,28 @@ function countDocsFromAnyRecord(record: any) {
   const fromRow = Number(record?.dokumenCount || 0)
 
   return Math.max(fromRow, Object.values(docs).filter(Boolean).length)
+}
+
+function jenjangFromStatus(status: any) {
+  const raw = String(status || '').trim()
+  const key = raw.toLowerCase()
+
+  const map: Record<string, string> = {
+    tk: 'TK',
+    ra: 'RA',
+    sd: 'SD',
+    mi: 'MI',
+    smp: 'SMP',
+    mts: 'MTs',
+    sma: 'SMA',
+    smk: 'SMK',
+    ma: 'MA',
+    madin: 'Madin',
+    pondok: 'Pondok',
+    umum: 'Umum'
+  }
+
+  return map[key] || raw
 }
 
 function normalizeSantriRow(row: any): SantriRow {

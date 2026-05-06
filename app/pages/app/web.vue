@@ -595,6 +595,7 @@
           </div>
         </div>
       </div>
+      
     </teleport>
   </div>
 </template>
@@ -617,6 +618,7 @@ import EditorGirlHero from '~/components/editor/GirlHero.vue'
 import EditorGalleryPage from '~/components/editor/GalleryPage.vue'
 import EditorProfilePage from '~/components/editor/ProfilePage.vue'
 import EditorProgramPage from '~/components/editor/ProgramPage.vue'
+import EditorRegistrationPage from '~/components/editor/RegistrationPage.vue'
 
 definePageMeta({
   layout: 'app-web',
@@ -656,6 +658,11 @@ const runtime = useRuntimeConfig()
 const actionPath = ref('/')
 const ogMode = ref<'link' | 'upload'>('link')
 const ogLinkInput = ref('')
+const publishing = ref(false)
+const publishMessage = ref('')
+const publishError = ref('')
+
+const isPublished = computed(() => meta.value?.status === 'published')
 
 function cleanText(value?: string) {
   return String(value || '')
@@ -1011,6 +1018,11 @@ const availableSectionTypes = [
     label: 'Profil Lembaga',
     description: 'Konten profil, sejarah, visi, dan misi.'
   },
+  {
+    key: 'RegistrationPage',
+    label: 'Halaman Pendaftaran',
+    description: 'Editor khusus untuk mengatur formulir PSB, status pendaftaran, timeline, kontak, dan multiple brosur.'
+  },
 ] as const
 
 function sectionLabel(key?: string) {
@@ -1177,6 +1189,7 @@ const componentMap: Record<string, any> = {
   GalleryPage: EditorGalleryPage,
   ProfilePage: EditorProfilePage,
   ProgramPage: EditorProgramPage,
+  RegistrationPage: EditorRegistrationPage,
 }
 
 function resolveSectionComponent(key: string) {
@@ -1230,6 +1243,45 @@ async function createPageNow() {
   selectPath(p)
 }
 
+async function createRegistrationPage() {
+  const path = normalizePath('/registration')
+
+  const pageExists = pages.value.some((item: any) => normalizePath(item.path) === path)
+
+  if (!pageExists) {
+    await createPage({
+      path,
+      title: 'Pendaftaran Santri Baru',
+      description: 'Formulir pendaftaran santri baru secara online.',
+      status: 'draft'
+    })
+  }
+
+  selectPath(path)
+  currentPath.value = path
+  actionPath.value = path
+  ensureActivePath(path)
+
+  await subscribePage(path)
+  await nextTick()
+
+  const existingSection = sections.value.find((item: any) => item.key === 'RegistrationPage')
+
+  if (existingSection) {
+    activeSectionId.value = existingSection.id
+    return
+  }
+
+  const newId = await addSection({
+    key: 'RegistrationPage',
+    enabled: true
+  })
+
+  if (newId) {
+    activeSectionId.value = newId
+  }
+}
+
 function openRenamePage() {
   openRenameFor(currentPath.value)
 }
@@ -1263,8 +1315,59 @@ async function askDeletePage() {
 }
 
 async function publish() {
-  ensureActivePath()
-  await publishPage(currentPath.value)
+  await setPublishStatus('published')
+}
+
+async function unpublish() {
+  await setPublishStatus('draft')
+}
+
+async function setPublishStatus(status: 'draft' | 'published') {
+  if (publishing.value) return
+
+  publishMessage.value = ''
+  publishError.value = ''
+  publishing.value = true
+
+  try {
+    ensureActivePath(currentPath.value)
+
+    // Simpan status langsung ke meta agar draft/live berubah jelas.
+    await upsertMeta({
+      status,
+      publishedAt: status === 'published' ? Date.now() : null
+    })
+
+    // Jika composable Mas punya publishPage, tetap panggil untuk menjaga kompatibilitas.
+    if (status === 'published') {
+      try {
+        await publishPage(currentPath.value)
+      } catch (error) {
+        console.warn('publishPage skipped/fallback to upsertMeta:', error)
+      }
+
+      // Pastikan status tetap published setelah publishPage.
+      await upsertMeta({
+        status: 'published',
+        publishedAt: Date.now()
+      })
+    }
+
+    await subscribePage(currentPath.value)
+    hydrateMetaForm()
+
+    publishMessage.value = status === 'published'
+      ? 'Halaman berhasil dipublish ke live.'
+      : 'Halaman berhasil dikembalikan ke draft.'
+
+    setTimeout(() => {
+      publishMessage.value = ''
+    }, 2200)
+  } catch (error: any) {
+    publishError.value = error?.message || 'Gagal mengubah status halaman.'
+  } finally {
+    publishing.value = false
+  }
 }
 
 async function reloadPages() {

@@ -153,6 +153,12 @@
             <div class="flex items-center justify-between gap-3 text-[12px] text-gray-500 dark:text-neutral-400">
               <span>{{ formatDate(n.publishedAt) }}</span>
               <span>{{ n.readTime || 1 }} min baca</span>
+              <span
+                v-if="n.publishedAt && n.publishedAt > Date.now()"
+                class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
+              >
+                Terjadwal
+              </span>
             </div>
 
             <div>
@@ -649,7 +655,22 @@
                   </div>
                 </div>
               </div>
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-neutral-400">
+                  Jadwal Posting
+                </label>
 
+                <input
+                  v-model="publishedAtLocal"
+                  type="datetime-local"
+                  required
+                  class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                />
+
+                <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
+                  Default hari ini. Jika tanggal/jam dibuat ke depan, artikel akan tersimpan sebagai jadwal posting.
+                </p>
+              </div>
               <div>
                 <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-neutral-400">
                   Tags
@@ -1280,7 +1301,15 @@
               class="inline-flex min-w-[148px] items-center justify-center rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span v-if="isBusy">{{ uploadOrSaveLabel }}</span>
-              <span v-else>{{ formMode === 'create' ? 'Terbitkan' : 'Simpan Perubahan' }}</span>
+              <span v-else>
+                {{
+                  formMode === 'create'
+                    ? form.publishedAt > Date.now()
+                      ? 'Jadwalkan Artikel'
+                      : 'Terbitkan'
+                    : 'Simpan Perubahan'
+                }}
+              </span>
             </button>
           </div>
         </div>

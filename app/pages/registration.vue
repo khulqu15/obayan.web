@@ -176,61 +176,169 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label :class="labelBase">Nama Lengkap <span class="text-rose-600">*</span></label>
-                    <input v-model.trim="form.siswa.nama" type="text" :class="inputBase" placeholder="Sesuai Akta Kelahiran" />
+                    <input
+                      v-model.trim="form.siswa.nama"
+                      type="text"
+                      v-bind="fieldAttrs('siswa.nama')"
+                      :class="inputClass('siswa.nama')"
+                      @input="sanitizeField('siswa.nama')"
+                      @blur="touchField('siswa.nama')"
+                    />
+                    <p v-if="fieldInfo('siswa.nama')" id="siswa-nama-message" :class="fieldInfoClass('siswa.nama')">
+                      {{ fieldInfo('siswa.nama') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">Jenis Kelamin <span class="text-rose-600">*</span></label>
-                    <select v-model="form.siswa.jk" :class="inputBase">
+                    <select
+                      v-model="form.siswa.jk"
+                      :class="inputClass('siswa.jk')"
+                      @change="touchField('siswa.jk')"
+                      @blur="touchField('siswa.jk')"
+                    >
                       <option value="" disabled>Pilih jenis kelamin</option>
                       <option value="L">Laki-laki</option>
                       <option value="P">Perempuan</option>
                     </select>
+                    <p v-if="fieldInfo('siswa.jk')" id="siswa-jk-message" :class="fieldInfoClass('siswa.jk')">
+                      {{ fieldInfo('siswa.jk') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">Tempat Lahir <span class="text-rose-600">*</span></label>
-                    <input v-model.trim="form.siswa.tmpLahir" type="text" :class="inputBase" placeholder="Contoh: Pasuruan" />
+                    <input
+                      v-model.trim="form.siswa.tmpLahir"
+                      type="text"
+                      v-bind="fieldAttrs('siswa.tmpLahir')"
+                      :class="inputClass('siswa.tmpLahir')"
+                      @input="sanitizeField('siswa.tmpLahir')"
+                      @blur="touchField('siswa.tmpLahir')"
+                    />
+                    <p v-if="fieldInfo('siswa.tmpLahir')" id="siswa-tmpLahir-message" :class="fieldInfoClass('siswa.tmpLahir')">
+                      {{ fieldInfo('siswa.tmpLahir') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">Tanggal Lahir <span class="text-rose-600">*</span></label>
-                    <input v-model="form.siswa.tglLahir" type="date" :class="inputBase" />
+                    <input
+                      v-model="form.siswa.tglLahir"
+                      type="date"
+                      v-bind="fieldAttrs('siswa.tglLahir')"
+                      :class="inputClass('siswa.tglLahir')"
+                      @change="touchField('siswa.tglLahir')"
+                      @blur="touchField('siswa.tglLahir')"
+                    />
+                    <p v-if="fieldInfo('siswa.tglLahir')" id="siswa-tglLahir-message" :class="fieldInfoClass('siswa.tglLahir')">
+                      {{ fieldInfo('siswa.tglLahir') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">Tinggi Badan</label>
-                    <input v-model="form.siswa.tinggi" type="number" min="0" :class="inputBase" placeholder="cm" />
+                    <input
+                      v-model="form.siswa.tinggi"
+                      type="text"
+                      v-bind="fieldAttrs('siswa.tinggi')"
+                      :class="inputClass('siswa.tinggi')"
+                      @input="sanitizeField('siswa.tinggi')"
+                      @blur="touchField('siswa.tinggi')"
+                    />
+                    <p v-if="fieldInfo('siswa.tinggi')" id="siswa-tinggi-message" :class="fieldInfoClass('siswa.tinggi')">
+                      {{ fieldInfo('siswa.tinggi') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">Berat Badan</label>
-                    <input v-model="form.siswa.berat" type="number" min="0" :class="inputBase" placeholder="kg" />
+                    <input
+                      v-model="form.siswa.berat"
+                      type="text"
+                      v-bind="fieldAttrs('siswa.berat')"
+                      :class="inputClass('siswa.berat')"
+                      @input="sanitizeField('siswa.berat')"
+                      @blur="touchField('siswa.berat')"
+                    />
+                    <p v-if="fieldInfo('siswa.berat')" id="siswa-berat-message" :class="fieldInfoClass('siswa.berat')">
+                      {{ fieldInfo('siswa.berat') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">Cita-cita</label>
-                    <input v-model.trim="form.siswa.cita" type="text" :class="inputBase" placeholder="Contoh: Dokter" />
+                    <input
+                      v-model.trim="form.siswa.cita"
+                      type="text"
+                      v-bind="fieldAttrs('siswa.cita')"
+                      :class="inputClass('siswa.cita')"
+                      @input="sanitizeField('siswa.cita')"
+                      @blur="touchField('siswa.cita')"
+                    />
+                    <p v-if="fieldInfo('siswa.cita')" id="siswa-cita-message" :class="fieldInfoClass('siswa.cita')">
+                      {{ fieldInfo('siswa.cita') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">Hobi</label>
-                    <input v-model.trim="form.siswa.hobi" type="text" :class="inputBase" placeholder="Contoh: Membaca" />
+                    <input
+                      v-model.trim="form.siswa.hobi"
+                      type="text"
+                      v-bind="fieldAttrs('siswa.hobi')"
+                      :class="inputClass('siswa.hobi')"
+                      @input="sanitizeField('siswa.hobi')"
+                      @blur="touchField('siswa.hobi')"
+                    />
+                    <p v-if="fieldInfo('siswa.hobi')" id="siswa-hobi-message" :class="fieldInfoClass('siswa.hobi')">
+                      {{ fieldInfo('siswa.hobi') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">No KK <span class="text-rose-600">*</span></label>
-                    <input v-model.trim="form.siswa.kk" type="text" inputmode="numeric" :class="inputBase" />
+                    <input
+                      v-model.trim="form.siswa.kk"
+                      type="text"
+                      v-bind="fieldAttrs('siswa.kk')"
+                      :class="inputClass('siswa.kk')"
+                      @input="sanitizeField('siswa.kk')"
+                      @blur="touchField('siswa.kk')"
+                    />
+                    <p v-if="fieldInfo('siswa.kk')" id="siswa-kk-message" :class="fieldInfoClass('siswa.kk')">
+                      {{ fieldInfo('siswa.kk') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">No NIK <span class="text-rose-600">*</span></label>
-                    <input v-model.trim="form.siswa.nik" type="text" inputmode="numeric" :class="inputBase" />
+                    <input
+                      v-model.trim="form.siswa.nik"
+                      type="text"
+                      v-bind="fieldAttrs('siswa.nik')"
+                      :class="inputClass('siswa.nik')"
+                      @input="sanitizeField('siswa.nik')"
+                      @blur="touchField('siswa.nik')"
+                    />
+                    <p v-if="fieldInfo('siswa.nik')" id="siswa-nik-message" :class="fieldInfoClass('siswa.nik')">
+                      {{ fieldInfo('siswa.nik') }}
+                    </p>
                   </div>
 
                   <div class="sm:col-span-2">
                     <label :class="labelBase">NISN <span class="text-rose-600">*</span></label>
-                    <input v-model.trim="form.siswa.nisn" type="text" inputmode="numeric" :class="inputBase" />
+                    <input
+                      v-model.trim="form.siswa.nisn"
+                      type="text"
+                      v-bind="fieldAttrs('siswa.nisn')"
+                      :class="inputClass('siswa.nisn')"
+                      @input="sanitizeField('siswa.nisn')"
+                      @blur="touchField('siswa.nisn')"
+                    />
+                    <p v-if="fieldInfo('siswa.nisn')" id="siswa-nisn-message" :class="fieldInfoClass('siswa.nisn')">
+                      {{ fieldInfo('siswa.nisn') }}
+                    </p>
                   </div>
                 </div>
               </section>
@@ -246,63 +354,169 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label :class="labelBase">Jalan / Gang / No. Rumah <span class="text-rose-600">*</span></label>
-                    <input v-model.trim="form.alamat.jalan" :class="inputBase" />
+                    <input
+                      v-model.trim="form.alamat.jalan"
+                      type="text"
+                      v-bind="fieldAttrs('alamat.jalan')"
+                      :class="inputClass('alamat.jalan')"
+                      @input="sanitizeField('alamat.jalan')"
+                      @blur="touchField('alamat.jalan')"
+                    />
+                    <p v-if="fieldInfo('alamat.jalan')" id="alamat-jalan-message" :class="fieldInfoClass('alamat.jalan')">
+                      {{ fieldInfo('alamat.jalan') }}
+                    </p>
                   </div>
 
                   <div class="grid grid-cols-2 gap-3">
                     <div>
                       <label :class="labelBase">RT</label>
-                      <input v-model.trim="form.alamat.rt" :class="inputBase" />
+                      <input
+                        v-model.trim="form.alamat.rt"
+                        type="text"
+                        v-bind="fieldAttrs('alamat.rt')"
+                        :class="inputClass('alamat.rt')"
+                        @input="sanitizeField('alamat.rt')"
+                        @blur="touchField('alamat.rt')"
+                      />
+                      <p v-if="fieldInfo('alamat.rt')" id="alamat-rt-message" :class="fieldInfoClass('alamat.rt')">
+                        {{ fieldInfo('alamat.rt') }}
+                      </p>
                     </div>
 
                     <div>
                       <label :class="labelBase">RW</label>
-                      <input v-model.trim="form.alamat.rw" :class="inputBase" />
+                      <input
+                        v-model.trim="form.alamat.rw"
+                        type="text"
+                        v-bind="fieldAttrs('alamat.rw')"
+                        :class="inputClass('alamat.rw')"
+                        @input="sanitizeField('alamat.rw')"
+                        @blur="touchField('alamat.rw')"
+                      />
+                      <p v-if="fieldInfo('alamat.rw')" id="alamat-rw-message" :class="fieldInfoClass('alamat.rw')">
+                        {{ fieldInfo('alamat.rw') }}
+                      </p>
                     </div>
                   </div>
 
                   <div>
                     <label :class="labelBase">Dusun</label>
-                    <input v-model.trim="form.alamat.dusun" :class="inputBase" />
+                    <input
+                      v-model.trim="form.alamat.dusun"
+                      type="text"
+                      v-bind="fieldAttrs('alamat.dusun')"
+                      :class="inputClass('alamat.dusun')"
+                      @input="sanitizeField('alamat.dusun')"
+                      @blur="touchField('alamat.dusun')"
+                    />
+                    <p v-if="fieldInfo('alamat.dusun')" id="alamat-dusun-message" :class="fieldInfoClass('alamat.dusun')">
+                      {{ fieldInfo('alamat.dusun') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">Desa/Kelurahan <span class="text-rose-600">*</span></label>
-                    <input v-model.trim="form.alamat.desa" :class="inputBase" />
+                    <input
+                      v-model.trim="form.alamat.desa"
+                      type="text"
+                      v-bind="fieldAttrs('alamat.desa')"
+                      :class="inputClass('alamat.desa')"
+                      @input="sanitizeField('alamat.desa')"
+                      @blur="touchField('alamat.desa')"
+                    />
+                    <p v-if="fieldInfo('alamat.desa')" id="alamat-desa-message" :class="fieldInfoClass('alamat.desa')">
+                      {{ fieldInfo('alamat.desa') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">Kecamatan <span class="text-rose-600">*</span></label>
-                    <input v-model.trim="form.alamat.kec" :class="inputBase" />
+                    <input
+                      v-model.trim="form.alamat.kec"
+                      type="text"
+                      v-bind="fieldAttrs('alamat.kec')"
+                      :class="inputClass('alamat.kec')"
+                      @input="sanitizeField('alamat.kec')"
+                      @blur="touchField('alamat.kec')"
+                    />
+                    <p v-if="fieldInfo('alamat.kec')" id="alamat-kec-message" :class="fieldInfoClass('alamat.kec')">
+                      {{ fieldInfo('alamat.kec') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">Kabupaten/Kota <span class="text-rose-600">*</span></label>
-                    <input v-model.trim="form.alamat.kab" :class="inputBase" />
+                    <input
+                      v-model.trim="form.alamat.kab"
+                      type="text"
+                      v-bind="fieldAttrs('alamat.kab')"
+                      :class="inputClass('alamat.kab')"
+                      @input="sanitizeField('alamat.kab')"
+                      @blur="touchField('alamat.kab')"
+                    />
+                    <p v-if="fieldInfo('alamat.kab')" id="alamat-kab-message" :class="fieldInfoClass('alamat.kab')">
+                      {{ fieldInfo('alamat.kab') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">Provinsi <span class="text-rose-600">*</span></label>
-                    <input v-model.trim="form.alamat.prov" :class="inputBase" />
+                    <input
+                      v-model.trim="form.alamat.prov"
+                      type="text"
+                      v-bind="fieldAttrs('alamat.prov')"
+                      :class="inputClass('alamat.prov')"
+                      @input="sanitizeField('alamat.prov')"
+                      @blur="touchField('alamat.prov')"
+                    />
+                    <p v-if="fieldInfo('alamat.prov')" id="alamat-prov-message" :class="fieldInfoClass('alamat.prov')">
+                      {{ fieldInfo('alamat.prov') }}
+                    </p>
                   </div>
 
                   <div>
                     <label :class="labelBase">Kode Pos</label>
-                    <input v-model.trim="form.alamat.kodepos" :class="inputBase" />
+                    <input
+                      v-model.trim="form.alamat.kodepos"
+                      type="text"
+                      v-bind="fieldAttrs('alamat.kodepos')"
+                      :class="inputClass('alamat.kodepos')"
+                      @input="sanitizeField('alamat.kodepos')"
+                      @blur="touchField('alamat.kodepos')"
+                    />
+                    <p v-if="fieldInfo('alamat.kodepos')" id="alamat-kodepos-message" :class="fieldInfoClass('alamat.kodepos')">
+                      {{ fieldInfo('alamat.kodepos') }}
+                    </p>
                   </div>
 
                   <div class="sm:col-span-2">
-                    <label :class="labelBase">Calon Santri Tinggal Dengan</label>
-                    <div class="grid gap-3 sm:grid-cols-3">
+                    <label :class="labelBase">Calon Santri Tinggal Dengan <span class="text-rose-600">*</span></label>
+                    <div
+                      class="grid gap-3 sm:grid-cols-3"
+                      :aria-invalid="!!fieldError('alamat.tinggal')"
+                      aria-describedby="alamat-tinggal-message"
+                    >
                       <label
                         v-for="item in tinggalOptions"
                         :key="item.value"
-                        class="flex cursor-pointer items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm font-semibold text-gray-700 transition hover:bg-white dark:border-neutral-800 dark:bg-neutral-800/70 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        class="flex cursor-pointer items-center gap-3 rounded-2xl border bg-gray-50 p-4 text-sm font-semibold text-gray-700 transition hover:bg-white dark:bg-neutral-800/70 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        :class="fieldError('alamat.tinggal')
+                          ? 'border-rose-300 dark:border-rose-800'
+                          : 'border-gray-200 dark:border-neutral-800'"
                       >
-                        <input type="radio" :value="item.value" v-model="form.alamat.tinggal" class="rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                        <input
+                          type="radio"
+                          :value="item.value"
+                          v-model="form.alamat.tinggal"
+                          class="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                          @change="touchField('alamat.tinggal')"
+                        />
                         {{ item.label }}
                       </label>
                     </div>
+                    <p v-if="fieldInfo('alamat.tinggal')" id="alamat-tinggal-message" :class="fieldInfoClass('alamat.tinggal')">
+                      {{ fieldInfo('alamat.tinggal') }}
+                    </p>
                   </div>
                 </div>
               </section>
@@ -317,28 +531,67 @@
 
                 <div class="space-y-5">
                   <div>
-                    <label :class="labelBase">Status Sekolah Asal</label>
-                    <div class="grid gap-3 sm:grid-cols-3">
+                    <label :class="labelBase">Status Sekolah Asal <span class="text-rose-600">*</span></label>
+                    <div
+                      class="grid gap-3 sm:grid-cols-3"
+                      :aria-invalid="!!fieldError('pendidikan.status')"
+                      aria-describedby="pendidikan-status-message"
+                    >
                       <label
                         v-for="item in pendidikanStatusOptions"
                         :key="item.value"
-                        class="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm font-semibold text-gray-700 transition hover:bg-white dark:border-neutral-800 dark:bg-neutral-800/70 dark:text-neutral-200"
+                        class="flex cursor-pointer items-start gap-3 rounded-2xl border bg-gray-50 p-4 text-sm font-semibold text-gray-700 transition hover:bg-white dark:bg-neutral-800/70 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        :class="fieldError('pendidikan.status')
+                          ? 'border-rose-300 dark:border-rose-800'
+                          : 'border-gray-200 dark:border-neutral-800'"
                       >
-                        <input type="radio" :value="item.value" v-model="form.pendidikan.status" class="mt-0.5 rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                        <input
+                          type="radio"
+                          :value="item.value"
+                          v-model="form.pendidikan.status"
+                          class="mt-0.5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                          @change="touchField('pendidikan.status')"
+                        />
                         <span>{{ item.label }}</span>
                       </label>
                     </div>
+                    <p v-if="fieldInfo('pendidikan.status')" id="pendidikan-status-message" :class="fieldInfoClass('pendidikan.status')">
+                      {{ fieldInfo('pendidikan.status') }}
+                    </p>
                   </div>
 
                   <div class="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label :class="labelBase">Nama Sekolah Asal</label>
-                      <input v-model.trim="form.pendidikan.sekolah" :class="inputBase" placeholder="SD/MI" />
+                      <label :class="labelBase">
+                        Nama Sekolah Asal
+                        <span v-if="isFieldRequired('pendidikan.sekolah')" class="text-rose-600">*</span>
+                      </label>
+                      <input
+                        v-model.trim="form.pendidikan.sekolah"
+                        type="text"
+                        v-bind="fieldAttrs('pendidikan.sekolah')"
+                        :class="inputClass('pendidikan.sekolah')"
+                        @input="sanitizeField('pendidikan.sekolah')"
+                        @blur="touchField('pendidikan.sekolah')"
+                      />
+                      <p v-if="fieldInfo('pendidikan.sekolah')" id="pendidikan-sekolah-message" :class="fieldInfoClass('pendidikan.sekolah')">
+                        {{ fieldInfo('pendidikan.sekolah') }}
+                      </p>
                     </div>
 
                     <div>
                       <label :class="labelBase">Alamat Sekolah Asal</label>
-                      <input v-model.trim="form.pendidikan.alamatSekolah" :class="inputBase" />
+                      <input
+                        v-model.trim="form.pendidikan.alamatSekolah"
+                        type="text"
+                        v-bind="fieldAttrs('pendidikan.alamatSekolah')"
+                        :class="inputClass('pendidikan.alamatSekolah')"
+                        @input="sanitizeField('pendidikan.alamatSekolah')"
+                        @blur="touchField('pendidikan.alamatSekolah')"
+                      />
+                      <p v-if="fieldInfo('pendidikan.alamatSekolah')" id="pendidikan-alamatSekolah-message" :class="fieldInfoClass('pendidikan.alamatSekolah')">
+                        {{ fieldInfo('pendidikan.alamatSekolah') }}
+                      </p>
                     </div>
                   </div>
 
@@ -348,23 +601,54 @@
                       <label
                         v-for="item in nonformalOptions"
                         :key="item.value"
-                        class="flex cursor-pointer items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm font-semibold text-gray-700 transition hover:bg-white dark:border-neutral-800 dark:bg-neutral-800/70 dark:text-neutral-200"
+                        class="flex cursor-pointer items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm font-semibold text-gray-700 transition hover:bg-white dark:border-neutral-800 dark:bg-neutral-800/70 dark:text-neutral-200 dark:hover:bg-neutral-800"
                       >
-                        <input type="checkbox" :value="item.value" v-model="form.pendidikan.nonformal" class="rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                        <input
+                          type="checkbox"
+                          :value="item.value"
+                          v-model="form.pendidikan.nonformal"
+                          class="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        />
                         {{ item.label }}
                       </label>
                     </div>
+                    <p class="mt-1.5 text-xs leading-5 text-gray-500 dark:text-neutral-400">
+                      Pilih salah satu atau lebih. Jika tidak pernah mengikuti, pilih “Tidak Ada”.
+                    </p>
                   </div>
 
                   <div class="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label :class="labelBase">Nama Lembaga Non-Formal</label>
-                      <input v-model.trim="form.pendidikan.nfNama" :class="inputBase" />
+                      <label :class="labelBase">
+                        Nama Lembaga Non-Formal
+                        <span v-if="isFieldRequired('pendidikan.nfNama')" class="text-rose-600">*</span>
+                      </label>
+                      <input
+                        v-model.trim="form.pendidikan.nfNama"
+                        type="text"
+                        v-bind="fieldAttrs('pendidikan.nfNama')"
+                        :class="inputClass('pendidikan.nfNama')"
+                        @input="sanitizeField('pendidikan.nfNama')"
+                        @blur="touchField('pendidikan.nfNama')"
+                      />
+                      <p v-if="fieldInfo('pendidikan.nfNama')" id="pendidikan-nfNama-message" :class="fieldInfoClass('pendidikan.nfNama')">
+                        {{ fieldInfo('pendidikan.nfNama') }}
+                      </p>
                     </div>
 
                     <div>
                       <label :class="labelBase">Alamat Lembaga Non-Formal</label>
-                      <input v-model.trim="form.pendidikan.nfAlamat" :class="inputBase" />
+                      <input
+                        v-model.trim="form.pendidikan.nfAlamat"
+                        type="text"
+                        v-bind="fieldAttrs('pendidikan.nfAlamat')"
+                        :class="inputClass('pendidikan.nfAlamat')"
+                        @input="sanitizeField('pendidikan.nfAlamat')"
+                        @blur="touchField('pendidikan.nfAlamat')"
+                      />
+                      <p v-if="fieldInfo('pendidikan.nfAlamat')" id="pendidikan-nfAlamat-message" :class="fieldInfoClass('pendidikan.nfAlamat')">
+                        {{ fieldInfo('pendidikan.nfAlamat') }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -385,36 +669,82 @@
                   <div class="mt-4 grid gap-4 sm:grid-cols-2">
                     <div>
                       <label :class="labelBase">Nama Ayah <span class="text-rose-600">*</span></label>
-                      <input v-model.trim="form.ortu.ayah.nama" :class="inputBase" />
+                      <input
+                        v-model.trim="form.ortu.ayah.nama"
+                        type="text"
+                        v-bind="fieldAttrs('ortu.ayah.nama')"
+                        :class="inputClass('ortu.ayah.nama')"
+                        @input="sanitizeField('ortu.ayah.nama')"
+                        @blur="touchField('ortu.ayah.nama')"
+                      />
+                      <p v-if="fieldInfo('ortu.ayah.nama')" id="ortu-ayah-nama-message" :class="fieldInfoClass('ortu.ayah.nama')">
+                        {{ fieldInfo('ortu.ayah.nama') }}
+                      </p>
                     </div>
 
                     <div>
-                      <label :class="labelBase">Status</label>
-                      <select v-model="form.ortu.ayah.status" :class="inputBase">
+                      <label :class="labelBase">Status Ayah <span class="text-rose-600">*</span></label>
+                      <select
+                        v-model="form.ortu.ayah.status"
+                        :class="inputClass('ortu.ayah.status')"
+                        @change="touchField('ortu.ayah.status')"
+                        @blur="touchField('ortu.ayah.status')"
+                      >
+                        <option value="" disabled>Pilih status ayah</option>
                         <option>Hidup</option>
                         <option>Meninggal</option>
                       </select>
+                      <p v-if="fieldInfo('ortu.ayah.status')" id="ortu-ayah-status-message" :class="fieldInfoClass('ortu.ayah.status')">
+                        {{ fieldInfo('ortu.ayah.status') }}
+                      </p>
                     </div>
 
                     <div>
-                      <label :class="labelBase">Pendidikan Terakhir</label>
-                      <select v-model="form.ortu.ayah.pendidikan" :class="inputBase">
-                        <option v-for="item in pendidikanOptions" :key="`ayah-${item}`">{{ item }}</option>
+                      <label :class="labelBase">Pendidikan Terakhir Ayah <span class="text-rose-600">*</span></label>
+                      <select
+                        v-model="form.ortu.ayah.pendidikan"
+                        :class="inputClass('ortu.ayah.pendidikan')"
+                        @change="touchField('ortu.ayah.pendidikan')"
+                        @blur="touchField('ortu.ayah.pendidikan')"
+                      >
+                        <option value="" disabled>Pilih pendidikan terakhir ayah</option>
+                        <option v-for="item in pendidikanOptions" :key="`ayah-${item}`" :value="item">{{ item }}</option>
                       </select>
+                      <p v-if="fieldInfo('ortu.ayah.pendidikan')" id="ortu-ayah-pendidikan-message" :class="fieldInfoClass('ortu.ayah.pendidikan')">
+                        {{ fieldInfo('ortu.ayah.pendidikan') }}
+                      </p>
                     </div>
 
                     <div>
-                      <label :class="labelBase">Pekerjaan</label>
-                      <select v-model="form.ortu.ayah.pekerjaan" :class="inputBase">
-                        <option v-for="item in pekerjaanOptions" :key="`ayah-job-${item}`">{{ item }}</option>
+                      <label :class="labelBase">Pekerjaan Ayah <span class="text-rose-600">*</span></label>
+                      <select
+                        v-model="form.ortu.ayah.pekerjaan"
+                        :class="inputClass('ortu.ayah.pekerjaan')"
+                        @change="touchField('ortu.ayah.pekerjaan')"
+                        @blur="touchField('ortu.ayah.pekerjaan')"
+                      >
+                        <option value="" disabled>Pilih pekerjaan ayah</option>
+                        <option v-for="item in pekerjaanOptions" :key="`ayah-job-${item}`" :value="item">{{ item }}</option>
                       </select>
+                      <p v-if="fieldInfo('ortu.ayah.pekerjaan')" id="ortu-ayah-pekerjaan-message" :class="fieldInfoClass('ortu.ayah.pekerjaan')">
+                        {{ fieldInfo('ortu.ayah.pekerjaan') }}
+                      </p>
                     </div>
 
                     <div class="sm:col-span-2">
-                      <label :class="labelBase">Penghasilan Per Bulan</label>
-                      <select v-model="form.ortu.ayah.penghasilan" :class="inputBase">
-                        <option v-for="item in penghasilanOptions" :key="`ayah-income-${item}`">{{ item }}</option>
+                      <label :class="labelBase">Penghasilan Ayah Per Bulan <span class="text-rose-600">*</span></label>
+                      <select
+                        v-model="form.ortu.ayah.penghasilan"
+                        :class="inputClass('ortu.ayah.penghasilan')"
+                        @change="touchField('ortu.ayah.penghasilan')"
+                        @blur="touchField('ortu.ayah.penghasilan')"
+                      >
+                        <option value="" disabled>Pilih perkiraan penghasilan ayah</option>
+                        <option v-for="item in penghasilanOptions" :key="`ayah-income-${item}`" :value="item">{{ item }}</option>
                       </select>
+                      <p v-if="fieldInfo('ortu.ayah.penghasilan')" id="ortu-ayah-penghasilan-message" :class="fieldInfoClass('ortu.ayah.penghasilan')">
+                        {{ fieldInfo('ortu.ayah.penghasilan') }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -426,22 +756,50 @@
                   <div class="mt-4 grid gap-4 sm:grid-cols-2">
                     <div>
                       <label :class="labelBase">Nama Ibu <span class="text-rose-600">*</span></label>
-                      <input v-model.trim="form.ortu.ibu.nama" :class="inputBase" />
+                      <input
+                        v-model.trim="form.ortu.ibu.nama"
+                        type="text"
+                        v-bind="fieldAttrs('ortu.ibu.nama')"
+                        :class="inputClass('ortu.ibu.nama')"
+                        @input="sanitizeField('ortu.ibu.nama')"
+                        @blur="touchField('ortu.ibu.nama')"
+                      />
+                      <p v-if="fieldInfo('ortu.ibu.nama')" id="ortu-ibu-nama-message" :class="fieldInfoClass('ortu.ibu.nama')">
+                        {{ fieldInfo('ortu.ibu.nama') }}
+                      </p>
                     </div>
 
                     <div>
-                      <label :class="labelBase">Status</label>
-                      <select v-model="form.ortu.ibu.status" :class="inputBase">
+                      <label :class="labelBase">Status Ibu <span class="text-rose-600">*</span></label>
+                      <select
+                        v-model="form.ortu.ibu.status"
+                        :class="inputClass('ortu.ibu.status')"
+                        @change="touchField('ortu.ibu.status')"
+                        @blur="touchField('ortu.ibu.status')"
+                      >
+                        <option value="" disabled>Pilih status ibu</option>
                         <option>Hidup</option>
                         <option>Meninggal</option>
                       </select>
+                      <p v-if="fieldInfo('ortu.ibu.status')" id="ortu-ibu-status-message" :class="fieldInfoClass('ortu.ibu.status')">
+                        {{ fieldInfo('ortu.ibu.status') }}
+                      </p>
                     </div>
 
                     <div class="sm:col-span-2">
-                      <label :class="labelBase">Pendidikan Terakhir</label>
-                      <select v-model="form.ortu.ibu.pendidikan" :class="inputBase">
-                        <option v-for="item in pendidikanOptions" :key="`ibu-${item}`">{{ item }}</option>
+                      <label :class="labelBase">Pendidikan Terakhir Ibu <span class="text-rose-600">*</span></label>
+                      <select
+                        v-model="form.ortu.ibu.pendidikan"
+                        :class="inputClass('ortu.ibu.pendidikan')"
+                        @change="touchField('ortu.ibu.pendidikan')"
+                        @blur="touchField('ortu.ibu.pendidikan')"
+                      >
+                        <option value="" disabled>Pilih pendidikan terakhir ibu</option>
+                        <option v-for="item in pendidikanOptions" :key="`ibu-${item}`" :value="item">{{ item }}</option>
                       </select>
+                      <p v-if="fieldInfo('ortu.ibu.pendidikan')" id="ortu-ibu-pendidikan-message" :class="fieldInfoClass('ortu.ibu.pendidikan')">
+                        {{ fieldInfo('ortu.ibu.pendidikan') }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -453,12 +811,32 @@
                   <div class="mt-4 grid gap-4 sm:grid-cols-2">
                     <div>
                       <label :class="labelBase">Nomor HP 1 / WA Aktif <span class="text-rose-600">*</span></label>
-                      <input v-model.trim="form.ortu.hp1" :class="inputBase" placeholder="08xxxxxxxxxx" />
+                      <input
+                        v-model.trim="form.ortu.hp1"
+                        type="tel"
+                        v-bind="fieldAttrs('ortu.hp1')"
+                        :class="inputClass('ortu.hp1')"
+                        @input="sanitizeField('ortu.hp1')"
+                        @blur="touchField('ortu.hp1')"
+                      />
+                      <p v-if="fieldInfo('ortu.hp1')" id="ortu-hp1-message" :class="fieldInfoClass('ortu.hp1')">
+                        {{ fieldInfo('ortu.hp1') }}
+                      </p>
                     </div>
 
                     <div>
                       <label :class="labelBase">Nomor HP 2</label>
-                      <input v-model.trim="form.ortu.hp2" :class="inputBase" />
+                      <input
+                        v-model.trim="form.ortu.hp2"
+                        type="tel"
+                        v-bind="fieldAttrs('ortu.hp2')"
+                        :class="inputClass('ortu.hp2')"
+                        @input="sanitizeField('ortu.hp2')"
+                        @blur="touchField('ortu.hp2')"
+                      />
+                      <p v-if="fieldInfo('ortu.hp2')" id="ortu-hp2-message" :class="fieldInfoClass('ortu.hp2')">
+                        {{ fieldInfo('ortu.hp2') }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -466,46 +844,78 @@
                 <!-- Wali -->
                 <div class="rounded-[1.75rem] border border-gray-200 p-4 dark:border-neutral-800 sm:p-5">
                   <h3 class="text-base font-black text-gray-950 dark:text-white">Data Wali</h3>
-                  <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Opsional, isi jika calon santri tinggal bersama wali.</p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
+                    Opsional. Isi jika calon santri tinggal bersama wali selain ayah/ibu.
+                  </p>
 
                   <div class="mt-4 grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label :class="labelBase">Nama Wali</label>
-                      <input v-model.trim="form.wali.nama" :class="inputBase" />
+                      <label :class="labelBase">
+                        Nama Wali
+                        <span v-if="isFieldRequired('wali.nama')" class="text-rose-600">*</span>
+                      </label>
+                      <input
+                        v-model.trim="form.wali.nama"
+                        type="text"
+                        v-bind="fieldAttrs('wali.nama')"
+                        :class="inputClass('wali.nama')"
+                        @input="sanitizeField('wali.nama')"
+                        @blur="touchField('wali.nama')"
+                      />
+                      <p v-if="fieldInfo('wali.nama')" id="wali-nama-message" :class="fieldInfoClass('wali.nama')">
+                        {{ fieldInfo('wali.nama') }}
+                      </p>
                     </div>
 
                     <div>
-                      <label :class="labelBase">Status</label>
-                      <select v-model="form.wali.status" :class="inputBase">
+                      <label :class="labelBase">Status Wali</label>
+                      <select v-model="form.wali.status" :class="[inputBase, inputNormal]">
+                        <option value="" disabled>Pilih status wali</option>
                         <option>Hidup</option>
                         <option>Meninggal</option>
                       </select>
                     </div>
 
                     <div>
-                      <label :class="labelBase">Pendidikan Terakhir</label>
-                      <select v-model="form.wali.pendidikan" :class="inputBase">
-                        <option v-for="item in pendidikanOptions" :key="`wali-${item}`">{{ item }}</option>
+                      <label :class="labelBase">Pendidikan Terakhir Wali</label>
+                      <select v-model="form.wali.pendidikan" :class="[inputBase, inputNormal]">
+                        <option value="" disabled>Pilih pendidikan wali</option>
+                        <option v-for="item in pendidikanOptions" :key="`wali-${item}`" :value="item">{{ item }}</option>
                       </select>
                     </div>
 
                     <div>
-                      <label :class="labelBase">Pekerjaan</label>
-                      <select v-model="form.wali.pekerjaan" :class="inputBase">
-                        <option v-for="item in pekerjaanOptions" :key="`wali-job-${item}`">{{ item }}</option>
+                      <label :class="labelBase">Pekerjaan Wali</label>
+                      <select v-model="form.wali.pekerjaan" :class="[inputBase, inputNormal]">
+                        <option value="" disabled>Pilih pekerjaan wali</option>
+                        <option v-for="item in pekerjaanOptions" :key="`wali-job-${item}`" :value="item">{{ item }}</option>
                       </select>
                     </div>
 
                     <div>
-                      <label :class="labelBase">Penghasilan</label>
-                      <select v-model="form.wali.penghasilan" :class="inputBase">
-                        <option v-for="item in penghasilanOptions" :key="`wali-income-${item}`">{{ item }}</option>
+                      <label :class="labelBase">Penghasilan Wali</label>
+                      <select v-model="form.wali.penghasilan" :class="[inputBase, inputNormal]">
+                        <option value="" disabled>Pilih penghasilan wali</option>
+                        <option v-for="item in penghasilanOptions" :key="`wali-income-${item}`" :value="item">{{ item }}</option>
                       </select>
                     </div>
 
                     <div>
-                      <label :class="labelBase">Nomor HP Wali</label>
-                      <input v-model.trim="form.wali.hp" :class="inputBase" />
+                      <label :class="labelBase">
+                        Nomor HP Wali
+                        <span v-if="isFieldRequired('wali.hp')" class="text-rose-600">*</span>
+                      </label>
+                      <input
+                        v-model.trim="form.wali.hp"
+                        type="tel"
+                        v-bind="fieldAttrs('wali.hp')"
+                        :class="inputClass('wali.hp')"
+                        @input="sanitizeField('wali.hp')"
+                        @blur="touchField('wali.hp')"
+                      />
+                      <p v-if="fieldInfo('wali.hp')" id="wali-hp-message" :class="fieldInfoClass('wali.hp')">
+                        {{ fieldInfo('wali.hp') }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -542,7 +952,7 @@
                       <div>
                         <p class="text-sm font-black text-gray-950 dark:text-white">{{ doc.label }}</p>
                         <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-neutral-400">
-                          Wajib diisi. Pilih gambar atau tempel link PDF publik.
+                          Wajib diisi. Pilih gambar JPG/PNG/WebP atau tempel link PDF publik.
                         </p>
                       </div>
 
@@ -592,11 +1002,16 @@
                           {{ docs[doc.key].file?.name || 'Tarik gambar ke sini' }}
                         </p>
                         <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
-                          JPG, PNG, WebP. Maksimal 5 MB.
+                          Format JPG, PNG, atau WebP. Maksimal 5 MB.
                         </p>
 
                         <label class="mt-3 inline-flex h-10 cursor-pointer items-center justify-center rounded-2xl bg-green-600 px-4 text-xs font-bold text-white transition hover:bg-green-700">
-                          <input type="file" class="hidden" accept="image/jpeg,image/png,image/webp" @change="onImageFileChange(doc.key, $event)" />
+                          <input
+                            type="file"
+                            class="hidden"
+                            accept="image/jpeg,image/png,image/webp"
+                            @change="onImageFileChange(doc.key, $event)"
+                          />
                           Pilih Gambar
                         </label>
                       </div>
@@ -613,9 +1028,12 @@
                         <input
                           v-model.trim="docs[doc.key].pdfLink"
                           type="url"
-                          :class="inputBase"
-                          placeholder="https://drive.google.com/file/d/.../view atau https://domain.com/file.pdf"
+                          :class="[inputBase, inputNormal]"
+                          placeholder="Contoh: https://drive.google.com/file/d/.../view"
                         />
+                        <p class="mt-1.5 text-xs leading-5 text-gray-500 dark:text-neutral-400">
+                          Pastikan akses file sudah “Anyone with the link”.
+                        </p>
                       </div>
 
                       <div v-if="docs[doc.key].pdfLink && pdfEmbedUrl(docs[doc.key].pdfLink)" class="overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800">
@@ -634,12 +1052,26 @@
                   </article>
                 </div>
 
-                <label class="flex items-start gap-3 rounded-[1.5rem] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/70">
-                  <input type="checkbox" v-model="form.pernyataan.keaslian" class="mt-1 rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                <label
+                  class="flex items-start gap-3 rounded-[1.5rem] border bg-gray-50 p-4 dark:bg-neutral-800/70"
+                  :class="fieldError('pernyataan.keaslian')
+                    ? 'border-rose-300 dark:border-rose-800'
+                    : 'border-gray-200 dark:border-neutral-800'"
+                >
+                  <input
+                    type="checkbox"
+                    v-model="form.pernyataan.keaslian"
+                    class="mt-1 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                    @change="touchField('pernyataan.keaslian')"
+                  />
                   <span class="text-sm leading-6 text-gray-700 dark:text-neutral-200">
                     Saya menyatakan semua dokumen yang diunggah atau ditautkan adalah <b>asli/scan dokumen resmi</b>.
                   </span>
                 </label>
+
+                <p v-if="fieldInfo('pernyataan.keaslian')" id="pernyataan-keaslian-message" :class="fieldInfoClass('pernyataan.keaslian')">
+                  {{ fieldInfo('pernyataan.keaslian') }}
+                </p>
               </section>
 
               <!-- STEP 6 -->
@@ -653,7 +1085,7 @@
                 <div class="rounded-[1.75rem] border border-gray-200 p-4 dark:border-neutral-800 sm:p-5">
                   <div class="grid gap-3 text-sm sm:grid-cols-2">
                     <SummaryItem label="Nama" :value="form.siswa.nama || '—'" />
-                    <SummaryItem label="Gender" :value="form.siswa.jk || '—'" />
+                    <SummaryItem label="Gender" :value="form.siswa.jk === 'L' ? 'Laki-laki' : form.siswa.jk === 'P' ? 'Perempuan' : '—'" />
                     <SummaryItem label="TTL" :value="`${form.siswa.tmpLahir || '-'}, ${form.siswa.tglLahir || '-'}`" />
                     <SummaryItem label="NIK" :value="form.siswa.nik || '—'" />
                     <SummaryItem label="Alamat" :value="alamatSingkat" />
@@ -707,11 +1139,16 @@
                 </div>
               </div>
 
-              <p v-if="feedback" class="mt-3 rounded-2xl px-4 py-3 text-sm font-semibold" :class="ok ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'">
+              <p
+                v-if="feedback"
+                class="mt-3 rounded-2xl px-4 py-3 text-sm font-semibold"
+                :class="ok
+                  ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
+                  : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'"
+              >
                 {{ feedback }}
               </p>
 
-              <!-- Receipt -->
               <!-- Receipt compact fallback -->
               <div v-if="ok && regInfo" class="mt-5 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 dark:border-green-900/40 dark:bg-green-900/10">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -791,18 +1228,28 @@
             <section class="rounded-[2rem] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
               <div class="flex items-center gap-3">
                 <div class="grid h-11 w-11 place-items-center rounded-2xl bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300">
-                  <Icon icon="ph:list-checks" class="h-5 w-5" />
+                  <Icon :icon="requirementsConfig.icon || 'lucide:list-checks'" class="h-5 w-5" />
                 </div>
+
                 <div>
-                  <h3 class="font-black text-gray-950 dark:text-white">Syarat Umum</h3>
-                  <p class="text-xs text-gray-500 dark:text-neutral-400">Checklist sebelum submit</p>
+                  <h3 class="font-black text-gray-950 dark:text-white">
+                    {{ requirementsConfig.title || 'Syarat Umum Pendaftaran' }}
+                  </h3>
+                  <p class="text-xs text-gray-500 dark:text-neutral-400">
+                    Checklist sebelum submit
+                  </p>
                 </div>
               </div>
 
               <ul class="mt-4 space-y-3 text-sm leading-6 text-gray-600 dark:text-neutral-300">
-                <li class="flex gap-2"><Icon icon="lucide:check" class="mt-1 h-4 w-4 shrink-0 text-green-600" /> Siapkan Akta Kelahiran, KK, KTP Ayah, dan KTP Ibu.</li>
-                <li class="flex gap-2"><Icon icon="lucide:check" class="mt-1 h-4 w-4 shrink-0 text-green-600" /> Masukkan NIK, KK, NISN, dan HP sesuai dokumen.</li>
-                <li class="flex gap-2"><Icon icon="lucide:check" class="mt-1 h-4 w-4 shrink-0 text-green-600" /> PDF harus berupa link Google Drive publik.</li>
+                <li
+                  v-for="item in requirementItems"
+                  :key="item.id"
+                  class="flex gap-2"
+                >
+                  <Icon icon="lucide:check" class="mt-1 h-4 w-4 shrink-0 text-green-600" />
+                  <span>{{ item.text }}</span>
+                </li>
               </ul>
             </section>
 
@@ -896,7 +1343,7 @@
                         Yakin Submit?
                       </h3>
                       <p class="mt-1 text-sm leading-6 text-gray-600 dark:text-neutral-400">
-                        Tidak dicheck terlebih dahulu? Pastikan data, nomor HP, dan dokumen sudah benar sebelum dikirim.
+                        Tidak dicek terlebih dahulu? Pastikan data, nomor HP, dan dokumen sudah benar sebelum dikirim.
                       </p>
                     </div>
                   </div>
@@ -1048,6 +1495,7 @@
                 <div class="bg-gray-100 p-4 dark:bg-neutral-950 sm:p-6">
                   <div
                     ref="registrationCardRef"
+                    data-registration-card="true"
                     class="mx-auto max-w-3xl overflow-hidden rounded-[2rem] border border-green-200 bg-white shadow-sm dark:border-green-900/40 dark:bg-neutral-900"
                   >
                     <div class="bg-green-700 p-6 text-white">
@@ -1264,21 +1712,39 @@
           </div>
         </div>
       </div>
-      <!-- /modal -->
     </div>
   </main>
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, h, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, defineComponent, h, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useHead, useNuxtApp, useRuntimeConfig, useSeoMeta } from '#imports'
+import { useHead, useNuxtApp, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
 import { onValue, push, ref as dbRef, serverTimestamp, set } from 'firebase/database'
 import { useCloudinaryUpload } from '~/composables/useCloudinaryUpload'
 
 type DocKey = 'kk' | 'akte' | 'ktpAyah' | 'ktpIbu'
 type DocMode = 'image' | 'pdf'
+
+type RequirementItem = {
+  id: string
+  text: string
+}
+
+type RequirementsConfig = {
+  icon: string
+  title: string
+  items: RequirementItem[]
+}
+
+type RegistrationBrochureSource =
+  | string
+  | {
+      url?: string
+      embedUrl?: string
+      title?: string
+    }
 
 type RegistrationPageConfig = {
   year: number
@@ -1289,12 +1755,17 @@ type RegistrationPageConfig = {
   description: string
   email: string
   whatsapp: string
-  brochures: string[]
+  brochures: RegistrationBrochureSource[]
   timeline: {
     registration: string
     selection: string
     announcement: string
   }
+  requirements: RequirementsConfig
+  isClosed: boolean
+  autoCloseEnabled: boolean
+  autoCloseAt: string | number
+  notice: string
 }
 
 type DocBox = {
@@ -1327,10 +1798,25 @@ const themeColor = String(config.public.appThemeColor || '#16a34a')
 const { uploadImage, uploading: cloudUploading } = useCloudinaryUpload()
 
 const inputBase =
-  'block h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-green-500 focus:bg-white focus:shadow-[0_0_0_4px_rgba(34,197,94,0.10)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white dark:focus:bg-neutral-900'
+  'block h-12 w-full rounded-2xl border bg-gray-50 px-4 text-sm outline-none transition placeholder:text-gray-400 focus:bg-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-900 dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900'
+
+const inputNormal =
+  'border-gray-200 focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.10)] dark:border-neutral-700'
+
+const inputError =
+  'border-rose-400 bg-rose-50/40 focus:border-rose-500 focus:shadow-[0_0_0_4px_rgba(244,63,94,0.12)] dark:border-rose-700 dark:bg-rose-950/10'
+
+const inputSuccess =
+  'border-green-300 focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.10)] dark:border-green-800'
 
 const labelBase =
   'mb-1.5 block text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-neutral-400'
+
+const helpBase =
+  'mt-1.5 text-xs leading-5 text-gray-500 dark:text-neutral-400'
+
+const errorBase =
+  'mt-1.5 text-xs font-bold leading-5 text-rose-600 dark:text-rose-400'
 
 const defaultRegistrationConfig: RegistrationPageConfig = {
   year: new Date().getFullYear(),
@@ -1346,34 +1832,130 @@ const defaultRegistrationConfig: RegistrationPageConfig = {
     registration: '-',
     selection: '-',
     announcement: '-'
-  }
+  },
+  requirements: {
+    icon: 'lucide:list-checks',
+    title: 'Syarat Umum Pendaftaran',
+    items: [
+      {
+        id: 'req-default-1',
+        text: 'Siapkan Akta Kelahiran, KK, KTP Ayah, dan KTP Ibu.'
+      },
+      {
+        id: 'req-default-2',
+        text: 'Masukkan NIK, KK, NISN, dan HP sesuai dokumen.'
+      },
+      {
+        id: 'req-default-3',
+        text: 'PDF harus berupa link Google Drive publik.'
+      }
+    ]
+  },
+  isClosed: false,
+  autoCloseEnabled: false,
+  autoCloseAt: '',
+  notice: ''
 }
 
 const registrationConfig = ref<RegistrationPageConfig>({ ...defaultRegistrationConfig })
 const ppdbYear = computed(() => Number(registrationConfig.value.year) || new Date().getFullYear())
 
+function normalizeBrochures(value: any): RegistrationBrochureSource[] {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .map((item) => {
+      if (typeof item === 'string') {
+        const url = item.trim()
+        return url ? url : ''
+      }
+
+      if (item && typeof item === 'object') {
+        const url = String(item.url || item.embedUrl || '').trim()
+        if (!url) return ''
+
+        return {
+          url,
+          embedUrl: String(item.embedUrl || '').trim(),
+          title: String(item.title || '').trim()
+        }
+      }
+
+      return ''
+    })
+    .filter(Boolean)
+}
+
+function normalizeRequirements(value: any): RequirementsConfig {
+  const rawItems = Array.isArray(value?.items)
+    ? value.items
+    : Array.isArray(value)
+      ? value
+      : defaultRegistrationConfig.requirements.items
+
+  const items = rawItems
+    .map((item: any, index: number) => {
+      if (typeof item === 'string') {
+        return {
+          id: `req-${index + 1}`,
+          text: item.trim()
+        }
+      }
+
+      return {
+        id: String(item?.id || `req-${index + 1}`),
+        text: String(item?.text || '').trim()
+      }
+    })
+    .filter((item: RequirementItem) => item.text)
+
+  return {
+    icon: String(value?.icon || defaultRegistrationConfig.requirements.icon),
+    title: String(value?.title || defaultRegistrationConfig.requirements.title),
+    items: items.length ? items : defaultRegistrationConfig.requirements.items
+  }
+}
+
+function normalizeRegistrationConfig(val: any): RegistrationPageConfig {
+  return {
+    year: Number(val.year) || defaultRegistrationConfig.year,
+    title: val.title || defaultRegistrationConfig.title,
+    subtitle: val.subtitle || defaultRegistrationConfig.subtitle,
+    institutionName: val.institutionName || defaultRegistrationConfig.institutionName,
+    institutionShortName: val.institutionShortName || defaultRegistrationConfig.institutionShortName,
+    description: val.description || defaultRegistrationConfig.description,
+    email: val.email || defaultRegistrationConfig.email,
+    whatsapp: normalizeWhatsappValue(val.whatsapp || defaultRegistrationConfig.whatsapp),
+    brochures: normalizeBrochures(val.brochures),
+    timeline: {
+      registration: val.timeline?.registration || defaultRegistrationConfig.timeline.registration,
+      selection: val.timeline?.selection || defaultRegistrationConfig.timeline.selection,
+      announcement: val.timeline?.announcement || defaultRegistrationConfig.timeline.announcement
+    },
+    requirements: normalizeRequirements(val.requirements),
+    isClosed: !!val.isClosed,
+    autoCloseEnabled: !!val.autoCloseEnabled,
+    autoCloseAt: val.autoCloseAt || '',
+    notice: val.notice || ''
+  }
+}
+
 function subscribeRegistrationConfig() {
   if (!$realtimeDb) return
 
   const path = `${clientName}/form/pendaftaran`
+
   const unsub = onValue(dbRef($realtimeDb, path), (snap) => {
     const val = snap.val() || {}
+    const nextConfig = normalizeRegistrationConfig(val)
 
-    registrationConfig.value = {
-      year: Number(val.year) || defaultRegistrationConfig.year,
-      title: val.title || defaultRegistrationConfig.title,
-      subtitle: val.subtitle || defaultRegistrationConfig.subtitle,
-      institutionName: val.institutionName || defaultRegistrationConfig.institutionName,
-      institutionShortName: val.institutionShortName || defaultRegistrationConfig.institutionShortName,
-      description: val.description || defaultRegistrationConfig.description,
-      email: val.email || defaultRegistrationConfig.email,
-      whatsapp: normalizeWhatsappValue(val.whatsapp || defaultRegistrationConfig.whatsapp),
-      brochures: Array.isArray(val.brochures) ? val.brochures.filter(Boolean).map(String) : defaultRegistrationConfig.brochures,
-      timeline: {
-        registration: val.timeline?.registration || defaultRegistrationConfig.timeline.registration,
-        selection: val.timeline?.selection || defaultRegistrationConfig.timeline.selection,
-        announcement: val.timeline?.announcement || defaultRegistrationConfig.timeline.announcement
-      }
+    registrationConfig.value = nextConfig
+
+    ppdbSettings.value = {
+      isClosed: nextConfig.isClosed,
+      autoCloseEnabled: nextConfig.autoCloseEnabled,
+      autoCloseAt: nextConfig.autoCloseAt,
+      notice: nextConfig.notice
     }
   })
 
@@ -1383,8 +1965,20 @@ function subscribeRegistrationConfig() {
 /** SEO */
 const pageTitle = computed(() => `PSB Online ${ppdbYear.value}/${ppdbYear.value + 1} | ${registrationConfig.value.institutionShortName}`)
 const pageDescription = computed(() => registrationConfig.value.description || defaultRegistrationConfig.description)
-const canonicalUrl = computed(() => new URL(route.fullPath || '/registrationPPDB', siteUrl).toString())
+const canonicalUrl = computed(() => new URL(route.fullPath || '/registration', siteUrl).toString())
 const seoImage = computed(() => absoluteUrl(appLogo))
+const requirementsConfig = computed(() => {
+  return registrationConfig.value.requirements || defaultRegistrationConfig.requirements
+})
+
+const requirementItems = computed(() => {
+  return (requirementsConfig.value.items || [])
+    .map((item) => ({
+      id: item.id,
+      text: String(item.text || '').trim()
+    }))
+    .filter((item) => item.text)
+})
 
 useSeoMeta({
   title: () => pageTitle.value,
@@ -1467,20 +2061,43 @@ function goToStep(target: number) {
 
   for (let i = 0; i < target; i++) {
     if (!validStep(i)) {
+      touchStepFields(i)
+
+      const result = validateStepInputs(i, true)
+
+      feedback.value = result.firstError || `Data pada langkah ${i + 1} belum lengkap.`
+      ok.value = false
       step.value = i
+
       return
     }
   }
 
+  feedback.value = ''
   step.value = target
 }
 
 function next() {
-  if (canNext.value && step.value < steps.length - 1) step.value++
+  const result = validateStepInputs(step.value, true)
+
+  if (!result.valid) {
+    touchStepFields(step.value)
+
+    feedback.value = result.firstError || 'Mohon lengkapi data yang wajib diisi.'
+    ok.value = false
+
+    return
+  }
+
+  feedback.value = ''
+
+  if (step.value < steps.length - 1) {
+    step.value += 1
+  }
 }
 
 function prev() {
-  if (step.value > 0) step.value--
+  if (step.value > 0) step.value -= 1
 }
 
 /** State */
@@ -1556,6 +2173,640 @@ const docs = reactive<Record<DocKey, DocBox>>({
   ktpIbu: { mode: 'image', file: null, url: null, pdfLink: '' }
 })
 
+type FieldKey =
+  | 'siswa.nama'
+  | 'siswa.jk'
+  | 'siswa.tmpLahir'
+  | 'siswa.tglLahir'
+  | 'siswa.tinggi'
+  | 'siswa.berat'
+  | 'siswa.cita'
+  | 'siswa.hobi'
+  | 'siswa.kk'
+  | 'siswa.nik'
+  | 'siswa.nisn'
+  | 'alamat.jalan'
+  | 'alamat.rt'
+  | 'alamat.rw'
+  | 'alamat.dusun'
+  | 'alamat.desa'
+  | 'alamat.kec'
+  | 'alamat.kab'
+  | 'alamat.prov'
+  | 'alamat.kodepos'
+  | 'alamat.tinggal'
+  | 'pendidikan.status'
+  | 'pendidikan.sekolah'
+  | 'pendidikan.alamatSekolah'
+  | 'pendidikan.nfNama'
+  | 'pendidikan.nfAlamat'
+  | 'ortu.ayah.nama'
+  | 'ortu.ayah.status'
+  | 'ortu.ayah.pendidikan'
+  | 'ortu.ayah.pekerjaan'
+  | 'ortu.ayah.penghasilan'
+  | 'ortu.ibu.nama'
+  | 'ortu.ibu.status'
+  | 'ortu.ibu.pendidikan'
+  | 'ortu.hp1'
+  | 'ortu.hp2'
+  | 'wali.nama'
+  | 'wali.status'
+  | 'wali.pendidikan'
+  | 'wali.pekerjaan'
+  | 'wali.penghasilan'
+  | 'wali.hp'
+  | 'pernyataan.keaslian'
+
+type FieldRule = {
+  label: string
+  placeholder?: string
+  help?: string
+  required?: boolean
+  minLength?: number
+  maxLength?: number
+  exactLength?: number
+  min?: number
+  max?: number
+  pattern?: RegExp
+  inputmode?: 'text' | 'numeric' | 'tel' | 'decimal' | 'email' | 'url'
+  autocomplete?: string
+}
+
+const touched = reactive<Record<string, boolean>>({})
+const validationErrors = reactive<Record<string, string>>({})
+const submittedOnce = ref(false)
+
+const todayISO = computed(() => new Date().toISOString().slice(0, 10))
+
+const FIELD_RULES: Record<FieldKey, FieldRule> = {
+  'siswa.nama': {
+    label: 'Nama Lengkap',
+    placeholder: 'Contoh: Ahmad Zainul Muttaqin',
+    help: 'Isi sesuai Akta Kelahiran. Minimal 3 karakter.',
+    required: true,
+    minLength: 3,
+    maxLength: 80,
+    autocomplete: 'name',
+    pattern: /^[A-Za-zÀ-ÿ.'’\-\s]+$/
+  },
+  'siswa.jk': {
+    label: 'Jenis Kelamin',
+    placeholder: 'Pilih jenis kelamin',
+    required: true
+  },
+  'siswa.tmpLahir': {
+    label: 'Tempat Lahir',
+    placeholder: 'Contoh: Pasuruan',
+    help: 'Isi kota/kabupaten tempat lahir sesuai Akta.',
+    required: true,
+    minLength: 2,
+    maxLength: 60,
+    pattern: /^[A-Za-zÀ-ÿ.'’\-\s]+$/
+  },
+  'siswa.tglLahir': {
+    label: 'Tanggal Lahir',
+    help: 'Tanggal lahir tidak boleh melebihi hari ini.',
+    required: true
+  },
+  'siswa.tinggi': {
+    label: 'Tinggi Badan',
+    placeholder: 'Contoh: 145',
+    help: 'Isi angka saja dalam satuan cm. Boleh dikosongkan.',
+    min: 80,
+    max: 220,
+    inputmode: 'numeric'
+  },
+  'siswa.berat': {
+    label: 'Berat Badan',
+    placeholder: 'Contoh: 38',
+    help: 'Isi angka saja dalam satuan kg. Boleh dikosongkan.',
+    min: 15,
+    max: 200,
+    inputmode: 'numeric'
+  },
+  'siswa.cita': {
+    label: 'Cita-cita',
+    placeholder: 'Contoh: Dokter, Guru, Pengusaha',
+    help: 'Boleh dikosongkan jika belum ada.',
+    maxLength: 60
+  },
+  'siswa.hobi': {
+    label: 'Hobi',
+    placeholder: 'Contoh: Membaca, Mengaji, Sepak Bola',
+    help: 'Boleh diisi lebih dari satu hobi.',
+    maxLength: 80
+  },
+  'siswa.kk': {
+    label: 'No. KK',
+    placeholder: 'Contoh: 3514123456789012',
+    help: 'Nomor KK harus 16 digit angka.',
+    required: true,
+    exactLength: 16,
+    inputmode: 'numeric',
+    pattern: /^\d+$/
+  },
+  'siswa.nik': {
+    label: 'No. NIK',
+    placeholder: 'Contoh: 3514123456789012',
+    help: 'NIK harus 16 digit angka sesuai KK/Akta.',
+    required: true,
+    exactLength: 16,
+    inputmode: 'numeric',
+    pattern: /^\d+$/
+  },
+  'siswa.nisn': {
+    label: 'NISN',
+    placeholder: 'Contoh: 0123456789',
+    help: 'NISN umumnya 10 digit angka.',
+    required: true,
+    exactLength: 10,
+    inputmode: 'numeric',
+    pattern: /^\d+$/
+  },
+
+  'alamat.jalan': {
+    label: 'Jalan / Gang / No. Rumah',
+    placeholder: 'Contoh: Jl. Raya Purwosari No. 10',
+    help: 'Isi alamat rumah yang mudah ditemukan.',
+    required: true,
+    minLength: 5,
+    maxLength: 140
+  },
+  'alamat.rt': {
+    label: 'RT',
+    placeholder: 'Contoh: 001',
+    help: 'Isi angka saja. Boleh dikosongkan jika tidak ada.',
+    maxLength: 3,
+    inputmode: 'numeric',
+    pattern: /^\d+$/
+  },
+  'alamat.rw': {
+    label: 'RW',
+    placeholder: 'Contoh: 002',
+    help: 'Isi angka saja. Boleh dikosongkan jika tidak ada.',
+    maxLength: 3,
+    inputmode: 'numeric',
+    pattern: /^\d+$/
+  },
+  'alamat.dusun': {
+    label: 'Dusun',
+    placeholder: 'Contoh: Krajan',
+    help: 'Boleh dikosongkan jika tidak ada.',
+    maxLength: 80
+  },
+  'alamat.desa': {
+    label: 'Desa/Kelurahan',
+    placeholder: 'Contoh: Purwosari',
+    required: true,
+    minLength: 2,
+    maxLength: 80
+  },
+  'alamat.kec': {
+    label: 'Kecamatan',
+    placeholder: 'Contoh: Purwosari',
+    required: true,
+    minLength: 2,
+    maxLength: 80
+  },
+  'alamat.kab': {
+    label: 'Kabupaten/Kota',
+    placeholder: 'Contoh: Pasuruan',
+    required: true,
+    minLength: 2,
+    maxLength: 80
+  },
+  'alamat.prov': {
+    label: 'Provinsi',
+    placeholder: 'Contoh: Jawa Timur',
+    required: true,
+    minLength: 2,
+    maxLength: 80
+  },
+  'alamat.kodepos': {
+    label: 'Kode Pos',
+    placeholder: 'Contoh: 67162',
+    help: 'Kode pos berisi 5 digit angka. Boleh dikosongkan.',
+    exactLength: 5,
+    inputmode: 'numeric',
+    pattern: /^\d+$/
+  },
+  'alamat.tinggal': {
+    label: 'Calon Santri Tinggal Dengan',
+    required: true
+  },
+
+  'pendidikan.status': {
+    label: 'Status Sekolah Asal',
+    required: true
+  },
+  'pendidikan.sekolah': {
+    label: 'Nama Sekolah Asal',
+    placeholder: 'Contoh: MI Al-Inayah / SDN Purwosari 1',
+    help: 'Wajib jika calon santri masih sekolah/lulus dari sekolah asal.',
+    minLength: 3,
+    maxLength: 100
+  },
+  'pendidikan.alamatSekolah': {
+    label: 'Alamat Sekolah Asal',
+    placeholder: 'Contoh: Jl. Raya Purwosari, Pasuruan',
+    maxLength: 160
+  },
+  'pendidikan.nfNama': {
+    label: 'Nama Lembaga Non-Formal',
+    placeholder: 'Contoh: TPQ Al-Hidayah',
+    help: 'Isi jika memilih TPQ/Madin/Pesantren atau lembaga lain.',
+    maxLength: 100
+  },
+  'pendidikan.nfAlamat': {
+    label: 'Alamat Lembaga Non-Formal',
+    placeholder: 'Contoh: Dusun Krajan, Purwosari',
+    maxLength: 160
+  },
+
+  'ortu.ayah.nama': {
+    label: 'Nama Ayah',
+    placeholder: 'Contoh: Ahmad Mustofa',
+    required: true,
+    minLength: 3,
+    maxLength: 80,
+    autocomplete: 'name',
+    pattern: /^[A-Za-zÀ-ÿ.'’\-\s]+$/
+  },
+  'ortu.ayah.status': {
+    label: 'Status Ayah',
+    required: true
+  },
+  'ortu.ayah.pendidikan': {
+    label: 'Pendidikan Ayah',
+    required: true
+  },
+  'ortu.ayah.pekerjaan': {
+    label: 'Pekerjaan Ayah',
+    required: true
+  },
+  'ortu.ayah.penghasilan': {
+    label: 'Penghasilan Ayah',
+    required: true
+  },
+  'ortu.ibu.nama': {
+    label: 'Nama Ibu',
+    placeholder: 'Contoh: Siti Aminah',
+    required: true,
+    minLength: 3,
+    maxLength: 80,
+    autocomplete: 'name',
+    pattern: /^[A-Za-zÀ-ÿ.'’\-\s]+$/
+  },
+  'ortu.ibu.status': {
+    label: 'Status Ibu',
+    required: true
+  },
+  'ortu.ibu.pendidikan': {
+    label: 'Pendidikan Ibu',
+    required: true
+  },
+  'ortu.hp1': {
+    label: 'Nomor HP 1 / WA Aktif',
+    placeholder: 'Contoh: 081234567890',
+    help: 'Gunakan nomor WhatsApp aktif. Format boleh 08xxx atau 628xxx.',
+    required: true,
+    minLength: 10,
+    maxLength: 15,
+    inputmode: 'tel',
+    autocomplete: 'tel',
+    pattern: /^(?:\+?62|0)8[1-9][0-9]{7,11}$/
+  },
+  'ortu.hp2': {
+    label: 'Nomor HP 2',
+    placeholder: 'Contoh: 081298765432',
+    help: 'Nomor cadangan. Boleh dikosongkan.',
+    minLength: 10,
+    maxLength: 15,
+    inputmode: 'tel',
+    autocomplete: 'tel',
+    pattern: /^(?:\+?62|0)8[1-9][0-9]{7,11}$/
+  },
+
+  'wali.nama': {
+    label: 'Nama Wali',
+    placeholder: 'Contoh: Abdul Karim',
+    help: 'Isi jika santri tinggal bersama wali, bukan ayah/ibu.',
+    minLength: 3,
+    maxLength: 80,
+    autocomplete: 'name',
+    pattern: /^[A-Za-zÀ-ÿ.'’\-\s]+$/
+  },
+  'wali.status': {
+    label: 'Status Wali'
+  },
+  'wali.pendidikan': {
+    label: 'Pendidikan Wali'
+  },
+  'wali.pekerjaan': {
+    label: 'Pekerjaan Wali'
+  },
+  'wali.penghasilan': {
+    label: 'Penghasilan Wali'
+  },
+  'wali.hp': {
+    label: 'Nomor HP Wali',
+    placeholder: 'Contoh: 081234567890',
+    minLength: 10,
+    maxLength: 15,
+    inputmode: 'tel',
+    autocomplete: 'tel',
+    pattern: /^(?:\+?62|0)8[1-9][0-9]{7,11}$/
+  },
+
+  'pernyataan.keaslian': {
+    label: 'Pernyataan Keaslian Dokumen',
+    required: true
+  }
+}
+
+const stepFieldKeys: Record<number, FieldKey[]> = {
+  1: [
+    'siswa.nama',
+    'siswa.jk',
+    'siswa.tmpLahir',
+    'siswa.tglLahir',
+    'siswa.tinggi',
+    'siswa.berat',
+    'siswa.cita',
+    'siswa.hobi',
+    'siswa.kk',
+    'siswa.nik',
+    'siswa.nisn'
+  ],
+  2: [
+    'alamat.jalan',
+    'alamat.rt',
+    'alamat.rw',
+    'alamat.dusun',
+    'alamat.desa',
+    'alamat.kec',
+    'alamat.kab',
+    'alamat.prov',
+    'alamat.kodepos',
+    'alamat.tinggal'
+  ],
+  3: [
+    'pendidikan.status',
+    'pendidikan.sekolah',
+    'pendidikan.alamatSekolah',
+    'pendidikan.nfNama',
+    'pendidikan.nfAlamat'
+  ],
+  4: [
+    'ortu.ayah.nama',
+    'ortu.ayah.status',
+    'ortu.ayah.pendidikan',
+    'ortu.ayah.pekerjaan',
+    'ortu.ayah.penghasilan',
+    'ortu.ibu.nama',
+    'ortu.ibu.status',
+    'ortu.ibu.pendidikan',
+    'ortu.hp1',
+    'ortu.hp2',
+    'wali.nama',
+    'wali.hp'
+  ],
+  5: ['pernyataan.keaslian']
+}
+
+function getByPath(path: string) {
+  return path.split('.').reduce((obj: any, key) => obj?.[key], form as any)
+}
+
+function setByPath(path: string, value: any) {
+  const keys = path.split('.')
+  const last = keys.pop()
+
+  if (!last) return
+
+  const target = keys.reduce((obj: any, key) => obj?.[key], form as any)
+
+  if (target) target[last] = value
+}
+
+function cleanSpaces(value: any) {
+  return String(value || '').replace(/\s+/g, ' ').trim()
+}
+
+function onlyDigits(value: any, maxLength?: number) {
+  const digits = String(value || '').replace(/\D/g, '')
+  return maxLength ? digits.slice(0, maxLength) : digits
+}
+
+function cleanPhone(value: any) {
+  return String(value || '')
+    .replace(/[^\d+]/g, '')
+    .replace(/^(\+?62)0/, '$1')
+    .slice(0, 16)
+}
+
+function hasWaliData() {
+  return [
+    form.wali.nama,
+    form.wali.pendidikan,
+    form.wali.pekerjaan,
+    form.wali.penghasilan,
+    form.wali.hp
+  ].some((value) => String(value || '').trim())
+}
+
+function hasNonformalData() {
+  return form.pendidikan.nonformal.some((item) => item && item !== 'tidak')
+}
+
+function isFieldRequired(key: FieldKey) {
+  const rule = FIELD_RULES[key]
+
+  if (rule.required) return true
+
+  if (key === 'pendidikan.sekolah') {
+    return ['kelas6', 'lulus', 'lainnya'].includes(String(form.pendidikan.status || ''))
+  }
+
+  if (key === 'pendidikan.nfNama') {
+    return hasNonformalData()
+  }
+
+  if (key === 'wali.nama' || key === 'wali.hp') {
+    return hasWaliData()
+  }
+
+  return false
+}
+
+function sanitizeField(key: FieldKey) {
+  const value = getByPath(key)
+
+  if (key === 'siswa.kk' || key === 'siswa.nik') {
+    setByPath(key, onlyDigits(value, 16))
+  } else if (key === 'siswa.nisn') {
+    setByPath(key, onlyDigits(value, 10))
+  } else if (key === 'alamat.rt' || key === 'alamat.rw') {
+    setByPath(key, onlyDigits(value, 3))
+  } else if (key === 'alamat.kodepos') {
+    setByPath(key, onlyDigits(value, 5))
+  } else if (key === 'siswa.tinggi' || key === 'siswa.berat') {
+    setByPath(key, onlyDigits(value, 3))
+  } else if (key === 'ortu.hp1' || key === 'ortu.hp2' || key === 'wali.hp') {
+    setByPath(key, cleanPhone(value))
+  } else if (typeof value === 'string') {
+    setByPath(key, value.replace(/\s{2,}/g, ' '))
+  }
+
+  if (touched[key] || submittedOnce.value) {
+    validateField(key, true)
+  }
+}
+
+function validateField(key: FieldKey, saveError = false) {
+  const rule = FIELD_RULES[key]
+  const raw = getByPath(key)
+  const value = Array.isArray(raw) ? raw : cleanSpaces(raw)
+  const empty = Array.isArray(raw) ? raw.length === 0 : value === ''
+  let message = ''
+
+  if (isFieldRequired(key) && empty) {
+    message = `${rule.label} wajib diisi.`
+  } else if (!empty && rule.exactLength && String(value).length !== rule.exactLength) {
+    message = `${rule.label} harus ${rule.exactLength} digit.`
+  } else if (!empty && rule.minLength && String(value).length < rule.minLength) {
+    message = `${rule.label} minimal ${rule.minLength} karakter.`
+  } else if (!empty && rule.maxLength && String(value).length > rule.maxLength) {
+    message = `${rule.label} maksimal ${rule.maxLength} karakter.`
+  } else if (!empty && rule.pattern && !rule.pattern.test(String(value))) {
+    if (key.includes('hp')) {
+      message = `${rule.label} belum sesuai. Gunakan format 08xxx atau 628xxx.`
+    } else if (key === 'siswa.kk' || key === 'siswa.nik' || key === 'siswa.nisn' || key === 'alamat.kodepos') {
+      message = `${rule.label} hanya boleh berisi angka.`
+    } else {
+      message = `${rule.label} mengandung karakter yang belum sesuai.`
+    }
+  } else if (!empty && (key === 'siswa.tinggi' || key === 'siswa.berat')) {
+    const num = Number(value)
+
+    if (!Number.isFinite(num)) {
+      message = `${rule.label} harus berupa angka.`
+    } else if (rule.min && num < rule.min) {
+      message = `${rule.label} terlalu kecil. Minimal ${rule.min}.`
+    } else if (rule.max && num > rule.max) {
+      message = `${rule.label} terlalu besar. Maksimal ${rule.max}.`
+    }
+  } else if (key === 'siswa.tglLahir' && !empty) {
+    const date = new Date(String(value))
+    const today = new Date()
+
+    if (Number.isNaN(date.getTime())) {
+      message = 'Tanggal lahir tidak valid.'
+    } else if (date > today) {
+      message = 'Tanggal lahir tidak boleh melebihi hari ini.'
+    }
+  }
+
+  if (saveError) {
+    if (message) validationErrors[key] = message
+    else delete validationErrors[key]
+  }
+
+  return message
+}
+
+function touchField(key: FieldKey) {
+  touched[key] = true
+  validateField(key, true)
+}
+
+function fieldError(key: FieldKey) {
+  if (!touched[key] && !submittedOnce.value) return ''
+  return validationErrors[key] || validateField(key, false)
+}
+
+function fieldInfo(key: FieldKey) {
+  const err = fieldError(key)
+  if (err) return err
+  return FIELD_RULES[key].help || ''
+}
+
+function fieldInfoClass(key: FieldKey) {
+  return fieldError(key) ? errorBase : helpBase
+}
+
+function inputClass(key: FieldKey) {
+  const err = fieldError(key)
+  const value = getByPath(key)
+  const hasValue = Array.isArray(value) ? value.length > 0 : cleanSpaces(value) !== ''
+
+  return [
+    inputBase,
+    err ? inputError : hasValue && touched[key] ? inputSuccess : inputNormal
+  ]
+}
+
+function fieldAttrs(key: FieldKey) {
+  const rule = FIELD_RULES[key]
+
+  return {
+    placeholder: rule.placeholder,
+    minlength: rule.minLength,
+    maxlength: rule.maxLength,
+    inputmode: rule.inputmode,
+    autocomplete: rule.autocomplete,
+    min: key === 'siswa.tglLahir' ? '1990-01-01' : rule.min,
+    max: key === 'siswa.tglLahir' ? todayISO.value : rule.max,
+    'aria-invalid': !!fieldError(key),
+    'aria-describedby': `${key.replace(/\./g, '-')}-message`
+  }
+}
+
+function validateStepInputs(stepIndex: number, saveError = false) {
+  const keys = stepFieldKeys[stepIndex] || []
+  const errors = keys
+    .map((key) => validateField(key, saveError))
+    .filter(Boolean)
+
+  if (stepIndex === 5) {
+    const docError = validateDocuments()
+
+    if (docError) errors.push(docError)
+  }
+
+  return {
+    valid: errors.length === 0,
+    firstError: errors[0] || ''
+  }
+}
+
+function validateAllInputs(saveError = false) {
+  for (let i = 1; i <= 5; i++) {
+    const result = validateStepInputs(i, saveError)
+
+    if (!result.valid) {
+      return {
+        ...result,
+        step: i
+      }
+    }
+  }
+
+  return {
+    valid: true,
+    firstError: '',
+    step: -1
+  }
+}
+
+function touchStepFields(stepIndex: number) {
+  for (const key of stepFieldKeys[stepIndex] || []) {
+    touched[key] = true
+    validateField(key, true)
+  }
+}
+
 const docConfigs: Array<{ key: DocKey; label: string }> = [
   { key: 'kk', label: 'Kartu Keluarga' },
   { key: 'akte', label: 'Akta Kelahiran' },
@@ -1587,24 +2838,8 @@ const penghasilanOptions = ['< Rp1.000.000', 'Rp1.000.000 - Rp2.000.000', 'Rp2.0
 
 /** Validation */
 function validStep(i: number) {
-  switch (i) {
-    case 0:
-      return true
-    case 1:
-      return !!(form.siswa.nama && form.siswa.jk && form.siswa.tmpLahir && form.siswa.tglLahir && form.siswa.nik)
-    case 2:
-      return !!(form.alamat.jalan && form.alamat.desa && form.alamat.kec && form.alamat.kab && form.alamat.prov)
-    case 3:
-      return true
-    case 4:
-      return !!(form.ortu.ayah.nama && form.ortu.ibu.nama && form.ortu.hp1)
-    case 5:
-      return docConfigs.every((doc) => isDocReady(doc.key)) && form.pernyataan.keaslian
-    case 6:
-      return true
-    default:
-      return false
-  }
+  if (i === 0 || i === 6) return true
+  return validateStepInputs(i, false).valid
 }
 
 const canNext = computed(() => validStep(step.value))
@@ -2124,21 +3359,17 @@ function openSubmitConfirm() {
     return
   }
 
-  const invalidStep = findFirstInvalidStep()
+  submittedOnce.value = true
 
-  if (invalidStep !== -1) {
-    step.value = invalidStep
-    feedback.value = `Data pada langkah ${invalidStep + 1} belum lengkap. Mohon cek kembali.`
+  const result = validateAllInputs(true)
+
+  if (!result.valid) {
+    touchStepFields(result.step)
+
+    step.value = result.step
+    feedback.value = result.firstError || `Data pada langkah ${result.step + 1} belum lengkap. Mohon cek kembali.`
     ok.value = false
-    return
-  }
 
-  const docErr = validateDocuments()
-
-  if (docErr) {
-    step.value = 5
-    feedback.value = docErr
-    ok.value = false
     return
   }
 
@@ -2241,101 +3472,86 @@ async function downloadRegistrationCard() {
   if (!regInfo.value || !receipt.value) return
 
   downloadCardLoading.value = true
+  feedback.value = ''
 
   try {
-    const canvas = document.createElement('canvas')
-    canvas.width = 1200
-    canvas.height = 820
+    registrationCardOpen.value = true
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) throw new Error('Browser tidak mendukung canvas.')
+    await nextTick()
 
-    ctx.fillStyle = '#f8fafc'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+    })
 
-    ctx.fillStyle = '#ffffff'
-    drawRoundedRect(ctx, 48, 48, 1104, 724, 34)
-    ctx.fill()
-    ctx.strokeStyle = '#bbf7d0'
-    ctx.lineWidth = 3
-    ctx.stroke()
+    const cardEl = registrationCardRef.value
 
-    ctx.fillStyle = '#15803d'
-    drawRoundedRect(ctx, 48, 48, 1104, 180, 34)
-    ctx.fill()
-
-    ctx.fillStyle = '#ffffff'
-    ctx.font = '700 24px Arial'
-    ctx.fillText(registrationConfig.value.institutionName || 'Lembaga Pendidikan', 88, 105)
-
-    ctx.font = '900 42px Arial'
-    ctx.fillText('Kartu Pendaftaran PSB', 88, 158)
-
-    ctx.font = '600 22px Arial'
-    ctx.fillText(`Tahun Ajaran ${ppdbYear.value}/${Number(ppdbYear.value) + 1}`, 88, 195)
-
-    ctx.fillStyle = 'rgba(255,255,255,0.13)'
-    drawRoundedRect(ctx, 832, 84, 270, 96, 22)
-    ctx.fill()
-
-    ctx.fillStyle = '#dcfce7'
-    ctx.font = '700 16px Arial'
-    ctx.fillText('NO. PENDAFTARAN', 860, 120)
-
-    ctx.fillStyle = '#ffffff'
-    ctx.font = '900 28px Arial'
-    ctx.fillText(regInfo.value.code, 860, 158)
-
-    const rows = registrationCardRows.value
-    const leftX = 88
-    const rightX = 610
-    let leftY = 290
-    let rightY = 290
-
-    function drawRow(label: string, value: string, x: number, y: number) {
-      ctx.fillStyle = '#64748b'
-      ctx.font = '700 15px Arial'
-      ctx.fillText(label.toUpperCase(), x, y)
-
-      ctx.fillStyle = '#0f172a'
-      ctx.font = '800 23px Arial'
-      return wrapCanvasText(ctx, value || '—', x, y + 34, 430, 28, 2) + 18
+    if (!cardEl) {
+      throw new Error('Elemen kartu pendaftaran tidak ditemukan.')
     }
 
-    rows.forEach((row, index) => {
-      if (index % 2 === 0) {
-        leftY = drawRow(row.label, row.value, leftX, leftY)
-      } else {
-        rightY = drawRow(row.label, row.value, rightX, rightY)
+    const { default: html2canvas } = await import('html2canvas')
+    const { jsPDF } = await import('jspdf')
+
+    const canvas = await html2canvas(cardEl, {
+      scale: Math.min(3, window.devicePixelRatio || 2),
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      allowTaint: false,
+      imageTimeout: 15000,
+      logging: false,
+      scrollX: 0,
+      scrollY: -window.scrollY,
+      onclone: (clonedDoc) => {
+        clonedDoc.documentElement.classList.remove('dark')
+        clonedDoc.body.classList.remove('dark')
+
+        const clonedCard = clonedDoc.querySelector('[data-registration-card="true"]') as HTMLElement | null
+
+        if (clonedCard) {
+          clonedCard.style.width = '900px'
+          clonedCard.style.maxWidth = '900px'
+          clonedCard.style.backgroundColor = '#ffffff'
+          clonedCard.style.color = '#111827'
+          clonedCard.style.boxShadow = 'none'
+        }
       }
     })
 
-    ctx.strokeStyle = '#e2e8f0'
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.moveTo(88, 690)
-    ctx.lineTo(1112, 690)
-    ctx.stroke()
+    const imgData = canvas.toDataURL('image/png', 1)
 
-    ctx.fillStyle = '#475569'
-    ctx.font = '600 18px Arial'
-    ctx.fillText('Simpan kartu ini sebagai bukti pendaftaran. Bawa/siapkan saat proses verifikasi administrasi.', 88, 735)
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4',
+      compress: true
+    })
 
-    ctx.fillStyle = '#94a3b8'
-    ctx.font = '500 15px Arial'
-    ctx.fillText(`Dicetak otomatis pada ${formatDateTimeID(new Date())}`, 88, 762)
+    const pageWidth = pdf.internal.pageSize.getWidth()
+    const pageHeight = pdf.internal.pageSize.getHeight()
 
-    const dataUrl = canvas.toDataURL('image/png')
-    const link = document.createElement('a')
-    link.href = dataUrl
-    link.download = `${safeFileName(`kartu-${regInfo.value.code}`)}.png`
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
+    const margin = 12
+    const availableWidth = pageWidth - margin * 2
+    const availableHeight = pageHeight - margin * 2
+
+    const imgRatio = canvas.width / canvas.height
+
+    let imgWidth = availableWidth
+    let imgHeight = imgWidth / imgRatio
+
+    if (imgHeight > availableHeight) {
+      imgHeight = availableHeight
+      imgWidth = imgHeight * imgRatio
+    }
+
+    const x = (pageWidth - imgWidth) / 2
+    const y = (pageHeight - imgHeight) / 2
+
+    pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST')
+    pdf.save(`${safeFileName(`kartu-${regInfo.value.code}`)}.pdf`)
 
     receiptDownloaded.value = true
   } catch (error: any) {
-    feedback.value = error?.message || 'Gagal membuat kartu pendaftaran.'
+    feedback.value = error?.message || 'Gagal membuat PDF kartu pendaftaran.'
     ok.value = false
   } finally {
     downloadCardLoading.value = false
@@ -2503,7 +3719,15 @@ const ppdbPos = reactive({ x: 0, y: 0 })
 
 const brochureItems = computed<BrochureItem[]>(() => {
   return (registrationConfig.value.brochures || [])
-    .map((url, index) => {
+    .map((item: RegistrationBrochureSource, index) => {
+      const url = typeof item === 'string'
+        ? item
+        : String(item.url || item.embedUrl || '')
+
+      const title = typeof item === 'string'
+        ? `Brosur ${index + 1}`
+        : item.title || `Brosur ${index + 1}`
+
       const embed = pdfEmbedUrl(url)
       const isPdf = /\.pdf(\?|#|$)/i.test(url) || /drive\.google\.com/i.test(url)
 
@@ -2511,7 +3735,7 @@ const brochureItems = computed<BrochureItem[]>(() => {
         url,
         embedUrl: isPdf ? embed : url,
         type: isPdf ? 'pdf' : 'image',
-        title: `Brosur ${index + 1}`
+        title
       } as BrochureItem
     })
     .filter((item) => item.url)

@@ -6,7 +6,7 @@
     </div>
 
     <template v-else>
-      <section class="relative overflow-hidden rounded-[32px] border border-green-100 bg-gradient-to-br from-green-600 via-emerald-600 to-lime-500 p-6 text-white shadow-[0_24px_60px_-18px_rgba(22,163,74,0.38)] md:p-7 dark:border-white/10">
+      <section class="relative overflow-hidden rounded-[32px] border border-green-100 bg-gradient-to-br from-green-600 via-green-600 to-lime-500 p-6 text-white shadow-[0_24px_60px_-18px_rgba(22,163,74,0.38)] md:p-7 dark:border-white/10">
         <div class="absolute inset-0 opacity-25">
           <div class="absolute -right-10 -top-12 h-40 w-40 rounded-full bg-white blur-3xl"></div>
           <div class="absolute bottom-0 left-10 h-36 w-36 rounded-full bg-lime-200 blur-3xl"></div>
@@ -61,7 +61,7 @@
               :class="[
                 'inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold',
                 card.trend > 0
-                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+                  ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
                   : card.trend < 0
                     ? 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'
                     : 'bg-gray-100 text-gray-600 dark:bg-neutral-800 dark:text-neutral-300'
@@ -312,7 +312,7 @@
                   <div class="truncate text-sm font-bold text-gray-900 dark:text-white">{{ row.title || 'Pengumuman' }}</div>
                   <div class="mt-1 line-clamp-2 text-sm text-gray-600 dark:text-neutral-300">{{ row.message || '—' }}</div>
                 </div>
-                <span :class="row.active ? 'rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' : 'rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-600 dark:bg-neutral-800 dark:text-neutral-300'">
+                <span :class="row.active ? 'rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-semibold text-green-700 dark:bg-green-900/20 dark:text-green-300' : 'rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-600 dark:bg-neutral-800 dark:text-neutral-300'">
                   {{ row.active ? 'Aktif' : 'Draft' }}
                 </span>
               </div>
@@ -647,7 +647,7 @@ const pct = (a: number, b: number) => (b > 0 ? (a / b) * 100 : null)
 const badgeClass = (status?: string) => {
   const s = String(status || '').toLowerCase()
   if (['approved', 'disetujui', 'selesai', 'lunas'].some((k) => s.includes(k))) {
-    return 'rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+    return 'rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-semibold text-green-700 dark:bg-green-900/20 dark:text-green-300'
   }
   if (['pending', 'menunggu', 'sebagian'].some((k) => s.includes(k))) {
     return 'rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'
@@ -781,7 +781,7 @@ const metricCards = computed(() => {
       value: presentTodayPct.value !== null ? `${presentTodayPct.value.toFixed(0)}%` : '—',
       sub: 'Persentase kehadiran santri hari ini',
       icon: 'lucide:clipboard-check',
-      iconWrapClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300',
+      iconWrapClass: 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300',
       trend: trendAbsensi.value,
     })
   }
@@ -856,8 +856,8 @@ const smartInsights = computed(() => {
             title: 'Kehadiran stabil',
             text: `Kehadiran hari ini berada di ${score.toFixed(0)}%. Ritme belajar terlihat sehat dan bisa dipertahankan.`,
             icon: 'lucide:badge-check',
-            wrapClass: 'border-emerald-200 bg-emerald-50/60 dark:border-emerald-900/30 dark:bg-emerald-900/10',
-            iconClass: 'bg-white text-emerald-700 dark:bg-neutral-900 dark:text-emerald-300'
+            wrapClass: 'border-green-200 bg-green-50/60 dark:border-green-900/30 dark:bg-green-900/10',
+            iconClass: 'bg-white text-green-700 dark:bg-neutral-900 dark:text-green-300'
           }
         : {
             title: 'Kehadiran perlu perhatian',
@@ -894,8 +894,8 @@ const smartInsights = computed(() => {
       title: 'Posisi keuangan bulan ini',
       text: `Penerimaan bulan berjalan ${fmtMoney(uangMasukBulan.value)} dengan saldo kas ${fmtMoney(saldoKas.value)}.`,
       icon: 'lucide:wallet-cards',
-      wrapClass: 'border-emerald-200 bg-emerald-50/60 dark:border-emerald-900/30 dark:bg-emerald-900/10',
-      iconClass: 'bg-white text-emerald-700 dark:bg-neutral-900 dark:text-emerald-300'
+      wrapClass: 'border-green-200 bg-green-50/60 dark:border-green-900/30 dark:bg-green-900/10',
+      iconClass: 'bg-white text-green-700 dark:bg-neutral-900 dark:text-green-300'
     })
   }
 
