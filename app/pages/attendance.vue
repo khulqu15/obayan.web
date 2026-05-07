@@ -1,103 +1,261 @@
 <template>
-  <div class="min-h-screen w-full relative pb-6">
+  <div class="relative min-h-screen overflow-hidden bg-slate-50 pb-10 text-slate-900 dark:bg-neutral-950 dark:text-white">
+    <!-- Background decoration -->
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-hidden">
-      <div class="absolute top-10 -left-24 w-[42rem] h-[42rem] rounded-full opacity-40 blur-3xl bg-gradient-to-br from-emerald-200 to-sky-200 dark:from-blue-900/40 dark:to-blue-900/30" />
-      <div class="absolute bottom-10 -right-24 w-[36rem] h-[36rem] rounded-full opacity-30 blur-3xl bg-gradient-to-tr from-blue-100 to-teal-100 dark:from-blue-900/30 dark:to-blue-900/30" />
-      <div class="absolute inset-0 [mask-image:radial-gradient(70%_60%_at_50%_40%,#000,transparent_80%)]">
-        <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(0,0,0,.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,.06)_1px,transparent_1px)] bg-[size:32px_32px] dark:bg-[linear-gradient(to_right,rgba(255,255,255,.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,.06)_1px,transparent_1px)]" />
+      <div class="absolute -left-32 top-10 h-[34rem] w-[34rem] rounded-full bg-emerald-200/50 blur-3xl dark:bg-emerald-900/20"></div>
+      <div class="absolute -right-32 top-48 h-[32rem] w-[32rem] rounded-full bg-sky-200/50 blur-3xl dark:bg-sky-900/20"></div>
+      <div class="absolute bottom-0 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-violet-100/60 blur-3xl dark:bg-violet-900/10"></div>
+      <div class="absolute inset-0 opacity-[0.045] dark:opacity-[0.08]">
+        <div class="h-full w-full bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:34px_34px] dark:bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)]"></div>
       </div>
     </div>
 
-    <div class="flex justify-center">
-      <div class="max-w-7xl w-full relative pt-28 px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
-          <div>
-            <h1 class="text-2xl font-semibold tracking-tight">Realtime Attendance</h1>
-            <p class="text-sm text-gray-500">Scan kartu RFID atau input manual untuk menandai kehadiran.</p>
+    <main class="relative mx-auto w-full max-w-7xl px-4 pt-24 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <section class="mb-6 overflow-hidden rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-neutral-900/80 sm:p-6">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div class="max-w-2xl">
+            <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
+              <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+              Realtime RFID Attendance
+            </div>
+
+            <h1 class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+              Absensi Santri Realtime
+            </h1>
+
+            <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-neutral-400">
+              Pantau scan RFID, catat kehadiran manual, kelola reset sesi, dan export data absensi dalam satu dashboard yang ringan.
+            </p>
           </div>
-          <div class="flex items-center gap-2">
-            <button class="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-3 py-2 shadow" @click="openSettings = true">
-              <Icon icon="mdi:cog" class="mr-1" width="18" height="18" /> Settings
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              :disabled="loading"
+              class="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              @click="refresh"
+            >
+              <Icon icon="mdi:refresh" width="18" height="18" />
+              Refresh
             </button>
-            <button class="btn btn-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-3 py-2 shadow" @click="exportCSV">
-              <Icon icon="mdi:download" class="mr-1" width="18" height="18" /> Export CSV
+
+            <button
+              type="button"
+              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(16,185,129,0.25)] transition hover:-translate-y-0.5 hover:bg-emerald-700"
+              @click="openSettings = true"
+            >
+              <Icon icon="mdi:cog-outline" width="18" height="18" />
+              Settings
             </button>
-            <label class="btn btn-sm bg-white hover:bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 shadow cursor-pointer">
-              <Icon icon="mdi:upload" class="mr-1" width="18" height="18" /> Import CSV
-              <input ref="fileInput" type="file" class="hidden" accept=".csv" @change="onImportFile" />
+
+            <button
+              type="button"
+              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-100"
+              @click="exportCSV"
+            >
+              <Icon icon="mdi:download-outline" width="18" height="18" />
+              Export CSV
+            </button>
+
+            <label
+              class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50 dark:border-white/10 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            >
+              <Icon icon="mdi:upload-outline" width="18" height="18" />
+              Import CSV
+              <input
+                ref="fileInput"
+                type="file"
+                class="hidden"
+                accept=".csv"
+                @change="onImportFile"
+              />
             </label>
-            <button class="btn btn-sm bg-rose-600 hover:bg-rose-700 text-white rounded-xl px-3 py-2 shadow" @click="confirmReset">
-              <Icon icon="mdi:refresh" class="mr-1" width="18" height="18" /> Reset Sesi
+
+            <button
+              type="button"
+              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(225,29,72,0.22)] transition hover:-translate-y-0.5 hover:bg-rose-700"
+              @click="confirmReset"
+            >
+              <Icon icon="mdi:restart" width="18" height="18" />
+              Reset Sesi
             </button>
           </div>
         </div>
+      </section>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
-          <div class="p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
-            <div class="text-sm text-gray-500">Now Present</div>
-            <div class="text-3xl font-semibold leading-tight">{{ presentCount }}</div>
+      <!-- Error -->
+      <section
+        v-if="error"
+        class="mb-6 rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300"
+      >
+        <div class="flex items-start gap-3">
+          <Icon icon="mdi:alert-circle-outline" width="20" height="20" class="mt-0.5 shrink-0" />
+          <div>
+            <p class="font-semibold">Gagal memuat data absensi</p>
+            <p class="mt-1">{{ error }}</p>
           </div>
-          <div class="p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
-            <div class="text-sm text-gray-500">Live Events</div>
-            <div class="text-3xl font-semibold leading-tight">{{ live.length }}</div>
-          </div>
-          <div class="p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
-            <div class="text-sm text-gray-500">Last Reset</div>
-            <div class="text-lg font-medium">{{ lastResetLabel }}</div>
-          </div>
-          <div class="p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
-            <div class="text-sm text-gray-500">Auto Reset Times</div>
-            <div class="text-lg font-medium truncate" :title="(settings.resetTimes||[]).join(', ')">
-              {{ (settings.resetTimes||[]).join(', ') || '—' }}
+        </div>
+      </section>
+
+      <!-- Stats -->
+      <section class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded-[1.7rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-neutral-900/80">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-sm font-medium text-slate-500 dark:text-neutral-400">Sudah Hadir</p>
+              <p class="mt-2 text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
+                {{ presentCount }}
+              </p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300">
+              <Icon icon="mdi:account-check-outline" width="25" height="25" />
             </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div class="lg:col-span-1">
-            <div class="p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
-              <div class="flex items-center justify-between mb-2">
-                <h2 class="font-semibold">Live Feed</h2>
-                <button class="btn btn-xs bg-white hover:bg-gray-50 border border-gray-200 rounded-lg" @click="refresh()">
-                  <Icon icon="mdi:refresh" width="16" height="16" class="mr-1"/>
-                </button>
+        <div class="rounded-[1.7rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-neutral-900/80">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-sm font-medium text-slate-500 dark:text-neutral-400">Live Event</p>
+              <p class="mt-2 text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
+                {{ live.length }}
+              </p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-300">
+              <Icon icon="ri:rfid-fill" width="25" height="25" />
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-[1.7rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-neutral-900/80">
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-slate-500 dark:text-neutral-400">Reset Terakhir</p>
+              <p class="mt-2 truncate text-base font-semibold text-slate-950 dark:text-white" :title="lastResetFull">
+                {{ lastResetLabel }}
+              </p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-300">
+              <Icon icon="mdi:clock-refresh-outline" width="25" height="25" />
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-[1.7rem] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-neutral-900/80">
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-slate-500 dark:text-neutral-400">Auto Reset</p>
+              <p class="mt-2 truncate text-base font-semibold text-slate-950 dark:text-white" :title="resetTimesLabel">
+                {{ resetTimesLabel }}
+              </p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-300">
+              <Icon icon="mdi:calendar-clock-outline" width="25" height="25" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main content -->
+      <section class="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <!-- Live Feed -->
+        <aside class="lg:col-span-4">
+          <div class="overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/90 shadow-[0_20px_70px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-neutral-900/80">
+            <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-white/10">
+              <div>
+                <h2 class="font-bold tracking-tight text-slate-950 dark:text-white">Live Feed</h2>
+                <p class="mt-1 text-xs text-slate-500 dark:text-neutral-400">Aktivitas terbaru dari perangkat.</p>
               </div>
-              <div class="border rounded-lg overflow-hidden h-64 overflow-y-auto divide-y border-gray-200">
-                <template v-if="live.length">
-                  <div v-for="e in [...live].slice().reverse()" :key="e.id" class="p-3 flex items-center gap-3 border-gray-100">
-                    <div class="w-10 h-10 rounded-full bg-linear-to-br from-emerald-200 to-emerald-400 flex items-center justify-center">
-                      <Icon icon="ri:rfid-fill" width="22" height="22" class="text-emerald-800"/>
-                    </div>
-                    <div class="min-w-0">
-                      <div class="font-medium truncate">{{ e.name || 'Santri Fulan' }}</div>
-                      <div class="text-xs text-gray-500 truncate">
-                        {{ e.maskan || '—' }} • {{ e.kamar || '—' }} • {{ formatTime(e.ts) }}
-                      </div>
-                    </div>
-                    <div class="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-blue-600 text-white">{{ (e.by||'').toUpperCase() }}</div>
+
+              <button
+                type="button"
+                class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                @click="refresh"
+              >
+                <Icon icon="mdi:refresh" width="18" height="18" />
+              </button>
+            </div>
+
+            <div class="max-h-[31rem] overflow-y-auto p-3">
+              <div v-if="liveReversed.length" class="space-y-2">
+                <div
+                  v-for="e in liveReversed"
+                  :key="e.id"
+                  class="group flex items-center gap-3 rounded-2xl border border-transparent p-3 transition hover:border-emerald-100 hover:bg-emerald-50/50 dark:hover:border-emerald-500/20 dark:hover:bg-emerald-500/10"
+                >
+                  <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-100 to-sky-100 text-emerald-700 dark:from-emerald-500/20 dark:to-sky-500/20 dark:text-emerald-300">
+                    <Icon icon="ri:rfid-fill" width="22" height="22" />
                   </div>
-                </template>
-                <div v-else class="h-full grid place-items-center text-sm text-gray-500">Belum ada event.</div>
+
+                  <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                      {{ e.name || 'Santri Fulan' }}
+                    </p>
+                    <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-neutral-400">
+                      {{ e.maskan || 'Maskan -' }} • {{ e.kamar || 'Kamar -' }} • {{ formatTime(e.ts) }}
+                    </p>
+                  </div>
+
+                  <span class="rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white dark:bg-white dark:text-slate-950">
+                    {{ e.by || 'manual' }}
+                  </span>
+                </div>
+              </div>
+
+              <div v-else class="grid min-h-72 place-items-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/80 p-6 text-center dark:border-white/10 dark:bg-neutral-900/60">
+                <div>
+                  <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-white text-slate-400 shadow-sm dark:bg-neutral-800">
+                    <Icon icon="mdi:access-point-network-off" width="28" height="28" />
+                  </div>
+                  <p class="mt-4 text-sm font-semibold text-slate-700 dark:text-neutral-200">Belum ada event</p>
+                  <p class="mt-1 text-xs text-slate-500 dark:text-neutral-400">Data akan muncul ketika kartu RFID discan.</p>
+                </div>
               </div>
             </div>
           </div>
+        </aside>
 
-          <div class="lg:col-span-2">
-            <div class="p-4 rounded-xl bg-white border border-gray-200 shadow-xl shadow-gray-50/40">
-              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
-                <h2 class="font-semibold">Attendance Log (Current)</h2>
-                <div class="flex items-center gap-2 flex-wrap">
+        <!-- Attendance Table -->
+        <section class="lg:col-span-8">
+          <div class="overflow-hidden rounded-[1.8rem] border border-white/70 bg-white/90 shadow-[0_20px_70px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-neutral-900/80">
+            <div class="border-b border-slate-100 px-5 py-4 dark:border-white/10">
+              <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                <div>
+                  <h2 class="font-bold tracking-tight text-slate-950 dark:text-white">Attendance Log</h2>
+                  <p class="mt-1 text-xs text-slate-500 dark:text-neutral-400">Daftar kehadiran pada sesi saat ini.</p>
+                </div>
+
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <div class="relative">
-                    <Icon icon="mdi:magnify" class="absolute left-2 top-1/2 -translate-y-1/2" width="18" height="18" />
-                    <input v-model="search" type="search" placeholder="Cari nama/maskan/kamar…" class="input input-sm pl-8 rounded-lg border border-gray-200 w-64" />
+                    <Icon
+                      icon="mdi:magnify"
+                      class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      width="18"
+                      height="18"
+                    />
+                    <input
+                      v-model="search"
+                      type="search"
+                      placeholder="Cari nama, maskan, kamar..."
+                      class="h-11 w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:focus:border-emerald-500/50 dark:focus:ring-emerald-500/10 sm:w-72"
+                    />
                   </div>
-                  <select v-model="sortKey" class="select select-sm rounded-lg border border-gray-200">
-                    <option value="time_desc">Waktu ↓</option>
-                    <option value="time_asc">Waktu ↑</option>
-                    <option value="name_asc">Nama A→Z</option>
-                    <option value="name_desc">Nama Z→A</option>
+
+                  <select
+                    v-model="sortKey"
+                    class="h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 outline-none transition focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:focus:border-emerald-500/50 dark:focus:ring-emerald-500/10"
+                  >
+                    <option value="time_desc">Waktu terbaru</option>
+                    <option value="time_asc">Waktu terlama</option>
+                    <option value="name_asc">Nama A-Z</option>
+                    <option value="name_desc">Nama Z-A</option>
                   </select>
-                  <select v-model="pageSize" class="select select-sm rounded-lg border border-gray-200">
+
+                  <select
+                    v-model.number="pageSize"
+                    class="h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 outline-none transition focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:focus:border-emerald-500/50 dark:focus:ring-emerald-500/10"
+                  >
                     <option :value="10">10 / page</option>
                     <option :value="25">25 / page</option>
                     <option :value="50">50 / page</option>
@@ -105,336 +263,627 @@
                   </select>
                 </div>
               </div>
-              <div class="overflow-x-auto rounded-lg border border-gray-200">
-                <table class="w-full table-auto border border-gray-200-collapse text-sm">
-                  <thead>
-                    <tr class="bg-gray-50">
-                      <th class="text-left p-3 border-b border-gray-200">Nama</th>
-                      <th class="text-left p-3 border-b border-gray-200">Santri ID</th>
-                      <th class="text-left p-3 border-b border-gray-200">Maskan / Kamar</th>
-                      <th class="text-left p-3 border-b border-gray-200">Waktu</th>
-                      <th class="text-left p-3 border-b border-gray-200">Metode</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="row in pagedRows" :key="row.key" class="hover:bg-gray-50">
-                      <td class="p-3 border-b border-gray-200 font-medium">{{ row.name }}</td>
-                      <td class="p-3 border-b border-gray-200">{{ row.santriId || '—' }}</td>
-                      <td class="p-3 border-b border-gray-200">{{ row.maskan || '—' }}<span v-if="row.kamar"> / {{ row.kamar }}</span></td>
-                      <td class="p-3 border-b border-gray-200">{{ formatTime(row.ts) }}</td>
-                      <td class="p-3 border-b border-gray-200">
-                        <span class="px-2 py-0.5 rounded-full text-white text-[11px] font-semibold inline-block"
-                              :class="row.by?.startsWith('manual') || row.by==='manual' ? 'bg-amber-600' : 'bg-blue-600'">
-                          {{ (row.by || 'manual').toUpperCase() }}
-                        </span>
-                      </td>
-                    </tr>
-                    <tr v-if="!pagedRows.length">
-                      <td colspan="5" class="p-6 text-center text-gray-500">Tidak ada data.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            </div>
 
-              <div class="flex items-center justify-between mt-4">
-                <div class="text-xs text-gray-500">Menampilkan {{ startIndex+1 }}–{{ Math.min(startIndex+pageSize, filteredRows.length) }} dari {{ filteredRows.length }}</div>
-                <div class="flex items-center gap-2">
-                  <button class="btn btn-xs border border-gray-200 rounded-lg px-2" :disabled="page===1" @click="page=1">⟪</button>
-                  <button class="btn btn-xs border border-gray-200 rounded-lg px-2" :disabled="page===1" @click="page--">‹</button>
-                  <span class="text-xs">Hal {{ page }} / {{ totalPages }}</span>
-                  <button class="btn btn-xs border border-gray-200 rounded-lg px-2" :disabled="page===totalPages" @click="page++">›</button>
-                  <button class="btn btn-xs border border-gray-200 rounded-lg px-2" :disabled="page===totalPages" @click="page=totalPages">⟫</button>
-                </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead>
+                  <tr class="border-b border-slate-100 bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-white/10 dark:bg-neutral-950/60 dark:text-neutral-400">
+                    <th class="px-5 py-3">Nama</th>
+                    <th class="px-5 py-3">Santri ID</th>
+                    <th class="px-5 py-3">Maskan / Kamar</th>
+                    <th class="px-5 py-3">Waktu</th>
+                    <th class="px-5 py-3">Metode</th>
+                  </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100 dark:divide-white/10">
+                  <tr
+                    v-for="row in pagedRows"
+                    :key="row.key"
+                    class="transition hover:bg-slate-50/80 dark:hover:bg-white/[0.03]"
+                  >
+                    <td class="px-5 py-4">
+                      <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+                          <Icon icon="mdi:account-outline" width="20" height="20" />
+                        </div>
+                        <div>
+                          <p class="font-semibold text-slate-950 dark:text-white">{{ row.name }}</p>
+                          <p class="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">{{ row.key }}</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td class="px-5 py-4 text-slate-600 dark:text-neutral-300">
+                      {{ row.santriId || '—' }}
+                    </td>
+
+                    <td class="px-5 py-4 text-slate-600 dark:text-neutral-300">
+                      {{ row.maskan || '—' }}
+                      <span v-if="row.kamar"> / {{ row.kamar }}</span>
+                    </td>
+
+                    <td class="px-5 py-4 text-slate-600 dark:text-neutral-300">
+                      {{ formatTime(row.ts) }}
+                    </td>
+
+                    <td class="px-5 py-4">
+                      <span
+                        class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white"
+                        :class="row.by?.startsWith('manual') || row.by === 'manual'
+                          ? 'bg-amber-500'
+                          : 'bg-sky-600'"
+                      >
+                        {{ (row.by || 'manual').toUpperCase() }}
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr v-if="!pagedRows.length">
+                    <td colspan="5" class="px-5 py-14 text-center">
+                      <div class="mx-auto max-w-sm">
+                        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-slate-100 text-slate-400 dark:bg-neutral-800">
+                          <Icon icon="mdi:database-search-outline" width="28" height="28" />
+                        </div>
+                        <p class="mt-4 text-sm font-semibold text-slate-700 dark:text-neutral-200">Tidak ada data</p>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                          Coba ubah kata kunci pencarian atau lakukan scan RFID.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-xs text-slate-500 dark:text-neutral-400">
+                Menampilkan
+                <span class="font-semibold text-slate-700 dark:text-neutral-200">{{ filteredRows.length ? startIndex + 1 : 0 }}</span>
+                –
+                <span class="font-semibold text-slate-700 dark:text-neutral-200">{{ Math.min(startIndex + pageSize, filteredRows.length) }}</span>
+                dari
+                <span class="font-semibold text-slate-700 dark:text-neutral-200">{{ filteredRows.length }}</span>
+                data
+              </p>
+
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  :disabled="page === 1"
+                  class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-neutral-950 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  @click="page = 1"
+                >
+                  ⟪
+                </button>
+
+                <button
+                  type="button"
+                  :disabled="page === 1"
+                  class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-neutral-950 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  @click="page--"
+                >
+                  ‹
+                </button>
+
+                <span class="px-2 text-xs font-semibold text-slate-600 dark:text-neutral-300">
+                  {{ page }} / {{ totalPages }}
+                </span>
+
+                <button
+                  type="button"
+                  :disabled="page === totalPages"
+                  class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-neutral-950 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  @click="page++"
+                >
+                  ›
+                </button>
+
+                <button
+                  type="button"
+                  :disabled="page === totalPages"
+                  class="inline-flex h-9 min-w-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-neutral-950 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  @click="page = totalPages"
+                >
+                  ⟫
+                </button>
               </div>
             </div>
           </div>
-        </div>
+        </section>
+      </section>
 
-        <teleport to="body">
-          <div v-if="openSettings" class="fixed inset-0 z-100">
-            <div class="absolute inset-0 bg-black/40" @click="openSettings=false" />
-            <div class="absolute inset-0 grid place-items-center p-4">
-              <div class="w-full max-w-xl rounded-2xl bg-white border border-gray-200 shadow-xl">
-                  <div class="p-5">
-                    <h3 class="font-semibold text-lg mb-3">Attendance Settings</h3>
-                    <div class="space-y-4">
-                      <div>
-                        <label class="text-sm font-medium">Auto Reset Times (HH:MM, 24h)</label>
-                        <div class="mt-1 flex items-center gap-2">
-                          <input ref="timesInputEl" v-model="timesInput" type="text" placeholder="e.g. 06:30, 12:00, 20:45" class="input input-sm w-full rounded-lg border border-gray-200"/>
-                          <button class="btn btn-sm bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg" @click="saveTimes">Simpan</button>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">Pisahkan dengan koma. Nilai tidak valid akan diabaikan otomatis.</p>
+      <!-- Settings Modal -->
+      <Teleport to="body">
+        <Transition
+          enter-active-class="transition duration-200 ease-out"
+          enter-from-class="opacity-0"
+          enter-to-class="opacity-100"
+          leave-active-class="transition duration-150 ease-in"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0"
+        >
+          <div
+            v-if="openSettings"
+            class="fixed inset-0 z-[100] overflow-y-auto bg-slate-950/40 p-4 backdrop-blur-sm"
+            @keydown.esc="openSettings = false"
+          >
+            <div class="flex min-h-full items-center justify-center">
+              <Transition
+                enter-active-class="transition duration-200 ease-out"
+                enter-from-class="scale-95 opacity-0 translate-y-3"
+                enter-to-class="scale-100 opacity-100 translate-y-0"
+                leave-active-class="transition duration-150 ease-in"
+                leave-from-class="scale-100 opacity-100 translate-y-0"
+                leave-to-class="scale-95 opacity-0 translate-y-3"
+              >
+                <div
+                  v-if="openSettings"
+                  class="w-full max-w-xl overflow-hidden rounded-[2rem] border border-white/80 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.25)] dark:border-white/10 dark:bg-neutral-900"
+                  @click.stop
+                >
+                  <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5 dark:border-white/10">
+                    <div>
+                      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">
+                        Attendance Settings
+                      </p>
+                      <h3 class="mt-1 text-xl font-bold tracking-tight text-slate-950 dark:text-white">
+                        Pengaturan Reset Sesi
+                      </h3>
+                      <p class="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+                        Atur jadwal reset otomatis dalam format 24 jam.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 dark:border-white/10 dark:bg-neutral-950 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                      @click="openSettings = false"
+                    >
+                      <Icon icon="mdi:close" width="20" height="20" />
+                    </button>
+                  </div>
+
+                  <div class="space-y-5 px-6 py-5">
+                    <div>
+                      <label class="text-sm font-semibold text-slate-700 dark:text-neutral-200">
+                        Auto Reset Times
+                      </label>
+
+                      <div class="mt-2 flex flex-col gap-2 sm:flex-row">
+                        <input
+                          v-model="timesInput"
+                          type="text"
+                          placeholder="Contoh: 06:30, 12:00, 20:45"
+                          class="h-11 min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:focus:border-emerald-500/50 dark:focus:ring-emerald-500/10"
+                        />
+
+                        <button
+                          type="button"
+                          class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(16,185,129,0.22)] transition hover:bg-emerald-700"
+                          @click="saveTimes"
+                        >
+                          Simpan
+                        </button>
                       </div>
 
-                      <div class="grid grid-cols-2 gap-3">
-                        <div>
-                          <div class="text-xs text-gray-500">Last Reset At</div>
-                          <div class="font-medium">{{ lastResetFull }}</div>
-                        </div>
-                        <div>
-                          <div class="text-xs text-gray-500">Last Reset Key</div>
-                          <div class="font-mono text-sm">{{ settings.lastResetKey || '—' }}</div>
-                        </div>
+                      <p class="mt-2 text-xs leading-5 text-slate-500 dark:text-neutral-400">
+                        Pisahkan dengan koma. Nilai tidak valid akan diabaikan otomatis oleh sistem.
+                      </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div class="rounded-3xl border border-slate-100 bg-slate-50 p-4 dark:border-white/10 dark:bg-neutral-950">
+                        <p class="text-xs font-medium text-slate-500 dark:text-neutral-400">Last Reset At</p>
+                        <p class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">{{ lastResetFull }}</p>
                       </div>
 
-                      <div class="flex items-center justify-between pt-3">
-                        <button class="btn btn-sm px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg" @click="confirmReset">Reset Sekarang</button>
-                        <div class="flex items-center gap-2">
-                          <button class="btn btn-sm px-3 py-2 bg-white border border-gray-200 rounded-lg" @click="openSettings=false">Tutup</button>
-                        </div>
+                      <div class="rounded-3xl border border-slate-100 bg-slate-50 p-4 dark:border-white/10 dark:bg-neutral-950">
+                        <p class="text-xs font-medium text-slate-500 dark:text-neutral-400">Last Reset Key</p>
+                        <p class="mt-2 break-all font-mono text-sm font-semibold text-slate-900 dark:text-white">
+                          {{ settings.lastResetKey || '—' }}
+                        </p>
                       </div>
                     </div>
                   </div>
+
+                  <div class="flex flex-col-reverse gap-2 border-t border-slate-100 px-6 py-5 dark:border-white/10 sm:flex-row sm:justify-between">
+                    <button
+                      type="button"
+                      class="inline-flex items-center justify-center rounded-2xl bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(225,29,72,0.18)] transition hover:bg-rose-700"
+                      @click="confirmReset"
+                    >
+                      Reset Sekarang
+                    </button>
+
+                    <button
+                      type="button"
+                      class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-neutral-950 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      @click="openSettings = false"
+                    >
+                      Tutup
+                    </button>
+                  </div>
                 </div>
+              </Transition>
             </div>
           </div>
-        </teleport>
-      </div>
-    </div>
+        </Transition>
+      </Teleport>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Icon } from '@iconify/vue'
-// IMPORTANT: ensure your composable includes:  import { useNuxtApp } from '#app'
-// and is exported from '@/composables/useAbsensi' (or adjust the path below)
 import { useAbsensi } from '~/composables/data/useAbsensi'
 
-// —— Composable ——
 const {
-  loading, error, current, live, settings, currentCount,
-  fetchCurrent, fetchSettings, saveSettings, subscribeLive,
-  resetSession, shouldResetNow
+  loading,
+  error,
+  current,
+  live,
+  settings,
+  currentCount,
+  fetchCurrent,
+  fetchSettings,
+  saveSettings,
+  subscribeLive,
+  resetSession,
+  shouldResetNow,
+  markPresentBySantriId,
+  markPresentManual
 } = useAbsensi()
 
-// —— UI State ——
 const search = ref('')
-const sortKey = ref<'time_desc'|'time_asc'|'name_asc'|'name_desc'>('time_desc')
+const sortKey = ref<'time_desc' | 'time_asc' | 'name_asc' | 'name_desc'>('time_desc')
 const page = ref(1)
 const pageSize = ref(25)
-const fileInput = ref<HTMLInputElement|null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
 const openSettings = ref(false)
-const settingsDlg = ref<HTMLDialogElement|null>(null)
 const timesInput = ref('')
 
-// present count shows unique keys in current
+let timer: number | null = null
+let unsub: null | (() => void) = null
+
 const presentCount = computed(() => currentCount.value)
 
-// normalize current map -> array rows
+const resetTimesLabel = computed(() => {
+  const times = settings.value.resetTimes || []
+  return times.length ? times.join(', ') : '—'
+})
+
+const liveReversed = computed(() => {
+  return [...live.value].sort((a, b) => (b.ts || 0) - (a.ts || 0))
+})
+
 const rows = computed(() => {
-  const out: Array<{ key:string; name:string; santriId?:string; maskan?:string; kamar?:string; ts:number; by?:string }> = []
-  const m = current.value || {}
-  for (const k of Object.keys(m)) {
-    const v = m[k] || {}
+  const out: Array<{
+    key: string
+    name: string
+    santriId?: string
+    maskan?: string
+    kamar?: string
+    ts: number
+    by?: string
+  }> = []
+
+  const currentMap = current.value || {}
+
+  for (const key of Object.keys(currentMap)) {
+    const value = currentMap[key] || {}
+
     out.push({
-      key: k,
-      name: String(v.name || 'Santri Fulan'),
-      santriId: v.santriId ? String(v.santriId) : undefined,
-      maskan: v.maskan ? String(v.maskan) : undefined,
-      kamar: v.kamar ? String(v.kamar) : undefined,
-      ts: typeof v.ts === 'number' ? v.ts : Date.now(),
-      by: String(v.by || '')
+      key,
+      name: String(value.name || 'Santri Fulan'),
+      santriId: value.santriId ? String(value.santriId) : undefined,
+      maskan: value.maskan ? String(value.maskan) : undefined,
+      kamar: value.kamar ? String(value.kamar) : undefined,
+      ts: typeof value.ts === 'number' ? value.ts : Date.now(),
+      by: String(value.by || 'manual')
     })
   }
+
   return out
 })
 
-// search filter
 const filteredRows = computed(() => {
-  const q = search.value.trim().toLowerCase()
-  if (!q) return rows.value
-  return rows.value.filter(r => [r.name, r.maskan, r.kamar, r.santriId].filter(Boolean).some(x => String(x).toLowerCase().includes(q)))
+  const keyword = search.value.trim().toLowerCase()
+
+  if (!keyword) return rows.value
+
+  return rows.value.filter((row) => {
+    return [row.name, row.maskan, row.kamar, row.santriId]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(keyword))
+  })
 })
 
-// sort
 const sortedRows = computed(() => {
-  const arr = [...filteredRows.value]
+  const list = [...filteredRows.value]
+
   switch (sortKey.value) {
     case 'time_asc':
-      arr.sort((a,b)=> a.ts - b.ts); break
+      return list.sort((a, b) => a.ts - b.ts)
+
     case 'name_asc':
-      arr.sort((a,b)=> a.name.localeCompare(b.name)); break
+      return list.sort((a, b) => a.name.localeCompare(b.name, 'id'))
+
     case 'name_desc':
-      arr.sort((a,b)=> b.name.localeCompare(a.name)); break
+      return list.sort((a, b) => b.name.localeCompare(a.name, 'id'))
+
+    case 'time_desc':
     default:
-      arr.sort((a,b)=> b.ts - a.ts); break
+      return list.sort((a, b) => b.ts - a.ts)
   }
-  return arr
 })
 
-// pagination
-const totalPages = computed(() => Math.max(1, Math.ceil(sortedRows.value.length / pageSize.value)))
-watch([sortedRows, pageSize], () => { page.value = 1 })
-const startIndex = computed(() => (page.value - 1) * pageSize.value)
-const pagedRows = computed(() => sortedRows.value.slice(startIndex.value, startIndex.value + pageSize.value))
+const totalPages = computed(() => {
+  return Math.max(1, Math.ceil(sortedRows.value.length / pageSize.value))
+})
 
-// labels
+const startIndex = computed(() => {
+  return (page.value - 1) * pageSize.value
+})
+
+const pagedRows = computed(() => {
+  return sortedRows.value.slice(startIndex.value, startIndex.value + pageSize.value)
+})
+
 const lastResetLabel = computed(() => {
   if (!settings.value.lastResetAt) return '—'
-  return new Date(settings.value.lastResetAt!).toLocaleString()
+
+  return new Date(settings.value.lastResetAt).toLocaleString('id-ID', {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  })
 })
+
 const lastResetFull = computed(() => {
   if (!settings.value.lastResetAt) return '—'
-  const d = new Date(settings.value.lastResetAt!)
-  return `${d.toISOString()} (${d.toLocaleString()})`
+
+  const date = new Date(settings.value.lastResetAt)
+
+  return `${date.toISOString()} (${date.toLocaleString('id-ID')})`
 })
 
-// helpers
-function formatTime(ts?: number) {
-  const d = ts ? new Date(ts) : new Date()
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-}
+watch([sortedRows, pageSize], () => {
+  page.value = 1
+})
 
-// actions
-async function refresh() {
-  await Promise.all([fetchSettings(), fetchCurrent()])
-}
+watch(totalPages, (value) => {
+  if (page.value > value) page.value = value
+})
 
-function confirmReset() {
-  if (confirm('Yakin reset sesi sekarang? Data current akan dipindahkan ke history.')) {
-    resetSession({ resetBy: 'manual' }).catch(console.error)
+watch(openSettings, (value) => {
+  if (value) {
+    timesInput.value = (settings.value.resetTimes || []).join(', ')
   }
+})
+
+function formatTime(ts?: number) {
+  const date = ts ? new Date(ts) : new Date()
+
+  return date.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
 }
 
-// export CSV (current)
+async function refresh() {
+  await Promise.all([
+    fetchSettings(),
+    fetchCurrent()
+  ])
+}
+
+async function confirmReset() {
+  if (typeof window === 'undefined') return
+
+  const ok = window.confirm('Yakin reset sesi sekarang? Data current akan dipindahkan ke history.')
+
+  if (!ok) return
+
+  await resetSession({ resetBy: 'manual' })
+  await refresh()
+
+  openSettings.value = false
+}
+
 function exportCSV() {
-  const headers = ['key','name','santriId','maskan','kamar','time','by']
+  const headers = ['key', 'name', 'santriId', 'maskan', 'kamar', 'time', 'by']
   const lines = [headers.join(',')]
-  for (const r of sortedRows.value) {
+
+  for (const row of sortedRows.value) {
     const line = [
-      r.key,
-      csvEsc(r.name),
-      csvEsc(r.santriId||''),
-      csvEsc(r.maskan||''),
-      csvEsc(r.kamar||''),
-      new Date(r.ts).toISOString(),
-      csvEsc(r.by||'')
+      row.key,
+      csvEsc(row.name),
+      csvEsc(row.santriId || ''),
+      csvEsc(row.maskan || ''),
+      csvEsc(row.kamar || ''),
+      new Date(row.ts).toISOString(),
+      csvEsc(row.by || '')
     ].join(',')
+
     lines.push(line)
   }
-  const blob = new Blob(["\ufeff" + lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+
+  const blob = new Blob(['\ufeff' + lines.join('\n')], {
+    type: 'text/csv;charset=utf-8;'
+  })
+
   const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `attendance_current_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`
-  a.click()
+  const anchor = document.createElement('a')
+
+  anchor.href = url
+  anchor.download = `attendance_current_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`
+  anchor.click()
+
   URL.revokeObjectURL(url)
 }
-function csvEsc(s: string) {
-  const needs = /[",\n]/.test(s)
-  return needs ? '"' + s.replace(/"/g,'""') + '"' : s
+
+function csvEsc(value: string) {
+  const needsEscape = /[",\n]/.test(value)
+
+  return needsEscape
+    ? `"${value.replace(/"/g, '""')}"`
+    : value
 }
 
-// import CSV (columns: name,santriId,maskan,kamar,deviceId)
-async function onImportFile(e: Event) {
-  const input = e.target as HTMLInputElement
+async function onImportFile(event: Event) {
+  const input = event.target as HTMLInputElement
   const file = input.files?.[0]
+
   if (!file) return
+
   try {
     const text = await file.text()
-    const rows = parseCSV(text)
-    // try headers
-    const hdr = rows.shift() || []
-    const idx = {
-      name: hdr.findIndex(h => /name/i.test(h)),
-      santriId: hdr.findIndex(h => /santri.?id/i.test(h)),
-      maskan: hdr.findIndex(h => /maskan/i.test(h)),
-      kamar: hdr.findIndex(h => /kamar/i.test(h)),
-      deviceId: hdr.findIndex(h => /device.?id/i.test(h)),
+    const csvRows = parseCSV(text)
+    const header = csvRows.shift() || []
+
+    const indexMap = {
+      name: header.findIndex((item) => /name|nama/i.test(item)),
+      santriId: header.findIndex((item) => /santri.?id/i.test(item)),
+      maskan: header.findIndex((item) => /maskan/i.test(item)),
+      kamar: header.findIndex((item) => /kamar/i.test(item)),
+      deviceId: header.findIndex((item) => /device.?id/i.test(item))
     }
+
     let count = 0
-    for (const r of rows) {
-      const name = valAt(r, idx.name) || 'Santri Fulan'
-      const santriId = valAt(r, idx.santriId)
-      const maskan = valAt(r, idx.maskan)
-      const kamar = valAt(r, idx.kamar)
-      const deviceId = valAt(r, idx.deviceId)
+
+    for (const row of csvRows) {
+      const name = valAt(row, indexMap.name) || 'Santri Fulan'
+      const santriId = valAt(row, indexMap.santriId)
+      const maskan = valAt(row, indexMap.maskan)
+      const kamar = valAt(row, indexMap.kamar)
+      const deviceId = valAt(row, indexMap.deviceId)
+
       if (santriId) {
-        await useAbsensi().markPresentBySantriId(santriId, name, { maskan, kamar, deviceId })
-        count++
-      } else if (name) {
-        await useAbsensi().markPresentManual(name, { maskan, kamar, deviceId })
-        count++
+        await markPresentBySantriId(santriId, name, {
+          maskan,
+          kamar,
+          deviceId
+        })
+
+        count += 1
+        continue
+      }
+
+      if (name) {
+        await markPresentManual(name, {
+          maskan,
+          kamar,
+          deviceId
+        })
+
+        count += 1
       }
     }
-    alert(`Import selesai: ${count} baris ditandai hadir.`)
+
+    await refresh()
+
+    window.alert(`Import selesai: ${count} baris ditandai hadir.`)
   } catch (err) {
     console.error(err)
-    alert('Gagal import CSV')
+    window.alert('Gagal import CSV.')
   } finally {
-    if (fileInput.value) fileInput.value.value = ''
+    if (fileInput.value) {
+      fileInput.value.value = ''
+    }
   }
 }
 
 function parseCSV(text: string): string[][] {
   const lines = text.split(/\r?\n/).filter(Boolean)
-  const rows: string[][] = []
-  for (const line of lines) {
-    const out: string[] = []
-    let cur = ''
-    let quoted = false
-    for (let i=0; i<line.length; i++) {
-      const ch = line[i]
-      if (quoted) {
-        if (ch === '"') {
-          if (line[i+1] === '"') { cur += '"'; i++ } else { quoted = false }
-        } else { cur += ch }
-      } else {
-        if (ch === '"') quoted = true
-        else if (ch === ',') { out.push(cur); cur = '' }
-        else { cur += ch }
-      }
-    }
-    out.push(cur)
-    rows.push(out.map(s=>s.trim()))
-  }
-  return rows
-}
-function valAt(row: string[], idx: number) { return idx >= 0 ? (row[idx]||'').trim() : '' }
+  const result: string[][] = []
 
-// auto reset checker (every 30s)
-let timer: number | null = null
+  for (const line of lines) {
+    const row: string[] = []
+    let currentValue = ''
+    let quoted = false
+
+    for (let index = 0; index < line.length; index += 1) {
+      const char = line[index]
+
+      if (quoted) {
+        if (char === '"') {
+          if (line[index + 1] === '"') {
+            currentValue += '"'
+            index += 1
+          } else {
+            quoted = false
+          }
+        } else {
+          currentValue += char
+        }
+
+        continue
+      }
+
+      if (char === '"') {
+        quoted = true
+        continue
+      }
+
+      if (char === ',') {
+        row.push(currentValue)
+        currentValue = ''
+        continue
+      }
+
+      currentValue += char
+    }
+
+    row.push(currentValue)
+    result.push(row.map((item) => item.trim()))
+  }
+
+  return result
+}
+
+function valAt(row: string[], index: number) {
+  return index >= 0
+    ? (row[index] || '').trim()
+    : ''
+}
+
+async function saveTimes() {
+  const times = timesInput.value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+
+  await saveSettings({ resetTimes: times })
+
+  timesInput.value = (settings.value.resetTimes || []).join(', ')
+
+  window.alert('Reset times berhasil disimpan.')
+}
+
 onMounted(async () => {
   await refresh()
-  const off = subscribeLive(50)
-  // keep a reference to call on unmount
-  unsub = off
-  // prepare settings input
+
+  unsub = subscribeLive(50)
+
   timesInput.value = (settings.value.resetTimes || []).join(', ')
+
   timer = window.setInterval(async () => {
     try {
       if (shouldResetNow()) {
         await resetSession({ resetBy: 'auto' })
+        await refresh()
       }
-    } catch (e) { console.error(e) }
+    } catch (err) {
+      console.error(err)
+    }
   }, 30000)
 })
 
-let unsub: null | (()=>void) = null
 onBeforeUnmount(() => {
   if (unsub) unsub()
   if (timer) window.clearInterval(timer)
 })
-
-watch(() => openSettings.value, (v) => {
-  if (v) timesInput.value = (settings.value.resetTimes || []).join(', ')
-})
-
-async function saveTimes() {
-  const parts = timesInput.value.split(',').map(s=>s.trim()).filter(Boolean)
-  await saveSettings({ resetTimes: parts })
-  timesInput.value = (settings.value.resetTimes || []).join(', ')
-  alert('Reset times disimpan.')
-}
 </script>
-
-<style scoped lang="postcss">
-.btn { @apply inline-flex items-center justify-center font-medium; }
-.input { @apply bg-white border border-gray-200-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500; }
-.select { @apply bg-white border border-gray-200-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500; }
-.modal { @apply fixed inset-0 grid place-items-center bg-black/30; }
-.modal-box { @apply bg-white; }
-.modal-backdrop { @apply fixed inset-0; }
-</style>

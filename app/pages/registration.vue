@@ -1,10 +1,9 @@
+<!-- pages/registration.vue -->
+
 <template>
   <main class="relative min-h-screen bg-gray-50 pt-24 pb-14 text-gray-800 dark:bg-neutral-950 dark:text-neutral-100">
-    <!-- Soft top accent -->
     <div class="pointer-events-none absolute inset-x-0 top-0 h-52 bg-green-600/10"></div>
-
     <div class="relative mx-auto max-w-[90rem] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-      <!-- HERO -->
       <header class="mb-6 rounded-[2rem] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 md:p-7">
         <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr),auto] lg:items-end">
           <div class="min-w-0">
@@ -48,7 +47,170 @@
       <div class="grid gap-6 lg:grid-cols-12 lg:items-start">
         <!-- LEFT: FORM -->
         <section v-if="!isFormClosed" class="lg:col-span-8">
-          <div class="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+          <div
+            v-if="isCustomRegistrationMode"
+            class="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+          >
+            <div class="border-b border-gray-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900 sm:p-7">
+              <p class="text-xs font-black uppercase tracking-[0.16em] text-green-700 dark:text-green-300">
+                Form Pendaftaran Ringkas
+              </p>
+
+              <h2 class="mt-2 text-2xl font-black tracking-tight text-gray-950 dark:text-white">
+                Isi Data Pendaftaran
+              </h2>
+
+              <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-neutral-400">
+                Lengkapi data berikut sesuai kebutuhan pendaftaran. Input yang tampil mengikuti konfigurasi admin.
+              </p>
+            </div>
+
+            <div class="p-5 sm:p-7">
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div
+                  v-for="field in activeCustomFields"
+                  :key="field.id"
+                  :class="[
+                    field.type === 'textarea' || field.type === 'file' ? 'sm:col-span-2' : ''
+                  ]"
+                >
+                  <label :class="labelBase">
+                    {{ field.label }}
+                    <span v-if="field.required" class="text-rose-600">*</span>
+                  </label>
+
+                  <textarea
+                    v-if="field.type === 'textarea'"
+                    v-model.trim="customValues[field.key]"
+                    rows="4"
+                    :placeholder="field.placeholder || `Masukkan ${field.label}`"
+                    :class="[
+                      customInputClass(field),
+                      'h-auto min-h-[120px] py-3'
+                    ]"
+                    @input="sanitizeCustomField(field)"
+                    @blur="setCustomTouched(field)"
+                  ></textarea>
+
+                  <select
+                    v-else-if="field.type === 'select'"
+                    v-model="customValues[field.key]"
+                    :class="customInputClass(field)"
+                    @change="setCustomTouched(field)"
+                    @blur="setCustomTouched(field)"
+                  >
+                    <option value="" disabled>
+                      {{ field.placeholder || `Pilih ${field.label}` }}
+                    </option>
+
+                    <option
+                      v-for="option in field.options || []"
+                      :key="option"
+                      :value="option"
+                    >
+                      {{ option }}
+                    </option>
+                  </select>
+
+                  <div v-else-if="field.type === 'file'" class="space-y-2">
+                    <input
+                      type="file"
+                      :class="customInputClass(field)"
+                      @change="onCustomFileChange(field, $event)"
+                      @blur="setCustomTouched(field)"
+                    />
+
+                    <p
+                      v-if="customValues[field.key] && typeof customValues[field.key] === 'object'"
+                      class="rounded-2xl bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-600 dark:bg-neutral-800 dark:text-neutral-300"
+                    >
+                      File:
+                      {{
+                        (customValues[field.key])?.fileName ||
+                        (customValues[field.key])?.url ||
+                        'Terpilih'
+                      }}
+                    </p>
+                  </div>
+
+                  <div v-else-if="field.type === 'range'" class="space-y-2">
+                    <input
+                      v-model="customValues[field.key]"
+                      type="range"
+                      :min="field.min ?? 0"
+                      :max="field.max ?? 100"
+                      :step="field.step ?? 1"
+                      class="w-full accent-green-600"
+                      @input="sanitizeCustomField(field)"
+                      @blur="setCustomTouched(field)"
+                    />
+
+                    <div class="flex items-center justify-between text-xs font-bold text-gray-500 dark:text-neutral-400">
+                      <span>{{ field.min ?? 0 }}</span>
+                      <span class="rounded-xl bg-green-50 px-3 py-1 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+                        {{ customValues[field.key] || 0 }}
+                      </span>
+                      <span>{{ field.max ?? 100 }}</span>
+                    </div>
+                  </div>
+
+                  <input
+                    v-else
+                    v-model.trim="customValues[field.key]"
+                    :type="field.type === 'tel' ? 'tel' : field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'"
+                    :min="field.min"
+                    :max="field.max"
+                    :step="field.step"
+                    :placeholder="field.placeholder || `Masukkan ${field.label}`"
+                    :class="customInputClass(field)"
+                    @input="sanitizeCustomField(field)"
+                    @blur="setCustomTouched(field)"
+                  />
+
+                  <p v-if="field.help && !customFieldError(field)" :class="helpBase">
+                    {{ field.help }}
+                  </p>
+
+                  <p v-if="customFieldError(field)" :class="errorBase">
+                    {{ customFieldError(field) }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="mt-6 flex flex-col gap-3 border-t border-gray-200 pt-5 dark:border-neutral-800 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-sm leading-6 text-gray-500 dark:text-neutral-400">
+                  Pastikan data sudah benar sebelum dikirim.
+                </p>
+
+                <button
+                  type="button"
+                  :disabled="loading || cloudUploading"
+                  @click="openSubmitConfirm"
+                  class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 text-sm font-black text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Icon
+                    v-if="loading || cloudUploading"
+                    icon="mingcute:loading-fill"
+                    class="h-4 w-4 animate-spin"
+                  />
+                  <Icon v-else icon="ph:paper-plane-tilt" class="h-4 w-4" />
+                  {{ loading || cloudUploading ? 'Mengirim...' : 'Kirim Pendaftaran' }}
+                </button>
+              </div>
+
+              <p
+                v-if="feedback"
+                class="mt-3 rounded-2xl px-4 py-3 text-sm font-semibold"
+                :class="ok
+                  ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
+                  : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'"
+              >
+                {{ feedback }}
+              </p>
+            </div>
+          </div>
+          
+          <div v-else class="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
             <!-- Stepper -->
             <div class="border-b border-gray-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900 sm:p-5">
               <div class="flex items-center justify-between gap-4">
@@ -1084,14 +1246,25 @@
 
                 <div class="rounded-[1.75rem] border border-gray-200 p-4 dark:border-neutral-800 sm:p-5">
                   <div class="grid gap-3 text-sm sm:grid-cols-2">
-                    <SummaryItem label="Nama" :value="form.siswa.nama || '—'" />
-                    <SummaryItem label="Gender" :value="form.siswa.jk === 'L' ? 'Laki-laki' : form.siswa.jk === 'P' ? 'Perempuan' : '—'" />
-                    <SummaryItem label="TTL" :value="`${form.siswa.tmpLahir || '-'}, ${form.siswa.tglLahir || '-'}`" />
-                    <SummaryItem label="NIK" :value="form.siswa.nik || '—'" />
-                    <SummaryItem label="Alamat" :value="alamatSingkat" />
-                    <SummaryItem label="Jenjang" :value="jenjangFromStatus(form.pendidikan.status)" />
-                    <SummaryItem label="HP Ortu" :value="form.ortu.hp1 || '—'" />
-                    <SummaryItem label="Dokumen" :value="dokumenCheck" />
+                    <template v-if="isCustomRegistrationMode">
+                      <SummaryItem
+                        v-for="item in customSubmitPreviewItems"
+                        :key="item.key"
+                        :label="item.label"
+                        :value="item.value"
+                      />
+                    </template>
+
+                    <template v-else>
+                      <SummaryItem label="Nama" :value="form.siswa.nama || '—'" />
+                      <SummaryItem label="Gender" :value="form.siswa.jk === 'L' ? 'Laki-laki' : form.siswa.jk === 'P' ? 'Perempuan' : '—'" />
+                      <SummaryItem label="TTL" :value="`${form.siswa.tmpLahir || '-'}, ${form.siswa.tglLahir || '-'}`" />
+                      <SummaryItem label="NIK" :value="form.siswa.nik || '—'" />
+                      <SummaryItem label="Alamat" :value="alamatSingkat" />
+                      <SummaryItem label="Jenjang" :value="jenjangFromStatus(form.pendidikan.status)" />
+                      <SummaryItem label="HP Ortu" :value="form.ortu.hp1 || '—'" />
+                      <SummaryItem label="Dokumen" :value="dokumenCheck" />
+                    </template>
                   </div>
                 </div>
 
@@ -1350,28 +1523,61 @@
                 </div>
 
                 <div class="space-y-4 p-5">
-                  <div class="grid gap-3 sm:grid-cols-2">
-                    <div class="rounded-2xl bg-gray-50 p-4 dark:bg-neutral-800">
-                      <p class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-500 dark:text-neutral-400">Nama Santri</p>
-                      <p class="mt-1 truncate text-sm font-bold text-gray-950 dark:text-white">{{ form.siswa.nama || '—' }}</p>
+                  <template v-if="isCustomRegistrationMode">
+                    <div class="grid gap-3 sm:grid-cols-2">
+                      <div
+                        v-for="item in customSubmitPreviewItems"
+                        :key="item.key"
+                        class="rounded-2xl bg-gray-50 p-4 dark:bg-neutral-800"
+                      >
+                        <p class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-500 dark:text-neutral-400">
+                          {{ item.label }}
+                        </p>
+                        <p class="mt-1 truncate text-sm font-bold text-gray-950 dark:text-white">
+                          {{ item.value }}
+                        </p>
+                      </div>
                     </div>
-
-                    <div class="rounded-2xl bg-gray-50 p-4 dark:bg-neutral-800">
-                      <p class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-500 dark:text-neutral-400">HP Ortu/Wali</p>
-                      <p class="mt-1 truncate text-sm font-bold text-gray-950 dark:text-white">{{ form.ortu.hp1 || '—' }}</p>
+                  </template>
+                  <template v-else>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                     <div class="rounded-2xl bg-gray-50 p-4 dark:bg-neutral-800">
+                      <p class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-500 dark:text-neutral-400">
+                        Nama Santri
+                      </p>
+                      <p class="mt-1 truncate text-sm font-bold text-gray-950 dark:text-white">
+                        {{ isCustomRegistrationMode ? customSubmitSummary.nama : form.siswa.nama || '—' }}
+                      </p>
                     </div>
-
+  
                     <div class="rounded-2xl bg-gray-50 p-4 dark:bg-neutral-800">
-                      <p class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-500 dark:text-neutral-400">Jenjang</p>
-                      <p class="mt-1 truncate text-sm font-bold text-gray-950 dark:text-white">{{ jenjangFromStatus(form.pendidikan.status) }}</p>
+                      <p class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-500 dark:text-neutral-400">
+                        HP Ortu/Wali
+                      </p>
+                      <p class="mt-1 truncate text-sm font-bold text-gray-950 dark:text-white">
+                        {{ isCustomRegistrationMode ? customSubmitSummary.nohp : form.ortu.hp1 || '—' }}
+                      </p>
                     </div>
-
+  
                     <div class="rounded-2xl bg-gray-50 p-4 dark:bg-neutral-800">
-                      <p class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-500 dark:text-neutral-400">Dokumen</p>
-                      <p class="mt-1 truncate text-sm font-bold text-gray-950 dark:text-white">{{ dokumenCheck }}</p>
+                      <p class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-500 dark:text-neutral-400">
+                        Jenjang
+                      </p>
+                      <p class="mt-1 truncate text-sm font-bold text-gray-950 dark:text-white">
+                        {{ isCustomRegistrationMode ? customSubmitSummary.jenjang : jenjangFromStatus(form.pendidikan.status) }}
+                      </p>
                     </div>
-                  </div>
-
+  
+                    <div class="rounded-2xl bg-gray-50 p-4 dark:bg-neutral-800">
+                      <p class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-500 dark:text-neutral-400">
+                        Dokumen
+                      </p>
+                      <p class="mt-1 truncate text-sm font-bold text-gray-950 dark:text-white">
+                        {{ isCustomRegistrationMode ? customSubmitSummary.dokumen : dokumenCheck }}
+                      </p>
+                    </div>
+                    </div>
+                  </template>
                   <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/10 dark:text-amber-200">
                     Setelah menekan <b>Ya, Submit</b>, data akan dikirim ke database dan dokumen gambar akan diupload ke Cloudinary.
                   </div>
@@ -1724,6 +1930,18 @@ import { useHead, useNuxtApp, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
 import { onValue, push, ref as dbRef, serverTimestamp, set } from 'firebase/database'
 import { useCloudinaryUpload } from '~/composables/useCloudinaryUpload'
 
+import {
+  emptyCustomRegistrationValues,
+  enabledCustomRegistrationFields,
+  getCustomValueByMap,
+  normalizeCustomRegistrationFields,
+  customRegistrationDisplayRows,
+  type CustomRegistrationField,
+  type CustomRegistrationValues,
+  type CustomRegistrationFileValue,
+  type RegistrationFormMode
+} from '~/composables/data/useRegistrationForm'
+
 type DocKey = 'kk' | 'akte' | 'ktpAyah' | 'ktpIbu'
 type DocMode = 'image' | 'pdf'
 
@@ -1766,6 +1984,10 @@ type RegistrationPageConfig = {
   autoCloseEnabled: boolean
   autoCloseAt: string | number
   notice: string
+
+  // NEW
+  formMode: RegistrationFormMode
+  customFields: CustomRegistrationField[]
 }
 
 type DocBox = {
@@ -1828,11 +2050,16 @@ const defaultRegistrationConfig: RegistrationPageConfig = {
   email: '',
   whatsapp: '',
   brochures: [],
+
+  formMode: 'default',
+  customFields: [],
+
   timeline: {
     registration: '-',
     selection: '-',
     announcement: '-'
   },
+
   requirements: {
     icon: 'lucide:list-checks',
     title: 'Syarat Umum Pendaftaran',
@@ -1851,6 +2078,7 @@ const defaultRegistrationConfig: RegistrationPageConfig = {
       }
     ]
   },
+
   isClosed: false,
   autoCloseEnabled: false,
   autoCloseAt: '',
@@ -1858,6 +2086,42 @@ const defaultRegistrationConfig: RegistrationPageConfig = {
 }
 
 const registrationConfig = ref<RegistrationPageConfig>({ ...defaultRegistrationConfig })
+const customValues = reactive<CustomRegistrationValues>({})
+const customTouched = reactive<Record<string, boolean>>({})
+const customErrors = reactive<Record<string, string>>({})
+const customFileInputs = reactive<Record<string, File | null>>({})
+
+const isCustomRegistrationMode = computed(() =>
+  registrationConfig.value.formMode === 'custom'
+)
+
+const activeCustomFields = computed(() =>
+  enabledCustomRegistrationFields(registrationConfig.value.customFields || [])
+)
+
+watch(
+  activeCustomFields,
+  (fields) => {
+    const fresh = emptyCustomRegistrationValues(fields)
+
+    for (const key of Object.keys(fresh)) {
+      if (!(key in customValues)) {
+        customValues[key] = fresh[key]
+      }
+    }
+
+    for (const key of Object.keys(customValues)) {
+      if (!fields.some((field) => field.key === key)) {
+        delete customValues[key]
+        delete customTouched[key]
+        delete customErrors[key]
+        delete customFileInputs[key]
+      }
+    }
+  },
+  { immediate: true, deep: true }
+)
+
 const ppdbYear = computed(() => Number(registrationConfig.value.year) || new Date().getFullYear())
 
 function normalizeBrochures(value: any): RegistrationBrochureSource[] {
@@ -1949,7 +2213,15 @@ function subscribeRegistrationConfig() {
     const val = snap.val() || {}
     const nextConfig = normalizeRegistrationConfig(val)
 
-    registrationConfig.value = nextConfig
+    registrationConfig.value = {
+      ...defaultRegistrationConfig,
+      ...val,
+      brochures: normalizeBrochures(val.brochures),
+      requirements: normalizeRequirements(val.requirements),
+
+      formMode: val.formMode === 'custom' ? 'custom' : 'default',
+      customFields: normalizeCustomRegistrationFields(val.customFields)
+    }
 
     ppdbSettings.value = {
       isClosed: nextConfig.isClosed,
@@ -2843,7 +3115,14 @@ function validStep(i: number) {
 }
 
 const canNext = computed(() => validStep(step.value))
-const canSubmit = computed(() => validStep(5))
+const canSubmit = computed(() => {
+  if (isCustomRegistrationMode.value) {
+    return validateCustomInputs(false).valid
+  }
+
+  return validStep(5)
+})
+
 
 /** Local draft */
 const DRAFT_KEY = computed(() => `${clientName}_ppdb_registration_v4`)
@@ -3289,56 +3568,69 @@ const downloadCardLoading = ref(false)
 const registrationCardRef = ref<HTMLElement | null>(null)
 const submittedAtText = ref('')
 
-const registrationCardRows = computed(() => [
-  {
-    label: 'Nama Santri',
-    value: form.siswa.nama || '—'
-  },
-  {
-    label: 'Jenis Kelamin',
-    value: form.siswa.jk === 'P' ? 'Perempuan' : form.siswa.jk === 'L' ? 'Laki-laki' : '—'
-  },
-  {
-    label: 'Tempat, Tanggal Lahir',
-    value: `${form.siswa.tmpLahir || '-'}, ${formatDateOnly(form.siswa.tglLahir)}`
-  },
-  {
-    label: 'NIK',
-    value: form.siswa.nik || '—'
-  },
-  {
-    label: 'NISN',
-    value: form.siswa.nisn || '—'
-  },
-  {
-    label: 'Jenjang',
-    value: jenjangFromStatus(form.pendidikan.status)
-  },
-  {
-    label: 'Nama Wali/Orang Tua',
-    value: primaryWaliName() || '—'
-  },
-  {
-    label: 'Nomor HP',
-    value: form.ortu.hp1 || '—'
-  },
-  {
-    label: 'Alamat',
-    value: alamatSingkat.value || '—'
-  },
-  {
-    label: 'Username',
-    value: receipt.value?.username || '—'
-  },
-  {
-    label: 'Public Token',
-    value: receipt.value?.publicToken || '—'
-  },
-  {
-    label: 'Tanggal Submit',
-    value: submittedAtText.value || '—'
+const registrationCardRows = computed(() => {
+  const systemRows = [
+    {
+      label: 'Username',
+      value: receipt.value?.username || '—'
+    },
+    {
+      label: 'Public Token',
+      value: receipt.value?.publicToken || '—'
+    },
+    {
+      label: 'Tanggal Submit',
+      value: submittedAtText.value || '—'
+    }
+  ]
+
+  if (isCustomRegistrationMode.value) {
+    return [
+      ...customSubmitPreviewItems.value,
+      ...systemRows
+    ]
   }
-])
+
+  return [
+    {
+      label: 'Nama Santri',
+      value: form.siswa.nama || '—'
+    },
+    {
+      label: 'Jenis Kelamin',
+      value: form.siswa.jk === 'P' ? 'Perempuan' : form.siswa.jk === 'L' ? 'Laki-laki' : '—'
+    },
+    {
+      label: 'Tempat, Tanggal Lahir',
+      value: `${form.siswa.tmpLahir || '-'}, ${formatDateOnly(form.siswa.tglLahir)}`
+    },
+    {
+      label: 'NIK',
+      value: form.siswa.nik || '—'
+    },
+    {
+      label: 'NISN',
+      value: form.siswa.nisn || '—'
+    },
+    {
+      label: 'Jenjang',
+      value: jenjangFromStatus(form.pendidikan.status)
+    },
+    {
+      label: 'Nama Wali/Orang Tua',
+      value: primaryWaliName() || '—'
+    },
+    {
+      label: 'Nomor HP',
+      value: form.ortu.hp1 || '—'
+    },
+    {
+      label: 'Alamat',
+      value: alamatSingkat.value || '—'
+    },
+    ...systemRows
+  ]
+})
 
 function validateDocuments() {
   for (const item of docConfigs) {
@@ -3368,6 +3660,325 @@ function findFirstInvalidStep() {
   return -1
 }
 
+function customInputClass(field: CustomRegistrationField) {
+  const error = customErrors[field.key]
+
+  return [
+    inputBase,
+    error ? inputError : inputNormal
+  ].join(' ')
+}
+
+function customFieldError(field: CustomRegistrationField) {
+  return customErrors[field.key] || ''
+}
+
+function setCustomTouched(field: CustomRegistrationField) {
+  customTouched[field.key] = true
+  validateCustomField(field, true)
+}
+
+function cleanCustomPhone(value: any) {
+  return String(value || '')
+    .replace(/[^\d+]/g, '')
+    .replace(/^(\+?62)0/, '$1')
+    .slice(0, 16)
+}
+
+function sanitizeCustomField(field: CustomRegistrationField) {
+  const value = customValues[field.key]
+
+  if (field.type === 'tel') {
+    customValues[field.key] = cleanCustomPhone(value)
+  }
+
+  if (field.type === 'number' || field.type === 'range') {
+    const raw = String(value ?? '').replace(/[^\d.-]/g, '')
+    customValues[field.key] = raw
+  }
+
+  if (typeof customValues[field.key] === 'string') {
+    customValues[field.key] = String(customValues[field.key] || '').replace(/\s{2,}/g, ' ')
+  }
+
+  if (customTouched[field.key] || submittedOnce.value) {
+    validateCustomField(field, true)
+  }
+}
+
+function validateCustomField(field: CustomRegistrationField, saveError = false) {
+  const value = customValues[field.key]
+  const isFile = field.type === 'file'
+  const hasFile = !!customFileInputs[field.key] || !!(value && typeof value === 'object' && 'url' in value)
+  const textValue = typeof value === 'object' ? '' : String(value ?? '').trim()
+
+  let message = ''
+
+  if (field.required) {
+    if (isFile && !hasFile) {
+      message = `${field.label} wajib diunggah.`
+    } else if (!isFile && !textValue) {
+      message = `${field.label} wajib diisi.`
+    }
+  }
+
+  if (!message && field.type === 'tel' && textValue && textValue.replace(/\D/g, '').length < 9) {
+    message = `${field.label} minimal 9 digit.`
+  }
+
+  if (!message && field.type === 'number' && textValue) {
+    const num = Number(textValue)
+
+    if (Number.isNaN(num)) {
+      message = `${field.label} harus berupa angka.`
+    } else if (field.min !== undefined && num < Number(field.min)) {
+      message = `${field.label} minimal ${field.min}.`
+    } else if (field.max !== undefined && num > Number(field.max)) {
+      message = `${field.label} maksimal ${field.max}.`
+    }
+  }
+
+  if (!message && field.type === 'range' && textValue) {
+    const num = Number(textValue)
+
+    if (Number.isNaN(num)) {
+      message = `${field.label} harus berupa angka.`
+    } else if (field.min !== undefined && num < Number(field.min)) {
+      message = `${field.label} minimal ${field.min}.`
+    } else if (field.max !== undefined && num > Number(field.max)) {
+      message = `${field.label} maksimal ${field.max}.`
+    }
+  }
+
+  if (saveError) {
+    customErrors[field.key] = message
+  }
+
+  return message
+}
+
+function validateCustomInputs(saveError = false) {
+  const fields = activeCustomFields.value
+
+  if (!fields.length) {
+    return {
+      valid: false,
+      firstError: 'Form custom belum memiliki input aktif.'
+    }
+  }
+
+  for (const field of fields) {
+    const message = validateCustomField(field, saveError)
+
+    if (message) {
+      return {
+        valid: false,
+        firstError: message
+      }
+    }
+  }
+
+  return {
+    valid: true,
+    firstError: ''
+  }
+}
+
+function displayCustomValue(value: any) {
+  if (value === undefined || value === null || value === '') return '—'
+
+  if (Array.isArray(value)) {
+    return value.length ? value.join(', ') : '—'
+  }
+
+  if (typeof value === 'object') {
+    return String(
+      value.fileName ||
+      value.url ||
+      value.secure_url ||
+      value.secureUrl ||
+      value.name ||
+      'File terpilih'
+    )
+  }
+
+  return String(value).trim() || '—'
+}
+
+const customSubmitPreviewItems = computed(() => {
+  return activeCustomFields.value
+    .slice(0, 4)
+    .map((field) => ({
+      key: field.key,
+      label: field.label || 'Input',
+      value: displayCustomValue(customValues[field.key])
+    }))
+})
+
+function firstReadableCustomValue(values: CustomRegistrationValues) {
+  for (const field of activeCustomFields.value) {
+    if (field.type === 'file') continue
+
+    const value = displayCustomValue(values[field.key])
+
+    if (value && value !== '—') return value
+  }
+
+  return ''
+}
+
+function onCustomFileChange(field: CustomRegistrationField, event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0] || null
+
+  customFileInputs[field.key] = file
+
+  if (file) {
+    customValues[field.key] = {
+      url: '',
+      fileName: file.name,
+      mimeType: file.type,
+      size: file.size
+    } as CustomRegistrationFileValue
+  } else {
+    customValues[field.key] = null
+  }
+
+  setCustomTouched(field)
+}
+
+async function uploadCustomFile(field: CustomRegistrationField, file: File) {
+  const runtime = useRuntimeConfig()
+  const cloudName = String(runtime.public.cloudinaryCloudName || 'dwbaxqjzr')
+  const uploadPreset = String(runtime.public.cloudinaryUploadPreset || 'ml_default')
+
+  const body = new FormData()
+  body.append('file', file)
+  body.append('upload_preset', uploadPreset)
+  body.append('folder', `${clientName}/registration/custom`)
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+    method: 'POST',
+    body
+  })
+
+  const json = await response.json()
+
+  if (!response.ok) {
+    throw new Error(json?.error?.message || `Gagal upload file ${field.label}.`)
+  }
+
+  return {
+    url: json.secure_url,
+    secure_url: json.secure_url,
+    public_id: json.public_id,
+    fileName: file.name,
+    mimeType: file.type,
+    size: file.size
+  } as CustomRegistrationFileValue
+}
+
+async function prepareCustomValuesForSubmit() {
+  const result: CustomRegistrationValues = JSON.parse(JSON.stringify(customValues))
+
+  for (const field of activeCustomFields.value) {
+    if (field.type !== 'file') continue
+
+    const file = customFileInputs[field.key]
+    if (!file) continue
+
+    result[field.key] = await uploadCustomFile(field, file)
+  }
+
+  return result
+}
+
+function customMappedValue(
+  values: CustomRegistrationValues,
+  mapTo: CustomRegistrationField['mapTo']
+) {
+  return getCustomValueByMap(activeCustomFields.value, values, mapTo)
+}
+
+function normalizeCustomText(value: any) {
+  if (Array.isArray(value)) return value.join(', ')
+  if (value && typeof value === 'object') {
+    return String(
+      value.fileName ||
+      value.url ||
+      value.secure_url ||
+      value.secureUrl ||
+      ''
+    )
+  }
+
+  return String(value ?? '').trim()
+}
+
+function getCustomValueByLabelKeywords(keywords: string[]) {
+  const field = activeCustomFields.value.find((item) => {
+    const label = String(item.label || '').toLowerCase()
+    const key = String(item.key || '').toLowerCase()
+
+    return keywords.some((keyword) => {
+      const k = keyword.toLowerCase()
+      return label.includes(k) || key.includes(k)
+    })
+  })
+
+  if (!field) return ''
+
+  return normalizeCustomText(customValues[field.key])
+}
+
+function smartCustomMappedValue(mapTo: CustomRegistrationField['mapTo'], keywords: string[] = []) {
+  const mapped = normalizeCustomText(customMappedValue(customValues, mapTo))
+
+  if (mapped) return mapped
+
+  return getCustomValueByLabelKeywords(keywords)
+}
+
+const customSubmitSummary = computed(() => {
+  const nama = smartCustomMappedValue('nama', ['nama lengkap', 'nama santri', 'nama'])
+  const nohp = smartCustomMappedValue('nohp', ['nomor handphone', 'nomor hp', 'no hp', 'whatsapp', 'wa', 'hp'])
+  const pendidikan = smartCustomMappedValue('pendidikan', ['pendidikan', 'jenjang'])
+  const tujuan = smartCustomMappedValue('tujuan', ['tujuan'])
+  const alamat = smartCustomMappedValue('alamat', ['alamat'])
+  const jk = smartCustomMappedValue('jk', ['jenis kelamin', 'gender'])
+  const tmpLahir = smartCustomMappedValue('tmpLahir', ['tempat lahir'])
+  const tglLahir = smartCustomMappedValue('tglLahir', ['tanggal lahir'])
+  const namaOrtu = smartCustomMappedValue('namaOrtu', ['nama orang tua', 'orang tua', 'ortu', 'wali'])
+
+  const customFileFields = activeCustomFields.value.filter((field) => field.type === 'file')
+  const readyFileFields = customFileFields.filter((field) => {
+    const value = customValues[field.key]
+    return !!customFileInputs[field.key] || !!normalizeCustomText(value)
+  })
+
+  return {
+    nama: nama || '—',
+    nohp: nohp || '—',
+    jenjang: pendidikan || tujuan || '—',
+    alamat: alamat || '—',
+    gender:
+      jk.toLowerCase().includes('perempuan') || jk.toLowerCase() === 'p'
+        ? 'Perempuan'
+        : jk.toLowerCase().includes('laki') || jk.toLowerCase() === 'l'
+          ? 'Laki-laki'
+          : jk || '—',
+    ttl:
+      tmpLahir || tglLahir
+        ? `${tmpLahir || '-'}, ${tglLahir || '-'}`
+        : '—',
+    namaOrtu: namaOrtu || '—',
+    dokumen:
+      customFileFields.length > 0
+        ? `${readyFileFields.length}/${customFileFields.length} file`
+        : 'Tidak diwajibkan'
+  }
+})
+
 function openSubmitConfirm() {
   if (isFormClosed.value) {
     feedback.value = 'Maaf, pendaftaran sudah ditutup.'
@@ -3377,20 +3988,33 @@ function openSubmitConfirm() {
 
   submittedOnce.value = true
 
-  const result = validateAllInputs(true)
+  if (isCustomRegistrationMode.value) {
+    const result = validateCustomInputs(true)
 
-  if (!result.valid) {
-    touchStepFields(result.step)
+    if (!result.valid) {
+      feedback.value = result.firstError || 'Data wajib belum lengkap. Mohon cek kembali.'
+      ok.value = false
+      return
+    }
 
-    step.value = result.step
-    feedback.value = result.firstError || `Data pada langkah ${result.step + 1} belum lengkap. Mohon cek kembali.`
-    ok.value = false
-
+    submitConfirmOpen.value = true
     return
   }
 
-  feedback.value = ''
-  ok.value = false
+  if (!canSubmit.value) {
+    feedback.value = 'Data belum lengkap. Mohon cek kembali.'
+    ok.value = false
+    return
+  }
+
+  const docErr = validateDocuments()
+
+  if (docErr) {
+    feedback.value = docErr
+    ok.value = false
+    return
+  }
+
   submitConfirmOpen.value = true
 }
 
@@ -3590,13 +4214,25 @@ async function submit() {
     return
   }
 
-  if (!canSubmit.value) return
+  const isCustomMode = isCustomRegistrationMode.value
+  if (isCustomMode) {
+    const customResult = validateCustomInputs(true)
 
-  const docErr = validateDocuments()
-  if (docErr) {
-    feedback.value = docErr
-    ok.value = false
-    return
+    if (!customResult.valid) {
+      feedback.value = customResult.firstError || 'Data wajib belum lengkap.'
+      ok.value = false
+      return
+    }
+  } else {
+    if (!canSubmit.value) return
+
+    const docErr = validateDocuments()
+
+    if (docErr) {
+      feedback.value = docErr
+      ok.value = false
+      return
+    }
   }
 
   loading.value = true
@@ -3613,12 +4249,33 @@ async function submit() {
     const regId = newRef.key as string
     const code = niceCode(regId)
 
-    const dokumen = await uploadDocumentImages(regId)
+    const dokumen = isCustomMode
+      ? {}
+      : await uploadDocumentImages(regId)
 
     const gender = (form.siswa.jk || '').toUpperCase() === 'P' ? 'P' : 'L'
     const tipe = gender === 'P' ? 'Putri' : 'Putra'
 
-    const username = genUsername(form.siswa.nama, regId)
+    const customSubmitValues = isCustomMode
+      ? await prepareCustomValuesForSubmit()
+      : null
+
+    const dynamicFallbackName = isCustomMode && customSubmitValues
+      ? firstReadableCustomValue(customSubmitValues)
+      : ''
+
+    const customFieldsSnapshot = isCustomMode
+      ? JSON.parse(JSON.stringify(activeCustomFields.value))
+      : []
+
+    const customDisplay = isCustomMode && customSubmitValues
+      ? customRegistrationDisplayRows(customFieldsSnapshot, customSubmitValues)
+      : []
+
+    const username = genUsername(
+      isCustomMode ? dynamicFallbackName || `pendaftar-${regId}` : form.siswa.nama,
+      regId
+    )
     const publicToken = `pub_${randomBase62(24)}`
     const secretToken = `sec_${randomBase62(48)}`
     const secretHash = `sha256:${await sha256Hex(secretToken)}`
@@ -3629,45 +4286,82 @@ async function submit() {
       return !!(item.url || item.secure_url || item.secureUrl)
     }).length
 
+    const mappedNama = customSubmitValues ? customMappedValue(customSubmitValues, 'nama') : ''
+    const mappedNoHp = customSubmitValues ? customMappedValue(customSubmitValues, 'nohp') : ''
+    const mappedTmpLahir = customSubmitValues ? customMappedValue(customSubmitValues, 'tmpLahir') : ''
+    const mappedTglLahir = customSubmitValues ? customMappedValue(customSubmitValues, 'tglLahir') : ''
+    const mappedJk = customSubmitValues ? customMappedValue(customSubmitValues, 'jk') : ''
+    const mappedAlamat = customSubmitValues ? customMappedValue(customSubmitValues, 'alamat') : ''
+    const mappedAsalSekolah = customSubmitValues ? customMappedValue(customSubmitValues, 'asalSekolah') : ''
+    const mappedPendidikan = customSubmitValues ? customMappedValue(customSubmitValues, 'pendidikan') : ''
+    const mappedNamaOrtu = customSubmitValues ? customMappedValue(customSubmitValues, 'namaOrtu') : ''
+
+    const normalizedCustomGender = (() => {
+      const value = mappedJk.toLowerCase()
+
+      if (value === 'l' || value.includes('laki')) return 'L'
+      if (value === 'p' || value.includes('perempuan')) return 'P'
+
+      return ''
+    })()
+
+    const customFileCount = isCustomMode && customSubmitValues
+      ? activeCustomFields.value.filter((field) => {
+          if (field.type !== 'file') return false
+          const value = customSubmitValues[field.key]
+          return displayCustomValue(value) !== '—'
+        }).length
+      : 0
+
     const santriRow = {
-      id: regId,
+      santri: isCustomMode
+        ? dynamicFallbackName || `Pendaftar ${Date.now()}`
+        : form.siswa.nama.trim(),
 
-      // utama
-      gen: String(ppdbYear.value),
-      santri: (form.siswa.nama || '').trim(),
-      walisantri: primaryWaliName(),
-      nohp: (form.ortu.hp1 || '').trim(),
+      nama: isCustomMode
+        ? dynamicFallbackName || `Pendaftar ${Date.now()}`
+        : form.siswa.nama.trim(),
 
-      // identitas santri
-      nik: (form.siswa.nik || '').trim(),
-      kk: (form.siswa.kk || '').trim(),
-      nisn: (form.siswa.nisn || '').trim(),
-      jk: gender,
-      gender,
-      tipe,
-      tmpLahir: (form.siswa.tmpLahir || '').trim(),
-      tglLahir: form.siswa.tglLahir || '',
+      walisantri: isCustomMode
+        ? ''
+        : (form.wali.nama || form.ortu.ayah.nama || form.ortu.ibu.nama || '').trim(),
 
-      // orang tua
-      ayahNama: (form.ortu.ayah.nama || '').trim(),
-      ibuNama: (form.ortu.ibu.nama || '').trim(),
-      waliNama: (form.wali.nama || primaryWaliName() || '').trim(),
-      hpOrtu1: (form.ortu.hp1 || '').trim(),
-      hpOrtu2: (form.ortu.hp2 || '').trim(),
+      nohp: isCustomMode
+        ? ''
+        : (form.ortu.hp1 || form.wali.hp || '').trim(),
 
-      // akademik/alamat
-      jenjang: jenjangFromStatus(form.pendidikan.status),
-      alamat: alamatSingkat.value,
+      nik: isCustomMode ? '' : (form.siswa.nik || '').trim(),
+      kk: isCustomMode ? '' : (form.siswa.kk || '').trim(),
+      nisn: isCustomMode ? '' : (form.siswa.nisn || '').trim(),
 
-      // status admin
+      jk: isCustomMode ? 'L' : gender,
+      gender: isCustomMode ? 'L' : gender,
+      tipe: isCustomMode ? 'Putra' : tipe,
+
+      tmpLahir: isCustomMode ? '' : (form.siswa.tmpLahir || '').trim(),
+      tglLahir: isCustomMode ? '' : (form.siswa.tglLahir || ''),
+
+      ayahNama: isCustomMode ? '' : (form.ortu.ayah.nama || '').trim(),
+      ibuNama: isCustomMode ? '' : (form.ortu.ibu.nama || '').trim(),
+      waliNama: isCustomMode ? '' : (form.wali.nama || primaryWaliName() || '').trim(),
+
+      hpOrtu1: isCustomMode ? '' : (form.ortu.hp1 || '').trim(),
+      hpOrtu2: isCustomMode ? '' : (form.ortu.hp2 || '').trim(),
+
+      jenjang: isCustomMode ? '' : jenjangFromStatus(form.pendidikan.status),
+      alamat: isCustomMode ? '' : alamatSingkat.value,
+      asalSekolah: isCustomMode ? '' : (form.pendidikan.sekolah || '').trim(),
+
       kuotaKunjunganBulanIni: 0,
       kamar: '-',
       maskan: '-',
       status: 'nonaktif',
 
-      // PPDB
       ppdbCode: code,
-      dokumenCount
+      dokumenCount: isCustomMode ? customFileCount : dokumenCount,
+
+      registrationMode: isCustomMode ? 'custom' : 'default',
+      formMode: isCustomMode ? 'custom' : 'default'
     }
 
     const record = {
@@ -3675,14 +4369,31 @@ async function submit() {
       username,
       publicToken,
       createdAt: serverTimestamp(),
-      dokumen,
+
+      formMode: isCustomMode ? 'custom' : 'default',
+      customData: isCustomMode ? JSON.parse(JSON.stringify(customSubmitValues || {})) : null,
+      customFieldsSnapshot: isCustomMode ? customFieldsSnapshot : null,
+      customDisplayRows: isCustomMode ? customDisplay : [],
+
+      dokumen: isCustomMode ? {} : dokumen,
+
       ppdb: {
-        siswa: JSON.parse(JSON.stringify(form.siswa)),
-        alamat: JSON.parse(JSON.stringify(form.alamat)),
-        pendidikan: JSON.parse(JSON.stringify(form.pendidikan)),
-        ortu: JSON.parse(JSON.stringify(form.ortu)),
-        wali: JSON.parse(JSON.stringify(form.wali))
+        siswa: isCustomMode ? {} : JSON.parse(JSON.stringify(form.siswa)),
+        alamat: isCustomMode ? {} : JSON.parse(JSON.stringify(form.alamat)),
+        pendidikan: isCustomMode ? {} : JSON.parse(JSON.stringify(form.pendidikan)),
+        ortu: isCustomMode ? {} : JSON.parse(JSON.stringify(form.ortu)),
+        wali: isCustomMode ? {} : JSON.parse(JSON.stringify(form.wali)),
+
+        custom: isCustomMode
+          ? {
+              mode: 'custom',
+              fields: customFieldsSnapshot,
+              values: JSON.parse(JSON.stringify(customSubmitValues || {})),
+              displayRows: customDisplay
+            }
+          : null
       },
+
       meta: {
         ua: navigator.userAgent,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone

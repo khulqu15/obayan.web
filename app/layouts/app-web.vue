@@ -766,7 +766,7 @@
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useRuntimeConfig, useState } from 'nuxt/app'
+import { useRuntimeConfig, useState, useHead } from 'nuxt/app'
 import { useWeb } from '~/composables/data/useWeb'
 
 type PageRow = {
@@ -786,7 +786,13 @@ const clientDisplayName = String(config.public.clientDisplayName || 'Al-Inayah')
 const appName = String(config.public.appName || 'SINAYAH')
 const appLogo = String(config.public.appLogo || '/assets/logo.png')
 const siteUrl = String(config.public.siteUrl || 'https://alinayah.sencra.io').replace(/\/$/, '')
-
+useHead({
+  link: [
+    { rel: 'icon', href: appLogo },
+    { rel: 'shortcut icon', href: appLogo },
+    { rel: 'apple-touch-icon', href: appLogo }
+  ]
+})
 const sessionUser = useState<any>('sessionUser', () => ({}))
 
 const user = computed(() => ({

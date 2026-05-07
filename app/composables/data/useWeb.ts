@@ -70,6 +70,18 @@ export function safeJSON<T = any>(v: any, fallback: T): T {
   }
 }
 
+function waitWithTimeout<T>(promise: Promise<T>, timeoutMs = 8000) {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null
+
+  const timeoutPromise = new Promise<null>((resolve) => {
+    timeoutId = setTimeout(() => resolve(null), timeoutMs)
+  })
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timeoutId) clearTimeout(timeoutId)
+  })
+}
+
 /* =======================
  * Composable
  * ======================= */
@@ -85,6 +97,13 @@ export function useWeb() {
 
   const loading = ref(false)
   const error = ref<unknown>(null)
+
+  const pageLoading = ref(false)
+  const pageLoaded = ref(false)
+  const pageError = ref<unknown>(null)
+  const pageLoadedAt = ref<number | null>(null)
+
+  let detailLoadToken = 0
 
   /* ===== List: pages ===== */
 
@@ -142,13 +161,23 @@ export function useWeb() {
 
   const detailUnsubs: Array<() => void> = []
 
-  function unbindDetail() {
+  function unbindDetail(resetState = true) {
+    detailLoadToken++
+
     while (detailUnsubs.length) {
       try { detailUnsubs.pop()?.() } catch {}
     }
+
     meta.value = null
     sections.value = []
     sectionsOrder.value = []
+
+    if (resetState) {
+      pageLoading.value = false
+      pageLoaded.value = false
+      pageError.value = null
+      pageLoadedAt.value = null
+    }
   }
 
   function setActivePath(p: string) {
@@ -177,47 +206,141 @@ export function useWeb() {
   }
 
   async function subscribePage(path: string) {
-    if (!isClient || !$realtimeDb) return
-    unbindDetail()
-    const normalized = normalizePath(path)
-    currentPath.value = normalized
-    const key = await ensurePage(normalized)
+    const token = ++detailLoadToken
 
-    // meta
-    const mRef = dref($realtimeDb, `${clientName}/web/pages/${key}/meta`)
-    const hM = onValue(mRef, (s) => {
-      const v = s.val() || null
-      meta.value = v
-    })
-    detailUnsubs.push(() => off(mRef, 'value', hM as any))
+    pageLoading.value = true
+    pageLoaded.value = false
+    pageError.value = null
+    pageLoadedAt.value = null
 
-    // sections
-    const sRef = dref($realtimeDb, `${clientName}/web/pages/${key}/sections`)
-    const hS = onValue(sRef, (s) => {
-      const arr: WebSection[] = []
-      s.forEach((ch: any) => {
-        const v = ch.val() || {}
-        arr.push({
-          id: ch.key as string,
-          key: v.key,
-          enabled: v.enabled !== false,
-          order: Number(v.order) || 0,
-          props: v.props || null,
-          createdAt: v.createdAt,
-          updatedAt: v.updatedAt
-        })
+    if (!isClient || !$realtimeDb) {
+      pageLoading.value = false
+      pageLoaded.value = true
+      pageLoadedAt.value = Date.now()
+      return null
+    }
+
+    unbindDetail(false)
+
+    try {
+      const normalized = normalizePath(path)
+      currentPath.value = normalized
+
+      const key = await ensurePage(normalized)
+
+      let metaReady = false
+      let sectionsReady = false
+      let sectionsOrderReady = false
+
+      const firstSnapshotReady = new Promise<void>((resolve, reject) => {
+        const checkReady = () => {
+          if (metaReady && sectionsReady && sectionsOrderReady) {
+            resolve()
+          }
+        }
+
+        // meta
+        const mRef = dref($realtimeDb, `${clientName}/web/pages/${key}/meta`)
+        const unsubMeta = onValue(
+          mRef,
+          (s) => {
+            const v = s.val() || null
+            meta.value = v
+
+            metaReady = true
+            checkReady()
+          },
+          (e) => {
+            pageError.value = e
+            reject(e)
+          }
+        )
+
+        detailUnsubs.push(unsubMeta)
+
+        // sections
+        const sRef = dref($realtimeDb, `${clientName}/web/pages/${key}/sections`)
+        const unsubSections = onValue(
+          sRef,
+          (s) => {
+            const arr: WebSection[] = []
+
+            s.forEach((ch: any) => {
+              const v = ch.val() || {}
+
+              arr.push({
+                id: ch.key as string,
+                key: v.key,
+                enabled: v.enabled !== false,
+                order: Number(v.order) || 0,
+                props: v.props || null,
+                createdAt: v.createdAt,
+                updatedAt: v.updatedAt
+              })
+            })
+
+            sections.value = arr
+
+            sectionsReady = true
+            checkReady()
+          },
+          (e) => {
+            pageError.value = e
+            reject(e)
+          }
+        )
+
+        detailUnsubs.push(unsubSections)
+
+        // sectionsOrder
+        const oRef = dref($realtimeDb, `${clientName}/web/pages/${key}/sectionsOrder`)
+        const unsubOrder = onValue(
+          oRef,
+          (s) => {
+            const val = s.val()
+            sectionsOrder.value = Array.isArray(val) ? (val as string[]) : []
+
+            sectionsOrderReady = true
+            checkReady()
+          },
+          (e) => {
+            pageError.value = e
+            reject(e)
+          }
+        )
+
+        detailUnsubs.push(unsubOrder)
       })
-      sections.value = arr
-    })
-    detailUnsubs.push(() => off(sRef, 'value', hS as any))
 
-    // sectionsOrder
-    const oRef = dref($realtimeDb, `${clientName}/web/pages/${key}/sectionsOrder`)
-    const hO = onValue(oRef, (s) => {
-      const val = s.val()
-      sectionsOrder.value = Array.isArray(val) ? (val as string[]) : []
-    })
-    detailUnsubs.push(() => off(oRef, 'value', hO as any))
+      // Tunggu snapshot pertama, tapi jangan sampai loading infinite.
+      await waitWithTimeout(firstSnapshotReady, 8000)
+
+      if (token === detailLoadToken) {
+        pageLoaded.value = true
+        pageLoadedAt.value = Date.now()
+      }
+
+      return {
+        meta: meta.value,
+        sections: sections.value,
+        sectionsOrder: sectionsOrder.value
+      }
+    } catch (e) {
+      if (token === detailLoadToken) {
+        pageError.value = e
+        error.value = e
+        pageLoaded.value = true
+        pageLoadedAt.value = Date.now()
+      }
+
+      console.error('[useWeb] Failed to subscribe page:', e)
+
+      return null
+    } finally {
+      if (token === detailLoadToken) {
+        pageLoading.value = false
+      }
+    }
   }
 
   const sortedSections = computed(() => {

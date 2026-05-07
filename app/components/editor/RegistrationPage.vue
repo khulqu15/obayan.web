@@ -1,3 +1,5 @@
+<!-- components/editor/RegistrationPage.vue -->
+
 <template>
   <section class="relative overflow-hidden rounded-[32px] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
     <!-- Header -->
@@ -527,157 +529,465 @@
           </div>
         </div>
 
-        <!-- Preview Payload -->
         <!-- Syarat Umum -->
-<div v-show="activeTab === 'Syarat Umum'" class="space-y-5">
-  <div class="rounded-[28px] border border-green-100 bg-gradient-to-br from-green-50 via-white to-lime-50 p-5 dark:border-green-900/30 dark:from-green-900/10 dark:via-neutral-900 dark:to-neutral-900">
-    <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-      <div class="flex items-start gap-4">
-        <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-green-600 text-white shadow-lg shadow-green-500/20">
-          <Icon :icon="form.requirements.icon || 'lucide:list-checks'" class="h-5 w-5" />
-        </div>
+        <div v-show="activeTab === 'Syarat Umum'" class="space-y-5">
+          <div class="rounded-[28px] border border-green-100 bg-gradient-to-br from-green-50 via-white to-lime-50 p-5 dark:border-green-900/30 dark:from-green-900/10 dark:via-neutral-900 dark:to-neutral-900">
+            <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div class="flex items-start gap-4">
+                <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-green-600 text-white shadow-lg shadow-green-500/20">
+                  <Icon :icon="form.requirements.icon || 'lucide:list-checks'" class="h-5 w-5" />
+                </div>
 
-        <div>
-          <h3 class="text-lg font-black text-gray-900 dark:text-white">
-            Syarat Umum
-          </h3>
-          <p class="mt-1 max-w-3xl text-sm leading-6 text-gray-500 dark:text-neutral-400">
-            Atur icon, judul, dan daftar poin syarat umum yang akan ditampilkan pada halaman pendaftaran.
-          </p>
-        </div>
-      </div>
+                <div>
+                  <h3 class="text-lg font-black text-gray-900 dark:text-white">
+                    Syarat Umum
+                  </h3>
+                  <p class="mt-1 max-w-3xl text-sm leading-6 text-gray-500 dark:text-neutral-400">
+                    Atur icon, judul, dan daftar poin syarat umum yang akan ditampilkan pada halaman pendaftaran.
+                  </p>
+                </div>
+              </div>
 
-      <button
-        type="button"
-        class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-sm font-bold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
-        @click="addRequirementItem"
-      >
-        <Icon icon="lucide:plus" class="h-4 w-4" />
-        Tambah Poin
-      </button>
-    </div>
-  </div>
-
-  <div class="grid gap-4 lg:grid-cols-[0.8fr,1.2fr]">
-    <section class="space-y-4 rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-      <FieldCard label="Icon Section" help="Pilih icon yang paling sesuai untuk bagian syarat umum.">
-        <div class="grid gap-3 sm:grid-cols-[72px,minmax(0,1fr)]">
-          <div class="grid h-[72px] place-items-center rounded-3xl bg-green-50 text-green-700 ring-1 ring-green-100 dark:bg-green-900/20 dark:text-green-300 dark:ring-green-900/40">
-            <Icon :icon="form.requirements.icon || 'lucide:list-checks'" class="h-8 w-8" />
+              <button
+                type="button"
+                class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-sm font-bold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+                @click="addRequirementItem"
+              >
+                <Icon icon="lucide:plus" class="h-4 w-4" />
+                Tambah Poin
+              </button>
+            </div>
           </div>
 
-          <select
-            v-model="form.requirements.icon"
-            :class="inputClass"
+          <div class="grid gap-4 lg:grid-cols-[0.8fr,1.2fr]">
+            <section class="space-y-4 rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+              <FieldCard label="Icon Section" help="Pilih icon yang paling sesuai untuk bagian syarat umum.">
+                <div class="grid gap-3 sm:grid-cols-[72px,minmax(0,1fr)]">
+                  <div class="grid h-[72px] place-items-center rounded-3xl bg-green-50 text-green-700 ring-1 ring-green-100 dark:bg-green-900/20 dark:text-green-300 dark:ring-green-900/40">
+                    <Icon :icon="form.requirements.icon || 'lucide:list-checks'" class="h-8 w-8" />
+                  </div>
+
+                  <select
+                    v-model="form.requirements.icon"
+                    :class="inputClass"
+                  >
+                    <option
+                      v-for="item in requirementIconOptions"
+                      :key="item.value"
+                      :value="item.value"
+                    >
+                      {{ item.label }}
+                    </option>
+                  </select>
+                </div>
+              </FieldCard>
+
+              <FieldCard label="Judul Section">
+                <input
+                  v-model.trim="form.requirements.title"
+                  type="text"
+                  :class="inputClass"
+                  placeholder="Syarat Umum Pendaftaran"
+                />
+              </FieldCard>
+
+              <div class="rounded-[24px] border border-green-100 bg-green-50 p-4 dark:border-green-900/30 dark:bg-green-900/10">
+                <div class="flex items-start gap-3">
+                  <Icon icon="lucide:info" class="mt-0.5 h-5 w-5 shrink-0 text-green-700 dark:text-green-300" />
+                  <p class="text-sm leading-6 text-green-800 dark:text-green-200">
+                    Poin kosong tidak akan disimpan ke Firebase. Gunakan kalimat singkat agar mudah dibaca oleh wali santri.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section class="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+              <div class="flex flex-col gap-3 border-b border-gray-200 px-5 py-4 dark:border-neutral-800 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h4 class="text-base font-black text-gray-950 dark:text-white">
+                    Daftar Poin Syarat
+                  </h4>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
+                    Total {{ form.requirements.items.length }} poin. Bisa diedit, diurutkan, atau dihapus.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  class="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-green-200 bg-white px-3 text-xs font-bold text-green-700 transition hover:bg-green-50 dark:border-green-900/40 dark:bg-neutral-900 dark:text-green-300 dark:hover:bg-green-900/10"
+                  @click="addRequirementItem"
+                >
+                  <Icon icon="lucide:plus" class="h-4 w-4" />
+                  Tambah
+                </button>
+              </div>
+
+              <div class="space-y-3 p-4">
+                <article
+                  v-for="(item, index) in form.requirements.items"
+                  :key="item.id"
+                  class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50"
+                >
+                  <div class="flex gap-3">
+                    <div class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-sm font-black text-green-700 ring-1 ring-gray-200 dark:bg-neutral-900 dark:text-green-300 dark:ring-neutral-700">
+                      {{ index + 1 }}
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                      <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">
+                        Poin {{ index + 1 }}
+                      </label>
+
+                      <textarea
+                        v-model.trim="item.text"
+                        rows="3"
+                        :class="textareaClass"
+                        placeholder="Contoh: Calon santri merupakan lulusan SD/MI atau sederajat."
+                      ></textarea>
+                    </div>
+
+                    <div class="flex shrink-0 flex-col gap-2">
+                      <button
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 disabled:opacity-40 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        :disabled="index === 0"
+                        @click="moveRequirementItem(index, -1)"
+                      >
+                        <Icon icon="lucide:arrow-up" class="h-4 w-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 disabled:opacity-40 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        :disabled="index === form.requirements.items.length - 1"
+                        @click="moveRequirementItem(index, 1)"
+                      >
+                        <Icon icon="lucide:arrow-down" class="h-4 w-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-rose-200 bg-white text-rose-700 transition hover:bg-rose-50 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10"
+                        @click="removeRequirementItem(index)"
+                      >
+                        <Icon icon="lucide:trash-2" class="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div v-show="activeTab === 'Form Input'" class="space-y-5">
+          <InfoCard
+            title="Pengaturan Input Formulir"
+            subtitle="Gunakan mode default untuk form lengkap lama, atau mode custom untuk form ringkas sesuai kebutuhan client."
+            icon="lucide:list-plus"
+          />
+
+          <section class="rounded-[28px] border border-gray-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+            <div class="grid gap-4 md:grid-cols-2">
+              <button
+                type="button"
+                class="rounded-[24px] border p-5 text-left transition"
+                :class="form.formMode === 'default'
+                  ? 'border-green-300 bg-green-50 text-green-900 dark:border-green-800 dark:bg-green-900/20 dark:text-green-100'
+                  : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'"
+                @click="form.formMode = 'default'"
+              >
+                <div class="flex items-start gap-3">
+                  <Icon icon="lucide:layout-list" class="mt-1 h-5 w-5 shrink-0" />
+                  <div>
+                    <h3 class="text-sm font-black">Default Form</h3>
+                    <p class="mt-1 text-sm leading-6 opacity-75">
+                      Memakai form lengkap lama pada <code>pages/registration.vue</code>.
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                class="rounded-[24px] border p-5 text-left transition"
+                :class="form.formMode === 'custom'
+                  ? 'border-green-300 bg-green-50 text-green-900 dark:border-green-800 dark:bg-green-900/20 dark:text-green-100'
+                  : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'"
+                @click="form.formMode = 'custom'"
+              >
+                <div class="flex items-start gap-3">
+                  <Icon icon="lucide:sliders-horizontal" class="mt-1 h-5 w-5 shrink-0" />
+                  <div>
+                    <h3 class="text-sm font-black">Custom Form</h3>
+                    <p class="mt-1 text-sm leading-6 opacity-75">
+                      Input bisa diaktif/nonaktifkan dan disimpan sebagai JSON custom pada data santri.
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </section>
+
+          <section
+            v-if="form.formMode === 'custom'"
+            class="rounded-[28px] border border-gray-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
           >
-            <option
-              v-for="item in requirementIconOptions"
-              :key="item.value"
-              :value="item.value"
-            >
-              {{ item.label }}
-            </option>
-          </select>
-        </div>
-      </FieldCard>
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h3 class="text-base font-black text-gray-950 dark:text-white">
+                  Custom Input
+                </h3>
+                <p class="mt-1 text-sm leading-6 text-gray-500 dark:text-neutral-400">
+                  Total {{ form.customFields.length }} input.
+                </p>
+              </div>
 
-      <FieldCard label="Judul Section">
-        <input
-          v-model.trim="form.requirements.title"
-          type="text"
-          :class="inputClass"
-          placeholder="Syarat Umum Pendaftaran"
-        />
-      </FieldCard>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-green-200 bg-green-50 px-4 text-sm font-bold text-green-700 transition hover:bg-green-100 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-300"
+                  @click="resetCustomFieldsToClientSimple"
+                >
+                  <Icon icon="lucide:sparkles" class="h-4 w-4" />
+                  Preset Simple Client
+                </button>
 
-      <div class="rounded-[24px] border border-green-100 bg-green-50 p-4 dark:border-green-900/30 dark:bg-green-900/10">
-        <div class="flex items-start gap-3">
-          <Icon icon="lucide:info" class="mt-0.5 h-5 w-5 shrink-0 text-green-700 dark:text-green-300" />
-          <p class="text-sm leading-6 text-green-800 dark:text-green-200">
-            Poin kosong tidak akan disimpan ke Firebase. Gunakan kalimat singkat agar mudah dibaca oleh wali santri.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section class="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-      <div class="flex flex-col gap-3 border-b border-gray-200 px-5 py-4 dark:border-neutral-800 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h4 class="text-base font-black text-gray-950 dark:text-white">
-            Daftar Poin Syarat
-          </h4>
-          <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
-            Total {{ form.requirements.items.length }} poin. Bisa diedit, diurutkan, atau dihapus.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          class="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-green-200 bg-white px-3 text-xs font-bold text-green-700 transition hover:bg-green-50 dark:border-green-900/40 dark:bg-neutral-900 dark:text-green-300 dark:hover:bg-green-900/10"
-          @click="addRequirementItem"
-        >
-          <Icon icon="lucide:plus" class="h-4 w-4" />
-          Tambah
-        </button>
-      </div>
-
-      <div class="space-y-3 p-4">
-        <article
-          v-for="(item, index) in form.requirements.items"
-          :key="item.id"
-          class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50"
-        >
-          <div class="flex gap-3">
-            <div class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-sm font-black text-green-700 ring-1 ring-gray-200 dark:bg-neutral-900 dark:text-green-300 dark:ring-neutral-700">
-              {{ index + 1 }}
+                <button
+                  type="button"
+                  class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-sm font-bold text-white transition hover:bg-green-700"
+                  @click="addCustomField"
+                >
+                  <Icon icon="lucide:plus" class="h-4 w-4" />
+                  Tambah Input
+                </button>
+              </div>
             </div>
 
-            <div class="min-w-0 flex-1">
-              <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">
-                Poin {{ index + 1 }}
-              </label>
+            <div class="mt-5 grid gap-4">
+              <article
+                v-for="(field, index) in form.customFields"
+                :key="field.id"
+                class="rounded-[26px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/60"
+              >
+                <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-green-50 text-green-700 ring-1 ring-green-100 dark:bg-green-900/20 dark:text-green-300 dark:ring-green-900/40">
+                      <Icon icon="lucide:form-input" class="h-5 w-5" />
+                    </div>
 
-              <textarea
-                v-model.trim="item.text"
-                rows="3"
-                :class="textareaClass"
-                placeholder="Contoh: Calon santri merupakan lulusan SD/MI atau sederajat."
-              ></textarea>
+                    <div>
+                      <p class="text-xs font-black uppercase tracking-[0.16em] text-green-700 dark:text-green-300">
+                        Input {{ index + 1 }}
+                      </p>
+                      <h4 class="text-sm font-black text-gray-950 dark:text-white">
+                        {{ field.label || 'Input belum diberi nama' }}
+                      </h4>
+                    </div>
+                  </div>
+
+                  <div class="flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      class="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 disabled:opacity-40 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      :disabled="index === 0"
+                      @click="moveCustomField(index, -1)"
+                    >
+                      <Icon icon="lucide:arrow-up" class="h-4 w-4" />
+                    </button>
+
+                    <button
+                      type="button"
+                      class="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 disabled:opacity-40 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      :disabled="index === form.customFields.length - 1"
+                      @click="moveCustomField(index, 1)"
+                    >
+                      <Icon icon="lucide:arrow-down" class="h-4 w-4" />
+                    </button>
+
+                    <button
+                      type="button"
+                      class="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-rose-200 bg-white text-rose-700 transition hover:bg-rose-50 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300"
+                      @click="removeCustomField(index)"
+                    >
+                      <Icon icon="lucide:trash-2" class="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div class="mt-4 grid gap-4 md:grid-cols-2">
+                  <FieldCard label="Label Input">
+                    <input
+                      v-model.trim="field.label"
+                      type="text"
+                      :class="inputClass"
+                      placeholder="Contoh: Nama Lengkap"
+                      @blur="syncCustomKeyFromLabel(field)"
+                    />
+                  </FieldCard>
+
+                  <FieldCard label="Tipe Input">
+                    <select v-model="field.type" :class="inputClass">
+                      <option
+                        v-for="item in customInputTypeOptions"
+                        :key="item.value"
+                        :value="item.value"
+                      >
+                        {{ item.label }}
+                      </option>
+                    </select>
+                  </FieldCard>
+
+                  <div class="md:col-span-2">
+                    <button
+                      type="button"
+                      class="flex w-full items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-left text-sm font-black text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      @click="toggleCustomFieldAdvanced(field)"
+                    >
+                      <span class="inline-flex items-center gap-2">
+                        <Icon icon="lucide:settings-2" class="h-4 w-4 text-green-600 dark:text-green-300" />
+                        Placeholder & Bantuan Kecil
+                      </span>
+
+                      <Icon
+                        icon="lucide:chevron-down"
+                        class="h-4 w-4 transition"
+                        :class="isCustomFieldAdvancedOpen(field) ? 'rotate-180' : ''"
+                      />
+                    </button>
+
+                    <Transition
+                      enter-active-class="transition duration-200 ease-out"
+                      enter-from-class="opacity-0 -translate-y-1"
+                      enter-to-class="opacity-100 translate-y-0"
+                      leave-active-class="transition duration-150 ease-in"
+                      leave-from-class="opacity-100 translate-y-0"
+                      leave-to-class="opacity-0 -translate-y-1"
+                    >
+                      <div
+                        v-if="isCustomFieldAdvancedOpen(field)"
+                        class="mt-3 grid gap-4 rounded-[24px] border border-gray-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900 md:grid-cols-2"
+                      >
+                        <FieldCard label="Placeholder">
+                          <input
+                            v-model.trim="field.placeholder"
+                            type="text"
+                            :class="inputClass"
+                            placeholder="Contoh: Masukkan nama lengkap"
+                          />
+                        </FieldCard>
+
+                        <FieldCard label="Bantuan Kecil">
+                          <input
+                            v-model.trim="field.help"
+                            type="text"
+                            :class="inputClass"
+                            placeholder="Contoh: Isi sesuai dokumen resmi"
+                          />
+                        </FieldCard>
+                      </div>
+                    </Transition>
+                  </div>
+
+                  <FieldCard
+                    v-if="field.type === 'select'"
+                    label="Opsi Pilihan"
+                    help="Bisa ditulis per baris, dipisah koma, atau titik koma. Spasi tetap aman."
+                    class="md:col-span-2"
+                  >
+                    <textarea
+                      :value="ensureOptionsDraft(field)"
+                      rows="6"
+                      :class="`${textareaClass} min-h-[150px] whitespace-pre-wrap`"
+                      placeholder="Laki-laki&#10;Perempuan&#10;Pondok Pesantren&#10;Sekolah Dasar"
+                      @keydown.stop
+                      @input="setOptionsDraft(field, ($event.target as HTMLTextAreaElement).value)"
+                      @blur="commitOptionsDraft(field)"
+                    ></textarea>
+
+                    <div class="mt-2 rounded-2xl border border-green-100 bg-green-50 px-4 py-3 text-xs leading-5 text-green-700 dark:border-green-900/40 dark:bg-green-900/10 dark:text-green-300">
+                      Contoh input valid:
+                      <b>Laki-laki</b>, <b>Pondok Pesantren</b>, <b>Sekolah Dasar</b>.
+                      Tekan Enter untuk membuat baris baru.
+                    </div>
+
+                    <div
+                      v-if="parseOptionsInput(ensureOptionsDraft(field)).length"
+                      class="mt-3 flex flex-wrap gap-2"
+                    >
+                      <span
+                        v-for="option in parseOptionsInput(ensureOptionsDraft(field))"
+                        :key="option"
+                        class="inline-flex items-center gap-2 rounded-full border border-green-100 bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-300"
+                      >
+                        {{ option }}
+                      </span>
+                    </div>
+
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        class="inline-flex h-9 items-center justify-center rounded-xl border border-gray-200 bg-white px-3 text-xs font-bold text-gray-600 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                        @click="setPresetOptions(field, ['Laki-laki', 'Perempuan'])"
+                      >
+                        Preset Gender
+                      </button>
+
+                      <button
+                        type="button"
+                        class="inline-flex h-9 items-center justify-center rounded-xl border border-gray-200 bg-white px-3 text-xs font-bold text-gray-600 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                        @click="setPresetOptions(field, ['PAUD', 'TK', 'SD/MI', 'SMP/MTs', 'SMA/MA'])"
+                      >
+                        Preset Pendidikan
+                      </button>
+
+                      <button
+                        type="button"
+                        class="inline-flex h-9 items-center justify-center rounded-xl border border-gray-200 bg-white px-3 text-xs font-bold text-gray-600 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                        @click="commitOptionsDraft(field)"
+                      >
+                        Terapkan Opsi
+                      </button>
+
+                      <button
+                        type="button"
+                        class="inline-flex h-9 items-center justify-center rounded-xl border border-rose-200 bg-white px-3 text-xs font-bold text-rose-600 transition hover:bg-rose-50 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10"
+                        @click="setPresetOptions(field, [])"
+                      >
+                        Kosongkan
+                      </button>
+                    </div>
+                  </FieldCard>
+
+                  <template v-if="field.type === 'number' || field.type === 'range'">
+                    <FieldCard label="Min">
+                      <input v-model.number="field.min" type="number" :class="inputClass" />
+                    </FieldCard>
+
+                    <FieldCard label="Max">
+                      <input v-model.number="field.max" type="number" :class="inputClass" />
+                    </FieldCard>
+
+                    <FieldCard label="Step">
+                      <input v-model.number="field.step" type="number" :class="inputClass" />
+                    </FieldCard>
+                  </template>
+
+                  <div class="md:col-span-2 flex flex-wrap gap-3">
+                    <label class="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200">
+                      <input
+                        v-model="field.required"
+                        type="checkbox"
+                        class="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                      />
+                      Wajib diisi
+                    </label>
+                  </div>
+                </div>
+              </article>
             </div>
-
-            <div class="flex shrink-0 flex-col gap-2">
-              <button
-                type="button"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 disabled:opacity-40 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                :disabled="index === 0"
-                @click="moveRequirementItem(index, -1)"
-              >
-                <Icon icon="lucide:arrow-up" class="h-4 w-4" />
-              </button>
-
-              <button
-                type="button"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 disabled:opacity-40 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                :disabled="index === form.requirements.items.length - 1"
-                @click="moveRequirementItem(index, 1)"
-              >
-                <Icon icon="lucide:arrow-down" class="h-4 w-4" />
-              </button>
-
-              <button
-                type="button"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-rose-200 bg-white text-rose-700 transition hover:bg-rose-50 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10"
-                @click="removeRequirementItem(index)"
-              >
-                <Icon icon="lucide:trash-2" class="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-  </div>
-</div>
+          </section>
+        </div>
       </template>
     </div>
 
@@ -779,6 +1089,16 @@ import { Icon } from '@iconify/vue'
 import { computed, defineComponent, h, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { onValue, ref as dbRef, serverTimestamp, update } from 'firebase/database'
 import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
+import {
+  CLIENT_SIMPLE_REGISTRATION_FIELDS,
+  cloneRegistrationFields,
+  createCustomFieldId,
+  normalizeCustomFieldKey,
+  normalizeCustomRegistrationFields,
+  type CustomInputType,
+  type CustomRegistrationField,
+  type RegistrationFormMode
+} from '~/composables/data/useRegistrationForm'
 
 type TimelineConfig = {
   registration: string
@@ -818,6 +1138,9 @@ type RegistrationEditorConfig = {
   autoCloseEnabled?: boolean
   autoCloseAt?: string | number
   notice?: string
+
+  formMode: RegistrationFormMode
+  customFields: CustomRegistrationField[]
 }
 
 type BrochureDraft = {
@@ -829,6 +1152,7 @@ type BrochureDraft = {
 const tabs = [
   { key: 'Umum', label: 'Umum', icon: 'lucide:layout-template' },
   { key: 'Status', label: 'Status', icon: 'lucide:lock-keyhole' },
+  { key: 'Form Input', label: 'Form Input', icon: 'lucide:list-plus' },
   { key: 'Timeline', label: 'Timeline', icon: 'lucide:calendar-check' },
   { key: 'Kontak', label: 'Kontak', icon: 'lucide:headphones' },
   { key: 'Brosur', label: 'Brosur', icon: 'lucide:files' },
@@ -865,6 +1189,8 @@ const defaults: RegistrationEditorConfig = {
   email: '',
   whatsapp: '',
   brochures: [],
+  formMode: 'default',
+  customFields: cloneRegistrationFields(),
   timeline: {
     registration: '-',
     selection: '-',
@@ -891,6 +1217,108 @@ const defaults: RegistrationEditorConfig = {
 
 const form = reactive<RegistrationEditorConfig>(clone(defaults))
 const brochureDrafts = reactive<BrochureDraft[]>([])
+const customOptionsDraft = reactive<Record<string, string>>({})
+const customFieldAdvancedOpen = reactive<Record<string, boolean>>({})
+
+function getCustomFieldDraftId(field: CustomRegistrationField) {
+  if (!field.id) {
+    field.id = createCustomFieldId()
+  }
+
+  return String(field.id)
+}
+
+function parseOptionsInput(value: string) {
+  return String(value || '')
+    // support enter, koma, dan titik koma
+    .split(/\r?\n|,|;/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .filter((item, index, arr) => arr.indexOf(item) === index)
+}
+
+function optionsText(field: CustomRegistrationField) {
+  return Array.isArray(field.options) ? field.options.join('\n') : ''
+}
+
+function ensureOptionsDraft(field: CustomRegistrationField) {
+  const id = getCustomFieldDraftId(field)
+
+  if (customOptionsDraft[id] === undefined) {
+    customOptionsDraft[id] = optionsText(field)
+  }
+
+  return customOptionsDraft[id]
+}
+
+function setOptionsDraft(field: CustomRegistrationField, value: string) {
+  const id = getCustomFieldDraftId(field)
+  customOptionsDraft[id] = value
+}
+
+function commitOptionsDraft(field: CustomRegistrationField) {
+  const id = getCustomFieldDraftId(field)
+  field.options = parseOptionsInput(customOptionsDraft[id] || '')
+}
+
+function commitAllCustomOptionsDrafts() {
+  form.customFields.forEach((field) => {
+    if (field.type === 'select') {
+      commitOptionsDraft(field)
+    } else {
+      field.options = []
+    }
+  })
+}
+
+function setPresetOptions(field: CustomRegistrationField, options: string[]) {
+  const cleanOptions = options
+    .map((item) => String(item || '').trim())
+    .filter(Boolean)
+
+  field.options = cleanOptions
+  customOptionsDraft[getCustomFieldDraftId(field)] = cleanOptions.join('\n')
+}
+
+function getCustomFieldUiId(field: CustomRegistrationField) {
+  if (!field.id) {
+    field.id = createCustomFieldId()
+  }
+
+  return String(field.id)
+}
+
+function isCustomFieldAdvancedOpen(field: CustomRegistrationField) {
+  return !!customFieldAdvancedOpen[getCustomFieldUiId(field)]
+}
+
+function toggleCustomFieldAdvanced(field: CustomRegistrationField) {
+  const id = getCustomFieldUiId(field)
+  customFieldAdvancedOpen[id] = !customFieldAdvancedOpen[id]
+}
+
+function inferCustomMapTo(label: string) {
+  const raw = String(label || '').toLowerCase().trim()
+
+  if (!raw) return ''
+
+  if (raw.includes('nama') && (raw.includes('orang tua') || raw.includes('ortu') || raw.includes('wali'))) {
+    return 'namaOrtu'
+  }
+
+  if (raw.includes('nama')) return 'nama'
+  if (raw.includes('whatsapp') || raw.includes('wa') || raw.includes('hp') || raw.includes('handphone')) return 'nohp'
+  if (raw.includes('tempat') && raw.includes('lahir')) return 'tmpLahir'
+  if (raw.includes('tanggal') && raw.includes('lahir')) return 'tglLahir'
+  if (raw === 'tanggal' || raw.includes('tanggal daftar')) return 'tanggal'
+  if (raw.includes('jenis kelamin') || raw.includes('gender')) return 'jk'
+  if (raw.includes('alamat')) return 'alamat'
+  if (raw.includes('asal sekolah') || raw.includes('sekolah asal')) return 'asalSekolah'
+  if (raw.includes('tujuan')) return 'tujuan'
+  if (raw.includes('pendidikan') || raw.includes('jenjang')) return 'pendidikan'
+
+  return ''
+}
 
 let unsub: null | (() => void) = null
 
@@ -915,6 +1343,152 @@ const requirementIconOptions = [
   { label: 'Info', value: 'lucide:info' },
   { label: 'Sparkles', value: 'lucide:sparkles' }
 ]
+
+const customInputTypeOptions: { label: string; value: CustomInputType }[] = [
+  { label: 'Text', value: 'text' },
+  { label: 'Number', value: 'number' },
+  { label: 'Phone / WhatsApp', value: 'tel' },
+  { label: 'Tanggal', value: 'date' },
+  { label: 'Pilihan / Select', value: 'select' },
+  { label: 'Textarea', value: 'textarea' },
+  { label: 'File', value: 'file' },
+  { label: 'Range', value: 'range' }
+]
+
+const customMapOptions = [
+  { label: 'Tidak dimapping', value: '' },
+  { label: 'Nama', value: 'nama' },
+  { label: 'Nomor HP / WA', value: 'nohp' },
+  { label: 'Tempat Lahir', value: 'tmpLahir' },
+  { label: 'Tanggal Lahir', value: 'tglLahir' },
+  { label: 'Tanggal', value: 'tanggal' },
+  { label: 'Jenis Kelamin', value: 'jk' },
+  { label: 'Alamat', value: 'alamat' },
+  { label: 'Asal Sekolah', value: 'asalSekolah' },
+  { label: 'Tujuan', value: 'tujuan' },
+  { label: 'Pendidikan', value: 'pendidikan' },
+  { label: 'Nama Orang Tua', value: 'namaOrtu' }
+]
+
+function resetCustomFieldsToClientSimple() {
+  form.customFields = cloneRegistrationFields(CLIENT_SIMPLE_REGISTRATION_FIELDS)
+  form.formMode = 'custom'
+}
+
+function addCustomField() {
+  const nextNumber = form.customFields.length + 1
+  const id = createCustomFieldId()
+
+  const field: CustomRegistrationField = {
+    id,
+    key: '',
+    label: `Input Custom ${nextNumber}`,
+    type: 'text',
+    enabled: true,
+    required: false,
+    placeholder: '',
+    help: '',
+    options: [],
+    order: nextNumber,
+    mapTo: ''
+  }
+
+  field.key = makeCustomFieldKey(field)
+  field.mapTo = inferCustomMapTo(field.label)
+
+  form.customFields.push(field)
+}
+
+function removeCustomField(index: number) {
+  form.customFields.splice(index, 1)
+  normalizeCustomFieldOrders()
+}
+
+function moveCustomField(index: number, direction: number) {
+  const targetIndex = index + direction
+  if (targetIndex < 0 || targetIndex >= form.customFields.length) return
+
+  const current = form.customFields[index]
+  const target = form.customFields[targetIndex]
+
+  if (!current || !target) return
+
+  form.customFields[index] = target
+  form.customFields[targetIndex] = current
+
+  normalizeCustomFieldOrders()
+}
+
+function normalizeCustomFieldOrders() {
+  form.customFields.forEach((item, index) => {
+    item.order = index + 1
+  })
+}
+
+function makeShortUid(value?: string) {
+  const raw = String(value || createCustomFieldId())
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toLowerCase()
+
+  return raw.slice(-6) || Math.random().toString(36).slice(2, 8)
+}
+
+function slugifyCustomLabel(value: string, fallback = 'custom_input') {
+  const slug = String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/_{2,}/g, '_')
+
+  return slug || fallback
+}
+
+function makeCustomFieldKey(field: CustomRegistrationField) {
+  const labelSlug = slugifyCustomLabel(field.label)
+  const uid = makeShortUid(field.id)
+
+  return `${labelSlug}_${uid}`
+}
+
+function syncCustomKeyFromLabel(field: CustomRegistrationField) {
+  if (!field.id) {
+    field.id = createCustomFieldId()
+  }
+
+  field.key = makeCustomFieldKey(field)
+  field.mapTo = inferCustomMapTo(field.label)
+  field.enabled = true
+}
+
+function normalizeCustomFieldByType(field: CustomRegistrationField) {
+  field.enabled = true
+
+  if (field.type !== 'select') {
+    field.options = []
+  }
+
+  if (field.type !== 'number' && field.type !== 'range') {
+    field.min = null
+    field.max = null
+    field.step = null
+  }
+
+  if (field.type === 'range') {
+    field.min = field.min ?? 0
+    field.max = field.max ?? 100
+    field.step = field.step ?? 1
+  }
+}
+
+function setOptionsText(field: CustomRegistrationField, value: string) {
+  field.options = String(value || '')
+    .split('\n')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
 
 const cleanBrochures = computed(() => {
   return brochureDrafts
@@ -1004,16 +1578,18 @@ function normalizeFirebaseConfig(value: any): RegistrationEditorConfig {
     email: value.email || defaults.email,
     whatsapp: normalizeWhatsappValue(value.whatsapp || defaults.whatsapp),
     brochures: normalizeBrochures(value.brochures),
+    formMode: value.formMode === 'custom' ? 'custom' : 'default',
+    customFields: normalizeCustomRegistrationFields(value.customFields),
     timeline: {
-  registration: value.timeline?.registration || defaults.timeline.registration,
-  selection: value.timeline?.selection || defaults.timeline.selection,
-  announcement: value.timeline?.announcement || defaults.timeline.announcement,
+      registration: value.timeline?.registration || defaults.timeline.registration,
+      selection: value.timeline?.selection || defaults.timeline.selection,
+      announcement: value.timeline?.announcement || defaults.timeline.announcement,
 
-  registrationStart: normalizeDateTimeLocal(value.timeline?.registrationStart),
-  registrationEnd: normalizeDateTimeLocal(value.timeline?.registrationEnd),
-  selectionAt: normalizeDateTimeLocal(value.timeline?.selectionAt),
-  announcementAt: normalizeDateTimeLocal(value.timeline?.announcementAt)
-},
+      registrationStart: normalizeDateTimeLocal(value.timeline?.registrationStart),
+      registrationEnd: normalizeDateTimeLocal(value.timeline?.registrationEnd),
+      selectionAt: normalizeDateTimeLocal(value.timeline?.selectionAt),
+      announcementAt: normalizeDateTimeLocal(value.timeline?.announcementAt)
+    },
     requirements: normalizeRequirements(value.requirements),
     isClosed: !!value.isClosed,
     autoCloseEnabled: !!value.autoCloseEnabled,
@@ -1135,15 +1711,38 @@ function buildPayload() {
     email: String(form.email || '').trim(),
     whatsapp: normalizedWhatsapp.value,
     brochures: cleanBrochures.value,
-    timeline: {
-    registration: timelineDisplay.value.registration,
-    selection: timelineDisplay.value.selection,
-    announcement: timelineDisplay.value.announcement,
+    formMode: form.formMode === 'custom' ? 'custom' : 'default',
+    customFields: normalizeCustomRegistrationFields(
+      form.customFields.map((field, index) => {
+        const id = field.id || createCustomFieldId()
 
-    registrationStart: String(form.timeline.registrationStart || '').trim(),
-    registrationEnd: String(form.timeline.registrationEnd || '').trim(),
-    selectionAt: String(form.timeline.selectionAt || '').trim(),
-    announcementAt: String(form.timeline.announcementAt || '').trim()
+        const normalizedField = {
+          ...field,
+          id,
+          key: makeCustomFieldKey({
+            ...field,
+            id
+          } as CustomRegistrationField),
+          mapTo: inferCustomMapTo(field.label),
+          enabled: true,
+          order: index + 1,
+          options: Array.isArray(field.options)
+            ? field.options.map((item) => String(item || '').trim()).filter(Boolean)
+            : []
+        }
+
+        return normalizedField
+      })
+    ),
+    timeline: {
+      registration: timelineDisplay.value.registration,
+      selection: timelineDisplay.value.selection,
+      announcement: timelineDisplay.value.announcement,
+
+      registrationStart: String(form.timeline.registrationStart || '').trim(),
+      registrationEnd: String(form.timeline.registrationEnd || '').trim(),
+      selectionAt: String(form.timeline.selectionAt || '').trim(),
+      announcementAt: String(form.timeline.announcementAt || '').trim(),
     },
     requirements: {
         icon: String(form.requirements.icon || 'lucide:list-checks').trim(),
@@ -1225,13 +1824,51 @@ function validateBeforeSave() {
   }
 
   if (form.timeline.registrationStart && form.timeline.registrationEnd) {
-  const start = new Date(form.timeline.registrationStart).getTime()
-  const end = new Date(form.timeline.registrationEnd).getTime()
+    const start = new Date(form.timeline.registrationStart).getTime()
+    const end = new Date(form.timeline.registrationEnd).getTime()
 
-  if (!Number.isNaN(start) && !Number.isNaN(end) && end < start) {
-    activeTab.value = 'Timeline'
-    return 'Akhir pendaftaran tidak boleh lebih awal dari mulai pendaftaran.'
+    if (!Number.isNaN(start) && !Number.isNaN(end) && end < start) {
+      activeTab.value = 'Timeline'
+      return 'Akhir pendaftaran tidak boleh lebih awal dari mulai pendaftaran.'
+    }
+
+    if (form.formMode === 'custom') {
+    const fields = normalizeCustomRegistrationFields(form.customFields)
+    const activeFields = fields.filter((item) => item.enabled)
+
+    if (!activeFields.length) {
+      activeTab.value = 'Form Input'
+      return 'Minimal harus ada 1 input custom yang aktif.'
+    }
+
+    const keys = new Set<string>()
+
+    for (const field of activeFields) {
+      if (!String(field.label || '').trim()) {
+        activeTab.value = 'Form Input'
+        return 'Semua input custom yang aktif wajib memiliki label.'
+      }
+
+      if (!String(field.key || '').trim()) {
+        activeTab.value = 'Form Input'
+        return `Key JSON untuk input "${field.label}" wajib diisi.`
+      }
+
+      if (keys.has(field.key)) {
+        activeTab.value = 'Form Input'
+        return `Key JSON "${field.key}" dipakai lebih dari satu kali. Gunakan key yang unik.`
+      }
+
+      keys.add(field.key)
+
+      if (field.type === 'select' && !field.options?.length) {
+        activeTab.value = 'Form Input'
+        return `Input "${field.label}" bertipe select, tetapi belum memiliki opsi pilihan.`
+      }
+    }
   }
+
+  return ''
 }
 
 const timelineDates = [

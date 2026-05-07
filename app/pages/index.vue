@@ -95,14 +95,11 @@
     </Teleport>
 
     <!-- Content tetap dirender di belakang loading -->
-    <div :class="isPageLoading ? 'pointer-events-none select-none' : ''">
+    <div data-home-content :class="isPageLoading ? 'pointer-events-none select-none' : ''" >
       <ClientOnly>
-        <component
-          v-for="section in displayedSections"
-          :key="section.renderKey || section.id"
-          :is="resolveSection(section.key)"
-          v-bind="getSectionProps(section)"
-        />
+        <div v-for="section in displayedSections" :key="section.renderKey || section.id" data-home-section >
+          <component :is="resolveSection(section.key)" v-bind="getSectionProps(section)"/>
+        </div>
       </ClientOnly>
     </div>
   </div>
@@ -117,6 +114,7 @@ import { useLoadingText } from '~/composables/useLoadingText'
 import HeaderHero from '~/components/hero/HeaderHero.vue'
 import InfoHero from '~/components/hero/InfoHero.vue'
 import BlogHero from '~/components/hero/BlogHero.vue'
+import GirlHero from '~/components/hero/GirlHero.vue'
 import InvitationHero from '~/components/hero/InvitationHero.vue'
 import HeroFacilityHero from '~/components/hero/FacilityHero.vue'
 import HeroProgramHero from '~/components/hero/ProgramHero.vue'
@@ -199,22 +197,61 @@ onBeforeUnmount(() => {
   unlockScroll()
 })
 
-async function waitWithTimeout<T>(promise: Promise<T>, timeoutMs = 4500) {
-  let timeoutId: ReturnType<typeof setTimeout> | null = null
+function wait(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms))
+}
 
-  const timeoutPromise = new Promise<null>((resolve) => {
-    timeoutId = setTimeout(() => resolve(null), timeoutMs)
+function waitForRaf() {
+  return new Promise((resolve) => requestAnimationFrame(resolve))
+}
+
+async function waitUntil(
+  condition: () => boolean,
+  timeoutMs = 7000,
+  intervalMs = 80
+) {
+  const startedAt = Date.now()
+
+  while (Date.now() - startedAt < timeoutMs) {
+    if (condition()) return true
+    await wait(intervalMs)
+  }
+
+  return false
+}
+
+async function waitForImages(rootSelector = '[data-home-content]', timeoutMs = 5000) {
+  if (typeof window === 'undefined') return
+
+  const root = document.querySelector(rootSelector)
+  if (!root) return
+
+  const images = Array.from(root.querySelectorAll('img')) as HTMLImageElement[]
+
+  const pendingImages = images.filter((img) => {
+    return !img.complete || img.naturalWidth === 0
   })
 
-  try {
-    return await Promise.race([promise, timeoutPromise])
-  } finally {
-    if (timeoutId) clearTimeout(timeoutId)
-  }
+  if (!pendingImages.length) return
+
+  await Promise.race([
+    Promise.allSettled(
+      pendingImages.map((img) => {
+        return new Promise<void>((resolve) => {
+          const done = () => resolve()
+
+          img.addEventListener('load', done, { once: true })
+          img.addEventListener('error', done, { once: true })
+        })
+      })
+    ),
+    wait(timeoutMs)
+  ])
 }
 
 async function loadHomePage() {
   isPageLoading.value = true
+  pageReady.value = false
 
   try {
     const path = normalizePath ? normalizePath(HOME_PATH) : HOME_PATH
@@ -225,22 +262,40 @@ async function loadHomePage() {
 
     ;(web as any)?.setActivePath?.(path)
 
-    await waitWithTimeout(Promise.resolve(subscribePage(path)), 4500)
-  } catch (error) {
-    console.error('[HomePage] Failed to load CMS page:', error)
-  } finally {
+    subscribePage(path)
+
+    await waitUntil(() => {
+      const hasMetaStatus = Boolean(meta.value?.status)
+      const hasSections = Array.isArray(sortedSections.value) && sortedSections.value.length > 0
+
+      return hasMetaStatus || hasSections
+    }, 6500)
+
     pageReady.value = true
 
-    // tunggu Vue selesai render component fallback/CMS
     await nextTick()
+    await waitForRaf()
+    await waitForRaf()
 
-    // beri sedikit delay agar transisi tidak terlalu patah
-    window.setTimeout(() => {
-      isPageLoading.value = false
-    }, 180)
+    await waitUntil(() => {
+      const sectionCount = document.querySelectorAll('[data-home-section]').length
+      return sectionCount >= displayedSections.value.length
+    }, 3000)
+
+    // Tunggu gambar di dalam konten selesai load.
+    await waitForImages('[data-home-content]', 5000)
+
+    // Delay kecil supaya transisi loading tetap halus.
+    await wait(250)
+  } catch (error) {
+    console.error('[HomePage] Failed to load CMS page:', error)
+
+    pageReady.value = true
+    await nextTick()
+  } finally {
+    isPageLoading.value = false
   }
 }
-
 onMounted(async () => {
   await loadHomePage()
 })
@@ -271,19 +326,18 @@ const registry: Record<string, any> = {
   HeroFacilityHero,
 
   ProgramHero: HeroProgramHero,
-  HeroProgramHero
-}
+  HeroProgramHero,
 
-const heroModules = import.meta.glob('~/components/hero/**/*.vue', {
-  eager: true
-}) as Record<string, any>
+  GirlHero: GirlHero
+}
 
 const UnknownSection = defineComponent({
   name: 'UnknownSection',
   props: {
     sectionKey: {
       type: String,
-      required: true
+      required: false,
+      default: 'Unknown'
     }
   },
   setup(props) {
@@ -293,7 +347,7 @@ const UnknownSection = defineComponent({
           'div',
           {
             class:
-              'rounded-lg border border-dashed p-4 text-sm text-gray-500 dark:text-neutral-400'
+              'rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-neutral-700 dark:text-neutral-400'
           },
           [
             'Unknown section: ',
@@ -307,12 +361,6 @@ const UnknownSection = defineComponent({
 function resolveSection(key: string) {
   if (registry[key]) return registry[key]
 
-  for (const path in heroModules) {
-    if (path.endsWith(`/${key}.vue`)) {
-      return heroModules[path].default
-    }
-  }
-
   return defineComponent({
     name: `UnknownSection_${key}`,
     setup() {
@@ -320,31 +368,31 @@ function resolveSection(key: string) {
     }
   })
 }
-
 /* =========================
    SEO META - sync path "/"
 ========================= */
 
 const siteUrl = computed(() => {
   const raw =
-    config.public.siteUrl ||
-    config.public.siteURL ||
-    config.public.site_url ||
-    'https://alinayah.sencra.io'
+    publicConfig.siteUrl ||
+    publicConfig.siteURL ||
+    publicConfig.site_url ||
+    'http://localhost:3000'
 
   return String(raw).replace(/\/$/, '')
 })
 
 const siteName = computed(() => {
   return String(
-    config.public.siteName ||
-      config.public.clientDisplayName ||
-      'Ponpes Alinayah'
+    publicConfig.siteName ||
+      publicConfig.clientDisplayName ||
+      publicConfig.appName ||
+      'Pondok Pesantren'
   )
 })
 
 const clientDisplayName = computed(() => {
-  return String(config.public.clientDisplayName || siteName.value)
+  return String(publicConfig.clientDisplayName || siteName.value)
 })
 
 const safeClientName = computed(() => {

@@ -3,11 +3,10 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 nuxt dev --no-fork",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 nuxt build",
+    "generate": "cross-env NODE_OPTIONS=--max-old-space-size=4096 nuxt generate",
+    "preview": "cross-env NODE_OPTIONS=--max-old-space-size=4096 nuxt preview"
   },
   "dependencies": {
     "@preline/carousel": "^3.2.3",
@@ -47,6 +46,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@iconify/vue": "^5.0.0"
+    "@iconify/vue": "^5.0.0",
+    "cross-env": "^10.1.0"
   }
 }

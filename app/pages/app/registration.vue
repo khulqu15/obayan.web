@@ -13,7 +13,7 @@
           <div>
             <div class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold ring-1 ring-white/20">
               <span class="inline-block h-2 w-2 rounded-full bg-lime-300"></span>
-              PPDB Workspace • {{ selectedYear }}/{{ Number(selectedYear) + 1 }}
+              PPDB Workspace • Semua Tahun
             </div>
 
             <h1 class="mt-4 text-2xl font-black tracking-tight md:text-4xl">
@@ -35,8 +35,8 @@
           <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
             <div class="rounded-[24px] bg-white/12 p-4 ring-1 ring-white/15 backdrop-blur">
               <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-green-100">Total Data</div>
-              <div class="mt-2 text-2xl font-black">{{ selectedYearRows.length }}</div>
-              <div class="mt-1 text-xs text-green-50/90">pendaftar tahun aktif</div>
+              <div class="mt-2 text-2xl font-black">{{ adminRows.length }}</div>
+              <div class="mt-1 text-xs text-green-50/90">semua pendaftar</div>
             </div>
 
             <div class="rounded-[24px] bg-white/12 p-4 ring-1 ring-white/15 backdrop-blur">
@@ -119,64 +119,99 @@
             </p>
           </div>
 
-          <div class="flex flex-wrap items-center gap-2">
-            <NuxtLink
-              to="/registration"
-              target="_blank"
-              class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
-            >
-              <ClientOnly><Icon icon="lucide:external-link" class="mr-2 h-4 w-4" /></ClientOnly>
-              Buka Form
-            </NuxtLink>
-
+          <div class="relative flex items-center justify-end">
             <button
-              @click="copy(formUrl)"
-              class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              type="button"
+              @click="workspaceMenuOpen = !workspaceMenuOpen"
+              class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/20 bg-white/15 text-white transition hover:bg-white/25 lg:border-gray-200 lg:bg-white lg:text-gray-700 lg:hover:bg-gray-50 dark:lg:border-neutral-700 dark:lg:bg-neutral-900 dark:lg:text-neutral-200 dark:lg:hover:bg-neutral-800"
+              aria-label="Menu workspace"
             >
-              <ClientOnly><Icon icon="lucide:copy" class="mr-2 h-4 w-4" /></ClientOnly>
-              Salin Link
+              <ClientOnly>
+                <Icon icon="lucide:ellipsis" class="h-5 w-5" />
+              </ClientOnly>
             </button>
 
-            <button
-              :disabled="exportBusy"
-              @click="exportRows(activeModeRows, `ppdb_${ppdbMode}_${selectedYear}`, 'csv')"
-              class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            <Transition
+              enter-active-class="transition duration-150 ease-out"
+              enter-from-class="opacity-0 scale-95 translate-y-1"
+              enter-to-class="opacity-100 scale-100 translate-y-0"
+              leave-active-class="transition duration-100 ease-in"
+              leave-from-class="opacity-100 scale-100 translate-y-0"
+              leave-to-class="opacity-0 scale-95 translate-y-1"
             >
-              <ClientOnly><Icon icon="lucide:file-down" class="mr-2 h-4 w-4" /></ClientOnly>
-              CSV Mode Aktif
-            </button>
+              <div
+                v-if="workspaceMenuOpen"
+                class="absolute right-0 top-13 z-30 w-72 overflow-hidden rounded-[24px] border border-gray-200 bg-white p-2 shadow-xl shadow-gray-900/10 dark:border-neutral-800 dark:bg-neutral-900"
+              >
+                <NuxtLink
+                  to="/registration"
+                  target="_blank"
+                  class="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  @click="workspaceMenuOpen = false"
+                >
+                  <ClientOnly><Icon icon="lucide:external-link" class="h-4 w-4 text-green-600" /></ClientOnly>
+                  Buka Form
+                </NuxtLink>
 
-            <button
-              :disabled="exportBusy"
-              @click="exportRows(activeModeRows, `ppdb_${ppdbMode}_${selectedYear}`, 'excel')"
-              class="inline-flex items-center justify-center rounded-2xl border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-semibold text-green-700 transition hover:bg-green-100 disabled:opacity-60 dark:border-green-900/40 dark:bg-green-900/10 dark:text-green-300"
-            >
-              <ClientOnly><Icon icon="lucide:sheet" class="mr-2 h-4 w-4" /></ClientOnly>
-              Excel Mode Aktif
-            </button>
+                <button
+                  type="button"
+                  @click="copy(formUrl); workspaceMenuOpen = false"
+                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                >
+                  <ClientOnly><Icon icon="lucide:copy" class="h-4 w-4 text-green-600" /></ClientOnly>
+                  Salin Link Form
+                </button>
 
-            <button
-              v-if="!isOpen"
-              @click="saveSettings({ isClosed: false })"
-              class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
-            >
-              <ClientOnly><Icon icon="ph:door-open" class="mr-2 h-4 w-4" /></ClientOnly>
-              Buka PPDB
-            </button>
+                <div class="my-1 h-px bg-gray-100 dark:bg-neutral-800"></div>
 
-            <button
-              v-else
-              @click="saveSettings({ isClosed: true })"
-              class="inline-flex items-center justify-center rounded-2xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700"
-            >
-              <ClientOnly><Icon icon="ph:door" class="mr-2 h-4 w-4" /></ClientOnly>
-              Tutup PPDB
-            </button>
+                <button
+                  type="button"
+                  :disabled="exportBusy"
+                  @click="exportRows(activeModeRows, `ppdb_semua_data`, 'csv'); workspaceMenuOpen = false"
+                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                >
+                  <ClientOnly><Icon icon="lucide:file-down" class="h-4 w-4 text-green-600" /></ClientOnly>
+                  Export CSV
+                </button>
+
+                <button
+                  type="button"
+                  :disabled="exportBusy"
+                  @click="exportRows(activeModeRows, `ppdb_semua_data`, 'excel'); workspaceMenuOpen = false"
+                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                >
+                  <ClientOnly><Icon icon="lucide:sheet" class="h-4 w-4 text-green-600" /></ClientOnly>
+                  Export Excel
+                </button>
+
+                <div class="my-1 h-px bg-gray-100 dark:bg-neutral-800"></div>
+
+                <button
+                  v-if="!isOpen"
+                  type="button"
+                  @click="saveSettings({ isClosed: false }); workspaceMenuOpen = false"
+                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-semibold text-green-700 transition hover:bg-green-50 dark:text-green-300 dark:hover:bg-green-900/10"
+                >
+                  <ClientOnly><Icon icon="ph:door-open" class="h-4 w-4" /></ClientOnly>
+                  Buka PPDB
+                </button>
+
+                <button
+                  v-else
+                  type="button"
+                  @click="saveSettings({ isClosed: true }); workspaceMenuOpen = false"
+                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-semibold text-rose-700 transition hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-900/10"
+                >
+                  <ClientOnly><Icon icon="ph:door" class="h-4 w-4" /></ClientOnly>
+                  Tutup PPDB
+                </button>
+              </div>
+            </Transition>
           </div>
         </div>
 
-        <div class="mt-4 grid gap-3 xl:grid-cols-[1.15fr,1fr,1.35fr]">
-          <div class="grid gap-3 sm:grid-cols-3">
+        <div class="mt-4 grid gap-3 xl:grid-cols-[auto,1fr]">
+          <div v-if="!usingCustomForm" class="grid gap-3 sm:grid-cols-2">
             <div class="grid grid-cols-2 gap-2 rounded-2xl border border-gray-200 bg-gray-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
               <button
                 type="button"
@@ -201,14 +236,7 @@
               </button>
             </div>
 
-            <select
-              v-model="selectedYear"
-              class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-            >
-              <option v-for="y in mergedYearOptions" :key="y" :value="y">{{ y }}</option>
-            </select>
-
-            <select
+            <select v-if="!usingCustomForm"
               v-model="filters.jenjang"
               class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
             >
@@ -225,7 +253,9 @@
             <input
               v-model.trim="filters.q"
               type="text"
-              placeholder="Cari nama, NIK, alamat, ayah, ibu, no HP, kode pendaftaran..."
+              :placeholder="usingCustomForm
+                ? 'Cari data pendaftaran, kode, atau isi form custom...'
+                : 'Cari nama, NIK, alamat, ayah, ibu, no HP, kode pendaftaran...'"
               class="block w-full rounded-2xl border border-gray-200 bg-gray-50 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
             />
           </div>
@@ -252,7 +282,7 @@
 
           <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 font-semibold text-gray-600 dark:bg-neutral-800 dark:text-neutral-300">
             <ClientOnly><Icon icon="lucide:filter" class="h-3.5 w-3.5" /></ClientOnly>
-            {{ activeModeRows.length }} data tampil
+            {{ activeModeRows.length }} data tampil dari {{ adminRows.length }} total
           </span>
 
           <span v-if="exportBusy" class="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 font-semibold text-green-700 dark:bg-green-900/20 dark:text-green-300">
@@ -265,7 +295,7 @@
           v-if="settings.autoCloseEnabled"
           class="mt-4 grid gap-3 rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/60 lg:grid-cols-[1fr,auto]"
         >
-          <div class="grid gap-3 sm:grid-cols-2">
+          <div  class="grid gap-3 sm:grid-cols-2">
             <div>
               <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">
                 Jadwal Tutup Otomatis
@@ -353,6 +383,39 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
+            <label
+              class="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            >
+              <input
+                type="checkbox"
+                class="h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-900"
+                :checked="isGroupFullySelected(group.rows)"
+                :indeterminate.prop="isGroupPartiallySelected(group.rows)"
+                :disabled="!group.rows.length"
+                @change="toggleGroupDeleteSelection(group.rows)"
+              />
+              Pilih Semua
+            </label>
+
+            <button
+              type="button"
+              :disabled="!selectedCountInGroup(group.rows) || bulkDeleting"
+              @click="openBulkDeleteSelected(group.rows)"
+              class="inline-flex items-center justify-center rounded-2xl border border-rose-200 bg-white px-4 py-2.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 disabled:opacity-60 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10"
+            >
+              <ClientOnly><Icon icon="lucide:trash-2" class="mr-2 h-4 w-4" /></ClientOnly>
+              Hapus Terpilih ({{ selectedCountInGroup(group.rows) }})
+            </button>
+
+            <button
+              type="button"
+              :disabled="!group.rows.length || bulkDeleting"
+              @click="openBulkDeleteGroup(group)"
+              class="inline-flex items-center justify-center rounded-2xl bg-rose-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-rose-700 disabled:opacity-60"
+            >
+              <ClientOnly><Icon icon="lucide:trash" class="mr-2 h-4 w-4" /></ClientOnly>
+              Hapus Semua
+            </button>
             <button
               @click="group.bulkAction()"
               :disabled="!group.rows.length || group.bulkSaving"
@@ -394,6 +457,17 @@
             :selectable="false"
             :export-filename="group.exportName.replace('.csv', '')"
           >
+            <template #cell-select="{ row }">
+              <label class="inline-flex cursor-pointer items-center justify-center">
+                <input
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-900"
+                  :checked="isRowSelectedForDelete(row)"
+                  @click.stop
+                  @change="toggleDeleteSelection(row)"
+                />
+              </label>
+            </template>
             <template #cell-dokumen="{ row }">
               <span
                 class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold"
@@ -453,6 +527,26 @@
               </div>
             </template>
           </DataTable>
+        </div>
+      </section>
+
+      <section
+        v-if="usingCustomForm && !activeModeRows.length"
+        class="rounded-[30px] border border-amber-200 bg-amber-50 p-6 text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/10 dark:text-amber-200"
+      >
+        <div class="flex gap-3">
+          <ClientOnly>
+            <Icon icon="lucide:info" class="mt-0.5 h-5 w-5 shrink-0" />
+          </ClientOnly>
+
+          <div>
+            <h3 class="font-black">Data custom belum tampil</h3>
+            <p class="mt-1 text-sm leading-6">
+              Data mungkin masih tersaring oleh tahun aktif atau belum memiliki snapshot custom field.
+              Coba cek tahun pendaftaran, pastikan data tersimpan dengan <code>formMode: custom</code>,
+              <code>customData</code>, atau <code>ppdb.custom.values</code>.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -673,7 +767,9 @@
                 <div>
                   <p class="text-xs font-black uppercase tracking-[0.18em] text-green-100">No. Pendaftaran</p>
                   <h3 class="mt-1 font-mono text-2xl font-black">{{ fullRecord.ppdbCode || '—' }}</h3>
-                  <p class="mt-2 text-sm text-green-50">{{ fullRecord.santri || detailValue(detailSiswa.nama) }}</p>
+                  <p class="mt-2 text-sm text-green-50">
+                    {{ usingCustomForm ? getDisplayName(fullRecord) : fullRecord.santri || detailValue(detailSiswa.nama) }}
+                  </p>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
@@ -794,6 +890,59 @@
       </ModalShell>
 
       <!-- DELETE MODAL -->
+      <ModalShell v-model="showBulkDeleteConfirm" title="Hapus Banyak Data">
+        <div class="space-y-4 text-sm">
+          <div class="rounded-[22px] border border-rose-200 bg-rose-50 p-4 text-rose-700 dark:border-rose-900/40 dark:bg-rose-900/10 dark:text-rose-300">
+            Data yang dihapus tidak dapat dikembalikan. Pastikan data yang dipilih sudah benar.
+          </div>
+
+          <div class="rounded-[22px] bg-gray-50 p-4 dark:bg-neutral-800">
+            <p class="font-bold text-gray-900 dark:text-white">
+              {{ bulkDeleteTitle }}
+            </p>
+            <p class="mt-1 text-gray-600 dark:text-neutral-300">
+              Total data yang akan dihapus:
+              <strong>{{ bulkDeleteRows.length }}</strong>
+            </p>
+          </div>
+
+          <div
+            v-if="bulkDeleteRows.length"
+            class="max-h-52 space-y-2 overflow-y-auto rounded-[22px] border border-gray-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900"
+          >
+            <div
+              v-for="row in bulkDeleteRows"
+              :key="row.id"
+              class="flex items-center justify-between gap-3 rounded-2xl bg-gray-50 px-3 py-2 dark:bg-neutral-800"
+            >
+              <span class="truncate text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                {{ getDisplayName(row) }}
+              </span>
+              <span class="shrink-0 font-mono text-xs text-gray-400">
+                {{ row.ppdbCode || row.id }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <template #footer>
+          <button
+            @click="showBulkDeleteConfirm = false"
+            class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+          >
+            Batal
+          </button>
+
+          <button
+            :disabled="bulkDeleting || !bulkDeleteRows.length"
+            @click="confirmBulkDelete"
+            class="inline-flex items-center justify-center rounded-2xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-60"
+          >
+            {{ bulkDeleting ? 'Menghapus…' : `Hapus ${bulkDeleteRows.length} Data` }}
+          </button>
+        </template>
+      </ModalShell>
+
       <ModalShell v-model="showConfirm" title="Hapus Data">
         <div class="space-y-4 text-sm">
           <div class="rounded-[22px] border border-rose-200 bg-rose-50 p-4 text-rose-700 dark:border-rose-900/40 dark:bg-rose-900/10 dark:text-rose-300">
@@ -801,7 +950,7 @@
           </div>
 
           <p class="text-gray-700 dark:text-neutral-200">
-            Hapus data <strong>{{ current?.santri }}</strong>?
+            Hapus data <strong>{{ getDisplayName(current) }}</strong>?
           </p>
         </div>
 
@@ -824,6 +973,10 @@ import DataTable from '~/components/widget/DataTable.vue'
 import ModalShell from '~/components/widget/ModalShell.vue'
 import { useSantri, type SantriRow } from '~/composables/data/useSantri'
 import { usePendaftaran } from '~/composables/data/usePendaftaran'
+import {
+  normalizeCustomRegistrationFields,
+  type CustomRegistrationField
+} from '~/composables/data/useRegistrationForm'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Pendaftaran' } })
 
@@ -837,6 +990,7 @@ const formUrl = computed(() => {
 })
 
 const ppdbMode = ref<'putra' | 'putri'>('putra')
+const workspaceMenuOpen = ref(false)
 const exportBusy = ref(false)
 
 async function copy(t: string) {
@@ -863,6 +1017,255 @@ function pickValue(...values: any[]) {
   }
 
   return ''
+}
+
+function isCustomRecord(record: any) {
+  return (
+    record?.formMode === 'custom' ||
+    record?.registrationMode === 'custom' ||
+    record?.ppdb?.custom?.mode === 'custom' ||
+    !!record?.customData ||
+    !!record?.ppdb?.custom?.values
+  )
+}
+
+function getRecordCustomValues(record: any) {
+  return {
+    ...(record?.customData || {}),
+    ...(record?.ppdb?.custom?.values || {}),
+    ...(record?.custom || {}),
+    ...(record?.formData || {}),
+    ...(record?.registrationData || {})
+  }
+}
+
+function getRecordCustomFields(record: any) {
+  const fields = pickValue(
+    record?.customFieldsSnapshot,
+    record?.ppdb?.custom?.fields,
+    record?.customFields,
+    []
+  )
+
+  return normalizeCustomRegistrationFields(Array.isArray(fields) ? fields : [])
+    .filter((field: any) => field.enabled !== false)
+    .sort((a: any, b: any) => Number(a.order || 0) - Number(b.order || 0))
+}
+
+const hasCustomRows = computed(() => {
+  return (rows.value || []).some((row: any) => isCustomRecord(row))
+})
+
+const usingCustomForm = computed(() => {
+  return (
+    settings.value?.formMode === 'custom' ||
+    hasCustomRows.value
+  )
+})
+
+const activeCustomFields = computed<CustomRegistrationField[]>(() => {
+  const settingFields = Array.isArray((settings.value as any)?.customFields)
+    ? (settings.value as any).customFields
+    : []
+
+  if (settingFields.length) {
+    return normalizeCustomRegistrationFields(settingFields)
+      .filter((field: any) => field.enabled !== false)
+      .sort((a: any, b: any) => Number(a.order || 0) - Number(b.order || 0))
+  }
+
+  const firstCustomRow = (rows.value || []).find((row: any) => {
+    return getRecordCustomFields(row).length > 0
+  })
+
+  if (firstCustomRow) {
+    return getRecordCustomFields(firstCustomRow)
+  }
+
+  return []
+})
+
+const tableCustomFields = computed<CustomRegistrationField[]>(() => {
+  return activeCustomFields.value
+    .filter((field: any) => field.type !== 'file')
+    .slice(0, 5)
+})
+
+const detailCustomFields = computed<CustomRegistrationField[]>(() => {
+  return activeCustomFields.value
+})
+
+function safeColumnKey(value: any) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'field'
+}
+
+function customColumnKey(field: CustomRegistrationField) {
+  return `custom_${safeColumnKey(field.key || field.id || field.label)}`
+}
+
+function normalizeGenderValue(value: any) {
+  const raw = String(value || '').trim().toLowerCase()
+
+  if (!raw) return ''
+  if (['p', 'putri', 'perempuan', 'wanita'].includes(raw)) return 'P'
+  if (['l', 'putra', 'laki-laki', 'laki laki', 'pria'].includes(raw)) return 'L'
+
+  return raw.includes('perempuan') || raw.includes('putri') ? 'P' : 'L'
+}
+
+function getCustomStorage(record: any) {
+  return getRecordCustomValues(record)
+}
+
+function getFieldsForRecord(record: any) {
+  const rowFields = getRecordCustomFields(record)
+
+  if (rowFields.length) return rowFields
+
+  return activeCustomFields.value
+}
+
+function getTableFieldsForRecord(record: any) {
+  return getFieldsForRecord(record)
+    .filter((field: any) => field.type !== 'file')
+    .slice(0, 5)
+}
+
+function getMappedValue(record: any, mapTo?: string) {
+  const s = record?.ppdb?.siswa || {}
+  const a = record?.ppdb?.alamat || {}
+  const p = record?.ppdb?.pendidikan || {}
+  const o = record?.ppdb?.ortu || {}
+  const ayah = o?.ayah || {}
+  const ibu = o?.ibu || {}
+  const wali = record?.ppdb?.wali || {}
+
+  const alamatLengkap = [
+    a?.jalan,
+    a?.rt ? `RT ${a.rt}` : '',
+    a?.rw ? `RW ${a.rw}` : '',
+    a?.dusun,
+    a?.desa,
+    a?.kec,
+    a?.kab,
+    a?.prov,
+    a?.kodepos
+  ].filter(Boolean).join(', ')
+
+  switch (mapTo) {
+    case 'nama':
+      return pickValue(record?.santri, s?.nama)
+
+    case 'nohp':
+      return pickValue(record?.nohp, record?.hpOrtu1, o?.hp1, wali?.hp)
+
+    case 'tmpLahir':
+      return pickValue(s?.tmpLahir, record?.tmpLahir, record?.tempatLahir)
+
+    case 'tglLahir':
+      return pickValue(s?.tglLahir, record?.tglLahir, record?.tanggalLahir)
+
+    case 'tanggal':
+      return pickValue(record?.tanggal, record?.createdAt)
+
+    case 'jk':
+      return pickValue(record?.gender, record?.jk, s?.jk)
+
+    case 'alamat':
+      return pickValue(record?.alamat, alamatLengkap)
+
+    case 'asalSekolah':
+      return pickValue(record?.asalSekolah, p?.sekolah)
+
+    case 'tujuan':
+      return pickValue(record?.tujuan, record?.jenjang, p?.tujuan)
+
+    case 'pendidikan':
+      return pickValue(record?.jenjang, p?.status, p?.pendidikan)
+
+    case 'namaOrtu':
+      return pickValue(record?.walisantri, record?.waliNama, wali?.nama, ayah?.nama, ibu?.nama)
+
+    default:
+      return ''
+  }
+}
+
+function getCustomFieldValue(record: any, field: CustomRegistrationField) {
+  const storage = getCustomStorage(record)
+  const key = String(field.key || '').trim()
+
+  return pickValue(
+    key ? storage[key] : '',
+    key ? record?.[key] : ''
+  )
+}
+
+function firstReadableCustomValue(record: any) {
+  for (const field of activeCustomFields.value) {
+    if (field.type === 'file') continue
+
+    const value = formatCustomValue(getCustomFieldValue(record, field), field.type)
+
+    if (value && value !== '—') return value
+  }
+
+  return ''
+}
+
+function getDisplayName(record: any) {
+  return pickValue(
+    record?.santri,
+    record?.nama,
+    firstReadableCustomValue(record),
+    record?.ppdbCode,
+    'Pendaftar'
+  )
+}
+
+function findCustomValue(record: any, mapTo: string, keywords: string[] = []) {
+  const fields = activeCustomFields.value
+
+  const byMap = fields.find((field: any) => field.mapTo === mapTo)
+  if (byMap) return getCustomFieldValue(record, byMap)
+
+  const byLabel = fields.find((field: any) => {
+    const label = String(field.label || '').toLowerCase()
+    return keywords.some((keyword) => label.includes(keyword))
+  })
+
+  return byLabel ? getCustomFieldValue(record, byLabel) : ''
+}
+
+function formatCustomValue(value: any, type?: string) {
+  if (Array.isArray(value)) return value.length ? value.join(', ') : '—'
+
+  if (value && typeof value === 'object') {
+    const url = extractUrl(value)
+    if (url) return url
+
+    return JSON.stringify(value)
+  }
+
+  if (value === null || value === undefined || value === '') return '—'
+
+  if (type === 'date') {
+    return formatDetailDate(value)
+  }
+
+  return String(value)
+}
+
+function buildCustomFieldColumns() {
+  return tableCustomFields.value.map((field: any) => ({
+    key: customColumnKey(field),
+    label: field.label || field.key || 'Input Custom',
+    sortable: true
+  }))
 }
 
 function countDocsFromAnyRecord(record: any) {
@@ -902,8 +1305,9 @@ function normalizeSantriRow(row: any): SantriRow {
   const ayah = o?.ayah || {}
   const ibu = o?.ibu || {}
   const wali = row?.ppdb?.wali || {}
+  const customJk = findCustomValue(row, 'jk', ['jenis kelamin', 'gender'])
 
-  const gender = String(pickValue(row?.gender, row?.jk, s?.jk, 'L')).toUpperCase()
+  const gender = normalizeGenderValue(pickValue(row?.gender, row?.jk, s?.jk, customJk, 'L'))
   const tipe = pickValue(row?.tipe, gender === 'P' ? 'Putri' : 'Putra')
 
   const alamatLengkap = [
@@ -918,12 +1322,13 @@ function normalizeSantriRow(row: any): SantriRow {
     a?.kodepos
   ].filter(Boolean).join(', ')
 
-  return {
+  const normalizedRow: any = {
     ...row,
 
     id: row?.id || '',
     gen: String(pickValue(row?.gen, row?.year, selectedYear.value, new Date().getFullYear())),
-    santri: pickValue(row?.santri, s?.nama),
+
+    santri: getDisplayName(row),
     walisantri: pickValue(row?.walisantri, row?.waliNama, wali?.nama, ayah?.nama, ibu?.nama),
     nohp: pickValue(row?.nohp, row?.hpOrtu1, o?.hp1, wali?.hp),
 
@@ -942,7 +1347,26 @@ function normalizeSantriRow(row: any): SantriRow {
 
     ppdbCode: pickValue(row?.ppdbCode, row?.kodePendaftaran, row?.registrationCode),
     dokumenCount: countDocsFromAnyRecord(row)
-  } as SantriRow
+  }
+
+  const rowTableFields = getTableFieldsForRecord(row)
+  for (const field of rowTableFields) {
+    normalizedRow[customColumnKey(field)] = formatCustomValue(
+      getCustomFieldValue(row, field),
+      field.type
+    )
+  }
+
+  for (const field of tableCustomFields.value) {
+    if (normalizedRow[customColumnKey(field)] !== undefined) continue
+
+    normalizedRow[customColumnKey(field)] = formatCustomValue(
+      getCustomFieldValue(row, field),
+      field.type
+    )
+  }
+
+  return normalizedRow as SantriRow
 }
 
 const adminRows = computed(() => {
@@ -966,21 +1390,10 @@ const mergedYearOptions = computed(() => {
 onMounted(async () => {
   await Promise.all([fetchSantri(), fetchSettings()])
 
-  const prefer = settings.value.year ? String(settings.value.year) : ''
-  selectedYear.value = prefer || yearOptions.value[0] || new Date().getFullYear().toString()
+  selectedYear.value = new Date().getFullYear().toString()
 
   startAutoCloseTicker()
   checkAutoClose()
-})
-
-let yearDebounce: any = null
-watch(selectedYear, (y) => {
-  if (!y) return
-  if (yearDebounce) clearTimeout(yearDebounce)
-
-  yearDebounce = setTimeout(() => {
-    saveSettings({ year: Number(y) })
-  }, 350)
 })
 
 function matchSearch(r: SantriRow, q: string) {
@@ -988,6 +1401,11 @@ function matchSearch(r: SantriRow, q: string) {
 
   const s = q.toLowerCase()
   const row: any = r
+
+  const customHay = activeCustomFields.value
+    .map((field) => getCustomFieldValue(row, field))
+    .map((v) => formatCustomValue(v))
+    .join(' | ')
 
   const hay = [
     row.ppdbCode,
@@ -1004,7 +1422,8 @@ function matchSearch(r: SantriRow, q: string) {
     row.username,
     row.publicToken,
     row.jenjang,
-    row.tipe
+    row.tipe,
+    customHay,
   ]
     .map((v) => String(v || '').toLowerCase())
     .join(' | ')
@@ -1022,16 +1441,19 @@ const isPutra = (r: SantriRow) => r.tipe === 'Putra' || String((r as any).gender
 const isCalon = (r: SantriRow) => String(r.status).toLowerCase() === 'nonaktif'
 const isBaru = (r: SantriRow) => !isCalon(r)
 
-const baseFiltered = computed(() =>
-  (adminRows.value || [])
-    .filter((r) => String(r.gen || '') === String(selectedYear.value || ''))
+const baseFiltered = computed(() => {
+  let data = (adminRows.value || [])
     .filter((r) => matchSearch(r, filters.q))
-    .filter((r) => matchJenjang(r, filters.jenjang))
-)
+
+  if (!usingCustomForm.value) {
+    data = data.filter((r) => matchJenjang(r, filters.jenjang))
+  }
+
+  return data
+})
 
 const jenjangOptions = computed(() => {
   const arr = (adminRows.value || [])
-    .filter((r) => String(r.gen || '') === String(selectedYear.value || ''))
     .map((r) => String(r.jenjang || '').trim())
     .filter(Boolean)
 
@@ -1046,41 +1468,75 @@ const calonPutriFiltered = computed(() => putriFiltered.value.filter(isCalon))
 const baruPutriFiltered = computed(() => putriFiltered.value.filter(isBaru))
 
 const selectedYearRows = computed(() => {
-  return (adminRows.value || []).filter((row) => String(row.gen || '') === String(selectedYear.value))
+  return adminRows.value || []
 })
 
 const totalCalon = computed(() => calonPutraFiltered.value.length + calonPutriFiltered.value.length)
 const totalDiterima = computed(() => baruPutraFiltered.value.length + baruPutriFiltered.value.length)
 
 const activeModeRows = computed(() => {
+  if (usingCustomForm.value) {
+    return baseFiltered.value
+  }
+
   return ppdbMode.value === 'putra'
     ? [...calonPutraFiltered.value, ...baruPutraFiltered.value]
     : [...calonPutriFiltered.value, ...baruPutriFiltered.value]
 })
 
 const tableGroups = computed(() => {
+  if (usingCustomForm.value) {
+    const calon = baseFiltered.value.filter(isCalon)
+    const diterima = baseFiltered.value.filter(isBaru)
+
+    return [
+      {
+        key: 'custom-calon',
+        title: 'Calon Pendaftar',
+        subtitle: 'Data pendaftar custom yang masih menunggu proses penerimaan.',
+        tone: 'candidate' as const,
+        rows: calon,
+        bulkSaving: savingBulk.value,
+        bulkLabel: 'Terima Semua',
+        exportName: 'calon_pendaftar_semua.csv',
+        bulkAction: () => approveBulk(calon.map((row) => row.id))
+      },
+      // {
+      //   key: 'custom-diterima',
+      //   title: `Pendaftar Diterima`,
+      //   subtitle: 'Data pendaftar custom yang sudah diterima.',
+      //   tone: 'accepted' as const,
+      //   rows: diterima,
+      //   bulkSaving: savingBulkRevert.value,
+      //   bulkLabel: 'Jadikan Calon Semua',
+      //   exportName: `pendaftar_diterima.csv`,
+      //   bulkAction: () => revertBulk(diterima.map((row) => row.id))
+      // }
+    ]
+  }
+
   if (ppdbMode.value === 'putra') {
     return [
       {
         key: 'calon-putra',
-        title: `Calon Putra (${selectedYear.value})`,
+        title: `Calon Putra`,
         subtitle: 'Pendaftar putra yang masih menunggu proses penerimaan.',
         tone: 'candidate' as const,
         rows: calonPutraFiltered.value,
         bulkSaving: savingBulk.value,
         bulkLabel: 'Terima Semua',
-        exportName: `calon_putra_${selectedYear.value}.csv`,
+        exportName: `calon_putra.csv`,
         bulkAction: () => approveBulk(calonPutraFiltered.value.map((row) => row.id))
       },
       {
         key: 'baru-putra',
-        title: `Santri Baru Putra (${selectedYear.value})`,
+        title: `Santri Baru Putra`,
         subtitle: 'Pendaftar putra yang sudah diterima sebagai santri baru.',
         tone: 'accepted' as const,
         rows: baruPutraFiltered.value,
         bulkSaving: savingBulkRevert.value,
         bulkLabel: 'Jadikan Calon Semua',
-        exportName: `santri_putra_${selectedYear.value}.csv`,
+        exportName: `santri_putra.csv`,
         bulkAction: () => revertBulk(baruPutraFiltered.value.map((row) => row.id))
       }
     ]
@@ -1089,7 +1545,7 @@ const tableGroups = computed(() => {
   return [
     {
       key: 'calon-putri',
-      title: `Calon Putri (${selectedYear.value})`,
+      title: `Calon Putri`,
       subtitle: 'Pendaftar putri yang masih menunggu proses penerimaan.',
       tone: 'candidate' as const,
       rows: calonPutriFiltered.value,
@@ -1100,13 +1556,13 @@ const tableGroups = computed(() => {
     },
     {
       key: 'baru-putri',
-      title: `Santri Baru Putri (${selectedYear.value})`,
+      title: `Santri Baru Putri`,
       subtitle: 'Pendaftar putri yang sudah diterima sebagai santri baru.',
       tone: 'accepted' as const,
       rows: baruPutriFiltered.value,
       bulkSaving: savingBulkRevert.value,
       bulkLabel: 'Jadikan Calon Semua',
-      exportName: `santri_putri_${selectedYear.value}.csv`,
+      exportName: `santri_putri.csv`,
       bulkAction: () => revertBulk(baruPutriFiltered.value.map((row) => row.id))
     }
   ]
@@ -1136,7 +1592,8 @@ const statusSummary = computed(() => {
 })
 
 /** ===== Columns ===== */
-const columnsAdmin = [
+const defaultColumnsAdmin = [
+  { key: 'select', label: '', sortable: false, slot: 'select' },
   { key: 'ppdbCode', label: 'No. Pendaftaran', sortable: true },
   { key: 'nik', label: 'NIK', sortable: true },
   { key: 'santri', label: 'Nama', sortable: true },
@@ -1146,6 +1603,17 @@ const columnsAdmin = [
   { key: 'nohp', label: 'Nomor WA', sortable: true },
   { key: 'dokumen', label: 'Dokumen', sortable: false, slot: 'dokumen' }
 ]
+
+const columnsAdmin = computed(() => {
+  if (!usingCustomForm.value) return defaultColumnsAdmin
+
+  return [
+    { key: 'select', label: '', sortable: false, slot: 'select' },
+    { key: 'ppdbCode', label: 'No. Pendaftaran', sortable: true },
+    ...buildCustomFieldColumns(),
+    { key: 'dokumen', label: 'Dokumen', sortable: false, slot: 'dokumen' }
+  ]
+})
 
 /** ===== Bulk actions ===== */
 const savingBulk = ref(false)
@@ -1269,6 +1737,68 @@ async function saveRow() {
 }
 
 /** ===== Hapus ===== */
+const selectedDeleteIds = ref<string[]>([])
+
+function getRowId(row: any) {
+  return String(row?.id || '')
+}
+
+function isRowSelectedForDelete(row: any) {
+  const id = getRowId(row)
+  return !!id && selectedDeleteIds.value.includes(id)
+}
+
+function toggleDeleteSelection(row: any) {
+  const id = getRowId(row)
+  if (!id) return
+
+  if (selectedDeleteIds.value.includes(id)) {
+    selectedDeleteIds.value = selectedDeleteIds.value.filter((item) => item !== id)
+    return
+  }
+
+  selectedDeleteIds.value = [...selectedDeleteIds.value, id]
+}
+
+function selectedCountInGroup(groupRows: any[]) {
+  const ids = new Set((groupRows || []).map((row) => getRowId(row)).filter(Boolean))
+  return selectedDeleteIds.value.filter((id) => ids.has(id)).length
+}
+
+function isGroupFullySelected(groupRows: any[]) {
+  const ids = (groupRows || []).map((row) => getRowId(row)).filter(Boolean)
+  if (!ids.length) return false
+
+  return ids.every((id) => selectedDeleteIds.value.includes(id))
+}
+
+function isGroupPartiallySelected(groupRows: any[]) {
+  const ids = (groupRows || []).map((row) => getRowId(row)).filter(Boolean)
+  if (!ids.length) return false
+
+  const selectedCount = ids.filter((id) => selectedDeleteIds.value.includes(id)).length
+
+  return selectedCount > 0 && selectedCount < ids.length
+}
+
+function toggleGroupDeleteSelection(groupRows: any[]) {
+  const ids = (groupRows || []).map((row) => getRowId(row)).filter(Boolean)
+  if (!ids.length) return
+
+  const allSelected = ids.every((id) => selectedDeleteIds.value.includes(id))
+
+  if (allSelected) {
+    selectedDeleteIds.value = selectedDeleteIds.value.filter((id) => !ids.includes(id))
+    return
+  }
+
+  selectedDeleteIds.value = Array.from(new Set([...selectedDeleteIds.value, ...ids]))
+}
+
+function clearDeletedSelection(ids: string[]) {
+  selectedDeleteIds.value = selectedDeleteIds.value.filter((id) => !ids.includes(id))
+}
+
 const showConfirm = ref(false)
 const deleting = ref(false)
 
@@ -1280,11 +1810,17 @@ function openConfirm(r: SantriRow) {
 async function confirmDelete() {
   if (!current.value?.id) return
 
+  const id = current.value.id
+
   deleting.value = true
 
   try {
-    await deleteSantri(current.value.id)
+    await deleteSantri(id)
+    clearDeletedSelection([id])
     showConfirm.value = false
+    current.value = null
+
+    await fetchSantri()
   } finally {
     deleting.value = false
   }
@@ -1436,6 +1972,59 @@ const docState = reactive<{ loading: boolean; dok: any | null; error: string }>(
 })
 
 const activeDocTab = ref(0)
+
+const showBulkDeleteConfirm = ref(false)
+const bulkDeleting = ref(false)
+const bulkDeleteRows = ref<SantriRow[]>([])
+const bulkDeleteTitle = ref('Hapus data terpilih')
+
+function openBulkDeleteSelected(groupRows: SantriRow[]) {
+  const groupIds = new Set((groupRows || []).map((row) => getRowId(row)).filter(Boolean))
+
+  const selectedRows = (groupRows || []).filter((row) => {
+    const id = getRowId(row)
+    return id && groupIds.has(id) && selectedDeleteIds.value.includes(id)
+  })
+
+  if (!selectedRows.length) return
+
+  bulkDeleteRows.value = selectedRows
+  bulkDeleteTitle.value = 'Hapus data terpilih'
+  showBulkDeleteConfirm.value = true
+}
+
+function openBulkDeleteGroup(group: any) {
+  const groupRows = Array.isArray(group?.rows) ? group.rows : []
+  if (!groupRows.length) return
+
+  bulkDeleteRows.value = groupRows
+  bulkDeleteTitle.value = `Hapus semua data pada ${group.title}`
+  showBulkDeleteConfirm.value = true
+}
+
+async function confirmBulkDelete() {
+  const ids = bulkDeleteRows.value
+    .map((row: any) => getRowId(row))
+    .filter(Boolean)
+
+  if (!ids.length) return
+
+  bulkDeleting.value = true
+
+  try {
+    for (const id of ids) {
+      await deleteSantri(id)
+    }
+
+    clearDeletedSelection(ids)
+    showBulkDeleteConfirm.value = false
+    bulkDeleteRows.value = []
+
+    await fetchSantri()
+  } finally {
+    bulkDeleting.value = false
+  }
+}
 
 const docTabs = computed(() => {
   const docs = collectDokumen({ dokumen: docState.dok || {} })
@@ -1589,26 +2178,40 @@ function formatCreatedAt(value: any) {
 
 const detailCreatedAt = computed(() => formatCreatedAt(fullRecord.value?.createdAt))
 
-const detailQuickSummary = computed(() => [
-  {
-    label: 'Nama Santri',
-    value: detailValue(fullRecord.value?.santri || detailSiswa.value.nama)
-  },
-  {
-    label: 'NIK',
-    value: detailValue(fullRecord.value?.nik || detailSiswa.value.nik)
-  },
-  {
-    label: 'No. HP',
-    value: detailValue(fullRecord.value?.nohp || detailOrtu.value?.hp1)
-  },
-  {
-    label: 'Jenjang',
-    value: detailValue(fullRecord.value?.jenjang)
-  }
-])
+const detailQuickSummary = computed(() => {
+  const record = fullRecord.value || {}
 
-const detailSections = computed(() => {
+  if (usingCustomForm.value) {
+    return getFieldsForRecord(record)
+      .filter((field: any) => field.type !== 'file')
+      .slice(0, 4)
+      .map((field: any) => ({
+        label: field.label || field.key || 'Input Custom',
+        value: detailValue(formatCustomValue(getCustomFieldValue(record, field), field.type))
+      }))
+  }
+
+  return [
+    {
+      label: 'Nama Santri',
+      value: detailValue(fullRecord.value?.santri || detailSiswa.value.nama)
+    },
+    {
+      label: 'NIK',
+      value: detailValue(fullRecord.value?.nik || detailSiswa.value.nik)
+    },
+    {
+      label: 'No. HP / WA',
+      value: detailValue(fullRecord.value?.nohp || detailOrtu.value?.hp1)
+    },
+    {
+      label: 'Jenjang',
+      value: detailValue(fullRecord.value?.jenjang || detailPendidikan.value?.status)
+    }
+  ]
+})
+
+const defaultDetailSections = computed(() => {
   const s = detailSiswa.value
   const a = detailAlamat.value
   const p = detailPendidikan.value
@@ -1718,6 +2321,58 @@ const detailSections = computed(() => {
   ]
 })
 
+const customDetailSections = computed(() => {
+  const record = fullRecord.value || {}
+
+  const customRows = getFieldsForRecord(record).map((field: any) => {
+    const rawValue = getCustomFieldValue(record, field)
+
+    return {
+      label: field.label || field.key || 'Input Custom',
+      value: detailValue(formatCustomValue(rawValue, field.type)),
+      wide: ['textarea', 'file'].includes(field.type)
+    }
+  })
+
+  return [
+    {
+      key: 'custom-form',
+      title: 'Data Formulir',
+      subtitle: 'Seluruh data mengikuti input yang dikirim dari form pendaftaran.',
+      icon: 'lucide:list-checks',
+      rows: customRows.length
+        ? customRows
+        : [
+            {
+              label: 'Data',
+              value: 'Belum ada data custom yang tersimpan.',
+              wide: true
+            }
+          ]
+    },
+    {
+      key: 'akun',
+      title: 'Akun & Metadata',
+      subtitle: 'Informasi sistem yang dibuat setelah submit.',
+      icon: 'lucide:shield-check',
+      rows: [
+        { label: 'No. Pendaftaran', value: detailValue(record?.ppdbCode) },
+        { label: 'Username', value: detailValue(record?.username) },
+        { label: 'Public Token', value: detailValue(record?.publicToken) },
+        { label: 'Tahun / Gen', value: detailValue(record?.gen) },
+        { label: 'Status', value: isCalon(record) ? 'Calon' : 'Diterima' },
+        { label: 'Waktu Submit', value: detailCreatedAt.value, wide: true }
+      ]
+    }
+  ]
+})
+
+const detailSections = computed(() => {
+  return usingCustomForm.value
+    ? customDetailSections.value
+    : defaultDetailSections.value
+})
+
 const detailDocSummary = computed(() => {
   return DOC_META.map((item) => ({
     label: item.label,
@@ -1726,7 +2381,7 @@ const detailDocSummary = computed(() => {
 })
 
 /** ===== Export Full Form ===== */
-function flattenForExport(rec: any) {
+function flattenDefaultForExport(rec: any) {
   const s = rec?.ppdb?.siswa || {}
   const a = rec?.ppdb?.alamat || {}
   const p = rec?.ppdb?.pendidikan || {}
@@ -1805,6 +2460,31 @@ function flattenForExport(rec: any) {
     dokumen_ktp_ibu: docs.ktpIbu,
     dokumen_count: Object.values(docs).filter(Boolean).length
   }
+}
+
+function flattenCustomForExport(rec: any) {
+  const output: Record<string, any> = {
+    id: rec?.id || '',
+    no_pendaftaran: rec?.ppdbCode || '',
+    gen: rec?.gen || '',
+    status: isCalon(rec) ? 'Calon' : 'Diterima',
+    created_at: formatCreatedAt(rec?.createdAt),
+    username: rec?.username || '',
+    public_token: rec?.publicToken || ''
+  }
+
+  for (const field of activeCustomFields.value) {
+    const key = safeColumnKey(field.label || field.key || field.id)
+    output[key] = formatCustomValue(getCustomFieldValue(rec, field), field.type)
+  }
+
+  return output
+}
+
+function flattenForExport(rec: any) {
+  return usingCustomForm.value
+    ? flattenCustomForExport(rec)
+    : flattenDefaultForExport(rec)
 }
 
 function csvEscape(value: any) {

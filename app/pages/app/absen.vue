@@ -291,9 +291,9 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useMaskan, type MaskanRow } from '~/composables/data/useMaskan'
+import { useMaskan } from '~/composables/data/useMaskan'
 import { useSantri } from '~/composables/data/useSantri'
-import { useAbsensi, history, fetchHistory, readHistorySession } from '~/composables/data/useAbsensi'
+import { useAbsensi } from '~/composables/data/useAbsensi'
 import ModalShell from '~/components/widget/ModalShell.vue'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Absensi Harian' } })
@@ -301,12 +301,24 @@ definePageMeta({ layout: 'app', layoutProps: { title: 'Absensi Harian' } })
 const { rows: maskan, fetchMaskan } = useMaskan()
 const { rows: santri, fetchSantri } = useSantri()
 const {
-  loading, current, live, settings, currentCount,
-  fetchCurrent, fetchSettings, saveSettings, subscribeLive,
-  markPresentBySantriId, markPresentManual, resetSession, shouldResetNow
+  loading,
+  current,
+  live,
+  settings,
+  currentCount,
+  history,
+  fetchCurrent,
+  fetchSettings,
+  saveSettings,
+  subscribeLive,
+  markPresentBySantriId,
+  markPresentManual,
+  resetSession,
+  shouldResetNow,
+  fetchHistory,
+  readHistorySession
 } = useAbsensi()
 
-const { history, fetchHistory, readHistorySession } = useAbsensi()
 const histDate = ref<string>('')
 const histLimit = ref<number>(20)
 

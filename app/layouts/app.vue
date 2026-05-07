@@ -713,7 +713,12 @@ useSeoMeta({
 })
 
 useHead({
-  link: [{ rel: 'canonical', href: url.value }]
+  link: [
+    { rel: 'canonical', href: url.value },
+    { rel: 'icon', type: 'image/png', href: appLogo },
+    { rel: 'shortcut icon', type: 'image/png', href: appLogo },
+    { rel: 'apple-touch-icon', href: appLogo }
+  ]
 })
 
 const ADMIN_SIDEBAR: SidebarGroup[] = [
