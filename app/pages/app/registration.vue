@@ -54,61 +54,6 @@
         </div>
       </section>
 
-      <!-- STATS -->
-      <section class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <article class="rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Calon Putra</p>
-              <p class="mt-2 text-3xl font-black tracking-tight text-gray-900 dark:text-white">{{ calonPutraFiltered.length }}</p>
-            </div>
-            <div class="inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-sky-100 text-sky-700 dark:bg-sky-900/20 dark:text-sky-300">
-              <ClientOnly><Icon icon="lucide:user-round" class="h-5 w-5" /></ClientOnly>
-            </div>
-          </div>
-          <p class="mt-4 text-sm text-gray-500 dark:text-neutral-400">Pendaftar putra yang masih berstatus calon.</p>
-        </article>
-
-        <article class="rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Santri Putra</p>
-              <p class="mt-2 text-3xl font-black tracking-tight text-gray-900 dark:text-white">{{ baruPutraFiltered.length }}</p>
-            </div>
-            <div class="inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-green-600 text-white dark:bg-green-900/20">
-              <ClientOnly><Icon icon="lucide:badge-check" class="h-5 w-5" /></ClientOnly>
-            </div>
-          </div>
-          <p class="mt-4 text-sm text-gray-500 dark:text-neutral-400">Pendaftar putra yang sudah diterima.</p>
-        </article>
-
-        <article class="rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Calon Putri</p>
-              <p class="mt-2 text-3xl font-black tracking-tight text-gray-900 dark:text-white">{{ calonPutriFiltered.length }}</p>
-            </div>
-            <div class="inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-pink-100 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300">
-              <ClientOnly><Icon icon="lucide:user-round" class="h-5 w-5" /></ClientOnly>
-            </div>
-          </div>
-          <p class="mt-4 text-sm text-gray-500 dark:text-neutral-400">Pendaftar putri yang masih berstatus calon.</p>
-        </article>
-
-        <article class="rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Santri Putri</p>
-              <p class="mt-2 text-3xl font-black tracking-tight text-gray-900 dark:text-white">{{ baruPutriFiltered.length }}</p>
-            </div>
-            <div class="inline-flex h-12 w-12 items-center justify-center rounded-[18px] bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
-              <ClientOnly><Icon icon="lucide:badge-check" class="h-5 w-5" /></ClientOnly>
-            </div>
-          </div>
-          <p class="mt-4 text-sm text-gray-500 dark:text-neutral-400">Pendaftar putri yang sudah diterima.</p>
-        </article>
-      </section>
-
       <!-- WORKSPACE ACTION - NOT STICKY -->
       <section class="rounded-[28px] border border-gray-200/80 bg-white/92 p-4 shadow-sm backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/92">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -496,6 +441,7 @@
                 </button>
 
                 <button
+                  v-if="!usingCustomForm"
                   @click="openDocs(row.id, row)"
                   class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
                 >
@@ -548,68 +494,6 @@
             </p>
           </div>
         </div>
-      </section>
-
-      <!-- INSIGHT -->
-      <section class="grid gap-5 xl:grid-cols-2">
-        <article class="rounded-[30px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white">Distribusi Status</h3>
-              <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Pantau rasio calon dan santri baru.</p>
-            </div>
-            <div class="rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-semibold text-green-700 dark:bg-green-900/20 dark:text-green-300">
-              Insight
-            </div>
-          </div>
-
-          <div class="mt-5 space-y-4">
-            <div v-for="item in statusSummary" :key="item.key" class="space-y-2">
-              <div class="flex items-center justify-between gap-3">
-                <span class="text-sm font-semibold text-gray-700 dark:text-neutral-200">{{ item.label }}</span>
-                <span class="text-sm font-black text-gray-900 dark:text-white">{{ item.count }}</span>
-              </div>
-              <div class="h-2 rounded-full bg-gray-200 dark:bg-neutral-800">
-                <div class="h-2 rounded-full" :class="item.barClass" :style="{ width: item.width }"></div>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <article class="rounded-[30px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white">Catatan Operasional</h3>
-              <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Checklist admin sebelum penerimaan final.</p>
-            </div>
-          </div>
-
-          <div class="mt-5 space-y-3">
-            <div class="rounded-[22px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/60">
-              <div class="flex items-start gap-3">
-                <div class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300">
-                  <ClientOnly><Icon icon="lucide:file-check-2" class="h-5 w-5" /></ClientOnly>
-                </div>
-                <div>
-                  <div class="text-sm font-bold text-gray-900 dark:text-white">Cek kelengkapan dokumen</div>
-                  <div class="mt-1 text-sm text-gray-600 dark:text-neutral-300">Pastikan KK, Akta, KTP Ayah, dan KTP Ibu sudah tampil sebelum diterima.</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="rounded-[22px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/60">
-              <div class="flex items-start gap-3">
-                <div class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
-                  <ClientOnly><Icon icon="lucide:phone-call" class="h-5 w-5" /></ClientOnly>
-                </div>
-                <div>
-                  <div class="text-sm font-bold text-gray-900 dark:text-white">Validasi nomor wali</div>
-                  <div class="mt-1 text-sm text-gray-600 dark:text-neutral-300">Gunakan nomor WA aktif untuk follow-up pembayaran dan pengumuman.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
       </section>
 
       <!-- EDIT MODAL -->
@@ -682,7 +566,7 @@
       </ModalShell>
 
       <!-- DOCS MODAL -->
-      <ModalShell size="7xl" v-model="showDocs" title="Dokumen Pendaftar">
+      <ModalShell v-if="!usingCustomForm" size="7xl" v-model="showDocs" title="Dokumen Pendaftar">
         <div class="space-y-4 max-h-[78vh] overflow-y-auto">
           <div v-if="docState.loading" class="rounded-2xl bg-gray-50 p-6 text-sm text-gray-500 dark:bg-neutral-800 dark:text-neutral-400">
             Memuat dokumen…
@@ -832,7 +716,7 @@
               </article>
             </section>
 
-            <section class="rounded-[28px] border border-gray-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+            <section v-if="!usingCustomForm" class="rounded-[28px] border border-gray-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
               <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div class="flex items-start gap-3">
                   <div class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300">
@@ -880,7 +764,7 @@
           </button>
 
           <button
-            v-if="fullRecord?.id"
+            v-if="!usingCustomForm && fullRecord?.id"
             @click="openDocs(fullRecord.id, fullRecord)"
             class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
           >
@@ -1269,6 +1153,8 @@ function buildCustomFieldColumns() {
 }
 
 function countDocsFromAnyRecord(record: any) {
+  if (usingCustomForm.value || isCustomRecord(record)) return 0
+
   const docs = collectDokumen(record)
   const fromRow = Number(record?.dokumenCount || 0)
 
@@ -1610,8 +1496,7 @@ const columnsAdmin = computed(() => {
   return [
     { key: 'select', label: '', sortable: false, slot: 'select' },
     { key: 'ppdbCode', label: 'No. Pendaftaran', sortable: true },
-    ...buildCustomFieldColumns(),
-    { key: 'dokumen', label: 'Dokumen', sortable: false, slot: 'dokumen' }
+    ...buildCustomFieldColumns()
   ]
 })
 
@@ -1928,6 +1813,8 @@ function getDocUrl(d: any, key: DocKey, legacyKey: string) {
 }
 
 function getRowDocCount(row: any) {
+  if (usingCustomForm.value || isCustomRecord(row)) return 0
+
   const fromRow = Number(row?.dokumenCount || 0)
   const docs = collectDokumen(row)
   const count = Object.values(docs).filter(Boolean).length
@@ -2060,6 +1947,7 @@ const currentTab = computed(() => {
 })
 
 async function openDocs(id: string, row?: any) {
+  if (usingCustomForm.value || isCustomRecord(row)) return
   showDocs.value = true
   activeDocTab.value = 0
   docState.loading = true

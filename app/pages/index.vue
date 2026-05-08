@@ -130,7 +130,9 @@ const {
   sortedSections,
   subscribePage,
   normalizePath,
-  currentPath
+  currentPath,
+  hydratePageFromCache,
+  readPageCache
 } = web as any
 
 const pageReady = ref(false)
@@ -250,19 +252,40 @@ async function waitForImages(rootSelector = '[data-home-content]', timeoutMs = 5
 }
 
 async function loadHomePage() {
-  isPageLoading.value = true
-  pageReady.value = false
+  const path = normalizePath ? normalizePath(HOME_PATH) : HOME_PATH
+
+  const hasCache =
+    typeof hydratePageFromCache === 'function'
+      ? hydratePageFromCache(path)
+      : Boolean(typeof readPageCache === 'function' && readPageCache(path))
+
+  // Kalau ada cache, langsung tampilkan konten.
+  // Firebase tetap akan sync melalui subscribePage().
+  isPageLoading.value = !hasCache
+  pageReady.value = hasCache
 
   try {
-    const path = normalizePath ? normalizePath(HOME_PATH) : HOME_PATH
-
     if (typeof currentPath?.value !== 'undefined') {
       currentPath.value = path
     }
 
     ;(web as any)?.setActivePath?.(path)
 
-    subscribePage(path)
+    const subscribeResult = subscribePage(path)
+
+    if (hasCache) {
+      pageReady.value = true
+
+      await nextTick()
+      await waitForRaf()
+      isPageLoading.value = false
+
+      await Promise.resolve(subscribeResult).catch(() => null)
+
+      return
+    }
+
+    await Promise.resolve(subscribeResult)
 
     await waitUntil(() => {
       const hasMetaStatus = Boolean(meta.value?.status)
@@ -282,10 +305,8 @@ async function loadHomePage() {
       return sectionCount >= displayedSections.value.length
     }, 3000)
 
-    // Tunggu gambar di dalam konten selesai load.
     await waitForImages('[data-home-content]', 5000)
 
-    // Delay kecil supaya transisi loading tetap halus.
     await wait(250)
   } catch (error) {
     console.error('[HomePage] Failed to load CMS page:', error)
@@ -296,6 +317,7 @@ async function loadHomePage() {
     isPageLoading.value = false
   }
 }
+
 onMounted(async () => {
   await loadHomePage()
 })

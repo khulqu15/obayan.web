@@ -734,8 +734,8 @@ const ADMIN_SIDEBAR: SidebarGroup[] = [
   {
     title: 'Form',
     items: [
-      { label: 'Registrasi Putra', href: '/app/registration', icon: 'fluent:form-24-regular' },
-      { label: 'Registrasi Putri', href: '/app/registration-girl', icon: 'fluent:form-24-regular' }
+      { label: 'Registrasi', href: '/app/registration', icon: 'fluent:form-24-regular' },
+      // { label: 'Registrasi Putri', href: '/app/registration-girl', icon: 'fluent:form-24-regular' }
     ]
   },
   {

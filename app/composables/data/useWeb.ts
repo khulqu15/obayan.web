@@ -19,6 +19,17 @@ export type WebPageMeta = {
   updatedAt?: number | ReturnType<typeof serverTimestamp>
 }
 
+export type WebPageCache = {
+  version: 1
+  clientName: string
+  path: string
+  pathKey: string
+  cachedAt: number
+  meta: WebPageMeta | null
+  sections: WebSection[]
+  sectionsOrder: string[]
+}
+
 export type WebSection = {
   id: string
   key: string                 // component name e.g., "HeaderHero" / "HeroHeaderHero"
@@ -97,6 +108,132 @@ export function useWeb() {
 
   const loading = ref(false)
   const error = ref<unknown>(null)
+
+  const CACHE_VERSION = 1
+  const CACHE_PREFIX = 'obayan:web:page'
+
+  function webPageCacheKey(path: string) {
+    const normalized = normalizePath(path)
+    const key = pathToKey(normalized)
+
+    return `${CACHE_PREFIX}:${clientName}:${key}`
+  }
+
+  function normalizeCachedPage(raw: any): WebPageCache | null {
+    if (!raw || typeof raw !== 'object') return null
+    if (raw.version !== CACHE_VERSION) return null
+    if (!Array.isArray(raw.sections)) return null
+    if (!Array.isArray(raw.sectionsOrder)) return null
+
+    return {
+      version: CACHE_VERSION,
+      clientName: String(raw.clientName || clientName),
+      path: normalizePath(raw.path || '/'),
+      pathKey: String(raw.pathKey || pathToKey(raw.path || '/')),
+      cachedAt: Number(raw.cachedAt || Date.now()),
+      meta: raw.meta || null,
+      sections: raw.sections.map((item: any) => ({
+        id: String(item.id || ''),
+        key: String(item.key || ''),
+        enabled: item.enabled !== false,
+        order: Number(item.order || 0),
+        props: item.props || null,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt
+      })).filter((item: WebSection) => item.id && item.key),
+      sectionsOrder: raw.sectionsOrder.map(String)
+    }
+  }
+
+  function readPageCache(path: string): WebPageCache | null {
+    if (!isClient) return null
+
+    try {
+      const raw = localStorage.getItem(webPageCacheKey(path))
+      if (!raw) return null
+
+      return normalizeCachedPage(JSON.parse(raw))
+    } catch {
+      return null
+    }
+  }
+
+  function writePageCache(path: string, payload: WebPage) {
+    if (!isClient) return
+
+    try {
+      const normalized = normalizePath(path)
+      const pathKey = pathToKey(normalized)
+
+      const cachePayload: WebPageCache = {
+        version: CACHE_VERSION,
+        clientName: String(clientName),
+        path: normalized,
+        pathKey,
+        cachedAt: Date.now(),
+        meta: payload.meta || null,
+        sections: Array.isArray(payload.sections) ? payload.sections : [],
+        sectionsOrder: Array.isArray(payload.sectionsOrder) ? payload.sectionsOrder : []
+      }
+
+      localStorage.setItem(webPageCacheKey(normalized), JSON.stringify(cachePayload))
+    } catch (error) {
+      console.warn('[useWeb] Failed to write page cache:', error)
+    }
+  }
+
+  function hydratePageFromCache(path: string) {
+    const cache = readPageCache(path)
+
+    if (!cache) return false
+
+    meta.value = cache.meta
+    sections.value = cache.sections
+    sectionsOrder.value = cache.sectionsOrder
+
+    return true
+  }
+
+  function persistCurrentPageCache(path = currentPath.value) {
+    writePageCache(path, {
+      meta: meta.value,
+      sections: sections.value,
+      sectionsOrder: sectionsOrder.value
+    })
+  }
+
+  function clearPageCache(path?: string) {
+    if (!isClient) return
+
+    try {
+      if (path) {
+        localStorage.removeItem(webPageCacheKey(path))
+        return
+      }
+
+      const prefix = `${CACHE_PREFIX}:${clientName}:`
+
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith(prefix)) {
+          localStorage.removeItem(key)
+        }
+      })
+    } catch {}
+  }
+
+  let cachePersistTimer: ReturnType<typeof setTimeout> | null = null
+
+  function schedulePageCachePersist(path = currentPath.value) {
+    if (!isClient) return
+
+    if (cachePersistTimer) {
+      clearTimeout(cachePersistTimer)
+    }
+
+    cachePersistTimer = setTimeout(() => {
+      persistCurrentPageCache(path)
+    }, 80)
+  }
 
   const pageLoading = ref(false)
   const pageLoaded = ref(false)
@@ -206,141 +343,99 @@ export function useWeb() {
   }
 
   async function subscribePage(path: string) {
-    const token = ++detailLoadToken
-
-    pageLoading.value = true
-    pageLoaded.value = false
-    pageError.value = null
-    pageLoadedAt.value = null
-
     if (!isClient || !$realtimeDb) {
-      pageLoading.value = false
-      pageLoaded.value = true
-      pageLoadedAt.value = Date.now()
-      return null
+      return hydratePageFromCache(path)
     }
 
-    unbindDetail(false)
+    unbindDetail()
 
-    try {
-      const normalized = normalizePath(path)
-      currentPath.value = normalized
+    const normalized = normalizePath(path)
+    currentPath.value = normalized
 
-      const key = await ensurePage(normalized)
+    const hasCache = hydratePageFromCache(normalized)
 
-      let metaReady = false
-      let sectionsReady = false
-      let sectionsOrderReady = false
+    const key = await ensurePage(normalized)
 
-      const firstSnapshotReady = new Promise<void>((resolve, reject) => {
-        const checkReady = () => {
-          if (metaReady && sectionsReady && sectionsOrderReady) {
-            resolve()
-          }
+    let metaReady = false
+    let sectionsReady = false
+    let sectionsOrderReady = false
+
+    const firstSnapshotReady = new Promise<boolean>((resolve) => {
+      const checkReady = () => {
+        if (metaReady && sectionsReady && sectionsOrderReady) {
+          persistCurrentPageCache(normalized)
+          resolve(true)
         }
+      }
 
-        // meta
-        const mRef = dref($realtimeDb, `${clientName}/web/pages/${key}/meta`)
-        const unsubMeta = onValue(
-          mRef,
-          (s) => {
-            const v = s.val() || null
-            meta.value = v
+      // meta
+      const mRef = dref($realtimeDb, `${clientName}/web/pages/${key}/meta`)
+      const hM = onValue(mRef, (s) => {
+        const v = s.val() || null
+        meta.value = v
 
-            metaReady = true
-            checkReady()
-          },
-          (e) => {
-            pageError.value = e
-            reject(e)
-          }
-        )
-
-        detailUnsubs.push(unsubMeta)
-
-        // sections
-        const sRef = dref($realtimeDb, `${clientName}/web/pages/${key}/sections`)
-        const unsubSections = onValue(
-          sRef,
-          (s) => {
-            const arr: WebSection[] = []
-
-            s.forEach((ch: any) => {
-              const v = ch.val() || {}
-
-              arr.push({
-                id: ch.key as string,
-                key: v.key,
-                enabled: v.enabled !== false,
-                order: Number(v.order) || 0,
-                props: v.props || null,
-                createdAt: v.createdAt,
-                updatedAt: v.updatedAt
-              })
-            })
-
-            sections.value = arr
-
-            sectionsReady = true
-            checkReady()
-          },
-          (e) => {
-            pageError.value = e
-            reject(e)
-          }
-        )
-
-        detailUnsubs.push(unsubSections)
-
-        // sectionsOrder
-        const oRef = dref($realtimeDb, `${clientName}/web/pages/${key}/sectionsOrder`)
-        const unsubOrder = onValue(
-          oRef,
-          (s) => {
-            const val = s.val()
-            sectionsOrder.value = Array.isArray(val) ? (val as string[]) : []
-
-            sectionsOrderReady = true
-            checkReady()
-          },
-          (e) => {
-            pageError.value = e
-            reject(e)
-          }
-        )
-
-        detailUnsubs.push(unsubOrder)
+        metaReady = true
+        schedulePageCachePersist(normalized)
+        checkReady()
       })
 
-      // Tunggu snapshot pertama, tapi jangan sampai loading infinite.
-      await waitWithTimeout(firstSnapshotReady, 8000)
+      detailUnsubs.push(() => off(mRef, 'value', hM as any))
 
-      if (token === detailLoadToken) {
-        pageLoaded.value = true
-        pageLoadedAt.value = Date.now()
-      }
+      // sections
+      const sRef = dref($realtimeDb, `${clientName}/web/pages/${key}/sections`)
+      const hS = onValue(sRef, (s) => {
+        const arr: WebSection[] = []
 
-      return {
-        meta: meta.value,
-        sections: sections.value,
-        sectionsOrder: sectionsOrder.value
-      }
-    } catch (e) {
-      if (token === detailLoadToken) {
-        pageError.value = e
-        error.value = e
-        pageLoaded.value = true
-        pageLoadedAt.value = Date.now()
-      }
+        s.forEach((ch: any) => {
+          const v = ch.val() || {}
 
-      console.error('[useWeb] Failed to subscribe page:', e)
+          arr.push({
+            id: ch.key as string,
+            key: v.key,
+            enabled: v.enabled !== false,
+            order: Number(v.order) || 0,
+            props: v.props || null,
+            createdAt: v.createdAt,
+            updatedAt: v.updatedAt
+          })
+        })
 
-      return null
-    } finally {
-      if (token === detailLoadToken) {
-        pageLoading.value = false
-      }
+        sections.value = arr
+
+        sectionsReady = true
+        schedulePageCachePersist(normalized)
+        checkReady()
+      })
+
+      detailUnsubs.push(() => off(sRef, 'value', hS as any))
+
+      // sectionsOrder
+      const oRef = dref($realtimeDb, `${clientName}/web/pages/${key}/sectionsOrder`)
+      const hO = onValue(oRef, (s) => {
+        const val = s.val()
+        sectionsOrder.value = Array.isArray(val) ? (val as string[]) : []
+
+        sectionsOrderReady = true
+        schedulePageCachePersist(normalized)
+        checkReady()
+      })
+
+      detailUnsubs.push(() => off(oRef, 'value', hO as any))
+    })
+
+    // Kalau sudah ada cache, jangan paksa nunggu Firebase untuk render pertama.
+    if (hasCache) {
+      firstSnapshotReady.then(() => true).catch(() => false)
+      return true
     }
+
+    // Kalau belum ada cache, tunggu snapshot pertama.
+    return await Promise.race([
+      firstSnapshotReady,
+      new Promise<boolean>((resolve) => {
+        setTimeout(() => resolve(false), 8000)
+      })
+    ])
   }
 
   const sortedSections = computed(() => {
@@ -382,6 +477,7 @@ export function useWeb() {
       data.pathKey = pathToKey(data.path)
     }
     await update(node, data)
+    clearPageCache(currentPath.value)
   }
 
   async function uploadOgImage(file: File) {
@@ -628,7 +724,15 @@ export function useWeb() {
     pages, subscribePages, unbindPages,
     currentPath, currentKey, meta, sections, sectionsOrder,
     sortedSections, enabledSections,
+
     subscribePage, unbindDetail,
+
+    readPageCache,
+    writePageCache,
+    hydratePageFromCache,
+    persistCurrentPageCache,
+    clearPageCache,
+
     upsertMeta, uploadOgImage, deleteOgImage,
     addSection, updateSection, setSectionEnabled,
     duplicateSection, deleteSection, reorderSections, moveSection: moveSection,

@@ -38,17 +38,17 @@
     <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
       <div class="rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/60 backdrop-blur p-4">
         <div class="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-          <div class="flex-1 flex items-center gap-2">
-            <label class="relative flex-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="relative md:w-xl w-full">
               <input v-model="q" type="text" :placeholder="texts.searchPlaceholder"
                      class="w-full rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-800 dark:text-neutral-100 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-600">
               <span class="absolute right-3 top-2.5 text-gray-400 text-xs">{{ filtered.length }} hasil</span>
             </label>
 
-            <div>
+            <div class="relative md:w-auto w-full">
               <select v-model="selectedCategory"
                       @change="setCategory(selectedCategory)"
-                      class="block w-52 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm text-gray-700 dark:text-neutral-200 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                      class="block w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm text-gray-700 dark:text-neutral-200 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 <option value="">{{ texts.categoryAll }}</option>
                 <option v-for="c in categories" :key="c" :value="c">
                   {{ c }}
