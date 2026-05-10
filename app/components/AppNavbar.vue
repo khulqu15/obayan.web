@@ -5,7 +5,7 @@
       isScrolledOrOpen ? scrolledHeaderClass : topHeaderClass
     ]"
   >
-    <nav class="relative max-w-[85rem] w-full mx-auto md:flex md:items-center md:justify-between md:gap-3 py-2 px-4 sm:px-6 lg:px-8">
+    <nav class="relative max-w-340 w-full mx-auto md:flex md:items-center md:justify-between md:gap-3 py-2 px-4 sm:px-6 lg:px-8">
       <!-- Brand + Toggle -->
       <div class="flex justify-between items-center gap-x-2">
         <a href="/" class="flex items-center gap-2">
