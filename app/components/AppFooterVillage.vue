@@ -4,7 +4,7 @@
 
     <footer
       id="footer"
-      aria-label="Footer Desa Martopuro"
+      :aria-label="`Footer ${appName}`"
       class="relative isolate overflow-hidden border-t border-slate-200 bg-white/80 backdrop-blur-2xl"
     >
       <!-- Background -->
@@ -33,15 +33,13 @@
                   {{ appName }}
                 </p>
                 <p class="mt-0.5 text-xs font-bold uppercase tracking-[0.16em] text-blue-600">
-                  Purwosari · Pasuruan
+                  {{ appLocation }}
                 </p>
               </div>
             </NuxtLink>
 
             <p class="mt-5 text-sm leading-7 text-slate-600">
-              Portal resmi informasi dan layanan digital Desa Martopuro, Kecamatan Purwosari,
-              Kabupaten Pasuruan. Menyajikan informasi desa, layanan publik, APBDes,
-              lembaga desa, potensi lokal, dan berita kegiatan masyarakat.
+              {{ footerDescription }}
             </p>
 
             <div class="mt-5 grid gap-3 sm:grid-cols-2">
@@ -70,24 +68,24 @@
             </div>
 
             <div class="mt-6 flex flex-wrap gap-2">
-              <NuxtLink
-                to="/layanan/surat"
+              <!-- <NuxtLink
+                to="/letters"
                 class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
               >
                 <ClientOnly>
                   <Icon icon="lucide:file-check-2" class="h-4 w-4" />
                 </ClientOnly>
                 Ajukan Surat
-              </NuxtLink>
+              </NuxtLink> -->
 
               <NuxtLink
-                to="/kontak"
+                to="/profile"
                 class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
               >
                 <ClientOnly>
                   <Icon icon="lucide:map-pin" class="h-4 w-4" />
                 </ClientOnly>
-                Kontak Desa
+                Profil Desa
               </NuxtLink>
             </div>
           </section>
@@ -114,7 +112,7 @@
               <div class="space-y-2">
                 <NuxtLink
                   v-for="item in section.items"
-                  :key="item.label"
+                  :key="`${section.title}-${item.href}-${item.label}`"
                   :to="item.href"
                   class="group flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-blue-50 hover:text-blue-700"
                 >
@@ -139,7 +137,7 @@
           <div class="grid gap-4 md:grid-cols-[1.2fr_1fr_1fr] md:items-center">
             <div>
               <p class="text-sm font-black">
-                Kantor Desa Martopuro
+                {{ officeName }}
               </p>
               <p class="mt-1 text-sm leading-6 text-slate-300">
                 {{ address }}
@@ -205,7 +203,7 @@
               © {{ year }} {{ appName }}. Seluruh hak cipta dilindungi.
             </p>
             <p class="mt-1 text-xs text-slate-400">
-              Website resmi Desa Martopuro, Kecamatan Purwosari, Kabupaten Pasuruan.
+              {{ copyrightSubtitle }}
             </p>
           </div>
 
@@ -268,7 +266,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { Icon } from '@iconify/vue'
-import { useRuntimeConfig } from 'nuxt/app'
+import { useRequestURL, useRuntimeConfig } from 'nuxt/app'
 import ContactHero from './village/ContactHero.vue'
 
 type FooterItem = {
@@ -297,15 +295,83 @@ type SocialLink = {
   show: boolean
 }
 
+type ApiListResponse<T> = {
+  data: T[]
+  meta?: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
+}
+
+type DynamicEntity = {
+  id?: string
+  title?: string | null
+  name?: string | null
+  displayName?: string | null
+  subtitle?: string | null
+  shortDescription?: string | null
+  description?: string | null
+  slug?: string | null
+  icon?: string | null
+  logoUrl?: string | null
+  imageUrl?: string | null
+  facilityType?: string | null
+  potentialType?: string | null
+  status?: string | null
+  metadata?: Record<string, any> | null
+}
+
 const config = useRuntimeConfig()
+const requestUrl = useRequestURL()
 const year = new Date().getFullYear()
+
+const hostname = computed(() => {
+  return String(requestUrl.hostname || '')
+    .replace(/^www\./, '')
+    .toLowerCase()
+})
+
+const tenantSlug = computed(() => {
+  const envClient = String(config.public.clientName || 'martopuro')
+    .trim()
+    .toLowerCase()
+
+  if (hostname.value.includes('martopuro')) return 'martopuro'
+  if (hostname.value.includes('obayan')) return 'obayan'
+
+  return envClient || 'martopuro'
+})
 
 const appName = computed(() => {
   return String(config.public.appName || config.public.clientDisplayName || 'Desa Martopuro')
 })
 
+const appLocation = computed(() => {
+  return String(config.public.appLocation || config.public.clientLocation || 'Purwosari · Pasuruan')
+})
+
 const appLogo = computed(() => {
-  return String(config.public.appLogo || '/assets/images/logo-martopuro.png')
+  return String(config.public.appLogo || '/assets/images/village/martopuro-logo.png')
+})
+
+const officeName = computed(() => {
+  return String(config.public.officeName || `Kantor ${appName.value}`)
+})
+
+const footerDescription = computed(() => {
+  return String(
+    config.public.footerDescription ||
+      `Portal resmi informasi dan layanan digital ${appName.value}. Menyajikan informasi desa, layanan publik, APBDes, organisasi, fasilitas, potensi lokal, dan berita kegiatan masyarakat.`
+  )
+})
+
+const copyrightSubtitle = computed(() => {
+  return String(
+    config.public.copyrightSubtitle ||
+      `Website resmi ${appName.value}.`
+  )
 })
 
 const address = computed(() => {
@@ -318,6 +384,7 @@ const address = computed(() => {
 const mapsQuery = computed(() => {
   return String(
     config.public.mapsQuery ||
+      address.value ||
       'Desa Martopuro Kecamatan Purwosari Kabupaten Pasuruan'
   )
 })
@@ -331,156 +398,196 @@ const directionsHref = computed(() => {
 })
 
 const whatsappHref = computed(() => {
-  return `https://wa.me/${waIntl.value}?text=${encodeURIComponent('Halo Admin Desa Martopuro, saya ingin bertanya terkait layanan desa.')}`
+  return `https://wa.me/${waIntl.value}?text=${encodeURIComponent(`Halo Admin ${appName.value}, saya ingin bertanya terkait layanan.`)}`
 })
 
-const highlightCards = [
+const organizationsApiUrl = computed(() => `/api/tenants/${tenantSlug.value}/organizations`)
+const facilitiesApiUrl = computed(() => `/api/tenants/${tenantSlug.value}/facilities`)
+const potentialsApiUrl = computed(() => `/api/tenants/${tenantSlug.value}/potentials`)
+
+const {
+  data: organizationsResponse,
+  pending: organizationsPending
+} = useFetch<ApiListResponse<DynamicEntity>>(organizationsApiUrl, {
+  key: computed(() => `footer-organizations-${tenantSlug.value}`),
+  query: computed(() => ({
+    status: 'active',
+    limit: 4,
+    sort: 'sort_order'
+  })),
+  watch: [tenantSlug],
+  default: () => ({
+    data: [],
+    meta: {
+      page: 1,
+      limit: 4,
+      total: 0,
+      totalPages: 1
+    }
+  })
+})
+
+const {
+  data: facilitiesResponse,
+  pending: facilitiesPending
+} = useFetch<ApiListResponse<DynamicEntity>>(facilitiesApiUrl, {
+  key: computed(() => `footer-facilities-${tenantSlug.value}`),
+  query: computed(() => ({
+    status: 'active',
+    limit: 4,
+    sort: 'sort_order'
+  })),
+  watch: [tenantSlug],
+  default: () => ({
+    data: [],
+    meta: {
+      page: 1,
+      limit: 4,
+      total: 0,
+      totalPages: 1
+    }
+  })
+})
+
+const {
+  data: potentialsResponse,
+  pending: potentialsPending
+} = useFetch<ApiListResponse<DynamicEntity>>(potentialsApiUrl, {
+  key: computed(() => `footer-potentials-${tenantSlug.value}`),
+  query: computed(() => ({
+    status: 'active',
+    limit: 4,
+    sort: 'sort_order'
+  })),
+  watch: [tenantSlug],
+  default: () => ({
+    data: [],
+    meta: {
+      page: 1,
+      limit: 4,
+      total: 0,
+      totalPages: 1
+    }
+  })
+})
+
+const organizationLinks = computed<FooterItem[]>(() => {
+  if (organizationsPending.value) return loadingLinks('organizations')
+
+  return mapEntityLinks(
+    organizationsResponse.value?.data || [],
+    '/organizations',
+    'lucide:users',
+    'Organisasi'
+  )
+})
+
+const facilityLinks = computed<FooterItem[]>(() => {
+  if (facilitiesPending.value) return loadingLinks('facilities')
+
+  return mapEntityLinks(
+    facilitiesResponse.value?.data || [],
+    '/facilities',
+    'lucide:map-pin',
+    'Fasilitas'
+  )
+})
+
+const potentialLinks = computed<FooterItem[]>(() => {
+  if (potentialsPending.value) return loadingLinks('potentials')
+
+  return mapEntityLinks(
+    potentialsResponse.value?.data || [],
+    '/potentials',
+    'lucide:sparkles',
+    'Potensi'
+  )
+})
+
+const highlightCards = computed(() => [
   {
-    label: 'Wilayah',
-    value: 'Purwosari, Pasuruan',
+    label: 'Organisasi',
+    value: `${organizationLinks.value.filter((item) => !item.href.includes('?loading=')).length} data tampil`,
+    icon: 'lucide:users'
+  },
+  {
+    label: 'Fasilitas',
+    value: `${facilityLinks.value.filter((item) => !item.href.includes('?loading=')).length} data tampil`,
     icon: 'lucide:map-pin'
   },
   {
-    label: 'Layanan',
-    value: 'Administrasi Desa',
-    icon: 'lucide:file-check-2'
-  },
-  {
-    label: 'Informasi',
-    value: 'Berita & Kegiatan',
-    icon: 'lucide:newspaper'
+    label: 'Potensi',
+    value: `${potentialLinks.value.filter((item) => !item.href.includes('?loading=')).length} data tampil`,
+    icon: 'lucide:sparkles'
   },
   {
     label: 'Transparansi',
     value: 'APBDes Desa',
     icon: 'lucide:landmark'
   }
-]
+])
 
-const footerSections: FooterSection[] = [
-  {
-    title: 'Profil Desa',
-    icon: 'lucide:landmark',
-    items: [
-      {
-        label: 'Sejarah Desa',
-        href: '/profil/sejarah',
-        icon: 'lucide:book-open'
-      },
-      {
-        label: 'Visi & Misi',
-        href: '/profil/visi-misi',
-        icon: 'lucide:target'
-      },
-      {
-        label: 'Struktur Pemerintahan',
-        href: '/profil/struktur',
-        icon: 'lucide:network'
-      },
-      {
-        label: 'Peta Wilayah',
-        href: '/profil/peta-wilayah',
-        icon: 'lucide:map'
-      }
-    ]
-  },
-  {
-    title: 'Layanan Publik',
-    icon: 'lucide:file-check-2',
-    items: [
-      {
-        label: 'Ajukan Surat Online',
-        href: '/layanan/surat',
-        icon: 'lucide:file-plus-2'
-      },
-      {
-        label: 'Persyaratan Layanan',
-        href: '/layanan/persyaratan',
-        icon: 'lucide:list-checks'
-      },
-      {
-        label: 'Status Pengajuan',
-        href: '/layanan/status',
-        icon: 'lucide:clipboard-check'
-      },
-      {
-        label: 'Aduan Warga',
-        href: '/layanan/aduan',
-        icon: 'lucide:message-square-warning'
-      }
-    ]
-  },
+const footerSections = computed<FooterSection[]>(() => [
   {
     title: 'Informasi',
     icon: 'lucide:newspaper',
     items: [
       {
         label: 'Berita Desa',
-        href: '/berita',
+        href: '/news',
         icon: 'lucide:newspaper'
       },
       {
-        label: 'Agenda Kegiatan',
-        href: '/agenda',
-        icon: 'lucide:calendar-days'
+        label: 'Profil Desa',
+        href: '/profile',
+        icon: 'lucide:landmark'
       },
       {
-        label: 'Pengumuman',
-        href: '/pengumuman',
-        icon: 'lucide:megaphone'
+        label: 'Status Desa',
+        href: '/status',
+        icon: 'lucide:activity'
       },
       {
-        label: 'Galeri Desa',
-        href: '/galeri',
-        icon: 'lucide:images'
+        label: 'APBD Desa',
+        href: '/apbd',
+        icon: 'lucide:pie-chart'
       }
     ]
+  },
+  {
+    title: 'Organisasi',
+    icon: 'lucide:users',
+    items: organizationLinks.value
+  },
+  {
+    title: 'Fasilitas',
+    icon: 'lucide:map-pin',
+    items: facilityLinks.value
   },
   {
     title: 'Potensi',
     icon: 'lucide:sparkles',
-    items: [
-      {
-        label: 'UMKM Desa',
-        href: '/potensi/umkm',
-        icon: 'lucide:store'
-      },
-      {
-        label: 'Pertanian & Perkebunan',
-        href: '/potensi/pertanian-perkebunan',
-        icon: 'lucide:wheat'
-      },
-      {
-        label: 'Pariwisata',
-        href: '/potensi/pariwisata',
-        icon: 'lucide:map-pin'
-      },
-      {
-        label: 'APBDes',
-        href: '/apbdes',
-        icon: 'lucide:pie-chart'
-      }
-    ]
+    items: potentialLinks.value
   }
-]
+])
 
 const footerBottomLinks: FooterItem[] = [
   {
     label: 'Kontak',
-    href: '/kontak'
+    href: '/profile'
   },
   {
-    label: 'APBDes',
-    href: '/apbdes'
+    label: 'APBD',
+    href: '/apbd'
   },
   {
     label: 'Status Desa',
-    href: '/status-desa'
+    href: '/status'
   },
-  {
-    label: 'Sitemap',
-    href: '/sitemap'
-  }
+  // {
+  //   label: 'Sitemap',
+  //   href: '/sitemap'
+  // }
 ]
 
 const socialLinks = computed<SocialLink[]>(() => {
@@ -533,6 +640,52 @@ const languages = ref<Language[]>([
 
 const selectedLanguage = ref<Language>(languages.value[0]!)
 
+function mapEntityLinks(
+  rows: DynamicEntity[],
+  basePath: '/organizations' | '/facilities' | '/potentials',
+  fallbackIcon: string,
+  fallbackLabel: string
+): FooterItem[] {
+  const items = rows
+    .filter((item) => item.slug)
+    .slice(0, 4)
+    .map((item) => ({
+      label: entityLabel(item, fallbackLabel),
+      href: `${basePath}/${item.slug}`,
+      icon: item.icon || fallbackIcon
+    }))
+
+  if (items.length) return items
+
+  return [
+    {
+      label: `Lihat Semua ${fallbackLabel}`,
+      href: basePath,
+      icon: fallbackIcon
+    }
+  ]
+}
+
+function entityLabel(item: DynamicEntity, fallback: string) {
+  return String(
+    item.title ||
+    item.name ||
+    item.displayName ||
+    item.subtitle ||
+    item.shortDescription ||
+    item.description ||
+    fallback
+  )
+}
+
+function loadingLinks(type: string): FooterItem[] {
+  return Array.from({ length: 4 }).map((_, index) => ({
+    label: `Memuat ${index + 1}`,
+    href: `/${type}?loading=${index + 1}`,
+    icon: 'lucide:loader-circle'
+  }))
+}
+
 function setLanguage(code: string) {
   const found = languages.value.find((item) => item.code === code)
 
@@ -541,14 +694,14 @@ function setLanguage(code: string) {
   selectedLanguage.value = found
 
   if (typeof window !== 'undefined') {
-    localStorage.setItem('martopuro-lang', code)
+    localStorage.setItem(`${tenantSlug.value}-lang`, code)
   }
 }
 
 onMounted(() => {
   if (typeof window === 'undefined') return
 
-  const saved = localStorage.getItem('martopuro-lang')
+  const saved = localStorage.getItem(`${tenantSlug.value}-lang`)
   const found = languages.value.find((item) => item.code === saved)
 
   if (found) {

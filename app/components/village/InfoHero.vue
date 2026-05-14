@@ -140,10 +140,19 @@
             <div v-if="activeOfficial" class="mt-5 grid gap-4 sm:grid-cols-[130px_minmax(0,1fr)] lg:grid-cols-1 xl:grid-cols-[130px_minmax(0,1fr)]">
               <div class="relative overflow-hidden rounded-3xl bg-slate-100">
                 <img
+                  v-if="activeOfficial.image"
                   :src="activeOfficial.image"
                   :alt="activeOfficial.name"
                   class="h-48 w-full object-cover sm:h-44 lg:h-52 xl:h-44"
                 />
+                <div
+                  v-else
+                  class="flex h-48 w-full items-center justify-center bg-slate-100 text-blue-600 sm:h-44 lg:h-52 xl:h-44"
+                >
+                  <ClientOnly>
+                    <Icon :icon="activeOfficial.icon || 'solar:user-rounded-bold-duotone'" class="h-14 w-14" />
+                  </ClientOnly>
+                </div>
 
                 <div class="absolute inset-x-0 bottom-0 bg-linear-to-t from-slate-950/70 to-transparent p-3">
                   <span class="rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black text-blue-700">
@@ -216,7 +225,7 @@
                   {{ c.budgetTitle }}
                 </h3>
                 <p class="mt-1 text-xs font-semibold text-slate-400">
-                  Realisasi dibandingkan anggaran
+                  {{ c.budgetSubtitle }}
                 </p>
               </div>
             </div>
@@ -354,7 +363,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, h, ref } from 'vue'
+import { computed, defineComponent, h, ref, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 
 type VisitorItem = {
@@ -368,6 +377,7 @@ type OfficialItem = {
   role: string
   status: string
   image: string
+  icon?: string
   description: string
 }
 
@@ -391,19 +401,122 @@ type InfoHeroProps = {
   subtitle?: string
   ctaLabel?: string
   ctaHref?: string
-  visitorGrowth?: string
-  visitorProgress?: string
-  visitors?: VisitorItem[]
   officialsHref?: string
-  officials?: OfficialItem[]
-  budgetTitle?: string
-  budgetSummary?: BudgetSummaryItem[]
-  incomeItems?: BudgetListItem[]
-  expenseItems?: BudgetListItem[]
-  note?: string
+  budgetYear?: number
+  officialsLimit?: number
+}
+
+type PublicMetricItem = {
+  id: string
+  metricGroup: string
+  metricKey: string
+  label: string
+  description: string | null
+  valueDecimal: number | null
+  valueText: string | null
+  valueUnit: string | null
+  comparisonValue: number | null
+  comparisonUnit: string | null
+  comparisonDirection: 'up' | 'down' | 'same' | null
+  periodType: string
+  icon: string | null
+  color: string | null
+  metadata: Record<string, any>
+  sortOrder: number
+  updatedAt: number
+}
+
+type VillageOfficialItem = {
+  id: string
+  name: string
+  slug: string
+  positionTitle: string
+  positionCode: string | null
+  shortDescription: string | null
+  contentHtml: string | null
+  photoUrl: string | null
+  icon: string | null
+  attendanceStatus: 'present' | 'away' | 'leave' | 'inactive' | 'unknown'
+  attendanceLabel: string | null
+  status: 'active' | 'inactive'
+  isFeatured: boolean
+  sortOrder: number
+}
+
+type BudgetLineType = 'revenue' | 'expense' | 'financing'
+
+type BudgetLineItemApi = {
+  id: string
+  lineType: BudgetLineType
+  lineGroup: string | null
+  lineCode: string | null
+  title: string
+  slug: string
+  description: string | null
+  budgetAmount: number
+  realizedAmount: number
+  realizationPercent: number
+  unit: string | null
+  icon: string | null
+  color: string | null
+  metadata: Record<string, any>
+  status: 'active' | 'inactive'
+  isFeatured: boolean
+  sortOrder: number
+}
+
+type BudgetSummaryApi = {
+  type: BudgetLineType
+  label: string
+  budgetAmount: number
+  realizedAmount: number
+  realizationPercent: number
+}
+
+type VillageBudgetPeriodItem = {
+  id: string
+  budgetYear: number
+  title: string
+  subtitle: string | null
+  currencyCode: string
+  legalBasis: string | null
+  sourceName: string | null
+  sourceUrl: string | null
+  notes: string | null
+  metadata: Record<string, any>
+  status: 'draft' | 'published' | 'archived'
+  isCurrent: boolean
+  summary: BudgetSummaryApi[]
+  revenueLines: BudgetLineItemApi[]
+  expenseLines: BudgetLineItemApi[]
+  financingLines: BudgetLineItemApi[]
+}
+
+type PublicDashboardResponse = {
+  data: {
+    visitorStats: {
+      title: string
+      subtitle: string
+      realtime: boolean
+      today: number
+      yesterday: number
+      total: number
+      comparisonPercent: number
+      metrics: PublicMetricItem[]
+    }
+    officials: {
+      title: string
+      subtitle: string
+      items: VillageOfficialItem[]
+    }
+    budget: VillageBudgetPeriodItem | null
+  }
 }
 
 const props = defineProps<InfoHeroProps>()
+
+const runtime = useRuntimeConfig()
+const requestUrl = useRequestURL()
 
 const officialIndex = ref(0)
 const activeTab = ref<'overview' | 'income' | 'expense'>('overview')
@@ -423,188 +536,304 @@ const tabs = [
   }
 ] as const
 
-const defaults = {
-  eyebrow: 'Statistik Desa',
-  title: 'Ringkasan Kinerja & APBDes 2026',
-  subtitle:
-    'Pantau statistik layanan, data aparatur, dan ringkasan APBDes secara ringkas, transparan, dan mudah dipahami masyarakat.',
-  ctaLabel: 'Lihat APBDes Lengkap',
-  ctaHref: '/apbdes',
-  visitorGrowth: '+12.1%',
-  visitorProgress: '72%',
-  visitors: [
-    {
-      label: 'Hari ini',
-      value: '37',
-      badge: '+4'
-    },
-    {
-      label: 'Kemarin',
-      value: '33'
-    },
-    {
-      label: 'Jumlah pengunjung',
-      value: '6.141'
+const hostname = computed(() => {
+  return String(requestUrl.hostname || '')
+    .replace(/^www\./, '')
+    .toLowerCase()
+})
+
+const tenantSlug = computed(() => {
+  const envClient = String(runtime.public.clientName || 'martopuro')
+    .trim()
+    .toLowerCase()
+
+  if (hostname.value.includes('martopuro')) return 'martopuro'
+  if (hostname.value.includes('obayan')) return 'obayan'
+
+  return envClient || 'martopuro'
+})
+
+const activeYear = computed(() => {
+  return Number(props.budgetYear || new Date().getFullYear())
+})
+
+const publicDashboardApiUrl = computed(() => {
+  return `/api/tenants/${tenantSlug.value}/public-dashboard`
+})
+
+const {
+  data: publicDashboardResponse,
+  pending: publicDashboardPending,
+  error: publicDashboardError,
+  refresh: refreshPublicDashboard
+} = await useFetch<PublicDashboardResponse>(publicDashboardApiUrl, {
+  key: computed(() => `public-dashboard-${tenantSlug.value}-${activeYear.value}`),
+  query: computed(() => ({
+    year: activeYear.value,
+    officialsLimit: Number(props.officialsLimit || 10)
+  })),
+  watch: [tenantSlug, activeYear],
+  default: () => ({
+    data: {
+      visitorStats: {
+        title: 'Statistik Pengunjung',
+        subtitle: 'Dipantau secara realtime',
+        realtime: true,
+        today: 0,
+        yesterday: 0,
+        total: 0,
+        comparisonPercent: 0,
+        metrics: []
+      },
+      officials: {
+        title: 'Aparatur Desa',
+        subtitle: 'Profil perangkat aktif',
+        items: []
+      },
+      budget: null
     }
-  ],
-  officialsHref: '/profile',
-  officials: [
-    {
-      name: 'Rianto',
-      role: 'Kepala Desa',
-      status: 'Hadir',
-      image: '/assets/images/kepala-desa.jpg',
-      description:
-        'Memimpin penyelenggaraan pemerintahan desa, pembangunan, pembinaan kemasyarakatan, dan pemberdayaan masyarakat.'
-    },
-    {
-      name: 'Sekretariat Desa',
-      role: 'Pelayanan Administrasi',
-      status: 'Aktif',
-      image: '/assets/images/aparatur-1.jpg',
-      description:
-        'Mendukung pengelolaan administrasi, pelayanan surat, arsip desa, dan koordinasi kegiatan pemerintahan.'
-    },
-    {
-      name: 'Bendahara Desa',
-      role: 'Keuangan Desa',
-      status: 'Aktif',
-      image: '/assets/images/aparatur-2.jpg',
-      description:
-        'Mengelola pencatatan keuangan desa, pelaporan, serta mendukung transparansi APBDes.'
-    }
-  ],
-  budgetTitle: 'APBDes 2026',
-  budgetSummary: [
-    {
-      label: 'Pendapatan',
-      percent: 0,
-      realization: 'Rp 0',
-      budget: 'Rp 2.784.452.000'
-    },
-    {
-      label: 'Belanja',
-      percent: 0,
-      realization: 'Rp 0',
-      budget: 'Rp 2.822.918.070'
-    },
-    {
-      label: 'Pembiayaan',
-      percent: 0,
-      realization: 'Rp 0',
-      budget: 'Rp 38.466.070'
-    }
-  ],
-  incomeItems: [
-    {
-      label: 'Lain-Lain PADesa',
-      realization: 'Rp 0',
-      budget: 'Rp 65.000.000',
-      percent: 0
-    },
-    {
-      label: 'Dana Desa',
-      realization: 'Rp 0',
-      budget: 'Rp 1.656.078.000',
-      percent: 0
-    },
-    {
-      label: 'Bagi Hasil Pajak & Retribusi',
-      realization: 'Rp 0',
-      budget: 'Rp 254.416.000',
-      percent: 0
-    },
-    {
-      label: 'Alokasi Dana Desa (ADD)',
-      realization: 'Rp 0',
-      budget: 'Rp 442.958.000',
-      percent: 0
-    },
-    {
-      label: 'Bantuan Keuangan Kab/Kota',
-      realization: 'Rp 0',
-      budget: 'Rp 366.000.000',
-      percent: 0
-    }
-  ],
-  expenseItems: [
-    {
-      label: 'Penyelenggaraan Pemerintahan Desa',
-      realization: 'Rp 0',
-      budget: 'Rp 1.159.164.470',
-      percent: 0
-    },
-    {
-      label: 'Pelaksanaan Pembangunan Desa',
-      realization: 'Rp 0',
-      budget: 'Rp 1.286.368.100',
-      percent: 0
-    },
-    {
-      label: 'Pembinaan Kemasyarakatan Desa',
-      realization: 'Rp 0',
-      budget: 'Rp 136.430.000',
-      percent: 0
-    },
-    {
-      label: 'Pemberdayaan Masyarakat Desa',
-      realization: 'Rp 0',
-      budget: 'Rp 90.055.500',
-      percent: 0
-    },
-    {
-      label: 'Penanggulangan Bencana/Darurat',
-      realization: 'Rp 0',
-      budget: 'Rp 150.900.000',
-      percent: 0
-    }
-  ],
-  note:
-    'Data dapat disesuaikan dengan sumber resmi desa atau API APBDes agar masyarakat mendapat informasi terbaru.'
-}
+  })
+})
+
+const dashboard = computed(() => publicDashboardResponse.value?.data)
+const visitorStats = computed(() => dashboard.value?.visitorStats)
+const dashboardOfficials = computed(() => dashboard.value?.officials)
+const dashboardBudget = computed(() => dashboard.value?.budget || null)
 
 const c = computed(() => {
   return {
-    eyebrow: props.eyebrow || defaults.eyebrow,
-    title: props.title || defaults.title,
-    subtitle: props.subtitle || defaults.subtitle,
-    ctaLabel: props.ctaLabel || defaults.ctaLabel,
-    ctaHref: props.ctaHref || defaults.ctaHref,
-    visitorGrowth: props.visitorGrowth || defaults.visitorGrowth,
-    visitorProgress: props.visitorProgress || defaults.visitorProgress,
-    visitors: props.visitors?.length ? props.visitors : defaults.visitors,
-    officialsHref: props.officialsHref || defaults.officialsHref,
-    officials: props.officials?.length ? props.officials : defaults.officials,
-    budgetTitle: props.budgetTitle || defaults.budgetTitle,
-    budgetSummary: props.budgetSummary?.length ? props.budgetSummary : defaults.budgetSummary,
-    incomeItems: props.incomeItems?.length ? props.incomeItems : defaults.incomeItems,
-    expenseItems: props.expenseItems?.length ? props.expenseItems : defaults.expenseItems,
-    note: props.note || defaults.note
+    eyebrow: props.eyebrow || 'Statistik Desa',
+    title: props.title || `Ringkasan Kinerja & APBDes ${activeYear.value}`,
+    subtitle:
+      props.subtitle ||
+      'Pantau statistik layanan, data aparatur, dan ringkasan APBDes secara ringkas, transparan, dan mudah dipahami masyarakat.',
+    ctaLabel: props.ctaLabel || 'Lihat APBDes Lengkap',
+    ctaHref: props.ctaHref || '/apbd',
+
+    visitorGrowth: formatGrowth(visitorStats.value?.comparisonPercent || 0),
+    visitorProgress: visitorProgress.value,
+    visitors: mappedVisitors.value,
+
+    officialsHref: props.officialsHref || '/profile',
+    officials: mappedOfficials.value,
+
+    budgetTitle: dashboardBudget.value?.title || `APBDes ${activeYear.value}`,
+    budgetSubtitle:
+      dashboardBudget.value?.subtitle ||
+      'Realisasi dibandingkan anggaran',
+
+    budgetSummary: mappedBudgetSummary.value,
+    incomeItems: mappedRevenueLines.value,
+    expenseItems: mappedExpenseLines.value,
+
+    note:
+      dashboardBudget.value?.notes ||
+      'Data APBDes akan tampil setelah tersedia pada database public-dashboard.'
   }
 })
 
 const officials = computed(() => c.value.officials)
 
 const activeOfficial = computed(() => {
-  return officials.value[officialIndex.value] || officials.value[0]
+  return officials.value[officialIndex.value] || officials.value[0] || null
+})
+
+const mappedVisitors = computed<VisitorItem[]>(() => {
+  const stats = visitorStats.value
+
+  if (!stats) return []
+
+  if (stats.metrics?.length) {
+    return stats.metrics
+      .slice()
+      .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0))
+      .map((item) => {
+        const value =
+          item.metadata?.display ||
+          item.valueText ||
+          formatCompactNumber(item.valueDecimal || 0)
+
+        const isToday = item.metricKey === 'today_visitors'
+
+        return {
+          label: item.label,
+          value,
+          badge:
+            isToday && stats.comparisonPercent
+              ? formatGrowth(stats.comparisonPercent)
+              : undefined
+        }
+      })
+  }
+
+  return [
+    {
+      label: 'Hari ini',
+      value: formatCompactNumber(stats.today),
+      badge: stats.comparisonPercent
+        ? formatGrowth(stats.comparisonPercent)
+        : undefined
+    },
+    {
+      label: 'Kemarin',
+      value: formatCompactNumber(stats.yesterday)
+    },
+    {
+      label: 'Jumlah pengunjung',
+      value: formatCompactNumber(stats.total)
+    }
+  ]
+})
+
+const visitorProgress = computed(() => {
+  const today = Number(visitorStats.value?.today || 0)
+  const yesterday = Number(visitorStats.value?.yesterday || 0)
+
+  if (!today && !yesterday) return '0%'
+
+  const total = today + yesterday
+  const percent = total ? (today / total) * 100 : 0
+
+  return `${clampPercent(percent)}%`
+})
+
+const mappedOfficials = computed<OfficialItem[]>(() => {
+  const items = dashboardOfficials.value?.items || []
+
+  return items.map((item) => ({
+    name: item.name,
+    role: item.positionTitle,
+    status: item.attendanceLabel || attendanceLabel(item.attendanceStatus),
+    image: item.photoUrl || '',
+    icon: item.icon || 'solar:user-rounded-bold-duotone',
+    description:
+      item.shortDescription ||
+      plainText(item.contentHtml || '') ||
+      'Profil aparatur desa aktif.'
+  }))
+})
+
+const mappedBudgetSummary = computed<BudgetSummaryItem[]>(() => {
+  const items = dashboardBudget.value?.summary || []
+
+  return items.map((item) => ({
+    label: item.label,
+    percent: clampPercent(item.realizationPercent),
+    realization: formatCurrency(item.realizedAmount),
+    budget: formatCurrency(item.budgetAmount)
+  }))
+})
+
+const mappedRevenueLines = computed<BudgetListItem[]>(() => {
+  return mapBudgetLines(dashboardBudget.value?.revenueLines || [])
+})
+
+const mappedExpenseLines = computed<BudgetListItem[]>(() => {
+  return mapBudgetLines(dashboardBudget.value?.expenseLines || [])
 })
 
 const circleDash = 251.2
 
+watch(officials, (items) => {
+  if (!items.length) {
+    officialIndex.value = 0
+    return
+  }
+
+  if (officialIndex.value > items.length - 1) {
+    officialIndex.value = 0
+  }
+})
+
+function mapBudgetLines(items: BudgetLineItemApi[]): BudgetListItem[] {
+  return items
+    .slice()
+    .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0))
+    .map((item) => ({
+      label: item.title,
+      realization: formatCurrency(item.realizedAmount),
+      budget: formatCurrency(item.budgetAmount),
+      percent: clampPercent(item.realizationPercent)
+    }))
+}
+
 function circleOffset(percent: number) {
-  const value = Math.max(0, Math.min(Number(percent || 0), 100))
+  const value = clampPercent(percent)
   return circleDash - (circleDash * value) / 100
 }
 
 function nextOfficial() {
+  if (!officials.value.length) return
+
   officialIndex.value = (officialIndex.value + 1) % officials.value.length
 }
 
 function prevOfficial() {
+  if (!officials.value.length) return
+
   officialIndex.value =
     officialIndex.value === 0
       ? officials.value.length - 1
       : officialIndex.value - 1
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: dashboardBudget.value?.currencyCode || 'IDR',
+    maximumFractionDigits: 0
+  }).format(Number(value || 0))
+}
+
+function formatCompactNumber(value: number) {
+  return new Intl.NumberFormat('id-ID').format(Number(value || 0))
+}
+
+function formatGrowth(value: number) {
+  const number = Number(value || 0)
+
+  if (!number) return '0%'
+
+  const sign = number > 0 ? '+' : ''
+
+  return `${sign}${new Intl.NumberFormat('id-ID', {
+    maximumFractionDigits: 1
+  }).format(number)}%`
+}
+
+function clampPercent(value: number) {
+  const number = Number(value || 0)
+
+  if (Number.isNaN(number)) return 0
+
+  return Math.max(0, Math.min(Math.round(number), 100))
+}
+
+function attendanceLabel(value: VillageOfficialItem['attendanceStatus']) {
+  const map: Record<VillageOfficialItem['attendanceStatus'], string> = {
+    present: 'Hadir',
+    away: 'Di luar',
+    leave: 'Cuti',
+    inactive: 'Tidak aktif',
+    unknown: 'Aktif'
+  }
+
+  return map[value] || 'Aktif'
+}
+
+function plainText(value: string) {
+  return String(value || '')
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 const BudgetItemCard = defineComponent({
@@ -618,7 +847,7 @@ const BudgetItemCard = defineComponent({
   setup(componentProps) {
     return () => {
       const item = componentProps.item as BudgetListItem
-      const percent = Math.max(0, Math.min(Number(item.percent || 0), 100))
+      const percent = clampPercent(item.percent)
 
       return h(
         'div',

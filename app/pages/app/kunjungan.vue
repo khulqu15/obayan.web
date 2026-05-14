@@ -216,11 +216,11 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import DataTable from '~/components/widget/DataTable.vue'
-import ModalShell from '~/components/widget/ModalShell.vue'
-import { useKunjungan } from '~/composables/data/useKunjungan'
-import { useSantri } from '~/composables/data/useSantri'
-import { useMaskan } from '~/composables/data/useMaskan'
+import DataTable from '../../components/widget/DataTable.vue'
+import ModalShell from '../../components/widget/ModalShell.vue'
+import { useKunjungan } from '../../composables/data/useKunjungan'
+import { useSantri } from '../../composables/data/useSantri'
+import { useMaskan } from '../../composables/data/useMaskan'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Kunjungan' } })
 

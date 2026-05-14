@@ -37,29 +37,7 @@
                         {{ c.ctaSecondary.label }}
                     </a>
                 </div>
-                <!-- Search box -->
-                <div class="mt-8 max-w-2xl rounded-[1.75rem] border border-slate-200 bg-white/80 p-2 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur-xl">
-                    <form class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]" @submit.prevent>
-                        <div class="relative">
-                            <ClientOnly>
-                                <Icon icon="lucide:search" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                            </ClientOnly>
-                            <input type="search" class="h-12 w-full rounded-2xl border border-transparent bg-slate-50 pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-200 focus:bg-white focus:ring-4 focus:ring-blue-100"
-                                :placeholder="c.searchPlaceholder" />
-                        </div>
-                        <button type="submit" class="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-950 px-5 text-sm font-black text-white transition hover:bg-blue-700">
-                            Cari
-                        </button>
-                    </form>
-                    <div class="mt-3 flex flex-wrap gap-2 px-1">
-                        <a v-for="item in c.badges" :key="item.label" href="#" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">
-                            <ClientOnly>
-                                <Icon :icon="item.icon" class="h-3.5 w-3.5" />
-                            </ClientOnly>
-                            {{ item.label }}
-                        </a>
-                    </div>
-                </div>
+
                 <!-- Quick stats -->
                 <div class="mt-8 grid max-w-3xl gap-3 sm:grid-cols-3">
                     <article v-for="item in c.quicks" :key="item.label" class="rounded-[1.35rem] border border-slate-200 bg-white/75 p-4 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-900/5">
@@ -135,149 +113,409 @@
 </template>
 
 <script setup lang="ts">
-    import {
-        computed
-    } from 'vue'
-    import {
-        Icon
-    } from '@iconify/vue'
-    type Stat = {
-        label: string
-        value: string
+import { computed } from 'vue'
+import { Icon } from '@iconify/vue'
+import type { TenantSiteConfig, TenantSiteResponse } from '../../../types/tenant-site'
+import { useRuntimeConfig, useRequestURL, useFetch } from 'nuxt/app'
+
+type Stat = {
+  label: string
+  value: string
+}
+
+type Quick = {
+  label: string
+  value: string
+  icon: string
+}
+
+type CTA = {
+  label: string
+  href: string
+}
+
+type Badge = {
+  label: string
+  icon: string
+}
+
+type HeaderHeroProps = {
+  brand?: string
+  bgImage?: string
+  titleMain?: string
+  titleHighlight?: string
+  tagline?: string
+  subtitle?: string
+  photos?: string[]
+  waIntl?: string
+  ctaPrimary?: CTA
+  ctaSecondary?: CTA
+  ctaPPDB?: CTA
+  badges?: Badge[]
+  stats?: Stat[]
+  quicks?: Quick[]
+  searchPlaceholder?: string
+  tenant?: TenantSiteConfig
+}
+
+type HeaderHeroComputed = Required<Omit<HeaderHeroProps, 'tenant'>> & {
+  isPro: boolean
+  subscriptionLabel: string
+  subscriptionEndsLabel: string
+  availableFeatures: {
+    news: boolean
+    onlineLetter: boolean
+    finance: boolean
+    letterC: boolean
+  }
+}
+
+const props = defineProps<HeaderHeroProps>()
+
+const runtime = useRuntimeConfig()
+const requestUrl = useRequestURL()
+
+const hostname = computed(() => {
+  return String(requestUrl.hostname || '')
+    .replace(/^www\./, '')
+    .toLowerCase()
+})
+
+const tenantSlug = computed(() => {
+  const envClient = String(runtime.public.clientName || 'martopuro')
+    .trim()
+    .toLowerCase()
+
+  if (hostname.value.includes('martopuro')) return 'martopuro'
+  if (hostname.value.includes('obayan')) return 'obayan'
+
+  return envClient || 'martopuro'
+})
+
+const tenantSiteApiUrl = computed(() => {
+  return `/api/tenants/${tenantSlug.value}/site`
+})
+
+const { data: tenantResponse } = useFetch<TenantSiteResponse>(tenantSiteApiUrl, {
+  key: computed(() => `tenant-site-hero-${tenantSlug.value}`),
+  default: () => ({
+    data: null as any
+  })
+})
+
+const tenant = computed<TenantSiteConfig | null>(() => {
+  return props.tenant || tenantResponse.value?.data || null
+})
+
+const features = computed(() => {
+  return tenant.value?.features || {}
+})
+
+const isProTenant = computed(() => {
+  return Boolean(tenant.value?.subscription?.isPro)
+})
+
+const isActiveSubscription = computed(() => {
+  return Boolean(tenant.value?.subscription?.isActive)
+})
+
+const onlineLetterEnabled = computed(() => {
+  return Boolean(features.value?.onlineLetter && isActiveSubscription.value)
+})
+
+const financeEnabled = computed(() => {
+  return Boolean(features.value?.finance && isActiveSubscription.value)
+})
+
+const letterCEnabled = computed(() => {
+  return Boolean(features.value?.letterC && isActiveSubscription.value)
+})
+
+const defaults = computed<HeaderHeroComputed>(() => {
+  const tenantName = tenant.value?.displayName || 'Desa Martopuro'
+  const tenantDescription =
+    tenant.value?.description ||
+    'Akses informasi terbaru, layanan administrasi online, potensi UMKM, wisata, serta agenda kegiatan desa dalam satu portal digital yang cepat, rapi, dan transparan.'
+
+  const hero = tenant.value?.hero || {}
+
+  const ctaPrimary = resolvePrimaryCta()
+  const ctaSecondary = resolveSecondaryCta()
+
+  return {
+    brand: tenantName,
+    bgImage:
+      hero.bgImage ||
+      tenant.value?.ogImageUrl ||
+      props.bgImage ||
+      '/assets/images/village/martopuro-hero.jpg',
+
+    titleMain:
+      hero.titleMain ||
+      'Selamat Datang di ',
+
+    titleHighlight:
+      hero.titleHighlight ||
+      tenantName,
+
+    tagline:
+      hero.tagline ||
+      resolveTagline(),
+
+    subtitle:
+      hero.subtitle ||
+      tenantDescription,
+
+    photos:
+      Array.isArray(hero.photos) && hero.photos.length
+        ? hero.photos
+        : [
+            '/assets/images/desa-1.jpg',
+            '/assets/images/desa-2.jpg',
+            '/assets/images/desa-3.jpg'
+          ],
+
+    waIntl:
+      tenant.value?.contact?.waIntl ||
+      '',
+
+    ctaPrimary,
+    ctaSecondary,
+
+    ctaPPDB: {
+      label: 'Daftar',
+      href: '/registration'
+    },
+
+    badges:
+      resolveBadges(),
+
+    stats:
+      Array.isArray(tenant.value?.statistic?.stats) && tenant.value?.statistic?.stats.length
+        ? tenant.value.statistic.stats
+        : resolveStats(),
+
+    quicks:
+      Array.isArray(tenant.value?.statistic?.quicks) && tenant.value?.statistic?.quicks.length
+        ? tenant.value.statistic.quicks
+        : resolveQuicks(),
+
+    searchPlaceholder:
+      hero.searchPlaceholder ||
+      'Cari layanan, berita, agenda, UMKM...',
+
+    isPro: isProTenant.value,
+
+    subscriptionLabel:
+      resolveSubscriptionLabel(),
+
+    subscriptionEndsLabel:
+      resolveSubscriptionEndsLabel(),
+
+    availableFeatures: {
+      news: true,
+      onlineLetter: onlineLetterEnabled.value,
+      finance: financeEnabled.value,
+      letterC: letterCEnabled.value
     }
-    type Quick = {
-        label: string
-        value: string
-        icon: string
+  }
+})
+
+const c = computed<HeaderHeroComputed>(() => {
+  return {
+    ...defaults.value,
+
+    brand: props.brand || defaults.value.brand,
+    bgImage: props.bgImage || defaults.value.bgImage,
+    titleMain: props.titleMain || defaults.value.titleMain,
+    titleHighlight: props.titleHighlight || defaults.value.titleHighlight,
+    tagline: props.tagline || defaults.value.tagline,
+    subtitle: props.subtitle || defaults.value.subtitle,
+    photos: props.photos?.length ? props.photos : defaults.value.photos,
+    waIntl: props.waIntl || defaults.value.waIntl,
+
+    ctaPrimary: {
+      ...defaults.value.ctaPrimary,
+      ...(props.ctaPrimary || {})
+    },
+
+    ctaSecondary: {
+      ...defaults.value.ctaSecondary,
+      ...(props.ctaSecondary || {})
+    },
+
+    ctaPPDB: {
+      ...defaults.value.ctaPPDB,
+      ...(props.ctaPPDB || {})
+    },
+
+    badges: props.badges?.length ? props.badges : defaults.value.badges,
+    stats: props.stats?.length ? props.stats : defaults.value.stats,
+    quicks: props.quicks?.length ? props.quicks : defaults.value.quicks,
+    searchPlaceholder: props.searchPlaceholder || defaults.value.searchPlaceholder
+  }
+})
+
+function resolvePrimaryCta(): CTA {
+  if (onlineLetterEnabled.value) {
+    return {
+      label: 'Ajukan Surat Online',
+      href: '/layanan'
     }
-    type CTA = {
-        label: string
-        href: string
+  }
+
+  return {
+    label: 'Lihat Berita',
+    href: '/news'
+  }
+}
+
+function resolveSecondaryCta(): CTA {
+  if (onlineLetterEnabled.value) {
+    return {
+      label: 'Lihat Berita',
+      href: '/news'
     }
-    type Badge = {
-        label: string
-        icon: string
+  }
+
+  return {
+    label: 'Lihat Profil Desa',
+    href: '/profile'
+  }
+}
+
+function resolveTagline() {
+  if (!isActiveSubscription.value) {
+    return 'Portal Informasi Desa'
+  }
+
+  if (isProTenant.value) {
+    return 'Portal Desa Digital Pro'
+  }
+
+  return 'Portal Resmi Pemerintah Desa'
+}
+
+function resolveBadges(): Badge[] {
+  const badges: Badge[] = [
+    {
+      label: 'Berita Desa',
+      icon: 'lucide:newspaper'
+    },
+    {
+      label: 'Agenda Desa',
+      icon: 'lucide:calendar-days'
+    },
+    {
+      label: 'Direktori UMKM',
+      icon: 'lucide:store'
     }
-    type HeaderHeroProps = {
-        brand ? : string
-        bgImage ? : string
-        titleMain ? : string
-        titleHighlight ? : string
-        tagline ? : string
-        subtitle ? : string
-        photos ? : string[]
-        waIntl ? : string
-        ctaPrimary ? : CTA
-        ctaSecondary ? : CTA
-        ctaPPDB ? : CTA
-        badges ? : Badge[]
-        stats ? : Stat[]
-        quicks ? : Quick[]
-        searchPlaceholder ? : string
-    }
-    type HeaderHeroComputed = Required < HeaderHeroProps >
-        const defaults: HeaderHeroComputed = {
-            brand: 'Desa Martopuro',
-            bgImage: '/assets/images/village/martopuro-hero.jpg',
-            titleMain: 'Selamat Datang di Desa ',
-            titleHighlight: 'Martopuro',
-            tagline: 'Portal Resmi Pemerintah Desa',
-            subtitle: 'Akses informasi terbaru, layanan administrasi online, potensi UMKM, wisata, serta agenda kegiatan desa dalam satu portal digital yang cepat, rapi, dan transparan.',
-            photos: [
-                '/assets/images/desa-1.jpg',
-                '/assets/images/desa-2.jpg',
-                '/assets/images/desa-3.jpg'
-            ],
-            waIntl: '',
-            ctaPrimary: {
-                label: 'Ajukan Surat Online',
-                href: '/layanan'
-            },
-            ctaSecondary: {
-                label: 'Lihat Profil Desa',
-                href: '/profile'
-            },
-            ctaPPDB: {
-                label: 'Daftar',
-                href: '/registration'
-            },
-            badges: [{
-                    label: 'Surat Keterangan',
-                    icon: 'lucide:file-check-2'
-                },
-                {
-                    label: 'Direktori UMKM',
-                    icon: 'lucide:store'
-                },
-                {
-                    label: 'Agenda Desa',
-                    icon: 'lucide:calendar-days'
-                },
-                {
-                    label: 'Wisata',
-                    icon: 'lucide:map-pin'
-                }
-            ],
-            stats: [{
-                    label: 'UMKM',
-                    value: '35+'
-                },
-                {
-                    label: 'Layanan',
-                    value: '12'
-                },
-                {
-                    label: 'Agenda',
-                    value: 'Aktif'
-                }
-            ],
-            quicks: [{
-                    label: 'Jam Layanan Kantor',
-                    value: 'Senin–Jumat • 08.00–15.00',
-                    icon: 'lucide:clock-3'
-                },
-                {
-                    label: 'UMKM Terdaftar',
-                    value: '35 usaha lokal aktif',
-                    icon: 'lucide:store'
-                },
-                {
-                    label: 'Nomor Darurat',
-                    value: '112 • 0812-xxxx-xxxx',
-                    icon: 'lucide:phone-call'
-                }
-            ],
-            searchPlaceholder: 'Cari layanan, berita, agenda, UMKM...'
-        }
-    const props = defineProps < HeaderHeroProps > ()
-    const c = computed < HeaderHeroComputed > (() => {
-        return {
-            brand: props.brand || defaults.brand,
-            bgImage: props.bgImage || defaults.bgImage,
-            titleMain: props.titleMain || defaults.titleMain,
-            titleHighlight: props.titleHighlight || defaults.titleHighlight,
-            tagline: props.tagline || defaults.tagline,
-            subtitle: props.subtitle || defaults.subtitle,
-            photos: props.photos?.length ? props.photos : defaults.photos,
-            waIntl: props.waIntl || defaults.waIntl,
-            ctaPrimary: {
-                ...defaults.ctaPrimary,
-                ...(props.ctaPrimary || {})
-            },
-            ctaSecondary: {
-                ...defaults.ctaSecondary,
-                ...(props.ctaSecondary || {})
-            },
-            ctaPPDB: {
-                ...defaults.ctaPPDB,
-                ...(props.ctaPPDB || {})
-            },
-            badges: props.badges?.length ? props.badges : defaults.badges,
-            stats: props.stats?.length ? props.stats : defaults.stats,
-            quicks: props.quicks?.length ? props.quicks : defaults.quicks,
-            searchPlaceholder: props.searchPlaceholder || defaults.searchPlaceholder
-        }
+  ]
+
+  if (onlineLetterEnabled.value) {
+    badges.unshift({
+      label: 'Surat Online',
+      icon: 'lucide:file-check-2'
     })
+  }
+
+  if (financeEnabled.value) {
+    badges.push({
+      label: 'Keuangan Desa',
+      icon: 'lucide:wallet'
+    })
+  }
+
+  if (letterCEnabled.value) {
+    badges.push({
+      label: 'Dokumen Letter C',
+      icon: 'lucide:folder-check'
+    })
+  }
+
+  return badges
+}
+
+function resolveStats(): Stat[] {
+  const stats: Stat[] = [
+    {
+      label: 'Berita',
+      value: 'Aktif'
+    },
+    {
+      label: 'Agenda',
+      value: 'Aktif'
+    },
+    {
+      label: 'UMKM',
+      value: '35+'
+    }
+  ]
+
+  if (onlineLetterEnabled.value) {
+    stats[1] = {
+      label: 'Surat Online',
+      value: 'Pro'
+    }
+  }
+
+  return stats
+}
+
+function resolveQuicks(): Quick[] {
+  const quicks: Quick[] = [
+    {
+      label: 'Jam Layanan Kantor',
+      value: 'Senin–Jumat • 08.00–15.00',
+      icon: 'lucide:clock-3'
+    },
+    {
+      label: 'Berita Terbaru',
+      value: 'Informasi resmi desa tersedia',
+      icon: 'lucide:newspaper'
+    },
+    {
+      label: 'Nomor Darurat',
+      value: '112 • 0812-xxxx-xxxx',
+      icon: 'lucide:phone-call'
+    }
+  ]
+
+  if (onlineLetterEnabled.value) {
+    quicks[1] = {
+      label: 'Administrasi Online',
+      value: 'Pengajuan surat warga tersedia',
+      icon: 'lucide:clipboard-list'
+    }
+  }
+
+  return quicks
+}
+
+function resolveSubscriptionLabel() {
+  const subscription = tenant.value?.subscription
+
+  if (!subscription) return 'Basic'
+
+  const plan = subscription.plan?.toUpperCase() || 'BASIC'
+  const status = subscription.status || 'active'
+
+  if (!subscription.isActive) return `${plan} • Expired`
+
+  return `${plan} • ${status}`
+}
+
+function resolveSubscriptionEndsLabel() {
+  const endsAt = tenant.value?.subscription?.endsAt
+
+  if (!endsAt) return 'Tanpa batas aktif'
+
+  return `Aktif hingga ${new Intl.DateTimeFormat('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  }).format(new Date(endsAt))}`
+}
 </script>
 
 <style scoped>

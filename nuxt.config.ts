@@ -3,7 +3,9 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-
+  hub: {
+    db: 'mysql',
+  },
   css: [
     '~/assets/css/main.css',
   ],
@@ -26,7 +28,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      titleTemplate: (titleChunk) => (titleChunk ? `${titleChunk} · Obayan` : 'Obayan · Modern Pesantren Platform'),
+      titleTemplate: (titleChunk: string) => (titleChunk ? `${titleChunk} · Obayan` : 'Obayan · Modern Pesantren Platform'),
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'theme-color', content: '#58CC02' },
@@ -47,11 +49,50 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      siteUrl: 'https://alberr.hayago.id',
-      siteName: 'Pondok Pesantren Alberr',
-      siteDescription: 'Pondok pesantren inovatif: diniyah, tahfidz, dan pendidikan formal berkarakter.',
-      twitterSite: '@alberr'
-    }
+      devVersion: process.env.NUXT_PUBLIC_DEV_VERSION || false,
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://obayan.id',
+      siteName: process.env.NUXT_PUBLIC_SITE_NAME || 'Obayan',
+      siteDescription: process.env.NUXT_PUBLIC_SITE_DESCRIPTION || 'Obayan — platform modern untuk pondok pesantren: web profile, SIAKAD, pembayaran, akademik, absensi, kunjungan, pelanggaran, perizinan — terintegrasi RFID & Fingerprint (ToriID).',
+      twitterSite: process.env.NUXT_PUBLIC_TWITTER_SITE || '@obayan',
+      
+      clientName: process.env.NUXT_PUBLIC_CLIENT_NAME || 'Obayan',
+      clientDisplayName: process.env.NUXT_PUBLIC_CLIENT_DISPLAY_NAME || 'Obayan',
+
+      appName: process.env.NUXT_PUBLIC_APP_NAME || 'Obayan',
+      appSubtitle: process.env.NUXT_PUBLIC_APP_SUBTITLE || 'Modern Education Platform',
+      appLogo: process.env.NUXT_PUBLIC_APP_LOGO || '/assets/logo.png',
+      appThemeColor: process.env.NUXT_PUBLIC_APP_THEME_COLOR || '#16a34a',
+      
+      heroBgImage: process.env.NUXT_PUBLIC_HERO_BG_IMAGE || '',
+      heroTitleMain: process.env.NUXT_PUBLIC_HERO_TITLE_MAIN || '',
+      heroTitleHighlight: process.env.NUXT_PUBLIC_HERO_TITLE_HIGHLIGHT || '',
+      heroTagline: process.env.NUXT_PUBLIC_HERO_TAGLINE || '',
+      heroSubtitle: process.env.NUXT_PUBLIC_HERO_SUBTITLE || '',
+      waIntl: process.env.NUXT_PUBLIC_WA_INTL || '',
+      schoolLevels: process.env.NUXT_PUBLIC_SCHOOL_LEVELS || '',
+      ppdbTimeline: process.env.NUXT_PUBLIC_PPDB_TIMELINE || '',
+      heroPrimaryLabel: process.env.NUXT_PUBLIC_HERO_PRIMARY_LABEL || '',
+      heroPrimaryHref: process.env.NUXT_PUBLIC_HERO_PRIMARY_HREF || '',
+      heroSecondaryLabel: process.env.NUXT_PUBLIC_HERO_SECONDARY_LABEL || '',
+      heroSecondaryHref: process.env.NUXT_PUBLIC_HERO_SECONDARY_HREF || '',
+      heroPpdbLabel: process.env.NUXT_PUBLIC_HERO_PPDB_LABEL || '',
+      heroPpdbHref: process.env.NUXT_PUBLIC_HERO_PPDB_HREF || '',
+      adminLabel: process.env.NUXT_PUBLIC_ADMIN_LABEL || '',
+
+      cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME || '',
+      cloudinaryUploadPreset: process.env.NUXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '',
+
+    },
+    databaseHost: process.env.DATABASE_HOST || 'localhost',
+    databasePort: process.env.DATABASE_PORT || '3306',
+    databaseUser: process.env.DATABASE_USER || 'root',
+    databasePassword: process.env.DATABASE_PASSWORD || '',
+    databaseName: process.env.DATABASE_NAME || 'obayan',
+    databaseConnectionLimit: process.env.DATABASE_CONNECTION_LIMIT || '10',
+    jwtSecret: process.env.JWT_SECRET || 'supersecretkey',
+    authSecret: process.env.AUTH_SECRET || 'arsades_secret_2026',
+    authCookieName: process.env.AUTH_COOKIE_NAME || 'arsades_auth',
+    authCookieMaxAge: process.env.AUTH_COOKIE_MAX_AGE || '604800000',
   },
 
   modules: ['nuxt-tiptap-editor'],

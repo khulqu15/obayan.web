@@ -1,384 +1,841 @@
 <template>
-  <div class="space-y-4 p-6">
-    <!-- ===== Top KPIs ===== -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-      <InfoStatCard
-        label="Total Santri"
-        :value="fmtNumber(totalSantri)"
-        :percent="trendSantri"
-        icon="lucide:users"
-        sub="Total terdaftar"
-      />
-      <InfoStatCard
-        label="Kehadiran Hari Ini"
-        :value="presentTodayPct !== null ? (presentTodayPct.toFixed(0) + '%') : '—'"
-        :percent="trendAbsensi"
-        icon="lucide:clipboard-check"
-        sub="Presentase hadir"
-      />
-      <InfoStatCard
-        label="Izin Pending"
-        :value="fmtNumber(izinPending)"
-        :percent="0"
-        icon="lucide:clock"
-        sub="Menunggu persetujuan"
-      />
-      <InfoStatCard
-        label="Pelanggaran Aktif"
-        :value="fmtNumber(faultUnresolved)"
-        :percent="0"
-        icon="lucide:shield-alert"
-        sub="Belum diselesaikan"
-      />
-    </div>
+  <div
+    class="min-h-full bg-neutral-50"
+    :style="themeVars"
+  >
+    <div class="space-y-5 p-4 sm:p-6">
+      <!-- Header -->
+      <section class="relative overflow-hidden rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm sm:p-6 lg:p-7">
+        <div class="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[var(--brand-soft)] blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-24 left-20 h-64 w-64 rounded-full bg-neutral-100 blur-3xl"></div>
 
-    <!-- ===== Charts Row ===== -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
-      <AreaLineChart
-        class="lg:col-span-2"
-        title="Trend Kehadiran (30 hari)"
-        :data="attendanceChart"
-        :options="chartOpts"
-      >
-        <template #actions>
-          <button class="text-xs px-2 py-1 rounded border hover:bg-gray-50 dark:hover:bg-neutral-800"
-                  @click="reloadAbsensiHistory">
-            Reload
-          </button>
-        </template>
-      </AreaLineChart>
+        <div class="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div class="flex items-start gap-4">
+            <div class="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-3xl text-white shadow-sm">
+              <img
+                v-if="profile.logo && !logoError"
+                :src="profile.logo"
+                :alt="profile.name"
+                class="h-10 w-10 rounded-2xl object-contain"
+                @error="logoError = true"
+              >
+              <Icon
+                v-else
+                :icon="profile.icon"
+                class="h-7 w-7"
+              />
+            </div>
 
-      <DonutChart
-        title="Komposisi Jenjang"
-        :data="jenjangChart"
-        :options="{ cutout: '60%' }"
-      />
-    </div>
-
-    <!-- ===== Bar + Agenda ===== -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
-      <BarChart
-        class="lg:col-span-2"
-        title="Pelanggaran per Kategori (30 hari)"
-        :data="faultChart"
-        :options="chartOpts"
-      />
-
-      <div class="p-4 rounded-xl border border-gray-200 bg-white shadow-xs dark:bg-neutral-800 dark:border-neutral-700">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold text-gray-800 dark:text-neutral-100">Agenda Terdekat</h3>
-          <NuxtLink to="/app/announcement" class="text-xs text-blue-600 hover:underline">Lihat semua</NuxtLink>
-        </div>
-
-        <ul v-if="agenda.length" class="space-y-2 text-sm">
-          <li v-for="a in agenda.slice(0,6)" :key="a.id" class="flex items-start gap-2">
-            <Icon icon="lucide:calendar" width="16" height="16" class="mt-0.5 text-gray-600 dark:text-neutral-300"/>
             <div class="min-w-0">
-              <p class="text-gray-800 dark:text-neutral-100 truncate">{{ a.title }}</p>
-              <p class="text-[12px] text-gray-500 dark:text-neutral-400">
-                {{ a.when }} <span v-if="a.where">· {{ a.where }}</span>
+              <div class="mb-2 flex flex-wrap items-center gap-2">
+                <span class="rounded-full bg-[var(--brand-soft)] px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-[var(--brand)]">
+                  {{ profile.badge }}
+                </span>
+
+                <span class="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-bold text-neutral-500">
+                  {{ todayLabel }}
+                </span>
+              </div>
+
+              <h1 class="text-2xl font-black tracking-tight text-neutral-950 sm:text-3xl">
+                {{ profile.title }}
+              </h1>
+
+              <p class="mt-2 max-w-3xl text-sm font-medium leading-7 text-neutral-500 sm:text-base">
+                {{ profile.description }}
               </p>
             </div>
-          </li>
-        </ul>
-        <p v-else class="text-sm text-gray-500 dark:text-neutral-400">Belum ada agenda terjadwal.</p>
-      </div>
-    </div>
+          </div>
 
-    <!-- ===== Data Tables ===== -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-      <DataTable
-        title="Perizinan Terbaru"
-        :rows="izinRows"
-        :columns="izinCols"
-        :rowKey="r => r.id"
-      >
-        <template #cell-status="{ row }">
-          <span :class="badgeClass(row.status)">{{ row.status }}</span>
-        </template>
-        <template #cell-actions="{ row }">
-          <NuxtLink :to="'/app/izin?focus='+row.id" class="text-xs text-blue-600 hover:underline">Lihat</NuxtLink>
-        </template>
-      </DataTable>
+          <div class="flex flex-wrap gap-2">
+            <NuxtLink
+              v-for="action in profile.actions"
+              :key="action.href"
+              :to="action.href"
+              class="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-black text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50 hover:text-neutral-950"
+            >
+              <Icon :icon="action.icon" class="h-5 w-5 text-[var(--brand)]" />
+              {{ action.label }}
+            </NuxtLink>
+          </div>
+        </div>
+      </section>
 
-      <DataTable
-        title="Pelanggaran Terbaru"
-        :rows="faultRows"
-        :columns="faultCols"
-        :rowKey="r => r.id"
-      >
-        <template #cell-status="{ row }">
-          <span :class="badgeClass(row.status || (row.resolved ? 'Selesai' : 'Aktif'))">
-            {{ row.status || (row.resolved ? 'Selesai' : 'Aktif') }}
-          </span>
-        </template>
-        <template #cell-actions="{ row }">
-          <NuxtLink :to="'/app/faults?focus='+row.id" class="text-xs text-blue-600 hover:underline">Lihat</NuxtLink>
-        </template>
-      </DataTable>
+      <!-- KPI Cards -->
+      <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <article
+          v-for="stat in dashboardStats"
+          :key="stat.label"
+          class="rounded-[1.75rem] border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+        >
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-sm font-bold text-neutral-500">
+                {{ stat.label }}
+              </p>
+
+              <h2 class="mt-3 text-3xl font-black tracking-tight text-neutral-950">
+                {{ stat.value }}
+              </h2>
+            </div>
+
+            <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
+              <Icon :icon="stat.icon" class="h-6 w-6" />
+            </div>
+          </div>
+
+          <div class="mt-5 flex items-center justify-between gap-3">
+            <p class="text-xs font-semibold leading-5 text-neutral-500">
+              {{ stat.sub }}
+            </p>
+
+            <span
+              class="rounded-full px-2.5 py-1 text-xs font-black"
+              :class="stat.tone === 'pro'
+                ? 'bg-neutral-900 text-white'
+                : stat.tone === 'good'
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-amber-100 text-amber-700'"
+            >
+              {{ stat.badge }}
+            </span>
+          </div>
+        </article>
+      </section>
+
+      <!-- Main Grid -->
+      <section class="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+        <!-- Feature Shortcuts -->
+        <div class="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="text-xs font-black uppercase tracking-[0.16em] text-[var(--brand)]">
+                Quick Access
+              </p>
+              <h2 class="mt-1 text-xl font-black text-neutral-950">
+                {{ profile.quickAccessTitle }}
+              </h2>
+            </div>
+
+            <NuxtLink
+              :to="profile.manageHref"
+              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-4 py-2.5 text-sm font-black text-white transition hover:bg-neutral-800"
+            >
+              <Icon icon="solar:settings-bold-duotone" class="h-5 w-5" />
+              Kelola
+            </NuxtLink>
+          </div>
+
+          <div class="mt-5 grid gap-3 sm:grid-cols-2">
+            <NuxtLink
+              v-for="item in featureCards"
+              :key="item.href"
+              :to="item.href"
+              class="group relative overflow-hidden rounded-[1.75rem] border p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+              :class="item.pro
+                ? 'border-neutral-200 bg-neutral-50'
+                : 'border-neutral-200 bg-white hover:border-[var(--brand)]'"
+            >
+              <div class="flex items-start justify-between gap-4">
+                <div
+                  class="grid h-12 w-12 place-items-center rounded-2xl"
+                  :class="item.pro
+                    ? 'bg-neutral-900 text-white'
+                    : 'bg-[var(--brand-soft)] text-[var(--brand)]'"
+                >
+                  <Icon :icon="item.icon" class="h-6 w-6" />
+                </div>
+
+                <span
+                  v-if="item.pro"
+                  class="rounded-full bg-neutral-900 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white"
+                >
+                  Pro
+                </span>
+              </div>
+
+              <h3 class="mt-4 text-base font-black text-neutral-950">
+                {{ item.title }}
+              </h3>
+
+              <p class="mt-2 text-sm font-medium leading-6 text-neutral-500">
+                {{ item.description }}
+              </p>
+
+              <div class="mt-4 inline-flex items-center gap-2 text-sm font-black text-[var(--brand)]">
+                Buka menu
+                <Icon icon="solar:arrow-right-linear" class="h-4 w-4 transition group-hover:translate-x-0.5" />
+              </div>
+            </NuxtLink>
+          </div>
+        </div>
+
+        <!-- Status / Package Card -->
+        <aside class="space-y-5">
+          <div class="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-xs font-black uppercase tracking-[0.16em] text-[var(--brand)]">
+                  Paket Aktif
+                </p>
+                <h2 class="mt-1 text-xl font-black text-neutral-950">
+                  {{ profile.packageName }}
+                </h2>
+              </div>
+
+              <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--brand-soft)] text-[var(--brand)]">
+                <Icon icon="solar:star-fall-bold-duotone" class="h-6 w-6" />
+              </div>
+            </div>
+
+            <p class="mt-4 text-sm font-medium leading-7 text-neutral-500">
+              {{ profile.packageDescription }}
+            </p>
+
+            <div class="mt-5 space-y-3">
+              <div
+                v-for="item in packageItems"
+                :key="item.label"
+                class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3"
+              >
+                <Icon
+                  :icon="item.active ? 'solar:check-circle-bold-duotone' : 'solar:lock-keyhole-bold-duotone'"
+                  class="h-5 w-5"
+                  :class="item.active ? 'text-emerald-600' : 'text-neutral-400'"
+                />
+
+                <span class="flex-1 text-sm font-bold text-neutral-700">
+                  {{ item.label }}
+                </span>
+
+                <span
+                  v-if="item.pro"
+                  class="rounded-full bg-neutral-900 px-2 py-0.5 text-[10px] font-black text-white"
+                >
+                  PRO
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-[2rem] border border-neutral-200 bg-neutral-950 p-5 text-white shadow-sm sm:p-6">
+            <div class="flex items-start gap-4">
+              <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/10">
+                <Icon :icon="profile.ctaIcon" class="h-6 w-6" />
+              </div>
+
+              <div>
+                <h2 class="text-lg font-black">
+                  {{ profile.ctaTitle }}
+                </h2>
+                <p class="mt-2 text-sm font-medium leading-6 text-white/65">
+                  {{ profile.ctaDescription }}
+                </p>
+              </div>
+            </div>
+
+            <NuxtLink
+              :to="profile.ctaHref"
+              class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-neutral-950 transition hover:bg-neutral-100"
+            >
+              {{ profile.ctaLabel }}
+              <Icon icon="solar:arrow-right-linear" class="h-5 w-5" />
+            </NuxtLink>
+          </div>
+        </aside>
+      </section>
+
+      <!-- Bottom Grid -->
+      <section class="grid gap-5 xl:grid-cols-3 grid-cols-1">
+        <!-- Activity -->
+        <div class="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm sm:p-6 xl:col-span-2">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p class="text-xs font-black uppercase tracking-[0.16em] text-[var(--brand)]">
+                Aktivitas
+              </p>
+              <h2 class="mt-1 text-xl font-black text-neutral-950">
+                Aktivitas Terbaru
+              </h2>
+            </div>
+
+            <button
+              type="button"
+              class="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-4 py-2 text-sm font-black text-neutral-600 transition hover:bg-neutral-50"
+            >
+              <Icon icon="solar:refresh-bold-duotone" class="h-4 w-4" />
+              Refresh
+            </button>
+          </div>
+
+          <div class="mt-5 space-y-3">
+            <div
+              v-for="item in recentActivities"
+              :key="item.title"
+              class="flex flex-wrap items-start gap-4 rounded-[1.5rem] border border-neutral-200 bg-neutral-50 p-4"
+            >
+              <div class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-[var(--brand)]">
+                <Icon :icon="item.icon" class="h-5 w-5" />
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-black text-neutral-950">
+                  {{ item.title }}
+                </p>
+                <p class="mt-1 text-sm font-medium leading-6 text-neutral-500">
+                  {{ item.description }}
+                </p>
+              </div>
+
+              <span class="shrink-0 text-xs font-bold text-neutral-400">
+                {{ item.time }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommended Next Steps -->
+        <div class="rounded-[2rem] border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+          <p class="text-xs font-black uppercase tracking-[0.16em] text-[var(--brand)]">
+            Next Step
+          </p>
+          <h2 class="mt-1 text-xl font-black text-neutral-950">
+            Rekomendasi
+          </h2>
+
+          <div class="mt-5 space-y-3">
+            <NuxtLink
+              v-for="item in recommendations"
+              :key="item.href"
+              :to="item.href"
+              class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-neutral-300 hover:bg-neutral-50"
+            >
+              <div class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-neutral-100 text-neutral-600">
+                <Icon :icon="item.icon" class="h-5 w-5" />
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-black text-neutral-950">
+                  {{ item.title }}
+                </p>
+                <p class="truncate text-xs font-semibold text-neutral-500">
+                  {{ item.description }}
+                </p>
+              </div>
+
+              <Icon icon="solar:alt-arrow-right-linear" class="h-5 w-5 text-neutral-400" />
+            </NuxtLink>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-/**
- * Dashboard tanpa dummy:
- * - Ambil data dari composables/data/*
- * - Semua agregasi dibuat dari rows/live yang ada
- * - Ada empty state bila data kosong
- */
-import { computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
-import InfoStatCard from '~/components/widget/InfoStatCard.vue'
-import AreaLineChart from '~/components/widget/AreaLineChart.vue'
-import DonutChart from '~/components/widget/DonutChart.vue'
-import BarChart from '~/components/widget/BarChart.vue'
-import DataTable from '~/components/widget/DataTable.vue'
+import { computed, ref } from 'vue'
+import {
+  useHead,
+  useRequestURL,
+  useRuntimeConfig,
+  useSeoMeta
+} from 'nuxt/app'
 
-import { useAbsensi } from '~/composables/data/useAbsensi'
-import { useSantri } from '~/composables/data/useSantri'
-import { useIzin } from '~/composables/data/useIzin'
-import { useFaults } from '~/composables/data/useFaults'
-import { useAnnouncements } from '~/composables/data/useAnnouncements'
+definePageMeta({
+  layout: 'app',
+  layoutProps: {
+    title: 'Dashboard'
+  }
+})
 
-definePageMeta({ layout: 'app', layoutProps: { title: 'Dashboard' } })
+type Mode = 'martopuro' | 'obayan'
 
-/* ===== Utils ===== */
-const fmtNumber = (n?: number | null) =>
-  (n ?? 0).toLocaleString('id-ID')
-
-const pct = (a: number, b: number) => (b > 0 ? (a / b) * 100 : null)
-
-const badgeClass = (status?: string) => {
-  const s = (status || '').toLowerCase()
-  if (['approved','disetujui','selesai','lunas'].some(k => s.includes(k)))
-    return 'text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-  if (['pending','menunggu','sebagian'].some(k => s.includes(k)))
-    return 'text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-  return 'text-xs px-2 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+type ActionItem = {
+  label: string
+  href: string
+  icon: string
 }
 
-/* ===== Data sources ===== */
-const absensi = useAbsensi()
-const santri  = useSantri()
-const izin    = useIzin()
-const faults  = useFaults()
-const ann     = useAnnouncements()
+type StatItem = {
+  label: string
+  value: string
+  sub: string
+  badge: string
+  icon: string
+  tone: 'good' | 'warning' | 'pro'
+}
 
-/* initial fetch/subscribe */
-onMounted(async () => {
-  try { santri.subscribeSantri?.() } catch {}
-  try { await santri.fetchSantri?.() } catch {}
+type FeatureCard = {
+  title: string
+  description: string
+  href: string
+  icon: string
+  pro?: boolean
+}
 
-  try { await absensi.fetchCurrent?.() } catch {}
-  try { await absensi.fetchHistory?.() } catch {}
-  try { absensi.subscribeLive?.() } catch {}
+type PackageItem = {
+  label: string
+  active: boolean
+  pro?: boolean
+}
 
-  try { await izin.fetchIzin?.() } catch {}
-  try { izin.subscribeLive?.() } catch {}
+type ActivityItem = {
+  title: string
+  description: string
+  icon: string
+  time: string
+}
 
-  try { await faults.fetchFaults?.() } catch {}
-  try { faults.subscribeFaults?.() } catch {}
+type RecommendationItem = {
+  title: string
+  description: string
+  href: string
+  icon: string
+}
 
-  try { await ann.fetchAnnouncements?.() } catch {}
-  try { ann.subscribeAnnouncements?.() } catch {}
+const config = useRuntimeConfig()
+const requestUrl = useRequestURL()
+const logoError = ref(false)
+
+const hostname = computed(() => {
+  return String(requestUrl.hostname || '')
+    .replace(/^www\./, '')
+    .toLowerCase()
 })
 
-/* ===== KPIs ===== */
-const totalSantri = computed(() => Number(santri.rows?.value?.length || 0))
-
-// hadir hari ini
-const presentTodayPct = computed(() => {
-  const curr = absensi.current?.value
-  const present = Number(curr?.present || curr?.hadir || 0)
-  const total   = Number(curr?.total   || curr?.jumlah || 0)
-  return pct(present, total) // bisa null
+const clientName = computed(() => {
+  return String(config.public.clientName || '')
+    .trim()
+    .toLowerCase()
 })
 
-// tren (placeholder perhitungan sehat: dibanding kemarin jika ada history)
-const trendAbsensi = computed(() => {
-  const hist = absensi.history?.value || []
-  if (hist.length < 2) return 0
-  const last  = hist[hist.length-1]
-  const prev  = hist[hist.length-2]
-  const p1 = pct(Number(last?.present||0), Number(last?.total||0)) ?? 0
-  const p0 = pct(Number(prev?.present||0), Number(prev?.total||0)) ?? 0
-  return Number((p1 - p0).toFixed(1))
+const mode = computed<Mode>(() => {
+  if (hostname.value.includes('martopuro')) return 'martopuro'
+  if (clientName.value.includes('martopuro')) return 'martopuro'
+
+  return 'obayan'
 })
 
-const trendSantri = 0 // jika ada pembanding bulan lalu, hitung di sini
+const isMartopuro = computed(() => mode.value === 'martopuro')
 
-const izinPending = computed(() => {
-  const rows = izin.rows?.value || []
-  return rows.filter(r => String(r?.status||'').toLowerCase().includes('pending')).length
+const todayLabel = computed(() => {
+  return new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  }).format(new Date())
 })
 
-const faultUnresolved = computed(() =>
-  Number(faults.unresolvedCount?.value || (faults.rows?.value || []).filter(x => !x?.resolved).length || 0)
-)
+const profile = computed(() => {
+  if (isMartopuro.value) {
+    const logo = String(
+      config.public.appLogo ||
+      config.public.logo ||
+      '/assets/images/logo-martopuro.png'
+    )
 
-/* ===== Charts ===== */
-// Absensi: ambil 30 record terakhir dari history (urut naik)
-const attendanceChart = computed(() => {
-  const hist = (absensi.history?.value || []).slice(-30)
-  const labels = hist.map(s => {
-    const d = new Date(s?.date || s?.tanggal || s?.ts || Date.now())
-    const mm = String(d.getMonth()+1).padStart(2,'0')
-    const dd = String(d.getDate()).padStart(2,'0')
-    return `${dd}/${mm}`
-  })
-  const data = hist.map(s => pct(Number(s?.present||0), Number(s?.total||0)) ?? 0)
-
-  return {
-    labels,
-    datasets: [{
-      label: 'Hadir (%)',
-      data,
-      fill: true,
-      tension: 0.35,
-      backgroundColor: 'rgba(59,130,246,0.15)',
-      borderColor: 'rgba(59,130,246,1)',
-      pointRadius: 0
-    }]
-  }
-})
-const reloadAbsensiHistory = () => absensi.fetchHistory?.()
-
-// Jenjang: kelompokkan santri.rows berdasarkan field "jenjang" / "kelas"
-const jenjangChart = computed(() => {
-  const rows = santri.rows?.value || []
-  const countBy: Record<string, number> = {}
-  for (const s of rows) {
-    const raw = String(s?.jenjang || s?.kelas || 'Lainnya')
-    // normalisasi contoh: "X IPA" -> "MA", "VII"/"VIII"/"IX" -> "MTs", dst (sesuaikan bila punyamu beda)
-    let key = 'Lainnya'
-    if (/^(vii|viii|ix)/i.test(raw)) key = 'MTs'
-    else if (/^(x|xi|xii)/i.test(raw)) key = 'MA'
-    else if (/kmi|diniyah/i.test(raw)) key = 'KMI/Diniyah'
-    else key = raw
-    countBy[key] = (countBy[key] || 0) + 1
-  }
-  const labels = Object.keys(countBy)
-  const data   = labels.map(k => countBy[k])
-
-  return {
-    labels,
-    datasets: [{ data, backgroundColor: ['#3b82f6','#06b6d4','#f59e0b','#10b981','#a78bfa','#ef4444'] }]
-  }
-})
-
-// Faults by kategori: pakai summaryByKategori jika ada
-const faultChart = computed(() => {
-  const sum = faults.summaryByKategori?.value
-  let labels: string[] = []
-  let data: number[] = []
-  if (sum && Array.isArray(sum)) {
-    labels = sum.map((x:any) => x.kategori || x.title || '—')
-    data   = sum.map((x:any) => Number(x.count || x.total || 0))
-  } else {
-    // fallback hitung manual 30 hari
-    const rows = faults.rows?.value || []
-    const since = Date.now() - 30*86400000
-    const map: Record<string, number> = {}
-    for (const f of rows) {
-      const t = Number(f?.timestamp || f?.createdAt || Date.parse(f?.date||''))
-      if (!t || t < since) continue
-      const k = String(f?.kategori || 'Lainnya')
-      map[k] = (map[k] || 0) + 1
+    return {
+      name: String(config.public.clientDisplayName || 'Desa Martopuro'),
+      title: 'Dashboard Platform Desa Martopuro',
+      badge: 'Village Platform',
+      icon: 'solar:buildings-3-bold-duotone',
+      logo,
+      description:
+        'Kelola website desa, berita informasi, transparansi keuangan, dokumen Letter C, dan pengajuan surat online dalam satu dashboard yang rapi dan mudah digunakan.',
+      quickAccessTitle: 'Layanan Digital Desa',
+      manageHref: '/app/web',
+      packageName: 'Paket Website Desa Basic',
+      packageDescription:
+        'Paket aktif saat ini fokus pada website informasi desa. Fitur keuangan, dokumen Letter C, dan pengajuan surat online tersedia sebagai modul Pro.',
+      ctaIcon: 'solar:rocket-bold-duotone',
+      ctaTitle: 'Upgrade ke Platform Desa Pro',
+      ctaDescription:
+        'Aktifkan fitur administrasi desa seperti transparansi keuangan, arsip Letter C, dan pengajuan surat online untuk pelayanan warga yang lebih cepat.',
+      ctaLabel: 'Lihat Modul Pro',
+      ctaHref: '/app/#finance',
+      brand: '#2563eb',
+      brandDark: '#1d4ed8',
+      brandSoft: '#eff6ff',
+      actions: [
+        {
+          label: 'Kelola Website',
+          href: '/app/web',
+          icon: 'solar:window-frame-bold-duotone'
+        },
+        {
+          label: 'Tambah Berita',
+          href: '/app/news',
+          icon: 'solar:add-circle-bold-duotone'
+        }
+      ] as ActionItem[]
     }
-    labels = Object.keys(map)
-    data   = labels.map(k => map[k])
   }
+
+  const logo = String(
+    config.public.appLogo ||
+    config.public.logo ||
+    '/logo.png'
+  )
+
   return {
-    labels,
-    datasets: [{ label: 'Kasus', data, backgroundColor: 'rgba(16,185,129,0.6)' }]
+    name: String(config.public.clientDisplayName || 'Obayan'),
+    title: 'Dashboard Obayan Platform',
+    badge: 'Education Platform',
+    icon: 'solar:widget-5-bold-duotone',
+    logo,
+    description:
+      'Pantau tenant, produk, modul website, SIAKAD, CBT, dan kebutuhan operasional platform Obayan dari satu dashboard yang clean dan scalable.',
+    quickAccessTitle: 'Ekosistem Produk Obayan',
+    manageHref: '/app/web',
+    packageName: 'Obayan Core Platform',
+    packageDescription:
+      'Dashboard ini membantu mengelola modul website, tenant, konten, dan produk digital Obayan agar lebih mudah dikembangkan secara bertahap.',
+    ctaIcon: 'solar:stars-bold-duotone',
+    ctaTitle: 'Bangun Produk Lebih Modular',
+    ctaDescription:
+      'Pisahkan fitur berdasarkan modul tenant, website, SIAKAD, CBT, dan pembayaran agar pengembangan lebih scalable.',
+    ctaLabel: 'Kelola Website',
+    ctaHref: '/app/web',
+    brand: '#58cc02',
+    brandDark: '#46a302',
+    brandSoft: '#f0fdf4',
+    actions: [
+      {
+        label: 'Kelola Website',
+        href: '/app/web',
+        icon: 'solar:window-frame-bold-duotone'
+      },
+      {
+        label: 'Tambah Tenant',
+        href: '/app/setting',
+        icon: 'solar:add-circle-bold-duotone'
+      }
+    ] as ActionItem[]
   }
 })
 
-/* ===== Agenda dari Pengumuman (jadwal terdekat) ===== */
-const agenda = computed(() => {
-  // gunakan helper schedule bila tersedia
-  const nexts = ann.getDueAnnouncements?.() || []
-  if (Array.isArray(nexts) && nexts.length) {
-    return nexts
-      .slice(0, 10)
-      .map((x:any, i:number) => ({
-        id: x?.id || ('a'+i),
-        title: x?.title || x?.text || 'Pengumuman',
-        when: ann.scheduleLabel?.(x) || x?.when || '',
-        where: x?.place || x?.location || ''
-      }))
+const themeVars = computed<Record<string, string>>(() => ({
+  '--brand': profile.value.brand,
+  '--brand-dark': profile.value.brandDark,
+  '--brand-soft': profile.value.brandSoft
+}))
+
+const dashboardStats = computed<StatItem[]>(() => {
+  if (isMartopuro.value) {
+    return [
+      {
+        label: 'Halaman Website',
+        value: '8',
+        sub: 'Profil, berita, layanan, dan informasi desa',
+        badge: 'Aktif',
+        icon: 'solar:window-frame-bold-duotone',
+        tone: 'good'
+      },
+      {
+        label: 'Berita Informasi',
+        value: '24',
+        sub: 'Konten publikasi dan update desa',
+        badge: 'CMS',
+        icon: 'solar:document-text-bold-duotone',
+        tone: 'good'
+      },
+      {
+        label: 'Keuangan Desa',
+        value: 'PRO',
+        sub: 'APBDes, pemasukan, pengeluaran, laporan',
+        badge: 'Locked',
+        icon: 'solar:wallet-money-bold-duotone',
+        tone: 'pro'
+      },
+      {
+        label: 'Layanan Surat',
+        value: 'PRO',
+        sub: 'Pengajuan surat online untuk warga',
+        badge: 'Locked',
+        icon: 'solar:letter-unread-bold-duotone',
+        tone: 'pro'
+      }
+    ]
   }
-  // fallback: sort by timestamp ke depan
-  const rows = (ann.rows?.value || [])
-    .filter((x:any) => Number(x?.timestamp || Date.parse(x?.date||'')) >= Date.now()-86400000)
-    .sort((a:any,b:any) => Number(a?.timestamp||0) - Number(b?.timestamp||0))
-  return rows.slice(0,10).map((x:any,i:number)=>({
-    id: x?.id || ('r'+i),
-    title: x?.title || 'Pengumuman',
-    when: ann.scheduleLabel?.(x) || '',
-    where: x?.place || ''
-  }))
+
+  return [
+    {
+      label: 'Tenant Aktif',
+      value: '3',
+      sub: 'Client aktif dalam ekosistem Obayan',
+      badge: 'Live',
+      icon: 'solar:buildings-3-bold-duotone',
+      tone: 'good'
+    },
+    {
+      label: 'Modul Produk',
+      value: '5',
+      sub: 'Website, SIAKAD, CBT, payment, RFID',
+      badge: 'Core',
+      icon: 'solar:widget-5-bold-duotone',
+      tone: 'good'
+    },
+    {
+      label: 'CMS Website',
+      value: 'Ready',
+      sub: 'Hero, berita, halaman, dan SEO',
+      badge: 'CMS',
+      icon: 'solar:window-frame-bold-duotone',
+      tone: 'good'
+    },
+    {
+      label: 'Billing',
+      value: 'Soon',
+      sub: 'Langganan, invoice, dan pembayaran tenant',
+      badge: 'Roadmap',
+      icon: 'solar:card-2-bold-duotone',
+      tone: 'warning'
+    }
+  ]
 })
 
-/* ===== Tables ===== */
-// Perizinan
-const izinCols = [
-  { key: 'pemohon', label: 'Santri', sortable: true },
-  { key: 'alasan',  label: 'Alasan', sortable: true },
-  { key: 'waktu',   label: 'Waktu',  sortable: true },
-  { key: 'status',  label: 'Status', sortable: true },
-  { key: 'actions', label: '',       sortable: false },
-]
-const izinRows = computed(() => {
-  const rows = izin.rows?.value || []
-  return rows
-    .slice() // shallow copy
-    .sort((a:any,b:any)=> Number(b?.timestamp||0) - Number(a?.timestamp||0))
-    .slice(0,20)
-    .map((x:any) => ({
-      id: x?.id || x?._id,
-      pemohon: x?.santri || x?.pemohon || x?.nama || '-',
-      alasan: x?.alasan || x?.reason || '-',
-      waktu: new Date(Number(x?.timestamp || Date.parse(x?.tanggal||Date.now()))).toLocaleString(),
-      status: x?.status || '-'
-    }))
+const featureCards = computed<FeatureCard[]>(() => {
+  if (isMartopuro.value) {
+    return [
+      {
+        title: 'Home',
+        href: '/app',
+        icon: 'solar:home-2-bold-duotone',
+        description: 'Ringkasan dashboard, status website desa, dan aktivitas terbaru.'
+      },
+      {
+        title: 'Berita Informasi',
+        href: '/app/news',
+        icon: 'solar:document-text-bold-duotone',
+        description: 'Kelola berita, agenda, pengumuman, dan informasi publik Desa Martopuro.'
+      },
+      {
+        title: 'Keuangan',
+        href: '/app/#finance',
+        icon: 'solar:wallet-money-bold-duotone',
+        description: 'Modul Pro untuk transparansi APBDes, pemasukan, pengeluaran, dan laporan keuangan.',
+        pro: true
+      },
+      {
+        title: 'Dokumen Letter C',
+        href: '/app/#letter-c',
+        icon: 'solar:folder-with-files-bold-duotone',
+        description: 'Modul Pro untuk arsip Letter C, data tanah, riwayat kepemilikan, dan dokumen pertanahan.',
+        pro: true
+      },
+      {
+        title: 'Pengajuan Surat Online',
+        href: '/app/#letters',
+        icon: 'solar:letter-unread-bold-duotone',
+        description: 'Modul Pro untuk pengajuan surat warga, verifikasi admin, dan riwayat pelayanan.',
+        pro: true
+      },
+      {
+        title: 'Website Desa',
+        href: '/app/web',
+        icon: 'solar:window-frame-bold-duotone',
+        description: 'Atur tampilan landing page, profil desa, hero section, SEO, dan konten website.'
+      }
+    ]
+  }
+
+  return [
+    {
+      title: 'Website CMS',
+      href: '/app/web',
+      icon: 'solar:window-frame-bold-duotone',
+      description: 'Kelola landing page, hero, berita, halaman, SEO, dan konten tenant.'
+    },
+    {
+      title: 'Tenant Settings',
+      href: '/app/setting',
+      icon: 'solar:settings-bold-duotone',
+      description: 'Atur tenant, branding, logo, domain, dan preferensi platform.'
+    },
+    {
+      title: 'Berita Informasi',
+      href: '/app/news',
+      icon: 'solar:document-text-bold-duotone',
+      description: 'Kelola konten publikasi untuk website tenant.'
+    },
+    {
+      title: 'Subscription',
+      href: '/app/billing',
+      icon: 'solar:card-2-bold-duotone',
+      description: 'Roadmap untuk pengelolaan invoice, subscription, dan pembayaran tenant.',
+      pro: true
+    }
+  ]
 })
 
-// Pelanggaran
-const faultCols = [
-  { key: 'santri', label: 'Santri', sortable: true },
-  { key: 'kategori', label: 'Kategori', sortable: true },
-  { key: 'poin', label: 'Poin', sortable: true },
-  { key: 'status', label: 'Status', sortable: true },
-  { key: 'waktu', label: 'Waktu', sortable: true },
-  { key: 'actions', label: '', sortable: false },
-]
-const faultRows = computed(() => {
-  const rows = faults.rows?.value || []
-  return rows
-    .slice()
-    .sort((a:any,b:any)=> Number(b?.timestamp||0) - Number(a?.timestamp||0))
-    .slice(0,20)
-    .map((x:any) => ({
-      id: x?.id || x?._id,
-      santri: x?.santri || x?.nama || '-',
-      kategori: x?.kategori || '-',
-      poin: Number(x?.poin || x?.point || 0),
-      status: x?.resolved ? 'Selesai' : 'Aktif',
-      waktu: new Date(Number(x?.timestamp || Date.parse(x?.tanggal||Date.now()))).toLocaleString()
-    }))
+const packageItems = computed<PackageItem[]>(() => {
+  if (isMartopuro.value) {
+    return [
+      {
+        label: 'Website informasi desa',
+        active: true
+      },
+      {
+        label: 'Manajemen berita informasi',
+        active: true
+      },
+      {
+        label: 'Keuangan desa',
+        active: false,
+        pro: true
+      },
+      {
+        label: 'Dokumen Letter C',
+        active: false,
+        pro: true
+      },
+      {
+        label: 'Pengajuan surat online',
+        active: false,
+        pro: true
+      }
+    ]
+  }
+
+  return [
+    {
+      label: 'Website CMS',
+      active: true
+    },
+    {
+      label: 'Tenant branding',
+      active: true
+    },
+    {
+      label: 'SIAKAD',
+      active: false,
+      pro: true
+    },
+    {
+      label: 'CBT Exam',
+      active: false,
+      pro: true
+    },
+    {
+      label: 'Billing tenant',
+      active: false,
+      pro: true
+    }
+  ]
 })
 
-const chartOpts = {
-  responsive: true,
-  plugins: {
-    legend: { display: false },
-    tooltip: { mode: 'index', intersect: false }
+const recentActivities = computed<ActivityItem[]>(() => {
+  if (isMartopuro.value) {
+    return [
+      {
+        title: 'Website Desa Martopuro aktif',
+        description: 'Dashboard siap digunakan untuk mengelola konten dan informasi desa.',
+        icon: 'solar:check-circle-bold-duotone',
+        time: 'Hari ini'
+      },
+      {
+        title: 'Modul berita informasi tersedia',
+        description: 'Admin dapat mulai menambahkan berita, agenda, dan pengumuman desa.',
+        icon: 'solar:document-text-bold-duotone',
+        time: 'Terbaru'
+      },
+      {
+        title: 'Modul Pro siap dikembangkan',
+        description: 'Keuangan, Letter C, dan pengajuan surat online dapat diaktifkan sebagai paket lanjutan.',
+        icon: 'solar:lock-keyhole-bold-duotone',
+        time: 'Roadmap'
+      }
+    ]
+  }
+
+  return [
+    {
+      title: 'Dashboard Obayan aktif',
+      description: 'Workspace siap digunakan untuk mengelola konten dan tenant.',
+      icon: 'solar:check-circle-bold-duotone',
+      time: 'Hari ini'
+    },
+    {
+      title: 'CMS website tersedia',
+      description: 'Admin dapat mengelola halaman website dan konten tenant.',
+      icon: 'solar:window-frame-bold-duotone',
+      time: 'Terbaru'
+    },
+    {
+      title: 'Modul produk bisa dibuat bertahap',
+      description: 'SIAKAD, CBT, payment, dan RFID dapat dipisahkan sebagai modul lanjutan.',
+      icon: 'solar:widget-5-bold-duotone',
+      time: 'Roadmap'
+    }
+  ]
+})
+
+const recommendations = computed<RecommendationItem[]>(() => {
+  if (isMartopuro.value) {
+    return [
+      {
+        title: 'Lengkapi profil desa',
+        description: 'Identitas, kontak, dan informasi pemerintah desa',
+        href: '/app/profile',
+        icon: 'solar:buildings-3-bold-duotone'
+      },
+      {
+        title: 'Update hero website',
+        description: 'Perbaiki tampilan awal website desa',
+        href: '/app/web',
+        icon: 'solar:gallery-wide-bold-duotone'
+      },
+      {
+        title: 'Tambah berita pertama',
+        description: 'Publikasikan informasi terbaru desa',
+        href: '/app/news',
+        icon: 'solar:add-circle-bold-duotone'
+      }
+    ]
+  }
+
+  return [
+    {
+      title: 'Atur branding tenant',
+      description: 'Logo, warna, domain, dan nama aplikasi',
+      href: '/app/setting',
+      icon: 'solar:palette-bold-duotone'
+    },
+    {
+      title: 'Kelola halaman website',
+      description: 'Hero, product section, CTA, dan SEO',
+      href: '/app/web',
+      icon: 'solar:window-frame-bold-duotone'
+    },
+    {
+      title: 'Tambah konten berita',
+      description: 'Publikasi untuk website tenant',
+      href: '/app/news',
+      icon: 'solar:document-add-bold-duotone'
+    }
+  ]
+})
+
+useSeoMeta({
+  title: () => `${profile.value.title} · ${profile.value.name}`,
+  description: () => profile.value.description,
+  ogTitle: () => `${profile.value.title} · ${profile.value.name}`,
+  ogDescription: () => profile.value.description,
+  robots: 'noindex, nofollow',
+  themeColor: () => profile.value.brand
+})
+
+useHead(() => ({
+  htmlAttrs: {
+    lang: 'id'
   },
-  scales: {
-    x: { grid: { display: false } },
-    y: { grid: { color: 'rgba(0,0,0,0.06)' } }
-  }
-}
+  meta: [
+    {
+      name: 'theme-color',
+      content: profile.value.brand
+    }
+  ]
+}))
 </script>

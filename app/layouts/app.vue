@@ -1,350 +1,996 @@
 <template>
-  <div class="text-gray-800 dark:text-neutral-400">
-    <header class="fixed top-0 inset-x-0 flex flex-wrap md:justify-start md:flex-nowrap z-48 lg:z-61 w-full bg-zinc-100 text-sm py-2.5 dark:bg-neutral-900">
-      <nav class="px-4 sm:px-5.5 flex basis-full items-center w-full mx-auto">
-        <div class="w-full flex items-center gap-x-1.5">
-          <ul class="flex items-center gap-1.5">
-            <li class="inline-flex items-center relative text-gray-200 pe-1.5 last:pe-0 last:after:hidden after:absolute after:top-1/2 after:end-0 after:inline-block after:w-px after:h-3.5 after:bg-gray-300 after:rounded-full after:-translate-y-1/2 after:rotate-12 dark:text-neutral-200 dark:after:bg-neutral-700">
-              <a class="shrink-0 inline-flex justify-center items-center size-8 rounded-md text-xl inline-block font-semibold focus:outline-hidden focus:opacity-80" href="#" aria-label="Brand">
-                <img src="/logo.png" alt="Logo AlBerr">
-                <Icon icon="mdi:hexagon-multiple" class="text-white text-[20px]" />
-              </a>
+  <div class="min-h-dvh bg-neutral-100 text-neutral-900">
+    <!-- Desktop Sidebar -->
+    <aside
+      class="fixed inset-y-0 start-0 z-50 hidden border-e border-neutral-200 bg-white transition-all duration-300 lg:flex lg:flex-col"
+      :class="desktopSidebarCollapsed ? 'lg:w-20' : 'lg:w-72'"
+    >
+      <!-- Brand -->
+      <div class="flex h-16 items-center gap-3 border-b border-neutral-200 px-4">
+        <NuxtLink
+          to="/app"
+          class="flex min-w-0 flex-1 items-center gap-3"
+        >
+          <div class="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-2xl text-white shadow-sm">
+            <img
+              v-if="appLogo && !logoError"
+              :src="appLogo"
+              :alt="appName"
+              class="h-7 w-7 rounded-xl object-contain"
+              @error="logoError = true"
+            >
+            <Icon
+              v-else
+              icon="solar:widget-5-bold-duotone"
+              class="h-6 w-6"
+            />
+          </div>
 
-              <button
-                type="button"
-                class="ms-1.5 p-1.5 size-7.5 inline-flex items-center gap-x-1 text-xs rounded-md border border-transparent text-gray-500 hover:text-gray-800 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:text-gray-800 dark:text-neutral-500 dark:hover:text-neutral-400 dark:focus:text-neutral-400"
-                aria-haspopup="dialog" aria-expanded="false" aria-controls="hs-pro-sidebar" data-hs-overlay="#hs-pro-sidebar"
+          <div
+            v-if="!desktopSidebarCollapsed"
+            class="min-w-0"
+          >
+            <p class="truncate text-sm font-black text-neutral-950">
+              {{ appName }}
+            </p>
+            <p class="truncate text-xs font-semibold text-neutral-500">
+              {{ appSubtitle }}
+            </p>
+          </div>
+        </NuxtLink>
+
+        <button
+          type="button"
+          class="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-900"
+          @click="desktopSidebarCollapsed = !desktopSidebarCollapsed"
+        >
+          <Icon
+            :icon="desktopSidebarCollapsed ? 'solar:sidebar-minimalistic-bold-duotone' : 'solar:sidebar-code-bold-duotone'"
+            class="h-5 w-5"
+          />
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="border-b border-neutral-200 p-3">
+        <button
+          type="button"
+          class="flex w-full items-center gap-2 rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm font-semibold text-neutral-500 transition hover:border-neutral-300 hover:bg-white"
+          :class="desktopSidebarCollapsed ? 'justify-center px-2' : ''"
+        >
+          <Icon icon="solar:magnifer-linear" class="h-5 w-5 shrink-0" />
+
+          <span
+            v-if="!desktopSidebarCollapsed"
+            class="truncate"
+          >
+            Search menu
+          </span>
+
+          <span
+            v-if="!desktopSidebarCollapsed"
+            class="ms-auto rounded-lg border border-neutral-200 bg-white px-1.5 py-0.5 text-[10px] font-black text-neutral-400"
+          >
+            ⌘K
+          </span>
+        </button>
+      </div>
+
+      <!-- Desktop Menu -->
+      <nav class="min-h-0 flex-1 overflow-y-auto p-3 scrollbar-thin-neutral">
+        <div
+          v-for="group in sidebarGroups"
+          :key="group.title"
+          class="mb-5 last:mb-0"
+        >
+          <p
+            v-if="!desktopSidebarCollapsed"
+            class="mb-2 px-2 text-[11px] font-black uppercase tracking-[0.16em] text-neutral-400"
+          >
+            {{ group.title }}
+          </p>
+
+          <ul class="space-y-1">
+            <li
+              v-for="item in group.items"
+              :key="item.href"
+            >
+              <NuxtLink
+                :to="item.href"
+                class="group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-bold transition"
+                :class="[
+                  isActive(item.href)
+                    ? 'bg-neutral-900 text-white shadow-sm'
+                    : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950',
+                  desktopSidebarCollapsed ? 'justify-center px-2' : ''
+                ]"
               >
-                <Icon icon="lucide:panel-left" class="size-3.5" />
-                <span class="sr-only">Sidebar Toggle</span>
-              </button>
-            </li>
-          </ul>
+                <Icon
+                  :icon="item.icon"
+                  class="h-5 w-5 shrink-0"
+                  :class="isActive(item.href) ? 'text-white' : 'text-neutral-400 group-hover:text-neutral-700'"
+                />
 
-          <ul class="flex flex-row items-center gap-x-3 ms-auto">
-            <button type="button" class="py-2 px-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-bray-200 text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" @click="rightOpen = !rightOpen">
-                <Icon icon="iconamoon:notification-light" width="16" height="16" />
-            </button>
+                <span
+                  v-if="!desktopSidebarCollapsed"
+                  class="truncate"
+                >
+                  {{ item.label }}
+                </span>
 
-            <li class="inline-flex items-center gap-1.5 relative text-gray-500 pe-3 last:pe-0 last:after:hidden after:absolute after:top-1/2 after:end-0 after:inline-block after:w-px after:h-3.5 after:bg-gray-300 after:rounded-full after:-translate-y-1/2 after:rotate-12 dark:text-neutral-200 dark:after:bg-neutral-700">
-              <div class="h-8">
-                <div class="hs-dropdown inline-flex [--strategy:absolute] [--auto-close:inside] [--placement:bottom-right] relative text-start">
-                  <button id="acct-btn" type="button" class="p-0.5 inline-flex shrink-0 items-center gap-x-3 text-start rounded-full hover:bg-gray-200 focus:outline-hidden focus:bg-gray-200 dark:hover:bg-neutral-800 dark:hover:text-neutral-200 dark:focus:bg-neutral-800 dark:focus:text-neutral-200 dark:text-neutral-500" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">
-                    <img class="shrink-0 size-7 rounded-full" :src="user.avatar" alt="Avatar">
-                  </button>
-                  <div class="hs-dropdown-menu hs-dropdown-open:opacity-100 w-60 transition-[opacity,margin] duration opacity-0 hidden z-20 bg-white border border-gray-200 rounded-xl shadow-xl dark:bg-neutral-900 dark:border-neutral-700" role="menu" aria-orientation="vertical" aria-labelledby="acct-btn">
-                    <div class="py-2 px-3.5">
-                      <span class="font-medium text-gray-800 dark:text-neutral-300">{{ user.name }}</span>
-                      <p class="text-sm text-gray-500 dark:text-neutral-500">{{ user.email }}</p>
-                    </div>
-                    <div class="px-4 py-2 border-t border-gray-200 dark:border-neutral-800">
-                      <div class="flex flex-wrap justify-between items-center gap-2">
-                        <span class="flex-1 cursor-pointer text-sm text-gray-600 dark:text-neutral-400">Theme</span>
-                        <div class="p-0.5 inline-flex cursor-pointer bg-gray-100 rounded-full dark:bg-neutral-800">
-                          <button type="button" class="size-7 flex justify-center items-center bg-white shadow-sm text-gray-800 rounded-full dark:text-neutral-200 hs-auto-mode-active:bg-transparent hs-auto-mode-active:shadow-none hs-dark-mode-active:bg-transparent hs-dark-mode-active:shadow-none" data-hs-theme-click-value="default">
-                            <Icon icon="lucide:sun" class="size-4" />
-                            <span class="sr-only">Default (Light)</span>
-                          </button>
-                          <button type="button" class="size-7 flex justify-center items-center text-gray-800 rounded-full dark:text-neutral-200 hs-dark-mode-active:bg-white hs-dark-mode-active:shadow-sm hs-dark-mode-active:text-neutral-800" data-hs-theme-click-value="dark">
-                            <Icon icon="lucide:moon" class="size-4" />
-                            <span class="sr-only">Dark</span>
-                          </button>
-                          <button type="button" class="size-7 flex justify-center items-center text-gray-800 rounded-full dark:text-neutral-200 hs-auto-light-mode-active:bg-white hs-auto-dark-mode-active:bg-red-800 hs-auto-mode-active:shadow-sm" data-hs-theme-click-value="auto">
-                            <Icon icon="lucide:laptop" class="size-4" />
-                            <span class="sr-only">Auto (System)</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="p-1 border-t border-gray-200 dark:border-neutral-800">
-                      <a v-for="item in accountMenu" :href="item.href" :key="item.label" class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800" href="#">
-                        <Icon :icon="item.icon" class="size-4" />
-                        {{ item.label }}
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                <span
+                  v-if="!desktopSidebarCollapsed && item.badge"
+                  class="ms-auto rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-black text-neutral-500"
+                  :class="isActive(item.href) ? 'bg-white/15 text-white' : ''"
+                >
+                  {{ item.badge }}
+                </span>
+              </NuxtLink>
             </li>
           </ul>
         </div>
       </nav>
-    </header>
-    <div id="hs-pro-sidebar" class="hs-overlay [--body-scroll:true] lg:[--overlay-backdrop:false] [--is-layout-affect:true] [--opened:lg] [--auto-close:lg] hs-overlay-open:translate-x-0 lg:hs-overlay-layout-open:translate-x-0 -translate-x-full transition-all duration-300 transform w-60 hidden fixed inset-y-0 z-60 start-0 bg-zinc-100 lg:block lg:-translate-x-full lg:end-auto lg:bottom-0 dark:bg-neutral-900" role="dialog" tabindex="-1" aria-label="Sidebar">
-      <div class="lg:pt-13 relative flex flex-col h-full max-h-full">
-        <nav class="p-3 size-full flex flex-col overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
-          <div class="lg:hidden mb-2 flex items-center justify-between">
-            <button type="button" class="flex items-center gap-x-1.5 py-2 px-2.5 font-medium text-xs bg-black text-white rounded-lg focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none dark:bg-white dark:text-black">
-              <Icon icon="lucide:sparkles" class="size-4" />
-              Ask AI
-            </button>
-            <button type="button" class="p-1.5 size-7.5 inline-flex items-center gap-x-1 text-xs rounded-md text-gray-500 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden dark:text-neutral-500" aria-haspopup="dialog" aria-expanded="false" aria-controls="hs-pro-sidebar" data-hs-overlay="#hs-pro-sidebar">
-              <Icon icon="lucide:x" class="size-3.5" />
-              <span class="sr-only">Sidebar Toggle</span>
-            </button>
-          </div>
-          <button type="button" class="p-1.5 ps-2.5 w-full inline-flex items-center gap-x-2 text-sm rounded-lg bg-white border border-gray-200 text-gray-600 shadow-xs hover:border-gray-300 focus:outline-hidden focus:border-gray-300 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-neutral-600 dark:focus:border-neutral-600" aria-haspopup="dialog" aria-expanded="false" aria-controls="hs-pro-cmsssm" data-hs-overlay="#hs-pro-cmsssm">
-            Search
-            <span class="ms-auto flex items-center gap-x-1 py-px px-1.5 border border-gray-200 rounded-md dark:border-neutral-700">
-              <Icon icon="lucide:command" class="size-2.5" />
-              <span class="text-[11px] uppercase">K</span>
-            </span>
-          </button>
-          <div v-for="group in sidebarGroups" :key="group.title" class="pt-3 mt-3 flex flex-col border-t border-gray-200 first:border-t-0 first:pt-0 first:mt-0 dark:border-neutral-700">
-            <span class="block ps-2.5 mb-2 font-medium text-xs uppercase text-gray-500 dark:text-neutral-500">
-              {{ group.title }}
-            </span>
-            <ul class="flex flex-col gap-y-1">
-              <li v-for="item in group.items" :key="item.label">
-                <NuxtLink class="w-full flex items-center gap-x-2 py-2 px-2.5 text-sm rounded-lg focus:outline-hidden" :to="item.href" :class="menuClass(item)">
-                  <Icon v-if="item.icon" :icon="item.icon" class="size-4" />
-                  {{ item.label }}
-                </NuxtLink>
-              </li>
-            </ul>
-          </div>
-        </nav>
-      </div>
-    </div>
 
-    <main class="lg:hs-overlay-layout-open:ps-60 bg-gray-100 transition-all duration-300 lg:fixed lg:inset-0 pt-13 px-3 pb-3 dark:bg-neutral-900">
-      <div class="h-[calc(100dvh-62px)] lg:h-full overflow-hidden flex flex-col bg-white border border-gray-200 shadow-xs rounded-lg dark:bg-neutral-800 dark:border-neutral-700">
-        <div class="flex-1 flex flex-col overflow-y-auto [&::-webkit-scrollbar]:w-0">
-          <div class="flex-1 flex flex-col lg:flex-row">
-            <div class="flex-1 min-w-0 flex flex-col border-e border-gray-200 dark:border-neutral-700">
-              <slot />
+      <!-- Desktop Footer User -->
+      <div class="border-t border-neutral-200 p-3">
+        <div
+          class="rounded-3xl border border-neutral-200 bg-neutral-50 p-3"
+          :class="desktopSidebarCollapsed ? 'px-2' : ''"
+        >
+          <div
+            class="flex items-center gap-3"
+            :class="desktopSidebarCollapsed ? 'justify-center' : ''"
+          >
+            <img
+              :src="displayUser.avatar"
+              :alt="displayUser.name"
+              class="h-10 w-10 shrink-0 rounded-2xl object-cover ring-1 ring-neutral-200"
+            >
+
+            <div
+              v-if="!desktopSidebarCollapsed"
+              class="min-w-0 flex-1"
+            >
+              <p class="truncate text-sm font-black text-neutral-950">
+                {{ displayUser.name }}
+              </p>
+              <p class="truncate text-xs font-semibold text-neutral-500">
+                {{ displayUser.email }}
+              </p>
             </div>
-            <div v-show="rightOpen" class="z-[70] fixed inset-y-0 top-12 right-0">
-              <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px] lg:hidden" @click="rightOpen = false"></div>
-              <aside class="relative h-dvh w-80 bg-white dark:bg-neutral-800 border-l border-gray-200 dark:border-neutral-700 shadow-xl">
-                <div class="flex items-center justify-between p-3 border-b border-gray-200 dark:border-neutral-700 lg:hidden">
-                  <span class="font-medium text-gray-800 dark:text-neutral-200">Notifikasi</span>
-                  <button type="button" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700" @click="rightOpen = false" aria-label="Tutup Notifikasi">
-                    <Icon icon="lucide:x" class="size-4" />
+          </div>
+
+          <button
+            v-if="!desktopSidebarCollapsed"
+            type="button"
+            class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-3 py-2 text-xs font-black text-neutral-600 transition hover:border-neutral-300 hover:bg-neutral-100 hover:text-neutral-950"
+            @click="handleLogout"
+          >
+            <Icon icon="solar:logout-3-bold-duotone" class="h-4 w-4" />
+            Logout
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Top Header -->
+    <header
+      class="fixed inset-x-0 top-0 z-40 border-b border-neutral-200 bg-white/90 backdrop-blur-xl transition-all duration-300"
+      :class="desktopSidebarCollapsed ? 'lg:ps-20' : 'lg:ps-72'"
+    >
+      <div class="flex h-16 items-center gap-3 px-4 sm:px-6">
+        <!-- Mobile Brand -->
+        <NuxtLink
+          to="/app"
+          class="flex min-w-0 items-center gap-3 lg:hidden"
+        >
+          <div class="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-2xl text-white shadow-sm">
+            <img
+              v-if="appLogo && !logoError"
+              :src="appLogo"
+              :alt="appName"
+              class="h-7 w-7 rounded-xl object-contain"
+              @error="logoError = true"
+            >
+            <Icon
+              v-else
+              icon="solar:widget-5-bold-duotone"
+              class="h-6 w-6"
+            />
+          </div>
+
+          <div class="min-w-0">
+            <p class="truncate text-sm font-black text-neutral-950">
+              {{ appName }}
+            </p>
+            <p class="truncate text-xs font-semibold text-neutral-500">
+              {{ currentPageTitle }}
+            </p>
+          </div>
+        </NuxtLink>
+
+        <!-- Desktop Title -->
+        <div class="hidden min-w-0 lg:block">
+          <p class="text-xs font-black uppercase tracking-[0.16em] text-neutral-400">
+            Workspace
+          </p>
+          <h1 class="truncate text-lg font-black text-neutral-950">
+            {{ currentPageTitle }}
+          </h1>
+        </div>
+
+        <div class="ms-auto flex items-center gap-2">
+          <button
+            type="button"
+            class="hidden items-center gap-2 rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm font-bold text-neutral-600 transition hover:border-neutral-300 hover:bg-white hover:text-neutral-950 sm:inline-flex"
+          >
+            <Icon icon="solar:magnifer-linear" class="h-5 w-5" />
+            <span class="hidden md:inline">Search</span>
+          </button>
+
+          <button
+            type="button"
+            class="relative grid h-10 w-10 place-items-center rounded-2xl border border-neutral-200 bg-neutral-50 text-neutral-600 transition hover:border-neutral-300 hover:bg-white hover:text-neutral-950"
+            @click="rightOpen = true"
+          >
+            <Icon icon="solar:bell-bing-bold-duotone" class="h-5 w-5" />
+            <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+          </button>
+
+          <!-- Account Dropdown -->
+          <div class="relative">
+            <button
+              type="button"
+              class="flex items-center gap-2 rounded-2xl border border-neutral-200 bg-neutral-50 p-1.5 pe-3 transition hover:border-neutral-300 hover:bg-white"
+              @click="accountOpen = !accountOpen"
+            >
+              <img
+                :src="displayUser.avatar"
+                :alt="displayUser.name"
+                class="h-8 w-8 rounded-xl object-cover"
+              >
+
+              <span class="hidden max-w-28 truncate text-sm font-black text-neutral-700 sm:inline">
+                {{ displayUser.name }}
+              </span>
+
+              <Icon
+                icon="solar:alt-arrow-down-linear"
+                class="hidden h-4 w-4 text-neutral-400 sm:block"
+              />
+            </button>
+
+            <Transition
+              enter-active-class="transition duration-150 ease-out"
+              enter-from-class="translate-y-1 opacity-0"
+              enter-to-class="translate-y-0 opacity-100"
+              leave-active-class="transition duration-100 ease-in"
+              leave-from-class="translate-y-0 opacity-100"
+              leave-to-class="translate-y-1 opacity-0"
+            >
+              <div
+                v-if="accountOpen"
+                class="absolute right-0 top-12 z-50 w-72 overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.14)]"
+              >
+                <div class="p-4">
+                  <div class="flex items-center gap-3">
+                    <img
+                      :src="displayUser.avatar"
+                      :alt="displayUser.name"
+                      class="h-12 w-12 rounded-2xl object-cover"
+                    >
+
+                    <div class="min-w-0">
+                      <p class="truncate text-sm font-black text-neutral-950">
+                        {{ displayUser.name }}
+                      </p>
+                      <p class="truncate text-xs font-semibold text-neutral-500">
+                        {{ displayUser.email }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="border-t border-neutral-100 p-2">
+                  <NuxtLink
+                    v-for="item in accountLinks"
+                    :key="item.href"
+                    :to="item.href"
+                    class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-bold text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950"
+                    @click="accountOpen = false"
+                  >
+                    <Icon :icon="item.icon" class="h-5 w-5 text-neutral-400" />
+                    {{ item.label }}
+                  </NuxtLink>
+
+                  <button
+                    type="button"
+                    class="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                    @click="handleLogout"
+                  >
+                    <Icon icon="solar:logout-3-bold-duotone" class="h-5 w-5" />
+                    Logout
                   </button>
                 </div>
-                <div class="h-[100vh] overflow-y-auto">
-                  <WidgetNotificationView />
-                </div>
-              </aside>
-            </div>
+              </div>
+            </Transition>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main
+      class="min-h-dvh pt-16 transition-all duration-300 lg:pb-0"
+      :class="[
+        desktopSidebarCollapsed ? 'lg:ps-20' : 'lg:ps-72',
+        'pb-24'
+      ]"
+    >
+      <div class="p-3 sm:p-4 lg:p-5">
+        <div class="min-h-[calc(100dvh-5.75rem)] overflow-hidden rounded-[1.75rem] border border-neutral-200 bg-white shadow-sm">
+          <div class="min-h-[calc(100dvh-5.75rem)]">
+            <slot />
           </div>
         </div>
       </div>
     </main>
+
+    <!-- Notification Panel -->
+    <Transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="translate-x-full opacity-0"
+      enter-to-class="translate-x-0 opacity-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="translate-x-0 opacity-100"
+      leave-to-class="translate-x-full opacity-0"
+    >
+      <div
+        v-if="rightOpen"
+        class="fixed inset-0 z-[80]"
+      >
+        <div
+          class="absolute inset-0 bg-neutral-950/40 backdrop-blur-[2px]"
+          @click="rightOpen = false"
+        ></div>
+
+        <aside class="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col border-l border-neutral-200 bg-white shadow-2xl">
+          <div class="flex h-16 items-center justify-between border-b border-neutral-200 px-4">
+            <div>
+              <p class="text-sm font-black text-neutral-950">
+                Notifikasi
+              </p>
+              <p class="text-xs font-semibold text-neutral-500">
+                Aktivitas terbaru dashboard
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="grid h-10 w-10 place-items-center rounded-2xl text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-950"
+              @click="rightOpen = false"
+            >
+              <Icon icon="solar:close-circle-bold-duotone" class="h-6 w-6" />
+            </button>
+          </div>
+
+          <div class="min-h-0 flex-1 overflow-y-auto">
+            <WidgetNotificationView />
+          </div>
+        </aside>
+      </div>
+    </Transition>
+
+    <!-- Mobile Bottom Dock -->
+    <nav
+      class="fixed inset-x-0 bottom-0 z-50 border-t border-neutral-200 bg-white/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-16px_50px_rgba(15,23,42,0.10)] backdrop-blur-xl lg:hidden"
+      @touchstart.passive="onDockTouchStart"
+      @touchend.passive="onDockTouchEnd"
+    >
+      <div class="mx-auto mb-2 h-1.5 w-12 rounded-full bg-neutral-200"></div>
+
+      <div class="mx-auto grid max-w-md grid-cols-5 gap-1">
+        <NuxtLink
+          v-for="item in mobileDockItems"
+          :key="item.href"
+          :to="item.href"
+          class="flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-black transition"
+          :class="isActive(item.href)
+            ? 'bg-neutral-900 text-white'
+            : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-950'"
+        >
+          <Icon :icon="item.icon" class="h-5 w-5" />
+          <span class="truncate">
+            {{ item.label }}
+          </span>
+        </NuxtLink>
+
+        <button
+          type="button"
+          class="flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-black text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-950"
+          @click="openMobileMenu"
+        >
+          <Icon icon="solar:hamburger-menu-bold-duotone" class="h-5 w-5" />
+          <span>Menu</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Mobile Menu Bottom Sheet -->
+    <Transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="translate-y-full opacity-0"
+      enter-to-class="translate-y-0 opacity-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="translate-y-0 opacity-100"
+      leave-to-class="translate-y-full opacity-0"
+    >
+      <div
+        v-if="mobileMenuOpen"
+        class="fixed inset-0 z-[90] lg:hidden"
+      >
+        <div
+          class="absolute inset-0 bg-neutral-950/40 backdrop-blur-[2px]"
+          @click="closeMobileMenu"
+        ></div>
+
+        <section
+          class="absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-hidden rounded-t-[2rem] border-t border-neutral-200 bg-white shadow-[0_-24px_80px_rgba(15,23,42,0.22)]"
+          :style="mobileSheetStyle"
+          @touchstart.passive="onSheetTouchStart"
+          @touchmove.passive="onSheetTouchMove"
+          @touchend.passive="onSheetTouchEnd"
+        >
+          <div class="sticky top-0 z-10 border-b border-neutral-200 bg-white/95 px-4 pb-3 pt-3 backdrop-blur-xl">
+            <div class="mx-auto mb-3 h-1.5 w-14 rounded-full bg-neutral-200"></div>
+
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-3">
+                <div class="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-2xl bg-neutral-900 text-white">
+                  <img
+                    v-if="appLogo && !logoError"
+                    :src="appLogo"
+                    :alt="appName"
+                    class="h-8 w-8 rounded-xl object-contain"
+                    @error="logoError = true"
+                  >
+                  <Icon
+                    v-else
+                    icon="solar:widget-5-bold-duotone"
+                    class="h-6 w-6"
+                  />
+                </div>
+
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-black text-neutral-950">
+                    {{ appName }}
+                  </p>
+                  <p class="truncate text-xs font-semibold text-neutral-500">
+                    Swipe down untuk menutup
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="grid h-10 w-10 place-items-center rounded-2xl text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-950"
+                @click="closeMobileMenu"
+              >
+                <Icon icon="solar:close-circle-bold-duotone" class="h-6 w-6" />
+              </button>
+            </div>
+          </div>
+
+          <div class="max-h-[calc(88dvh-5.5rem)] overflow-y-auto px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
+            <div class="mb-4 rounded-3xl border border-neutral-200 bg-neutral-50 p-4">
+              <div class="flex items-center gap-3">
+                <img
+                  :src="displayUser.avatar"
+                  :alt="displayUser.name"
+                  class="h-12 w-12 rounded-2xl object-cover ring-1 ring-neutral-200"
+                >
+
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-black text-neutral-950">
+                    {{ displayUser.name }}
+                  </p>
+                  <p class="truncate text-xs font-semibold text-neutral-500">
+                    {{ displayUser.email }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-for="group in sidebarGroups"
+              :key="group.title"
+              class="mb-5 last:mb-0"
+            >
+              <p class="mb-2 px-1 text-[11px] font-black uppercase tracking-[0.16em] text-neutral-400">
+                {{ group.title }}
+              </p>
+
+              <div class="grid grid-cols-2 gap-2">
+                <NuxtLink
+                  v-for="item in group.items"
+                  :key="item.href"
+                  :to="item.href"
+                  class="rounded-3xl border p-4 transition"
+                  :class="isActive(item.href)
+                    ? 'border-neutral-900 bg-neutral-900 text-white'
+                    : 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50'"
+                  @click="closeMobileMenu"
+                >
+                  <div
+                    class="grid h-11 w-11 place-items-center rounded-2xl"
+                    :class="isActive(item.href)
+                      ? 'bg-white/15 text-white'
+                      : 'bg-neutral-100 text-neutral-500'"
+                  >
+                    <Icon :icon="item.icon" class="h-5 w-5" />
+                  </div>
+
+                  <p class="mt-3 truncate text-sm font-black">
+                    {{ item.label }}
+                  </p>
+                  <p
+                    class="mt-1 line-clamp-2 text-xs font-semibold leading-5"
+                    :class="isActive(item.href) ? 'text-white/70' : 'text-neutral-400'"
+                  >
+                    {{ item.description || 'Buka menu dashboard' }}
+                  </p>
+                </NuxtLink>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="mt-2 flex w-full items-center justify-center gap-2 rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-black text-red-600"
+              @click="handleLogout"
+            >
+              <Icon icon="solar:logout-3-bold-duotone" class="h-5 w-5" />
+              Logout
+            </button>
+          </div>
+        </section>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { Icon } from '@iconify/vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import {
+  navigateTo,
+  useHead,
+  useRoute,
+  useRuntimeConfig,
+  useSeoMeta
+} from 'nuxt/app'
+import { useAuth } from '../composables/data/useAuth'
+
+type SidebarItem = {
+  label: string
+  href: string
+  icon: string
+  badge?: string
+  description?: string
+}
+
+type SidebarGroup = {
+  title: string
+  items: SidebarItem[]
+}
 
 const route = useRoute()
-const router = useRouter()
 const config = useRuntimeConfig()
-const AUTH_KEY = 'alberr:auth'
 
-const PASSPHRASE = 'alberr-admin-secret'
-const SALT       = 'alberr-static-salt'
-const ITER       = 120_000
-const IV_BYTES   = 12
-
-const url = computed(() => new URL(route.fullPath || '/', config.public.siteUrl).toString())
-const titlePage = 'Ponpes Alberr | Pesantren Inovatif & Informatif'
-const description = 'Selamat datang di Ponpes Alberr Pandaan: KMI/Diniyah, Tahfidz, MTs/MA, kegiatan santri, dan PPDB online.'
-
-useSeoMeta({
-  title: titlePage,
-  description: description,
-  ogTitle: titlePage,
-  ogDescription: description,
-  ogType: 'website',
-  ogUrl: url.value,
-  ogImage: 'logo.png',
-  twitterCard: 'summary_large_image',
-  twitterSite: config.public.twitterSite || undefined,
-  themeColor: '#0ea5e9',
-  robots: 'index, follow'
-})
-
-useHead({
-  link: [{ rel: 'canonical', href: url.value }],
-  script: [
-    {
-      type: 'application/ld+json',
-      children: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'WebSite',
-        name: config.public.siteName,
-        url: config.public.siteUrl,
-        potentialAction: {
-          '@type': 'SearchAction',
-          target: `${config.public.siteUrl}/search?q={query}`,
-          'query-input': 'required name=query'
-        }
-      })
-    },
-    {
-      type: 'application/ld+json',
-      children: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        name: 'Pondok Pesantren Alberr',
-        url: config.public.siteUrl,
-        logo: `${config.public.siteUrl}/logo.png`,
-        sameAs: [
-          'https://facebook.com/alberr',
-          'https://instagram.com/alberr'
-        ]
-      })
-    }
-  ]
-})
-
-const props = defineProps<{
-  title?: string
-  darkMode?: boolean
-}>()
+const {
+  user: authUser,
+  fetchMe,
+  logout
+} = useAuth()
 
 const rightOpen = ref(false)
+const accountOpen = ref(false)
+const mobileMenuOpen = ref(false)
+const desktopSidebarCollapsed = ref(false)
+const logoError = ref(false)
 
-const accountMenu = ref([
-  { label: 'Profile',  icon: 'lucide:user', href: '/app/profile' },
-  { label: 'Settings', icon: 'lucide:settings-2', href: '/app/setting' },
-  { label: 'Log out',  icon: 'lucide:log-out', href: '/cakAdmin' },
-])
+const dockTouchStartY = ref(0)
+const sheetTouchStartY = ref(0)
+const sheetDragY = ref(0)
 
-async function deriveKey(pass: string, salt: string) {
-  const enc = new TextEncoder()
-  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(pass), { name: 'PBKDF2' }, false, ['deriveKey'])
-  return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: enc.encode(salt), iterations: ITER, hash: 'SHA-256' },
-    keyMaterial,
-    { name: 'AES-GCM', length: 256 },
-    false,
-    ['decrypt']
+const appName = computed(() => {
+  return String(
+    config.public.appName ||
+    config.public.siteName ||
+    config.public.clientDisplayName ||
+    'Obayan'
   )
-}
-function fromB64(b64: string) { return Uint8Array.from(atob(b64), c => c.charCodeAt(0)).buffer }
-
-async function decryptJSON(serialized: string) {
-  const obj = JSON.parse(serialized)
-  const key = await deriveKey(PASSPHRASE, SALT)
-  const iv = new Uint8Array(fromB64(obj.iv))
-  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, fromB64(obj.ct))
-  return JSON.parse(new TextDecoder().decode(plain))
-}
-
-const currentUser = ref<{ email: string; role: string } | null>(null)
-
-function menuClass(item: any) {
-  if(item.label == props.title) return 'bg-blue-600 text-white hover:bg-blue-700'
-  else return 'text-gray-800 hover:bg-gray-200 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800 dark:text-neutral-200'
-}
-
-const user = ref({
-  name: 'Cak Admin',
-  email: 'admin@alberr.sch.id',
-  avatar: '/assets/pp.jpg'
 })
 
-const sidebarGroups = ref([
+const appSubtitle = computed(() => {
+  return String(
+    config.public.appSubtitle ||
+    config.public.clientName ||
+    'Dashboard'
+  )
+})
+
+const appLogo = computed(() => {
+  return normalizeAssetUrl(
+    String(
+      config.public.appLogo ||
+      config.public.logo ||
+      '/logo.png'
+    )
+  )
+})
+
+const siteUrl = computed(() => {
+  return String(config.public.siteUrl || 'https://obayan.id').replace(/\/$/, '')
+})
+
+const pageUrl = computed(() => {
+  return `${siteUrl.value}${route.fullPath || '/app'}`
+})
+
+const currentPageTitle = computed(() => {
+  const allItems = sidebarGroups.value.flatMap((group) => group.items)
+  const found = allItems.find((item) => isActive(item.href))
+
+  return found?.label || 'Dashboard'
+})
+
+const displayUser = computed(() => {
+  const current = authUser.value as any
+
+  return {
+    name:
+      current?.name ||
+      current?.fullName ||
+      current?.email?.split('@')?.[0] ||
+      'Admin',
+    email:
+      current?.email ||
+      'admin@obayan.id',
+    avatar:
+      current?.avatar ||
+      current?.avatarUrl ||
+      current?.photoUrl ||
+      '/assets/pp.jpg'
+  }
+})
+
+const accountLinks = [
   {
-    title: 'Beranda',
-    items: [
-      { label: 'Dashboard', href: '/app', icon: 'lucide:layout-dashboard' },
-      { label: 'Berita Informasi', href: '/app/news', icon: 'hugeicons:news' },
-      { label: 'Pengumuman', href: '/app/announcement', icon: 'lucide:info' },
-      { label: 'Agenda', href: '/app/agenda', icon: 'solar:calendar-line-duotone' },
-    ]
+    label: 'Profile',
+    icon: 'solar:user-rounded-bold-duotone',
+    href: '/app/profile'
   },
   {
-    title: 'Kesantrian',
-    items: [
-      { label: 'Santri',     href: '/app/santri',          icon: 'lucide:users' },
-      { label: 'Maskan Kamar',href: '/app/maskan',         icon: 'lucide:bed' },
-      { label: 'Kelas',     href: '/app/class',         icon: 'streamline:class-lesson' },
-      { label: 'Wali Santri',href: '/app/wali',            icon: 'lucide:user-round' },
-    ]
-  },
+    label: 'Settings',
+    icon: 'solar:settings-bold-duotone',
+    href: '/app/setting'
+  }
+]
+
+const sidebarGroups = ref<SidebarGroup[]>([
   {
-    title: 'Rutinitas',
+    title: 'Platform Desa',
     items: [
-      { label: 'Absensi Harian', href: '/app/absen', icon: 'hugeicons:note-03' },
-      { label: 'Kunjungan',      href: '/app/kunjungan', icon: 'material-symbols:parent-child-dining-outline-rounded' },
-      { label: 'Jadwal Piket',     href: '/app/picket',          icon: 'lucide:calendar-days' },
-      { label: 'Registrasi RFID', href: '/app/setting-rfid',  icon: 'ri:rfid-fill' },
-    ]
-  },
-  {
-    title: 'Keamanan & Ketertiban',
-    items: [
-      { label: 'Pelanggaran', href: '/app/faults', icon: 'mingcute:fault-line' },
-      { label: 'Perizinan',      href: '/app/izin', icon: 'solar:letter-linear' },
+      {
+        label: 'Home',
+        href: '/app',
+        icon: 'solar:home-2-bold-duotone',
+        description: 'Ringkasan website desa, statistik konten, dan aktivitas terbaru.'
+      },
+      {
+        label: 'Berita Informasi',
+        href: '/app/news',
+        icon: 'solar:document-text-bold-duotone',
+        description: 'Kelola berita, informasi publik, agenda, dan pengumuman desa.'
+      },
+      {
+        label: 'Organisasi',
+        href: '/app/organizations',
+        icon: 'solar:document-text-bold-duotone',
+        description: 'Kelola berita, informasi publik, agenda, dan pengumuman desa.'
+      },
+      {
+        label: 'Fasilitas',
+        href: '/app/facilities',
+        icon: 'solar:document-text-bold-duotone',
+        description: 'Kelola berita, informasi publik, agenda, dan pengumuman desa.'
+      },
+      {
+        label: 'Potensi',
+        href: '/app/potentials',
+        icon: 'solar:document-text-bold-duotone',
+        description: 'Kelola berita, informasi publik, agenda, dan pengumuman desa.'
+      },
+      {
+        label: 'Lembaga',
+        href: '/app/institutions',
+        icon: 'solar:document-text-bold-duotone',
+        description: 'Kelola berita, informasi publik, agenda, dan pengumuman desa.'
+      },
+      {
+        label: 'Keuangan',
+        href: '/app/#finance',
+        icon: 'solar:wallet-money-bold-duotone',
+        badge: 'PRO',
+        description: 'Kelola APBDes, pemasukan, pengeluaran, laporan, dan transparansi keuangan desa.'
+      },
+      {
+        label: 'Dokumen Letter C',
+        href: '/app/#letter-c',
+        icon: 'solar:folder-with-files-bold-duotone',
+        badge: 'PRO',
+        description: 'Manajemen arsip Letter C, data tanah, riwayat kepemilikan, dan dokumen pertanahan.'
+      },
+      {
+        label: 'Pengajuan Surat Online',
+        href: '/app/#letters',
+        icon: 'solar:letter-unread-bold-duotone',
+        badge: 'PRO',
+        description: 'Kelola pengajuan surat warga secara online, status verifikasi, dan riwayat layanan.'
+      }
     ]
   },
   {
     title: 'Pengaturan',
     items: [
-      { label: 'Profil', href: '/app/profile',  icon: 'iconamoon:profile' },
-      { label: 'Website', href: '/app/web',  icon: 'icon-park-outline:web-page' },
+      {
+        label: 'Profil Desa',
+        href: '/app/profile',
+        icon: 'solar:buildings-3-bold-duotone',
+        description: 'Kelola identitas desa, logo, alamat, kontak, dan informasi pemerintah desa.'
+      },
+      {
+        label: 'Website Desa',
+        href: '/app/web',
+        icon: 'solar:window-frame-bold-duotone',
+        description: 'Atur tampilan website, halaman, hero, SEO, dan konten landing page desa.'
+      },
+      {
+        label: 'Pengaturan',
+        href: '/app/setting',
+        icon: 'solar:settings-bold-duotone',
+        description: 'Konfigurasi akun, tenant, preferensi sistem, dan akses dashboard.'
+      }
     ]
   }
 ])
 
-onMounted(async() => {
-  try {
-    const raw = localStorage.getItem(AUTH_KEY)
-    if (!raw) throw new Error('no token')
-    const data = await decryptJSON(raw)
-    const now = Math.floor(Date.now() / 1000)
-    if (!data?.exp || now >= data.exp) throw new Error('expired')
-    currentUser.value = { email: data.email, role: data.role }
-    if (route.path === '/' || route.path === '/login') {
-      router.replace('/app')
+const mobileDockItems = computed(() => {
+  return [
+    {
+      label: 'Home',
+      href: '/app',
+      icon: 'solar:home-2-bold-duotone'
+    },
+    {
+      label: 'Berita',
+      href: '/app/news',
+      icon: 'solar:document-text-bold-duotone'
+    },
+    {
+      label: 'Keuangan',
+      href: '/app/#finance',
+      icon: 'solar:wallet-money-bold-duotone',
+      badge: 'PRO'
+    },
+    {
+      label: 'Surat',
+      href: '/app/#letters',
+      icon: 'solar:letter-unread-bold-duotone',
+      badge: 'PRO'
     }
-  } catch (e) {
-    localStorage.removeItem(AUTH_KEY)
-    if (!route.path.startsWith('/auth') && route.path !== '/' && route.path !== '/login') {
-      router.replace('/');
-    }
-  }
-  const mql = window.matchMedia('(min-width: 1024px)')
-  const applyLock = () => {
-    const isDesktop = mql.matches
-    if (rightOpen.value && !isDesktop) {
-      document.documentElement.classList.add('overflow-hidden')
-    } else {
-      document.documentElement.classList.remove('overflow-hidden')
-    }
-  }
-  applyLock()
-
-  const onChange = () => applyLock()
-  const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') rightOpen.value = false }
-
-  mql.addEventListener('change', onChange)
-  window.addEventListener('keydown', onEsc)
-
-  const stopWatch = watch(rightOpen, applyLock)
-
-  onBeforeUnmount(() => {
-    mql.removeEventListener('change', onChange)
-    window.removeEventListener('keydown', onEsc)
-    stopWatch()
-    document.documentElement.classList.remove('overflow-hidden')
-  })
+  ]
 })
 
-watch(() => route.fullPath, () => { rightOpen.value = false })
+const mobileSheetStyle = computed(() => {
+  return {
+    transform: `translateY(${sheetDragY.value}px)`,
+    transition: sheetDragY.value === 0 ? 'transform 180ms ease' : 'none'
+  }
+})
 
+useSeoMeta({
+  title: () => `${currentPageTitle.value} · ${appName.value}`,
+  description: () => `Dashboard ${appName.value}`,
+  ogTitle: () => `${currentPageTitle.value} · ${appName.value}`,
+  ogDescription: () => `Dashboard ${appName.value}`,
+  ogType: 'website',
+  ogUrl: () => pageUrl.value,
+  robots: 'noindex, nofollow',
+  themeColor: '#171717'
+})
+
+useHead(() => ({
+  htmlAttrs: {
+    lang: 'id'
+  },
+  link: [
+    {
+      rel: 'canonical',
+      href: pageUrl.value
+    },
+    {
+      rel: 'icon',
+      href: appLogo.value
+    },
+    {
+      rel: 'apple-touch-icon',
+      href: appLogo.value
+    }
+  ],
+  meta: [
+    {
+      name: 'theme-color',
+      content: '#171717'
+    }
+  ]
+}))
+
+function isActive(href: string) {
+  if (href === '/app') {
+    return route.path === '/app'
+  }
+
+  return route.path === href || route.path.startsWith(`${href}/`)
+}
+
+function openMobileMenu() {
+  sheetDragY.value = 0
+  mobileMenuOpen.value = true
+}
+
+function closeMobileMenu() {
+  sheetDragY.value = 0
+  mobileMenuOpen.value = false
+}
+
+function onDockTouchStart(event: TouchEvent) {
+  dockTouchStartY.value = event.changedTouches[0]?.clientY || 0
+}
+
+function onDockTouchEnd(event: TouchEvent) {
+  const endY = event.changedTouches[0]?.clientY || 0
+  const deltaY = endY - dockTouchStartY.value
+
+  if (deltaY < -32) {
+    openMobileMenu()
+  }
+}
+
+function onSheetTouchStart(event: TouchEvent) {
+  sheetTouchStartY.value = event.changedTouches[0]?.clientY || 0
+}
+
+function onSheetTouchMove(event: TouchEvent) {
+  const currentY = event.changedTouches[0]?.clientY || 0
+  const deltaY = currentY - sheetTouchStartY.value
+
+  sheetDragY.value = Math.max(0, deltaY)
+}
+
+function onSheetTouchEnd() {
+  if (sheetDragY.value > 90) {
+    closeMobileMenu()
+    return
+  }
+
+  sheetDragY.value = 0
+}
+
+async function handleLogout() {
+  accountOpen.value = false
+  rightOpen.value = false
+  closeMobileMenu()
+
+  try {
+    await logout()
+  } catch {
+    await navigateTo('/login')
+  }
+}
+
+function normalizeAssetUrl(value: string) {
+  const cleanValue = String(value || '').trim()
+
+  if (!cleanValue) return '/logo.png'
+  if (/^https?:\/\//i.test(cleanValue)) return cleanValue
+  if (cleanValue.startsWith('/')) return cleanValue
+
+  return `/${cleanValue}`
+}
+
+function lockDocumentScroll() {
+  if (typeof document === 'undefined') return
+
+  if (rightOpen.value || mobileMenuOpen.value) {
+    document.documentElement.classList.add('overflow-hidden')
+    document.body.classList.add('overflow-hidden')
+  } else {
+    document.documentElement.classList.remove('overflow-hidden')
+    document.body.classList.remove('overflow-hidden')
+  }
+}
+
+watch(
+  () => route.fullPath,
+  () => {
+    rightOpen.value = false
+    accountOpen.value = false
+    closeMobileMenu()
+  }
+)
+
+watch([rightOpen, mobileMenuOpen], lockDocumentScroll)
+
+onMounted(async () => {
+  /**
+   * Tidak ada force redirect di layout ini.
+   * fetchMe hanya mencoba mengisi data user untuk avatar/header.
+   * Kalau gagal, layout tetap tampil dan tidak diarahkan ke login/home.
+   */
+  try {
+    await fetchMe()
+  } catch {
+    // intentionally empty
+  }
+
+  lockDocumentScroll()
+
+  const onEsc = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape') return
+
+    rightOpen.value = false
+    accountOpen.value = false
+    closeMobileMenu()
+  }
+
+  window.addEventListener('keydown', onEsc)
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('keydown', onEsc)
+
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.remove('overflow-hidden')
+      document.body.classList.remove('overflow-hidden')
+    }
+  })
+})
 </script>
 
 <style scoped>
-.size-7-5 { width: 1.875rem; height: 1.875rem; }
-.size-8 { width: 2rem; height: 2rem; }
-.size-6 { width: 1.5rem; height: 1.5rem; }
-.size-5 { width: 1.25rem; height: 1.25rem; }
-.size-4 { width: 1rem; height: 1rem; }
-.size-3-5 { width: 0.875rem; height: 0.875rem; }
+.scrollbar-thin-neutral {
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d4 transparent;
+}
+
+.scrollbar-thin-neutral::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-thin-neutral::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin-neutral::-webkit-scrollbar-thumb {
+  background: #d4d4d4;
+  border-radius: 999px;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 </style>
