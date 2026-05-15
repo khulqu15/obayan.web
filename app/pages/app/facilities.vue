@@ -1178,6 +1178,7 @@ import type {
   UpdateFacilityPayload
 } from '~/types/facility'
 import { useCloudinaryUpload } from '~/composables/useCloudinaryUpload'
+import { useAppApi } from '../../composables/useAppApi'
 
 definePageMeta({
   layout: 'app',
@@ -1277,7 +1278,9 @@ const themeVars = computed<Record<string, string>>(() => ({
   '--brand-ring': profile.value.brandRing
 }))
 
-const apiUrl = computed(() => `/api/tenants/${tenantSlug.value}/facilities`)
+const { tenantApiUrl } = useAppApi()
+
+const apiUrl = computed(() => tenantApiUrl(tenantSlug.value, `/facilities`))
 
 const selectedType = ref<FacilityType | 'all'>('all')
 const selectedStatus = ref<FacilityStatus | 'all'>('all')

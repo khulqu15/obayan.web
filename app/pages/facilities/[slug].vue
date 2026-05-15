@@ -422,13 +422,14 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import { defineComponent, h } from 'vue'
+import { computed, defineComponent, h } from 'vue'
 import type {
   FacilityDetailResponse,
   FacilityItem,
   FacilityListResponse,
   FacilityType
 } from '~/types/facility'
+import { useAppApi } from '../../composables/useAppApi'
 
 const route = useRoute()
 const requestUrl = useRequestURL()
@@ -462,7 +463,7 @@ const slug = computed(() => {
 })
 
 const apiUrl = computed(() => {
-  return `/api/tenants/${tenantSlug.value}/facilities/by-slug/${encodeURIComponent(slug.value)}`
+  return tenantApiUrl(tenantSlug.value, `/facilities/by-slug/${encodeURIComponent(slug.value)}`)
 })
 
 const {
@@ -481,8 +482,9 @@ const facility = computed<FacilityItem | null>(() => {
   return data.value?.data || null
 })
 
+const { tenantApiUrl } = useAppApi  ()
 const relatedApiUrl = computed(() => {
-  return `/api/tenants/${tenantSlug.value}/facilities`
+  return tenantApiUrl(tenantSlug.value, `/facilities`)
 })
 
 const {

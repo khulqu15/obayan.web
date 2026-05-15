@@ -369,7 +369,7 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import { defineComponent, h } from 'vue'
+import { computed, defineComponent, h } from 'vue'
 
 type OrganizationStatus = 'active' | 'inactive'
 
@@ -416,6 +416,7 @@ type OrganizationListResponse = {
 const route = useRoute()
 const runtime = useRuntimeConfig()
 const requestUrl = useRequestURL()
+const { tenantApiUrl } = useAppApi()
 
 const heroImageFailed = ref(false)
 const logoFailed = ref(false)
@@ -444,7 +445,7 @@ const slug = computed(() => {
 })
 
 const apiUrl = computed(() => {
-  return `/api/tenants/${tenantSlug.value}/organizationss/by-slug/${encodeURIComponent(slug.value)}`
+  return tenantApiUrl(tenantSlug, `/organizations/by-slug/${encodeURIComponent(slug.value)}`)
 })
 
 const {
@@ -457,7 +458,7 @@ const {
     try {
       return await $fetch<OrganizationDetailResponse>(apiUrl.value)
     } catch {
-      const list = await $fetch<OrganizationListResponse>(`/api/tenants/${tenantSlug.value}/organizationss`, {
+      const list = await $fetch<OrganizationListResponse>(tenantApiUrl(tenantSlug, `/organizations`), {
         query: {
           status: 'active',
           limit: 100,
@@ -484,7 +485,7 @@ const organization = computed<OrganizationItem | null>(() => {
   return data.value?.data || null
 })
 
-const listApiUrl = computed(() => `/api/tenants/${tenantSlug.value}/organizationss`)
+const listApiUrl = computed(() => tenantApiUrl(tenantSlug.value, '/organizations'))
 
 const {
   data: relatedResponse

@@ -6,6 +6,7 @@ import type {
   OrganizationType,
   UpdateOrganizationPayload
 } from '../../../types/organization'
+import { useAppApi } from '../useAppApi'
 
 export function useOrganizationsSQL() {
   const runtime = useRuntimeConfig()
@@ -28,6 +29,7 @@ export function useOrganizationsSQL() {
     return envClient || 'martopuro'
   })
 
+
   const q = ref('')
   const selectedType = ref<OrganizationType | 'all'>('all')
   const selectedStatus = ref<OrganizationStatus | 'all'>('active')
@@ -36,8 +38,9 @@ export function useOrganizationsSQL() {
   const limit = ref(20)
   const sort = ref<'newest' | 'oldest' | 'name' | 'sort_order'>('sort_order')
 
+  const { tenantApiUrl } = useAppApi()
   const apiUrl = computed(() => {
-    return `/api/tenants/${tenantSlug.value}/organizations`
+    return  tenantApiUrl(tenantSlug.value, '/organizations')
   })
 
   const {

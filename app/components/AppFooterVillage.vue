@@ -268,6 +268,7 @@ import { computed, onMounted, ref } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useRequestURL, useRuntimeConfig } from 'nuxt/app'
 import ContactHero from './village/ContactHero.vue'
+import { useAppApi } from '~/composables/useAppApi'
 
 type FooterItem = {
   label: string
@@ -401,9 +402,11 @@ const whatsappHref = computed(() => {
   return `https://wa.me/${waIntl.value}?text=${encodeURIComponent(`Halo Admin ${appName.value}, saya ingin bertanya terkait layanan.`)}`
 })
 
-const organizationsApiUrl = computed(() => `/api/tenants/${tenantSlug.value}/organizations`)
-const facilitiesApiUrl = computed(() => `/api/tenants/${tenantSlug.value}/facilities`)
-const potentialsApiUrl = computed(() => `/api/tenants/${tenantSlug.value}/potentials`)
+const { tenantApiUrl } = useAppApi()
+
+const organizationsApiUrl = computed(() => tenantApiUrl(tenantSlug.value, '/organization'))
+const facilitiesApiUrl = computed(() => tenantApiUrl(tenantSlug.value, '/facilities'))
+const potentialsApiUrl = computed(() => tenantApiUrl(tenantSlug.value, '/potentials'))
 
 const {
   data: organizationsResponse,

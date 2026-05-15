@@ -117,6 +117,7 @@ import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import type { TenantSiteConfig, TenantSiteResponse } from '../../../types/tenant-site'
 import { useRuntimeConfig, useRequestURL, useFetch } from 'nuxt/app'
+import { useAppApi } from '~/composables/useAppApi'
 
 type Stat = {
   label: string
@@ -192,8 +193,10 @@ const tenantSlug = computed(() => {
   return envClient || 'martopuro'
 })
 
+const { tenantApiUrl } = useAppApi()
+
 const tenantSiteApiUrl = computed(() => {
-  return `/api/tenants/${tenantSlug.value}/site`
+  return tenantApiUrl(tenantSlug.value, '/site')
 })
 
 const { data: tenantResponse } = useFetch<TenantSiteResponse>(tenantSiteApiUrl, {

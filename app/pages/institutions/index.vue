@@ -229,7 +229,9 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { computed } from 'vue'
 import type { InstitutionItem, InstitutionListResponse, InstitutionStatus } from '~/types/institution'
+import { useAppApi } from '../../composables/useAppApi'
 
 const requestUrl = useRequestURL()
 const runtime = useRuntimeConfig()
@@ -276,8 +278,10 @@ const appLogo = computed(() => {
   )
 })
 
+const { tenantApiUrl } = useAppApi()
+
 const apiUrl = computed(() => {
-  return `/api/tenants/${tenantSlug.value}/institutions`
+  return tenantApiUrl(tenantSlug.value, '/institutions')
 })
 
 const {

@@ -358,6 +358,7 @@
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useRequestURL, useRuntimeConfig, useFetch } from "nuxt/app"
+import { useAppApi } from '~/composables/useAppApi'
 
 type NavItem = {
   label: string
@@ -500,6 +501,8 @@ const hostname = computed(() => {
     .toLowerCase()
 })
 
+const { tenantApiUrl } = useAppApi()
+
 const tenantSlug = computed(() => {
   const envClient = String(config.public.clientName || 'martopuro')
     .trim()
@@ -512,7 +515,7 @@ const tenantSlug = computed(() => {
 })
 
 const institutionsApiUrl = computed(() => {
-  return `/api/tenants/${tenantSlug.value}/institutions`
+  return tenantApiUrl(tenantSlug.value, `/institutions`)
 })
 
 const {
@@ -651,7 +654,7 @@ function getPotentialImage(item: PotentialItem) {
 }
 
 const facilitiesApiUrl = computed(() => {
-  return `/api/tenants/${tenantSlug.value}/facilities`
+  return tenantApiUrl(tenantSlug.value, '/facilities')
 })
 
 const {
@@ -691,7 +694,7 @@ const fasilitasLinks = computed<NavItem[]>(() => {
 })
 
 const potentialsApiUrl = computed(() => {
-  return `/api/tenants/${tenantSlug.value}/potentials`
+  return tenantApiUrl(tenantSlug.value, '/potentials')
 })
 
 const {

@@ -263,6 +263,7 @@
 import { computed, ref, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useRuntimeConfig, useFetch } from 'nuxt/app'
+import { useAppApi } from '~/composables/useAppApi'
 
 type NewsStatus = 'draft' | 'published' | 'archived'
 type NewsItem = {
@@ -329,8 +330,11 @@ const tenantSlug = computed(() => {
 const clientDisplayName = computed(() => {
     return String(runtime.public.clientDisplayName || tenantSlug.value || 'Martopuro')
 })
+
+const { tenantApiUrl } = useAppApi()
+
 const newsApiUrl = computed(() => {
-    return `/api/tenants/${tenantSlug.value}/news`
+    return tenantApiUrl(tenantSlug.value, '/news')
 })
 const {
     data: newsResponse,

@@ -1052,6 +1052,7 @@ import type {
   UpdateInstitutionPayload
 } from '~/types/institution'
 import { useCloudinaryUpload } from '~/composables/useCloudinaryUpload'
+import { useAppApi } from '../../composables/useAppApi'
 
 definePageMeta({
   layout: 'app',
@@ -1188,7 +1189,9 @@ const themeVars = computed<Record<string, string>>(() => ({
   '--brand-ring': profile.value.brandRing
 }))
 
-const apiUrl = computed(() => `/api/tenants/${tenantSlug.value}/institutions`)
+const { tenantApiUrl } = useAppApi()
+
+const apiUrl = computed(() => tenantApiUrl(tenantSlug.value, `/institutions`))
 const queryParams = computed(() => ({
   status: selectedStatus.value === 'all' ? undefined : selectedStatus.value,
   limit: 100,

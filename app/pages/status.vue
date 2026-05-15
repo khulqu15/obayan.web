@@ -336,6 +336,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { computed, defineComponent, h, ref, watch } from 'vue'
+import { useAppApi } from '../composables/useAppApi'
 
 type PublicMetricItem = {
   id: string
@@ -432,7 +433,8 @@ const tenantSlug = computed(() => {
   return envClient || 'martopuro'
 })
 
-const apiUrl = computed(() => `/api/tenants/${tenantSlug.value}/public-dashboard`)
+const { tenantApiUrl } = useAppApi()
+const apiUrl = computed(() =>  tenantApiUrl(tenantSlug.value, `/public-dashboard`))
 
 const { data, pending, error, refresh } = await useFetch<PublicDashboardResponse>(apiUrl, {
   key: computed(() => `status-public-dashboard-${tenantSlug.value}-${activeYear.value}`),

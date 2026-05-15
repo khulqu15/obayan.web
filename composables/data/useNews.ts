@@ -24,8 +24,10 @@ export function useNews() {
     return typeof value === 'string' ? value : ''
   })
 
+  const { tenantApiUrl } = useAppApi()
+  
   const apiUrl = computed(() => {
-    return `/api/tenants/${tenantSlug.value}/news`
+    return tenantApiUrl(tenantSlug.value, `/news`)
   })
 
   const {

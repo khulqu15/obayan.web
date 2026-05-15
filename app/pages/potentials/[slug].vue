@@ -458,7 +458,9 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import { defineComponent, h } from 'vue'
+import { ref } from 'process'
+import { computed, defineComponent, h } from 'vue'
+import { useAppApi } from '~/composables/useAppApi'
 import type {
   PotentialDetailResponse,
   PotentialItem,
@@ -469,6 +471,8 @@ import type {
 const route = useRoute()
 const requestUrl = useRequestURL()
 const runtime = useRuntimeConfig()
+
+const { tenantApiUrl } = useAppApi()
 
 const heroImageFailed = ref(false)
 const logoFailed = ref(false)
@@ -498,7 +502,7 @@ const slug = computed(() => {
 })
 
 const apiUrl = computed(() => {
-  return `/api/tenants/${tenantSlug.value}/potentials/by-slug/${encodeURIComponent(slug.value)}`
+  return tenantApiUrl(tenantSlug.value, `/potentials/by-slug/${encodeURIComponent(slug.value)}`)
 })
 
 const {
@@ -518,7 +522,7 @@ const potential = computed<PotentialItem | null>(() => {
 })
 
 const relatedApiUrl = computed(() => {
-  return `/api/tenants/${tenantSlug.value}/potentials`
+  return tenantApiUrl(tenantSlug.value, `/potentials`)
 })
 
 const {

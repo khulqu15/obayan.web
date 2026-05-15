@@ -362,7 +362,9 @@ const appLogo = computed(() => {
   return String(runtime.public.appLogo || '')
 })
 
-const apiUrl = computed(() => `/api/tenants/${tenantSlug.value}/potentials`)
+const { tenantApiUrl } = useAppApi()
+
+const apiUrl = computed(() => tenantApiUrl(tenantSlug.value ,`/potentials`))
 
 const {
   data,

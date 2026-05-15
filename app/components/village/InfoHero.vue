@@ -365,6 +365,7 @@
 <script setup lang="ts">
 import { computed, defineComponent, h, ref, watch } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useAppApi } from '~/composables/useAppApi'
 
 type VisitorItem = {
   label: string
@@ -553,12 +554,14 @@ const tenantSlug = computed(() => {
   return envClient || 'martopuro'
 })
 
+const { tenantApiUrl } = useAppApi()
+
 const activeYear = computed(() => {
   return Number(props.budgetYear || new Date().getFullYear())
 })
 
 const publicDashboardApiUrl = computed(() => {
-  return `/api/tenants/${tenantSlug.value}/public-dashboard`
+  return tenantApiUrl(tenantSlug.value, '/public-dashboard')
 })
 
 const {

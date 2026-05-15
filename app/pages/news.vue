@@ -363,6 +363,7 @@ import { computed, ref } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useHead, useRequestURL, useRoute, useRuntimeConfig, useSeoMeta, useRouter } from 'nuxt/app'
 import type { NewsItem, NewsListResponse } from '~/types/news'
+import { useAppApi } from '../composables/useAppApi'
 
 type NewsMode = 'martopuro' | 'obayan'
 type NewsSort = 'newest' | 'oldest' | 'title'
@@ -472,7 +473,8 @@ const activeSlug = computed(() => {
   return typeof value === 'string' ? value : ''
 })
 
-const apiUrl = computed(() => `/api/tenants/${tenantSlug.value}/news`)
+const { tenantApiUrl } = useAppApi()
+const apiUrl = computed(() => tenantApiUrl(tenantSlug.value, '/news'))
 
 const {
   data,

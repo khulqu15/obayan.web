@@ -363,6 +363,7 @@ import { Icon } from '@iconify/vue'
 import { computed, defineComponent, h, ref } from 'vue'
 import { useAsyncData, useHead, useRequestURL, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
 import { useTenantContext } from '~/composables/useTenantContext'
+import { useAppApi } from '~/composables/useAppApi'
 
 type TenantType = 'village' | 'school' | 'pesantren' | 'company' | 'custom'
 type TenantStatus = 'active' | 'inactive'
@@ -454,12 +455,6 @@ const apiBaseUrl = computed(() => {
     .replace(/\/$/, '')
 })
 
-function buildApiUrl(path: string) {
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`
-  if (!apiBaseUrl.value) return normalizedPath
-  return `${apiBaseUrl.value}${normalizedPath}`
-}
-
 const siteUrl = computed(() => {
   const value =
     tenant.value?.siteUrl ||
@@ -479,13 +474,15 @@ const appName = computed(() => {
   )
 })
 
+const { tenantApiUrl } = useAppApi()
+
 const { data, pending, error, refresh } = await useAsyncData<TenantResponse>(
   computed(() => `tenant-profile-${tenantSlug.value}`),
   async () => {
     const endpoints = [
-      buildApiUrl(`/api/tenants/${tenantSlug.value}/site`),
-      buildApiUrl(`/api/tenants/${tenantSlug.value}/profile`),
-      buildApiUrl(`/api/tenants/${tenantSlug.value}`)
+      tenantApiUrl(tenantSlug.value, `/site`),
+      tenantApiUrl(tenantSlug.value, `/profile`),
+      tenantApiUrl(tenantSlug.value, `/`)
     ]
 
     let lastError: unknown = null

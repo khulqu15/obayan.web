@@ -1,4 +1,5 @@
 import type { TenantSiteResponse } from '~/types/tenant-site'
+import { useAppApi } from '../useAppApi'
 
 export function useTenantSite() {
   const runtime = useRuntimeConfig()
@@ -9,8 +10,9 @@ export function useTenantSite() {
       .toLowerCase()
   })
 
+  const { tenantApiUrl } = useAppApi()
   const apiUrl = computed(() => {
-    return `/api/tenants/${tenantSlug.value}/site`
+    return  tenantApiUrl(tenantSlug.value, '/site')
   })
 
   const {

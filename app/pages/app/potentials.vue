@@ -1182,6 +1182,7 @@ import type {
   UpdatePotentialPayload
 } from '~/types/potential'
 import { useCloudinaryUpload } from '~/composables/useCloudinaryUpload'
+import { useAppApi } from '../../composables/useAppApi'
 
 definePageMeta({
   layout: 'app',
@@ -1281,7 +1282,11 @@ const themeVars = computed<Record<string, string>>(() => ({
   '--brand-ring': profile.value.brandRing
 }))
 
-const apiUrl = computed(() => `/api/tenants/${tenantSlug.value}/potentials`)
+const { tenantApiUrl } = useAppApi()
+
+const apiUrl = computed(() => {
+  return tenantApiUrl(tenantSlug.value, `/potentials`)
+})
 
 const selectedType = ref<PotentialType | 'all'>('all')
 const selectedStatus = ref<PotentialStatus | 'all'>('all')

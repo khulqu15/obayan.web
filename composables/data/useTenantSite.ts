@@ -9,8 +9,10 @@ export function useTenantSite() {
       .toLowerCase()
   })
 
+  const { tenantApiUrl } = useAppApi()
+
   const apiUrl = computed(() => {
-    return `/api/tenants/${tenantSlug.value}/site`
+    return tenantApiUrl(tenantSlug.value, '/site')
   })
 
   const {

@@ -7,6 +7,7 @@ import type {
   UserListResponse,
   UserStatus
 } from '~/types/rbac'
+import { useAppApi } from '../useAppApi'
 
 export function useUsers() {
   const runtime = useRuntimeConfig()
@@ -23,8 +24,9 @@ export function useUsers() {
   const page = ref(1)
   const limit = ref(20)
 
+  const { tenantApiUrl } = useAppApi()
   const usersApiUrl = computed(() => {
-    return `/api/tenants/${tenantSlug.value}/users`
+    return  tenantApiUrl(tenantSlug.value, '/users')
   })
 
   const {

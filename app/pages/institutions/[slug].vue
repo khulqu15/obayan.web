@@ -245,7 +245,9 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { computed } from 'vue'
 import type { InstitutionDetailResponse, InstitutionItem } from '~/types/institution'
+import { useAppApi } from '../../composables/useAppApi'
 
 const route = useRoute()
 const requestUrl = useRequestURL()
@@ -276,8 +278,9 @@ const slug = computed(() => {
     .toLowerCase()
 })
 
+const { tenantApiUrl } = useAppApi()
 const apiUrl = computed(() => {
-  return `/api/tenants/${tenantSlug.value}/institutions/by-slug/${encodeURIComponent(slug.value)}`
+  return tenantApiUrl(tenantSlug.value, `/institutions/by-slug/${encodeURIComponent(slug.value)}`)
 })
 
 const {

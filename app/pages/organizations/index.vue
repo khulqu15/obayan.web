@@ -268,7 +268,9 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import type { ComputedRef } from 'vue'
+import { ref } from 'process'
+import { computed, ComputedRef } from 'vue'
+import { useRuntimeConfig, useRequestURL } from 'nuxt/app'
 
 type OrganizationStatus = 'active' | 'inactive'
 
@@ -344,7 +346,9 @@ const appName = computed(() => {
   )
 })
 
-const apiUrl = computed(() => `/api/tenants/${tenantSlug.value}/organizationss`)
+const { tenantApiUrl } = useAppApi()
+
+const apiUrl = computed(() => tenantApiUrl(tenantSlug.value, `/organizations`))
 
 const {
   data,
