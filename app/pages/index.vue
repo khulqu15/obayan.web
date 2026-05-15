@@ -51,11 +51,17 @@ const currentHostname = computed(() => {
 })
 
 const isMartopuroDomain = computed(() => {
+  const host = String(currentHostname.value || '')
+    .replace(/^www\./, '')
+    .replace(/:\d+$/, '')
+    .toLowerCase()
+
   return (
-    currentHostname.value === 'martopuro.com' ||
-    currentHostname.value === 'localhost' ||
-    currentHostname.value === '127.0.0.1' ||
-    currentHostname.value === 'railway.app'
+    host === 'martopuro.com' ||
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host === 'obayanweb-production.up.railway.app' ||
+    host.endsWith('.up.railway.app')
   )
 })
 
