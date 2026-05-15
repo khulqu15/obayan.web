@@ -437,8 +437,10 @@ const hostname = computed(() => {
 })
 
 const tenantKey = computed(() => {
-  const envClient = String(runtime.public.clientName || '').toLowerCase()
-
+  const envClient = String(runtime.public.clientName || '')
+    .trim()
+    .toLowerCase()
+  if (hostname.value === 'obayanweb-production.up.railway.app' || hostname.value.endsWith('.railway.app') || hostname.value.endsWith('.up.railway.app')) return 'martopuro'
   if (hostname.value.includes('martopuro')) return 'martopuro'
   if (hostname.value.includes('obayan')) return 'obayan'
 

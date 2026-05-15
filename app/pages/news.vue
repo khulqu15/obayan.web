@@ -361,7 +361,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Icon } from '@iconify/vue'
-import { useHead, useRequestURL, useRoute, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
+import { useHead, useRequestURL, useRoute, useRuntimeConfig, useSeoMeta, useRouter } from 'nuxt/app'
 import type { NewsItem, NewsListResponse } from '~/types/news'
 
 type NewsMode = 'martopuro' | 'obayan'
@@ -398,7 +398,16 @@ const envClientName = computed(() => {
     .toLowerCase()
 })
 
+const isRailwayDomain = computed(() => {
+  return (
+    hostname.value == 'obayanweb-production.up.railway.app' ||
+    hostname.value.endsWith('.railway.app') ||
+    hostname.value.endsWith('.up.railway.app')
+  )
+})
+
 const tenantSlug = computed(() => {
+  if (isRailwayDomain.value) return 'martopuro'
   if (hostname.value.includes('martopuro')) return 'martopuro'
   if (hostname.value.includes('obayan')) return 'obayan'
   return envClientName.value || 'obayan'
