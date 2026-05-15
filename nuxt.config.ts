@@ -22,6 +22,44 @@ export default defineNuxtConfig({
     '~/plugins/page-loading.client.ts',
   ],
 
+  nitro: {
+    prerender: {
+      crawlLinks: false,
+      failOnError: false,
+      routes: [
+        '/',
+        '/news',
+        '/profile',
+        '/status',
+        '/apbd',
+        '/facilities',
+        '/institutions',
+        '/organizations',
+        '/login',
+        '/register'
+      ],
+      ignore: [
+        '/dev',
+        '/dev/**',
+        '/app',
+        '/app/**',
+        '/news/**',
+        '/facilities/**',
+        '/potentials/**',
+        '/organizations',
+        '/organizations/**'
+      ]
+    }
+  },
+  routeRules: {
+    '/app/**': { prerender: false },
+    '/dev/**': { prerender: false },
+    '/news/**': { prerender: false },
+    '/facilities/**': { prerender: false },
+    '/potentials/**': { prerender: false },
+    '/organizations/**': { prerender: false }
+  },
+
   imports: {
     autoImport: true
   },
