@@ -226,7 +226,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import DataTable from '~/components/widget/DataTable.vue'
 import ModalShell from '~/components/widget/ModalShell.vue'
 import { useSantri } from '~/composables/data/useSantri'
-import { useRFID } from '~/composables/data/useRFID'
+import { useRFID } from '~/composables/data/useRfid'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Registrasi RFID' } })
 
