@@ -337,10 +337,10 @@ import { Icon } from '@iconify/vue'
 import { computed, ref } from 'vue'
 import {
   useHead,
-  useRequestURL,
   useRuntimeConfig,
   useSeoMeta
 } from 'nuxt/app'
+import { useTenantContext } from '~/composables/useTenantContext'
 
 definePageMeta({
   layout: 'app',
@@ -348,8 +348,6 @@ definePageMeta({
     title: 'Dashboard'
   }
 })
-
-type Mode = 'martopuro' | 'obayan'
 
 type ActionItem = {
   label: string
@@ -395,29 +393,17 @@ type RecommendationItem = {
 }
 
 const config = useRuntimeConfig()
-const requestUrl = useRequestURL()
+
 const logoError = ref(false)
 
-const hostname = computed(() => {
-  return String(requestUrl.hostname || '')
-    .replace(/^www\./, '')
-    .toLowerCase()
-})
-
-const clientName = computed(() => {
-  return String(config.public.clientName || '')
-    .trim()
-    .toLowerCase()
-})
-
-const mode = computed<Mode>(() => {
-  if (hostname.value.includes('martopuro')) return 'martopuro'
-  if (clientName.value.includes('martopuro')) return 'martopuro'
-
-  return 'obayan'
-})
-
-const isMartopuro = computed(() => mode.value === 'martopuro')
+const {
+  tenantKey,
+  tenantHost,
+  isMartopuro,
+  isObayan,
+  isSencra,
+  isRailway
+} = useTenantContext()
 
 const todayLabel = computed(() => {
   return new Intl.DateTimeFormat('id-ID', {
@@ -468,6 +454,50 @@ const profile = computed(() => {
           label: 'Tambah Berita',
           href: '/app/news',
           icon: 'solar:add-circle-bold-duotone'
+        }
+      ] as ActionItem[]
+    }
+  }
+
+  if (isSencra.value) {
+    const logo = String(
+      config.public.appLogo ||
+      config.public.logo ||
+      '/logo.png'
+    )
+
+    return {
+      name: String(config.public.clientDisplayName || 'Sencra'),
+      title: 'Dashboard Sencra Platform',
+      badge: 'Creative Platform',
+      icon: 'solar:case-round-bold-duotone',
+      logo,
+      description:
+        'Kelola website, produk digital, tenant, konten, dan layanan kreatif Sencra dalam satu dashboard yang modular dan scalable.',
+      quickAccessTitle: 'Ekosistem Produk Sencra',
+      manageHref: '/app/web',
+      packageName: 'Sencra Core Platform',
+      packageDescription:
+        'Dashboard ini membantu mengelola modul website, konten, tenant, dan layanan digital Sencra secara bertahap.',
+      ctaIcon: 'solar:stars-bold-duotone',
+      ctaTitle: 'Bangun Sistem Lebih Modular',
+      ctaDescription:
+        'Kembangkan fitur berdasarkan kebutuhan tenant, produk, layanan, konten, dan operasional bisnis.',
+      ctaLabel: 'Kelola Website',
+      ctaHref: '/app/web',
+      brand: '#0f172a',
+      brandDark: '#020617',
+      brandSoft: '#f1f5f9',
+      actions: [
+        {
+          label: 'Kelola Website',
+          href: '/app/web',
+          icon: 'solar:window-frame-bold-duotone'
+        },
+        {
+          label: 'Tenant Settings',
+          href: '/app/setting',
+          icon: 'solar:settings-bold-duotone'
         }
       ] as ActionItem[]
     }

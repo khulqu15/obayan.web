@@ -362,6 +362,7 @@
 import { Icon } from '@iconify/vue'
 import { computed, defineComponent, h, ref } from 'vue'
 import { useAsyncData, useHead, useRequestURL, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
+import { useTenantContext } from '~/composables/useTenantContext'
 
 type TenantType = 'village' | 'school' | 'pesantren' | 'company' | 'custom'
 type TenantStatus = 'active' | 'inactive'
@@ -421,21 +422,52 @@ const runtime = useRuntimeConfig()
 const requestUrl = useRequestURL()
 const logoFailed = ref(false)
 
+const {
+  tenantHost,
+  tenantKey,
+  isMartopuro,
+  isObayan,
+  isSencra,
+  isRailway
+} = useTenantContext()
+
 const hostname = computed(() => {
+  const fromMiddleware = String(tenantHost.value || '').trim()
+
+  if (fromMiddleware) return fromMiddleware
+
   return String(requestUrl.hostname || '')
     .replace(/^www\./, '')
+    .replace(/:\d+$/, '')
     .toLowerCase()
 })
 
 const tenantSlug = computed(() => {
-  const envClient = String(runtime.public.clientName || 'martopuro')
+  return String(tenantKey.value || 'obayan')
     .trim()
     .toLowerCase()
+})
 
-  if (hostname.value.includes('martopuro')) return 'martopuro'
-  if (hostname.value.includes('obayan')) return 'obayan'
+const apiBaseUrl = computed(() => {
+  return String(runtime.public.apiBaseUrl || '')
+    .trim()
+    .replace(/\/$/, '')
+})
 
-  return envClient || 'martopuro'
+function buildApiUrl(path: string) {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  if (!apiBaseUrl.value) return normalizedPath
+  return `${apiBaseUrl.value}${normalizedPath}`
+}
+
+const siteUrl = computed(() => {
+  const value =
+    tenant.value?.siteUrl ||
+    runtime.public.siteUrl ||
+    requestUrl.origin ||
+    ''
+
+  return String(value).replace(/\/$/, '')
 })
 
 const appName = computed(() => {
@@ -447,17 +479,13 @@ const appName = computed(() => {
   )
 })
 
-const siteUrl = computed(() => {
-  return String(runtime.public.siteUrl || requestUrl.origin || '')
-})
-
 const { data, pending, error, refresh } = await useAsyncData<TenantResponse>(
-  () => `tenant-profile-${tenantSlug.value}`,
+  computed(() => `tenant-profile-${tenantSlug.value}`),
   async () => {
     const endpoints = [
-      `/api/tenants/${tenantSlug.value}/site`,
-      `/api/tenants/${tenantSlug.value}/profile`,
-      `/api/tenants/${tenantSlug.value}`
+      buildApiUrl(`/api/tenants/${tenantSlug.value}/site`),
+      buildApiUrl(`/api/tenants/${tenantSlug.value}/profile`),
+      buildApiUrl(`/api/tenants/${tenantSlug.value}`)
     ]
 
     let lastError: unknown = null
@@ -485,12 +513,18 @@ const visibleError = computed(() => {
 })
 
 const brandColor = computed(() => {
-  return (
+  const fromTenant =
     tenant.value?.primaryColor ||
     tenant.value?.theme?.primaryColor ||
-    tenant.value?.theme?.brandColor ||
-    '#2563eb'
-  )
+    tenant.value?.theme?.brandColor
+
+  if (fromTenant) return fromTenant
+
+  if (isMartopuro.value) return '#2563eb'
+  if (isSencra.value) return '#0f172a'
+  if (isObayan.value) return '#58cc02'
+
+  return '#2563eb'
 })
 
 const themeVars = computed<Record<string, string>>(() => ({
@@ -500,7 +534,12 @@ const themeVars = computed<Record<string, string>>(() => ({
 }))
 
 const tenantLogo = computed(() => {
-  return String(runtime.public.appLogo || '')
+  return String(
+    tenant.value?.logoUrl ||
+    runtime.public.appLogo ||
+    runtime.public.logo ||
+    ''
+  )
 })
 
 const tenantTypeLabel = computed(() => {
@@ -721,24 +760,101 @@ const serviceLinks = computed<ServiceLink[]>(() => {
       }))
   }
 
-  const type = tenant.value?.tenantType || 'custom'
-
-  if (type === 'village') {
+  if (isMartopuro.value || tenant.value?.tenantType === 'village') {
     return [
-      { label: 'Berita Informasi', description: 'Informasi resmi, agenda, dan publikasi desa.', href: '/news', icon: 'solar:document-text-bold-duotone' },
-      { label: 'Fasilitas Desa', description: 'Data fasilitas publik dan layanan warga.', href: '/facilities', icon: 'solar:map-point-wave-bold-duotone' },
-      { label: 'Potensi Desa', description: 'Potensi ekonomi, UMKM, wisata, dan budaya lokal.', href: '/potentials', icon: 'solar:leaf-bold-duotone' },
-      { label: 'Lembaga Desa', description: 'Struktur kelembagaan dan organisasi desa.', href: '/institutions', icon: 'solar:buildings-3-bold-duotone' },
-      { label: 'Keuangan Desa', description: 'Ringkasan transparansi APBDes dan data keuangan.', href: '/finance', icon: 'solar:wallet-money-bold-duotone' },
-      { label: 'Pengajuan Surat', description: 'Akses layanan administrasi surat online.', href: '/letters', icon: 'solar:file-send-bold-duotone' }
+      {
+        label: 'Berita Informasi',
+        description: 'Informasi resmi, agenda, dan publikasi desa.',
+        href: '/news',
+        icon: 'solar:document-text-bold-duotone'
+      },
+      {
+        label: 'Fasilitas Desa',
+        description: 'Data fasilitas publik dan layanan warga.',
+        href: '/facilities',
+        icon: 'solar:map-point-wave-bold-duotone'
+      },
+      {
+        label: 'Potensi Desa',
+        description: 'Potensi ekonomi, UMKM, wisata, dan budaya lokal.',
+        href: '/potentials',
+        icon: 'solar:leaf-bold-duotone'
+      },
+      {
+        label: 'Lembaga Desa',
+        description: 'Struktur kelembagaan dan organisasi desa.',
+        href: '/institutions',
+        icon: 'solar:buildings-3-bold-duotone'
+      },
+      {
+        label: 'APBD Desa',
+        description: 'Ringkasan transparansi APBDes dan data keuangan.',
+        href: '/apbd',
+        icon: 'solar:wallet-money-bold-duotone'
+      },
+      {
+        label: 'Status Desa',
+        description: 'Status layanan, aparatur, dan aktivitas desa.',
+        href: '/status',
+        icon: 'solar:pulse-2-bold-duotone'
+      }
+    ]
+  }
+
+  if (isSencra.value) {
+    return [
+      {
+        label: 'Berita',
+        description: 'Publikasi dan informasi terbaru.',
+        href: '/news',
+        icon: 'solar:document-text-bold-duotone'
+      },
+      {
+        label: 'Organisasi',
+        description: 'Profil organisasi atau unit yang terhubung.',
+        href: '/organization',
+        icon: 'solar:users-group-rounded-bold-duotone'
+      },
+      {
+        label: 'Fasilitas',
+        description: 'Data fasilitas atau layanan utama tenant.',
+        href: '/facilities',
+        icon: 'solar:map-point-wave-bold-duotone'
+      },
+      {
+        label: 'Potensi',
+        description: 'Produk, layanan, atau potensi yang dikembangkan.',
+        href: '/potentials',
+        icon: 'solar:stars-bold-duotone'
+      }
     ]
   }
 
   return [
-    { label: 'Berita', description: 'Publikasi dan informasi terbaru.', href: '/news', icon: 'solar:document-text-bold-duotone' },
-    { label: 'Organisasi', description: 'Profil organisasi atau unit yang terhubung.', href: '/organizations', icon: 'solar:users-group-rounded-bold-duotone' },
-    { label: 'Fasilitas', description: 'Data fasilitas atau layanan utama tenant.', href: '/facilities', icon: 'solar:map-point-wave-bold-duotone' },
-    { label: 'Kontak', description: 'Informasi kontak dan alamat resmi.', href: '/contact', icon: 'solar:phone-bold-duotone' }
+    {
+      label: 'Berita',
+      description: 'Publikasi dan informasi terbaru.',
+      href: '/news',
+      icon: 'solar:document-text-bold-duotone'
+    },
+    {
+      label: 'Organisasi',
+      description: 'Profil organisasi atau unit yang terhubung.',
+      href: '/organization',
+      icon: 'solar:users-group-rounded-bold-duotone'
+    },
+    {
+      label: 'Fasilitas',
+      description: 'Data fasilitas atau layanan utama tenant.',
+      href: '/facilities',
+      icon: 'solar:map-point-wave-bold-duotone'
+    },
+    {
+      label: 'Kontak',
+      description: 'Informasi kontak dan alamat resmi.',
+      href: '/contact',
+      icon: 'solar:phone-bold-duotone'
+    }
   ]
 })
 
@@ -855,7 +971,7 @@ useHead(() => ({
   link: [
     {
       rel: 'canonical',
-      href: `${requestUrl.origin}/profile`
+      href: `${siteUrl.value || requestUrl.origin}/profile`
     },
     ...(tenant.value?.faviconUrl
       ? [

@@ -82,6 +82,8 @@ export default defineNuxtConfig({
       cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME || '',
       cloudinaryUploadPreset: process.env.NUXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '',
 
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || ''
+
     },
     databaseHost: process.env.DATABASE_HOST || 'localhost',
     databasePort: process.env.DATABASE_PORT || '3306',
