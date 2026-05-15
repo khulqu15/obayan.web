@@ -54,7 +54,8 @@ const isMartopuroDomain = computed(() => {
   return (
     currentHostname.value === 'martopuro.com' ||
     currentHostname.value === 'localhost' ||
-    currentHostname.value === '127.0.0.1'
+    currentHostname.value === '127.0.0.1' ||
+    currentHostname.value === 'railway.app'
   )
 })
 
