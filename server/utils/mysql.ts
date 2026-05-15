@@ -1,52 +1,44 @@
-import mysql, {
-    type Pool,
-    type PoolConnection,
-    type ResultSetHeader,
-    type RowDataPacket
-} from 'mysql2/promise'
+import mysql, { type Pool, type PoolConnection, type RowDataPacket } from 'mysql2/promise'
+
+type DbParams = Array<string | number | boolean | null | Date>
 
 declare global {
-  // eslint-disable-next-line no-var
-  var __mysqlPool: Pool | undefined
+    // eslint-disable-next-line no-var
+    var __mysqlPool: Pool | undefined
 }
 
-export type DbValue =
-    | string
-    | number
-    | boolean
-    | Date
-    | Buffer
-    | null
+function required(key: string) {
+    const value = process.env[key]
 
-export type DbParams = DbValue[]
-
-function required(value: unknown, key: string) {
-    if (!value || String(value).trim() === '') {
+    if (!value) {
         throw createError({
-        statusCode: 500,
-        statusMessage: `Missing database config: ${key}`
+            statusCode: 500,
+            statusMessage: `Missing database config: ${key}`
         })
     }
 
-    return String(value)
+    return value
 }
 
 export function getMysqlPool() {
     if (globalThis.__mysqlPool) return globalThis.__mysqlPool
-    
-    const config = useRuntimeConfig()
 
     globalThis.__mysqlPool = mysql.createPool({
-        host: required(config.databaseHost, 'localhost'),
-        port: Number(config.databasePort || 3306),
-        user: required(config.databaseUser, 'root'),
-        password: String(config.databasePassword || ''),
-        database: required(config.databaseName, 'arsades_db'),
+        host: required('DATABASE_HOST'),
+        port: Number(process.env.DATABASE_PORT || 3306),
+        user: required('DATABASE_USER'),
+        password: required('DATABASE_PASSWORD'),
+        database: required('DATABASE_NAME'),
 
         waitForConnections: true,
-        connectionLimit: Number(config.databaseConnectionLimit || 10),
-        charset: 'utf8mb4',
-        timezone: 'Z'
+        connectionLimit: Number(process.env.DATABASE_CONNECTION_LIMIT || 10),
+        queueLimit: 0,
+
+        connectTimeout: 15000,
+        timezone: 'Z',
+
+        decimalNumbers: true,
+        dateStrings: false
     })
 
     return globalThis.__mysqlPool
@@ -60,12 +52,13 @@ export async function dbQuery<T extends RowDataPacket[]>(sql: string, params: Db
 
 export async function dbExecute(sql: string, params: DbParams = [], connection?: PoolConnection) {
     const executor = connection || getMysqlPool()
-    const [result] = await executor.execute<ResultSetHeader>(sql, params)
+    const [result] = await executor.execute(sql, params)
     return result
 }
 
 export async function withTransaction<T>(callback: (connection: PoolConnection) => Promise<T>) {
     const connection = await getMysqlPool().getConnection()
+
     try {
         await connection.beginTransaction()
         const result = await callback(connection)
