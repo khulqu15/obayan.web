@@ -619,6 +619,8 @@ import EditorGalleryPage from '~/components/editor/GalleryPage.vue'
 import EditorProfilePage from '~/components/editor/ProfilePage.vue'
 import EditorProgramPage from '~/components/editor/ProgramPage.vue'
 import EditorRegistrationPage from '~/components/editor/RegistrationPage.vue'
+import EditorOtherEducation from '~/components/editor/OtherEducation.vue'
+import OtherEducation from '~/components/editor/OtherEducation.vue'
 
 definePageMeta({
   layout: 'app-web',
@@ -1023,6 +1025,11 @@ const availableSectionTypes = [
     label: 'Halaman Pendaftaran',
     description: 'Editor khusus untuk mengatur formulir PSB, status pendaftaran, timeline, kontak, dan multiple brosur.'
   },
+  {
+    key: 'OtherEducation',
+    label: 'Pendidikan Non Formal',
+    description: 'Hero slider untuk pendidikan/kegiatan lain.'
+  }
 ] as const
 
 function sectionLabel(key?: string) {
@@ -1124,11 +1131,6 @@ async function moveDown(id: string) {
   await moveSection(id, 'down')
 }
 
-function triggerSectionMediaPick(id: string) {
-  currentMediaSectionId.value = id
-  sectionMediaPicker.value?.click()
-}
-
 async function onPickSectionMedia(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0] || null
   const id = currentMediaSectionId.value
@@ -1140,42 +1142,6 @@ async function onPickSectionMedia(e: Event) {
     sectionMedia(id).mode = 'link'
   }
   if (sectionMediaPicker.value) sectionMediaPicker.value.value = ''
-}
-
-function applySectionMediaLink(id: string) {
-  const value = sectionMedia(id).link.trim()
-  if (!value) return
-  sectionMedia(id).url = value
-}
-
-async function copySectionMediaUrl(id: string) {
-  const value = sectionMedia(id).url
-  if (!value) return
-  try {
-    await navigator.clipboard.writeText(value)
-  } catch {}
-}
-
-function insertMediaIntoJson(id: string) {
-  const value = sectionMedia(id).url
-  if (!value || !localEdits[id]) return
-  try {
-    const raw = localEdits[id].propsText?.trim()
-    if (!raw) {
-      localEdits[id].propsText = JSON.stringify({ image: value }, null, 2)
-      validateJson(id)
-      return
-    }
-    const parsed = JSON.parse(raw)
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      if (!('image' in parsed)) parsed.image = value
-      else if (!('media' in parsed)) parsed.media = value
-      else if (Array.isArray(parsed.media)) parsed.media.push(value)
-      else parsed.media = [parsed.media, value]
-      localEdits[id].propsText = JSON.stringify(parsed, null, 2)
-      validateJson(id)
-    }
-  } catch {}
 }
 
 const componentMap: Record<string, any> = {
@@ -1190,6 +1156,7 @@ const componentMap: Record<string, any> = {
   ProfilePage: EditorProfilePage,
   ProgramPage: EditorProgramPage,
   RegistrationPage: EditorRegistrationPage,
+  OtherEducation: EditorOtherEducation,
 }
 
 function resolveSectionComponent(key: string) {
@@ -1208,13 +1175,6 @@ function closeAllModals() {
   modal.newPage = false
   modal.rename = false
   modal.clone = false
-}
-
-function openNewPage() {
-  formNew.path = '/'
-  formNew.title = ''
-  formNew.description = ''
-  modal.newPage = true
 }
 
 function openRenameFor(path: string) {
@@ -1241,45 +1201,6 @@ async function createPageNow() {
   await createPage({ path: p, title: formNew.title, description: formNew.description, status: 'draft' })
   modal.newPage = false
   selectPath(p)
-}
-
-async function createRegistrationPage() {
-  const path = normalizePath('/registration')
-
-  const pageExists = pages.value.some((item: any) => normalizePath(item.path) === path)
-
-  if (!pageExists) {
-    await createPage({
-      path,
-      title: 'Pendaftaran Santri Baru',
-      description: 'Formulir pendaftaran santri baru secara online.',
-      status: 'draft'
-    })
-  }
-
-  selectPath(path)
-  currentPath.value = path
-  actionPath.value = path
-  ensureActivePath(path)
-
-  await subscribePage(path)
-  await nextTick()
-
-  const existingSection = sections.value.find((item: any) => item.key === 'RegistrationPage')
-
-  if (existingSection) {
-    activeSectionId.value = existingSection.id
-    return
-  }
-
-  const newId = await addSection({
-    key: 'RegistrationPage',
-    enabled: true
-  })
-
-  if (newId) {
-    activeSectionId.value = newId
-  }
 }
 
 function openRenamePage() {

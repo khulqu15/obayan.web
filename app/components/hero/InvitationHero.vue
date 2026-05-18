@@ -1,71 +1,115 @@
 <template>
-  <section class="relative dark:bg-neutral-900 bg-gray-100">
-    <div class="max-w-340 mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-
+  <section class="relative bg-gray-100 dark:bg-neutral-900">
+    <div class="mx-auto max-w-340 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
       <div
-        class="relative overflow-hidden rounded-4xl shadow-xl border border-gray-200/70 dark:border-neutral-800 isolate transition-transform duration-500 hover:scale-[1.01]">
+        class="relative isolate overflow-hidden rounded-4xl border border-gray-200/70 shadow-xl transition-transform duration-500 hover:scale-[1.01] dark:border-neutral-800"
+      >
         <div class="absolute inset-0">
-          <div class="absolute inset-0 bg-center bg-cover" :style="{ backgroundImage: `url(${state.bg})` }" />
+          <div
+            class="absolute inset-0 bg-cover bg-center"
+            :style="{ backgroundImage: `url(${state.bg})` }"
+          />
           <div class="absolute inset-0 bg-[rgba(var(--app-primary-rgb),0.8)] mix-blend-multiply" />
           <div class="absolute inset-0 bg-linear-to-br from-white/5 via-transparent to-white/10" />
         </div>
 
-        <div class="relative grid grid-cols-12 gap-6 items-center">
-          <div class="col-span-12 md:col-span-7 px-8 sm:px-12 py-12 sm:py-16">
-            <p class="inline-flex items-center gap-2 text-white/90 text-[11px] font-semibold uppercase tracking-wider">
+        <div class="relative grid grid-cols-12 items-center gap-6">
+          <div class="col-span-12 px-8 py-12 sm:px-12 sm:py-16 md:col-span-7">
+            <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-white/90">
               <span class="inline-block size-1.5 rounded-full bg-white/80" />
               {{ state.eyebrow }}
             </p>
 
-            <h1 class="mt-2 text-white text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
-              {{ state.preText }}
-              <span class="underline decoration-white/40">{{ state.highlightText }}</span>
-              {{ state.suffixText }}
-              <span class="text-white drop-shadow">{{ state.brand }}</span>
+            <h1 class="mt-2 text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
+              {{ state.titlePrefix }}
+              <span class="underline decoration-white/40">
+                {{ state.titleUnderline }}
+              </span>
+              {{ state.titleSuffix }}
+              <span class="text-white drop-shadow">
+                {{ state.brand }}
+              </span>
             </h1>
 
-            <p class="mt-3 text-white/90 max-w-xl">
+            <p class="mt-3 max-w-xl text-white/90">
               {{ state.subtitle }}
             </p>
 
             <div class="mt-6 flex flex-wrap gap-3">
-              <a :href="state.ctaPrimary.href"
-                 class="inline-flex items-center gap-2 rounded-xl bg-white text-blue-700 px-5 py-3 text-sm font-semibold hover:bg-white/90">
+              <a
+                v-if="state.primaryCTA?.label"
+                :href="state.primaryCTA.href || '#'"
+                class="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-blue-700 transition hover:bg-white/90"
+              >
                 <ClientOnly>
-                  <Icon v-if="state.ctaPrimary?.icon" :icon="state.ctaPrimary.icon" class="size-4" />
+                  <Icon
+                    v-if="state.primaryCTA?.icon"
+                    :icon="state.primaryCTA.icon"
+                    class="size-4"
+                  />
                 </ClientOnly>
-                {{ state.ctaPrimary.label }}
+                {{ state.primaryCTA.label }}
               </a>
-              <a :href="state.ctaSecondary.href"
-                 class="inline-flex items-center gap-1.5 text-white/90 text-sm font-medium underline-offset-4 hover:underline">
-                {{ state.ctaSecondary.label }}
+
+              <a
+                v-if="state.secondaryCTA?.label"
+                :href="state.secondaryCTA.href || '#'"
+                class="inline-flex items-center gap-1.5 text-sm font-medium text-white/90 underline-offset-4 transition hover:underline"
+              >
+                {{ state.secondaryCTA.label }}
+
                 <ClientOnly>
-                  <Icon v-if="state.ctaSecondary?.icon" :icon="state.ctaSecondary.icon" class="size-4" />
+                  <Icon
+                    v-if="state.secondaryCTA?.icon"
+                    :icon="state.secondaryCTA.icon"
+                    class="size-4"
+                  />
                 </ClientOnly>
               </a>
             </div>
           </div>
 
-          <img v-if="state.pattern"
-               :src="state.pattern"
-               alt="Background Pattern"
-               class="absolute bottom-0 w-full opacity-80 -right-[60%]">
+          <img
+            v-if="state.pattern"
+            :src="state.pattern"
+            alt="Background Pattern"
+            class="absolute bottom-0 -right-[60%] w-full opacity-80"
+          >
         </div>
       </div>
 
-      <!-- Hadist -->
-      <figure v-if="state.hadithArabic || state.hadithTranslation || state.hadithSource"
-        class="mt-6 sm:mt-8 rounded-2xl border border-gray-200/70 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/70 backdrop-blur p-5 sm:p-6 shadow">
+      <figure
+        v-if="state.hadithArabic || state.hadithTranslation || state.hadithSource"
+        class="mt-6 rounded-2xl border border-gray-200/70 bg-white/80 p-5 shadow backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/70 sm:mt-8 sm:p-6"
+      >
         <blockquote class="text-center">
-          <p class="text-lg sm:text-xl font-medium text-gray-900 dark:text-white leading-relaxed">
-            <span v-if="state.hadithArabic" class="block text-2xl sm:text-3xl mb-2 font-semibold">{{ state.hadithArabic }}</span>
-            <span v-if="state.hadithTranslation" class="block text-gray-700 dark:text-neutral-300 text-base">
+          <p class="text-lg font-medium leading-relaxed text-gray-900 dark:text-white sm:text-xl">
+            <span
+              v-if="state.hadithArabic"
+              class="mb-2 block text-2xl font-semibold sm:text-3xl"
+            >
+              {{ state.hadithArabic }}
+            </span>
+
+            <span
+              v-if="state.hadithTranslation"
+              class="block text-base text-gray-700 dark:text-neutral-300"
+            >
               {{ state.hadithTranslation }}
             </span>
           </p>
         </blockquote>
-        <figcaption v-if="state.hadithSource" class="mt-3 text-center text-sm text-gray-500 dark:text-neutral-400">
-          <ClientOnly><Icon icon="ph:book-open-text" class="inline size-4 me-1 align-[-2px]" /></ClientOnly>
+
+        <figcaption
+          v-if="state.hadithSource"
+          class="mt-3 text-center text-sm text-gray-500 dark:text-neutral-400"
+        >
+          <ClientOnly>
+            <Icon
+              icon="ph:book-open-text"
+              class="me-1 inline size-4 align-[-2px]"
+            />
+          </ClientOnly>
           {{ state.hadithSource }}
         </figcaption>
       </figure>
@@ -74,58 +118,105 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, onMounted, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
-import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
+import { reactive, onMounted, onUnmounted } from 'vue'
+import { useNuxtApp, useRuntimeConfig } from '#imports'
 import { ref as dbRef, query, orderByChild, equalTo, onValue } from 'firebase/database'
 import type { Query } from 'firebase/database'
 
 const config = useRuntimeConfig()
-const clientName = config.public.clientName || 'alinayah'
+const clientName = String(config.public.clientName || 'martopuro')
 
-type CTA = { label: string; href: string; icon?: string }
-type Shape = {
-  bg: string; pattern?: string; eyebrow: string;
-  preText: string; highlightText: string; suffixText: string; brand: string;
-  subtitle: string;
-  hadithArabic?: string; hadithTranslation?: string; hadithSource?: string;
-  ctaPrimary: CTA; ctaSecondary: CTA
+type CTA = {
+  label: string
+  href: string
+  icon?: string
 }
 
-const props = defineProps<{ override?: Partial<Shape> }>()
+type Shape = {
+  bg: string
+  pattern?: string
+  eyebrow: string
+  titlePrefix: string
+  titleUnderline: string
+  titleSuffix: string
+  brand: string
+  subtitle: string
+  hadithArabic?: string
+  hadithTranslation?: string
+  hadithSource?: string
+  primaryCTA: CTA
+  secondaryCTA: CTA
+}
+
+type LegacyShape = Partial<Shape> & {
+  preText?: string
+  highlightText?: string
+  suffixText?: string
+  ctaPrimary?: CTA
+  ctaSecondary?: CTA
+}
+
+const props = defineProps<{
+  override?: LegacyShape
+}>()
 
 const defaults: Shape = {
   bg: '/assets/images/profile.png',
   pattern: '/assets/pattern.png',
   eyebrow: 'Ajakan Kebaikan',
-  preText: 'Ayo',
-  highlightText: 'Mondok',
-  suffixText: 'di',
-  brand: 'Ponpes Alinayah',
-  subtitle: 'Lingkungan yang menumbuhkan adab, ilmu, dan kemandirian. Kurikulum diniyah & formal terpadu, pembinaan tahfidz, serta program kepemimpinan dan pengabdian.',
-  hadithArabic: 'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ',
-  hadithTranslation: '“Barangsiapa menempuh jalan untuk mencari ilmu, Allah akan mudahkan baginya jalan menuju Surga.”',
+  titlePrefix: 'Ayo',
+  titleUnderline: 'Mondok',
+  titleSuffix: 'di',
+  brand: 'Desa Martopuro',
+  subtitle:
+    'Website resmi Desa Martopuro sebagai pusat informasi, layanan masyarakat, berita desa, dan potensi lokal secara digital.',
+  hadithArabic:
+    'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ',
+  hadithTranslation:
+    '“Barangsiapa menempuh jalan untuk mencari ilmu, Allah akan mudahkan baginya jalan menuju Surga.”',
   hadithSource: 'HR. Muslim',
-  ctaPrimary: { label: 'Alinayah', href: '/profile', icon: 'ph:student' },
-  ctaSecondary: { label: 'Pelajari lebih lanjut', href: '/program', icon: 'ph:arrow-right' }
+  primaryCTA: {
+    label: 'Profil Desa',
+    href: '/profile',
+    icon: 'lucide:home'
+  },
+  secondaryCTA: {
+    label: 'Layanan Desa',
+    href: '/services',
+    icon: 'lucide:arrow-right'
+  }
 }
 
 const state = reactive<Shape>({ ...defaults })
-function merge(b: Shape, p: Partial<Shape> = {}): Shape {
+
+function merge(base: Shape, patch: LegacyShape = {}): Shape {
   return {
-    bg: p.bg ?? b.bg,
-    pattern: p.pattern ?? b.pattern,
-    eyebrow: p.eyebrow ?? b.eyebrow,
-    preText: p.preText ?? b.preText,
-    highlightText: p.highlightText ?? b.highlightText,
-    suffixText: p.suffixText ?? b.suffixText,
-    brand: p.brand ?? b.brand,
-    subtitle: p.subtitle ?? b.subtitle,
-    hadithArabic: p.hadithArabic ?? b.hadithArabic,
-    hadithTranslation: p.hadithTranslation ?? b.hadithTranslation,
-    hadithSource: p.hadithSource ?? b.hadithSource,
-    ctaPrimary: { ...b.ctaPrimary, ...(p.ctaPrimary || {}) },
-    ctaSecondary: { ...b.ctaSecondary, ...(p.ctaSecondary || {}) }
+    bg: patch.bg ?? base.bg,
+    pattern: patch.pattern ?? base.pattern,
+    eyebrow: patch.eyebrow ?? base.eyebrow,
+
+    // Field baru dari editor
+    titlePrefix: patch.titlePrefix ?? patch.preText ?? base.titlePrefix,
+    titleUnderline: patch.titleUnderline ?? patch.highlightText ?? base.titleUnderline,
+    titleSuffix: patch.titleSuffix ?? patch.suffixText ?? base.titleSuffix,
+
+    brand: patch.brand ?? base.brand,
+    subtitle: patch.subtitle ?? base.subtitle,
+
+    hadithArabic: patch.hadithArabic ?? base.hadithArabic,
+    hadithTranslation: patch.hadithTranslation ?? base.hadithTranslation,
+    hadithSource: patch.hadithSource ?? base.hadithSource,
+
+    // Field baru dari editor + fallback field lama
+    primaryCTA: {
+      ...base.primaryCTA,
+      ...(patch.primaryCTA || patch.ctaPrimary || {})
+    },
+    secondaryCTA: {
+      ...base.secondaryCTA,
+      ...(patch.secondaryCTA || patch.ctaSecondary || {})
+    }
   }
 }
 
@@ -134,16 +225,22 @@ let unsub: (() => void) | null = null
 
 function subscribeFromRTDBByKey() {
   if (typeof window === 'undefined') return
+
   const { $realtimeDb }: any = useNuxtApp()
 
-  const sectionsPath =  `${clientName}/web/pages/home/sections`
-  const q: Query = query(dbRef($realtimeDb, sectionsPath), orderByChild('key'), equalTo(KEY))
+  const sectionsPath = `${clientName}/web/pages/home/sections`
+  const q: Query = query(
+    dbRef($realtimeDb, sectionsPath),
+    orderByChild('key'),
+    equalTo(KEY)
+  )
 
   unsub = onValue(q, (snap) => {
     if (!snap.exists()) return
+
     const obj = snap.val() as Record<string, any>
-    console.log(`[RTDB] ${KEY} updated:`, obj)
     const first = Object.values(obj)[0] as any
+
     if (first && (first.enabled ?? true)) {
       const props = first.props || {}
       Object.assign(state, merge(defaults, props))
@@ -154,10 +251,13 @@ function subscribeFromRTDBByKey() {
 onMounted(() => {
   if (props.override) {
     Object.assign(state, merge(defaults, props.override))
-  } else {
-    subscribeFromRTDBByKey()
+    return
   }
+
+  subscribeFromRTDBByKey()
 })
 
-onUnmounted(() => { if (unsub) unsub(); })
+onUnmounted(() => {
+  if (unsub) unsub()
+})
 </script>

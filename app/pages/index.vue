@@ -118,6 +118,7 @@ import GirlHero from '~/components/hero/GirlHero.vue'
 import InvitationHero from '~/components/hero/InvitationHero.vue'
 import HeroFacilityHero from '~/components/hero/FacilityHero.vue'
 import HeroProgramHero from '~/components/hero/ProgramHero.vue'
+import OtherEducation from '~/components/hero/OtherEducation.vue'
 
 const HOME_PATH = '/'
 
@@ -350,7 +351,12 @@ const registry: Record<string, any> = {
   ProgramHero: HeroProgramHero,
   HeroProgramHero,
 
-  GirlHero: GirlHero
+  GirlHero: GirlHero,
+
+  OtherEducation,
+  OtherEducations: OtherEducation,
+  HeroOtherEducation: OtherEducation,
+  HeroOtherEducations: OtherEducation
 }
 
 const UnknownSection = defineComponent({
