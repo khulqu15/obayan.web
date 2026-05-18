@@ -414,8 +414,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from "fs"
-import { computed, reactive, ref } from "vue"
+import { computed, reactive, ref, watch } from "vue"
 
 type PanelKey = 'pages' | 'layers' | 'assets'
 type ToolKey = 'select' | 'frame' | 'text' | 'shape' | 'hand' | 'comment'
