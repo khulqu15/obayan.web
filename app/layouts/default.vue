@@ -1,10 +1,8 @@
 <template>
     <div>
-        <AppNavbar v-if="isObayanDomain"/>
-        <AppNavbarVillage v-if="isMartopuroDomain"/>
+      <AppNavbar/>
         <slot />
-        <AppFooter v-if="isObayanDomain" />
-        <AppFooterVillage v-if="isMartopuroDomain" />
+      <AppFooter/>
     </div>
 </template>
 

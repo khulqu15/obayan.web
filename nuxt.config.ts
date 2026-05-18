@@ -120,9 +120,15 @@ export default defineNuxtConfig({
       cloudinaryUploadPreset: process.env.NUXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '',
 
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || '',
-      apiRemoteEnabled: process.env.NUXT_PUBLIC_API_REMOTE_ENABLED || false
+      apiRemoteEnabled: process.env.NUXT_PUBLIC_API_REMOTE_ENABLED || false,
+      
+      midtransClientKey: process.env.NUXT_PUBLIC_MIDTRANS_CLIENT_KEY || '',
+      midtransIsProduction: process.env.NUXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true'
 
     },
+    midtransServerKey: process.env.MIDTRANS_SERVER_KEY || '',
+    midtransIsProduction: process.env.MIDTRANS_IS_PRODUCTION === 'true',
+
     databaseHost: process.env.DATABASE_HOST || 'localhost',
     databasePort: process.env.DATABASE_PORT || '3306',
     databaseUser: process.env.DATABASE_USER || 'root',

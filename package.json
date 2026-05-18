@@ -33,6 +33,7 @@
     "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.2",
     "firebase": "^12.1.0",
+    "html2pdf.js": "^0.14.0",
     "isomorphic-dompurify": "^2.26.0",
     "konva": "^10.3.0",
     "marked": "^16.2.0",
