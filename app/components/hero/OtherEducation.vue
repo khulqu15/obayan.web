@@ -4,6 +4,8 @@
     <div class="pointer-events-none absolute inset-0 opacity-70 dark:opacity-20">
       <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.06)_1px,transparent_1px)] bg-[size:44px_44px]"></div>
       <div class="absolute inset-0 bg-linear-to-r from-white via-white/30 to-green-100/40 dark:from-neutral-950 dark:via-neutral-950/80 dark:to-green-950/20"></div>
+      <div class="absolute -left-24 top-20 h-80 w-80 rounded-full bg-green-200/45 blur-3xl dark:bg-green-900/20"></div>
+      <div class="absolute -right-24 bottom-20 h-80 w-80 rounded-full bg-lime-200/35 blur-3xl dark:bg-lime-900/10"></div>
     </div>
 
     <div class="relative mx-auto max-w-340 px-4 sm:px-6 lg:px-8">
@@ -28,6 +30,38 @@
           <p class="mt-5 max-w-2xl text-base leading-8 text-slate-600 dark:text-neutral-300">
             {{ safeSubtitle }}
           </p>
+
+          <!-- Global CTA -->
+          <div class="mt-7 flex flex-wrap gap-3">
+            <button
+              type="button"
+              class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 text-sm font-black text-white shadow-xl shadow-green-500/25 transition hover:-translate-y-0.5 hover:bg-green-700"
+              @click="goToAllEducation"
+            >
+              <Icon icon="lucide:grid-3x3" class="h-4 w-4" />
+              Semua Edukasi
+            </button>
+
+            <button
+              v-if="activeSlide"
+              type="button"
+              class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-green-200 bg-white px-5 text-sm font-black text-green-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-green-50 dark:border-green-900/40 dark:bg-neutral-900 dark:text-green-300 dark:hover:bg-green-950/20"
+              @click="goToDetail(activeSlide)"
+            >
+              Detail
+              <Icon icon="lucide:arrow-up-right" class="h-4 w-4" />
+            </button>
+
+            <button
+              v-if="activeSlide"
+              type="button"
+              class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              @click="openLearnModal(activeSlide)"
+            >
+              <Icon icon="lucide:sparkles" class="h-4 w-4" />
+              Pelajari
+            </button>
+          </div>
 
           <!-- Category Pills -->
           <div v-if="categoryItems.length" class="mt-7 flex flex-wrap gap-2.5">
@@ -71,40 +105,30 @@
                 </div>
 
                 <p class="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-neutral-400">
-                  {{ activeSlide.short_description }}
+                  {{ activeSlide.short_description || 'Lihat ringkasan program dan informasi kegiatan pendidikan lainnya.' }}
                 </p>
+
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    class="inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-xs font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+                    @click="openLearnModal(activeSlide)"
+                  >
+                    Pelajari
+                    <Icon icon="lucide:book-open" class="h-4 w-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    class="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-xs font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    @click="goToDetail(activeSlide)"
+                  >
+                    Detail
+                    <Icon icon="lucide:arrow-up-right" class="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-
-          <!-- CTA -->
-          <div v-if="activeSlide" class="mt-7 flex flex-wrap gap-3">
-            <button
-              type="button"
-              class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 text-sm font-black text-white shadow-xl shadow-green-500/25 transition hover:-translate-y-0.5 hover:bg-green-700"
-              @click="openDetailModal(activeSlide)"
-            >
-              Lihat Detail
-              <Icon icon="lucide:arrow-up-right" class="h-4 w-4" />
-            </button>
-
-            <button
-              type="button"
-              class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
-              @click="openImageModal(activeSlide)"
-            >
-              <Icon icon="lucide:image" class="h-4 w-4" />
-              Lihat Gambar
-            </button>
-
-            <button
-              type="button"
-              class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
-              @click="shareSlide(activeSlide)"
-            >
-              <Icon icon="lucide:share-2" class="h-4 w-4" />
-              Bagikan
-            </button>
           </div>
         </div>
 
@@ -166,7 +190,7 @@
               </div>
 
               <!-- Side Icon -->
-              <div class="absolute left-5 top-[65%] hidden -translate-y-1/2 sm:block">
+              <div class="absolute left-8 top-[55%] hidden -translate-y-1/2 sm:block">
                 <div class="grid h-16 w-16 place-items-center rounded-[22px] bg-white/15 text-white ring-1 ring-white/20 backdrop-blur">
                   <Icon :icon="categoryIcon(activeSlide.category)" class="h-8 w-8" />
                 </div>
@@ -179,23 +203,36 @@
                     {{ activeSlide.title }}
                   </h3>
 
+                  <p class="mt-3 line-clamp-2 max-w-xl text-sm leading-6 text-white/80">
+                    {{ activeSlide.short_description || 'Pelajari informasi program, jadwal, lokasi, dan deskripsi kegiatan.' }}
+                  </p>
+
                   <div class="mt-5 flex flex-wrap items-center gap-3">
                     <button
                       type="button"
                       class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-black text-slate-950 transition hover:bg-white/90"
-                      @click.stop="openDetailModal(activeSlide)"
+                      @click.stop="openLearnModal(activeSlide)"
                     >
-                      Lihat Detail
+                      Pelajari
+                      <Icon icon="lucide:sparkles" class="h-4 w-4" />
+                    </button>
+
+                    <button
+                      type="button"
+                      class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-sm font-black text-white shadow-lg shadow-green-600/25 transition hover:bg-green-700"
+                      @click.stop="goToDetail(activeSlide)"
+                    >
+                      Detail
                       <Icon icon="lucide:arrow-up-right" class="h-4 w-4" />
                     </button>
 
                     <button
                       type="button"
                       class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-white/15 px-4 text-sm font-black text-white ring-1 ring-white/15 backdrop-blur transition hover:bg-white/25"
-                      @click.stop="openImageModal(activeSlide)"
+                      @click.stop="goToAllEducation"
                     >
-                      <Icon icon="lucide:maximize-2" class="h-4 w-4" />
-                      Full Image
+                      <Icon icon="lucide:grid-3x3" class="h-4 w-4" />
+                      Semua Edukasi
                     </button>
                   </div>
                 </div>
@@ -207,7 +244,7 @@
                 >
                   <div class="mb-2 flex items-center justify-between gap-3">
                     <span class="text-xs font-black">
-                      Slide {{ activeIndex + 1 }}/{{ normalizedSlides.length }}
+                      Slide {{ activeIndex + 1 }}/{{ activeList.length }}
                     </span>
 
                     <button
@@ -237,7 +274,7 @@
 
             <!-- Prev/Next -->
             <button
-              v-if="showControls && normalizedSlides.length > 1"
+              v-if="showControls && activeList.length > 1"
               type="button"
               class="absolute left-4 top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white/25"
               aria-label="Previous slide"
@@ -247,7 +284,7 @@
             </button>
 
             <button
-              v-if="showControls && normalizedSlides.length > 1"
+              v-if="showControls && activeList.length > 1"
               type="button"
               class="absolute right-4 top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white/25"
               aria-label="Next slide"
@@ -276,11 +313,11 @@
 
           <!-- Dots -->
           <div
-            v-if="normalizedSlides.length > 1"
+            v-if="activeList.length > 1"
             class="mt-5 flex items-center justify-center gap-2"
           >
             <button
-              v-for="(_, index) in normalizedSlides"
+              v-for="(_, index) in activeList"
               :key="'dot-' + index"
               type="button"
               class="h-2.5 rounded-full transition-all"
@@ -294,7 +331,7 @@
 
           <!-- Thumbnails -->
           <div
-            v-if="normalizedSlides.length > 1"
+            v-if="activeList.length > 1"
             class="mt-5 grid gap-3 sm:grid-cols-3"
           >
             <button
@@ -314,7 +351,7 @@
                 loading="lazy"
               />
 
-              <div class="min-w-0">
+              <div class="min-w-0 flex-1">
                 <p class="truncate text-xs font-black text-slate-950 dark:text-white">
                   {{ slide.title }}
                 </p>
@@ -322,6 +359,8 @@
                   {{ slide.category || slide.location || '-' }}
                 </p>
               </div>
+
+              <Icon icon="lucide:chevron-right" class="h-4 w-4 shrink-0 text-slate-400 transition group-hover:text-green-600" />
             </button>
           </div>
         </div>
@@ -371,144 +410,248 @@
                   class="max-h-[78vh] w-full rounded-[24px] object-contain"
                 />
               </div>
+
+              <div class="flex flex-col gap-2 border-t border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950 sm:flex-row sm:items-center sm:justify-between">
+                <p class="line-clamp-1 text-sm font-bold text-slate-700 dark:text-neutral-200">
+                  {{ imageModal.slide.short_description || 'Preview gambar program edukasi.' }}
+                </p>
+
+                <div class="flex gap-2">
+                  <button
+                    type="button"
+                    class="inline-flex h-10 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-xs font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    @click="openLearnFromImage"
+                  >
+                    Pelajari
+                  </button>
+
+                  <button
+                    type="button"
+                    class="inline-flex h-10 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-xs font-black text-white transition hover:bg-green-700"
+                    @click="goToDetail(imageModal.slide)"
+                  >
+                    Detail
+                    <Icon icon="lucide:arrow-up-right" class="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </Transition>
     </Teleport>
 
-    <!-- DETAIL MODAL -->
+    <!-- LEARN MODAL -->
     <Teleport to="body">
-        <Transition
-            enter-active-class="transition duration-300 ease-out"
-            enter-from-class="translate-y-4 opacity-0 scale-[0.98]"
-            enter-to-class="translate-y-0 opacity-100 scale-100"
-            leave-active-class="transition duration-200 ease-in"
-            leave-from-class="translate-y-0 opacity-100 scale-100"
-            leave-to-class="translate-y-4 opacity-0 scale-[0.98]"
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="translate-y-4 opacity-0 scale-[0.98]"
+        enter-to-class="translate-y-0 opacity-100 scale-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="translate-y-0 opacity-100 scale-100"
+        leave-to-class="translate-y-4 opacity-0 scale-[0.98]"
+      >
+        <div
+          v-if="learnModal.show && learnModal.slide"
+          class="fixed inset-0 z-[10000] bg-slate-950/70 px-4 py-6 backdrop-blur-md sm:py-8"
+          @click.self="closeLearnModal"
         >
+          <div class="flex min-h-full items-center justify-center">
             <div
-            v-if="detailModal.show && detailModal.slide"
-            class="fixed inset-0 z-[10000] bg-slate-950/70 px-4 py-6 backdrop-blur-md sm:py-8"
-            @click.self="closeDetailModal"
+              class="flex max-h-[calc(100vh-3rem)] w-full max-w-5xl flex-col overflow-hidden rounded-[34px] border border-slate-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-950 sm:max-h-[calc(100vh-4rem)]"
             >
-            <div class="flex min-h-full items-center justify-center">
-                <div
-                class="flex max-h-[calc(100vh-3rem)] w-full max-w-5xl flex-col overflow-hidden rounded-[34px] border border-slate-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-950 sm:max-h-[calc(100vh-4rem)]"
-                >
-                <!-- Modal Header -->
-                <div class="relative shrink-0 overflow-hidden border-b border-slate-200 bg-linear-to-br from-green-600 via-green-600 to-lime-500 p-5 text-white dark:border-neutral-800 md:p-7">
-                    <div class="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-white/20 blur-3xl"></div>
-                    <div class="absolute -bottom-16 left-8 h-36 w-36 rounded-full bg-lime-200/30 blur-3xl"></div>
+              <!-- Modal Header -->
+              <div class="relative shrink-0 overflow-hidden border-b border-slate-200 bg-linear-to-br from-green-600 via-green-600 to-lime-500 p-5 text-white dark:border-neutral-800 md:p-7">
+                <div class="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-white/20 blur-3xl"></div>
+                <div class="absolute -bottom-16 left-8 h-36 w-36 rounded-full bg-lime-200/30 blur-3xl"></div>
 
-                    <div class="relative z-10 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                    <div class="min-w-0">
-                        <div class="flex flex-wrap items-center gap-2">
-                        <span
-                            v-if="detailModal.slide.category"
-                            class="rounded-full bg-white/15 px-3 py-1.5 text-xs font-black text-white ring-1 ring-white/15 backdrop-blur"
-                        >
-                            {{ detailModal.slide.category }}
-                        </span>
+                <div class="relative z-10 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                  <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span
+                        v-if="learnModal.slide.category"
+                        class="rounded-full bg-white/15 px-3 py-1.5 text-xs font-black text-white ring-1 ring-white/15 backdrop-blur"
+                      >
+                        {{ learnModal.slide.category }}
+                      </span>
 
-                        <span
-                            v-if="detailModal.slide.interval"
-                            class="rounded-full bg-white/15 px-3 py-1.5 text-xs font-black text-white ring-1 ring-white/15 backdrop-blur"
-                        >
-                            {{ detailModal.slide.interval }}
-                        </span>
-                        </div>
-
-                        <h3 class="mt-4 text-2xl font-black leading-tight tracking-[-0.035em] md:text-4xl">
-                        {{ detailModal.slide.title }}
-                        </h3>
-
-                        <p class="mt-3 max-w-3xl text-sm leading-7 text-green-50/90 md:text-base">
-                        {{ detailModal.slide.short_description }}
-                        </p>
+                      <span
+                        v-if="learnModal.slide.interval"
+                        class="rounded-full bg-white/15 px-3 py-1.5 text-xs font-black text-white ring-1 ring-white/15 backdrop-blur"
+                      >
+                        {{ learnModal.slide.interval }}
+                      </span>
                     </div>
+
+                    <h3 class="mt-4 text-2xl font-black leading-tight tracking-[-0.035em] md:text-4xl">
+                      {{ learnModal.slide.title }}
+                    </h3>
+
+                    <p class="mt-3 max-w-3xl text-sm leading-7 text-green-50/90 md:text-base">
+                      {{ learnModal.slide.short_description || 'Pelajari ringkasan program sebelum membuka halaman detail lengkap.' }}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/15 text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white/25"
+                    @click="closeLearnModal"
+                  >
+                    <Icon icon="lucide:x" class="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+
+              <!-- Scrollable Modal Body -->
+              <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                <div class="grid gap-0 lg:grid-cols-[320px,minmax(0,1fr)]">
+                  <!-- Sidebar Info -->
+                  <aside class="border-b border-slate-200 bg-slate-50 p-5 dark:border-neutral-800 dark:bg-neutral-900/60 lg:border-b-0 lg:border-r">
+                    <img
+                      :src="learnModal.slide.image || fallbackImage"
+                      :alt="learnModal.slide.title"
+                      class="h-44 w-full rounded-[24px] object-cover shadow-sm"
+                    />
+
+                    <div class="mt-5 grid grid-cols-1 gap-3">
+                      <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950">
+                        <div class="flex items-center gap-3">
+                          <Icon icon="lucide:map-pin" class="h-5 w-5 shrink-0 text-green-600" />
+                          <div class="min-w-0">
+                            <p class="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
+                              Lokasi
+                            </p>
+                            <p class="mt-0.5 text-sm font-bold text-slate-950 dark:text-white">
+                              {{ learnModal.slide.location || '-' }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950">
+                        <div class="flex items-center gap-3">
+                          <Icon icon="lucide:calendar-days" class="h-5 w-5 shrink-0 text-green-600" />
+                          <div class="min-w-0">
+                            <p class="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
+                              Jadwal
+                            </p>
+                            <p class="mt-0.5 text-sm font-bold text-slate-950 dark:text-white">
+                              {{ dateRangeLabel(learnModal.slide.start_date, learnModal.slide.end_date) }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950">
+                        <div class="flex items-center gap-3">
+                          <Icon icon="lucide:repeat" class="h-5 w-5 shrink-0 text-green-600" />
+                          <div class="min-w-0">
+                            <p class="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
+                              Interval
+                            </p>
+                            <p class="mt-0.5 text-sm font-bold text-slate-950 dark:text-white">
+                              {{ learnModal.slide.interval || '-' }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div v-if="learnModal.slide.tags.length" class="mt-5 flex flex-wrap gap-2">
+                      <span
+                        v-for="tag in learnModal.slide.tags"
+                        :key="tag"
+                        class="rounded-full bg-green-50 px-3 py-1.5 text-xs font-black text-green-700 ring-1 ring-green-100 dark:bg-green-900/20 dark:text-green-300 dark:ring-green-900/40"
+                      >
+                        #{{ tag }}
+                      </span>
+                    </div>
+                  </aside>
+
+                  <!-- Tiptap HTML Viewer -->
+                  <main class="min-w-0 p-5 md:p-6">
+                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p class="text-xs font-black uppercase tracking-[0.16em] text-green-600 dark:text-green-300">
+                          Preview Pembelajaran
+                        </p>
+                        <h4 class="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950 dark:text-white">
+                          Ringkasan Program
+                        </h4>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 text-sm font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+                        @click="goToDetail(learnModal.slide)"
+                      >
+                        Detail
+                        <Icon icon="lucide:arrow-up-right" class="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <div class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+                      <article
+                        class="tiptap-viewer prose prose-slate max-w-none p-5 text-slate-700 dark:prose-invert dark:text-neutral-200 md:p-7"
+                        v-html="learnHtml"
+                      ></article>
+                    </div>
+                  </main>
+                </div>
+              </div>
+
+              <!-- Modal Footer -->
+              <div class="shrink-0 border-t border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p class="text-xs leading-5 text-slate-500 dark:text-neutral-400">
+                    Modal ini hanya preview singkat. Gunakan tombol Detail untuk membuka halaman lengkap.
+                  </p>
+
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      @click="goToAllEducation"
+                    >
+                      <Icon icon="lucide:grid-3x3" class="h-4 w-4" />
+                      Semua Edukasi
+                    </button>
 
                     <button
-                        type="button"
-                        class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/15 text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white/25"
-                        @click="closeDetailModal"
+                      type="button"
+                      class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 text-sm font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+                      @click="goToDetail(learnModal.slide)"
                     >
-                        <Icon icon="lucide:x" class="h-5 w-5" />
+                      Detail
+                      <Icon icon="lucide:arrow-up-right" class="h-4 w-4" />
                     </button>
-                    </div>
+
+                    <button
+                      type="button"
+                      class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      @click="closeLearnModal"
+                    >
+                      Tutup
+                    </button>
+                  </div>
                 </div>
-
-                <!-- Scrollable Modal Body -->
-                <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-                    <div class="grid gap-0 lg:grid-cols-[320px,minmax(0,1fr)]">
-                    <!-- Sidebar Info -->
-                    <aside class="border-b border-slate-200 bg-slate-50 p-5 dark:border-neutral-800 dark:bg-neutral-900/60 lg:border-b-0 lg:border-r">
-                        <div class="grid grid-cols-1 gap-3 lg:grid-cols-1">
-                        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950">
-                            <div class="flex items-center gap-3">
-                            <Icon icon="lucide:map-pin" class="h-5 w-5 shrink-0 text-green-600" />
-                            <div class="min-w-0">
-                                <p class="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
-                                Lokasi
-                                </p>
-                                <p class="mt-0.5 text-sm font-bold text-slate-950 dark:text-white">
-                                {{ detailModal.slide.location || '-' }}
-                                </p>
-                            </div>
-                            </div>
-                        </div>
-
-                        <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950">
-                            <div class="flex items-center gap-3">
-                            <Icon icon="lucide:calendar-days" class="h-5 w-5 shrink-0 text-green-600" />
-                            <div class="min-w-0">
-                                <p class="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
-                                Jadwal
-                                </p>
-                                <p class="mt-0.5 text-sm font-bold text-slate-950 dark:text-white">
-                                {{ dateRangeLabel(detailModal.slide.start_date, detailModal.slide.end_date) }}
-                                </p>
-                            </div>
-                            </div>
-                        </div>
-                        </div>
-
-                        <div v-if="detailModal.slide.tags.length" class="mt-5 flex flex-wrap gap-2">
-                        <span
-                            v-for="tag in detailModal.slide.tags"
-                            :key="tag"
-                            class="rounded-full bg-green-50 px-3 py-1.5 text-xs font-black text-green-700 ring-1 ring-green-100 dark:bg-green-900/20 dark:text-green-300 dark:ring-green-900/40"
-                        >
-                            #{{ tag }}
-                        </span>
-                        </div>
-                    </aside>
-
-                    <!-- Tiptap HTML Viewer -->
-                    <main class="min-w-0 p-5 md:p-6">
-                        <div class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-                        <article
-                            class="tiptap-viewer prose prose-slate max-w-none p-5 text-slate-700 dark:prose-invert dark:text-neutral-200 md:p-7"
-                            v-html="modalHtml"
-                        ></article>
-                        </div>
-                    </main>
-                    </div>
-                </div>
-                </div>
+              </div>
             </div>
-            </div>
-        </Transition>
+          </div>
+        </div>
+      </Transition>
     </Teleport>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 
 type EducationSlide = {
   id?: string
+  slug?: string
   image?: string
   imagePublicId?: string | null
   title?: string
@@ -524,6 +667,7 @@ type EducationSlide = {
 
 type NormalizedSlide = {
   id: string
+  slug: string
   image: string
   imagePublicId: string | null
   title: string
@@ -546,6 +690,8 @@ const props = withDefaults(
     showControls?: boolean
     sliderDelay?: number
     slides?: EducationSlide[]
+    allEducationUrl?: string
+    detailPagePath?: string
   }>(),
   {
     eyebrow: 'Pendidikan Lainnya',
@@ -555,9 +701,14 @@ const props = withDefaults(
     autoplay: true,
     showControls: true,
     sliderDelay: 4500,
-    slides: () => []
+    slides: () => [],
+    allEducationUrl: '/education',
+    detailPagePath: '/education'
   }
 )
+
+const router = useRouter()
+const route = useRoute()
 
 const fallbackImage = '/assets/images/activity.jpg'
 const activeIndex = ref(0)
@@ -576,7 +727,7 @@ const imageModal = reactive<{
   slide: null
 })
 
-const detailModal = reactive<{
+const learnModal = reactive<{
   show: boolean
   slide: NormalizedSlide | null
 }>({
@@ -619,22 +770,28 @@ const normalizedSlides = computed<NormalizedSlide[]>(() => {
 
   return raw
     .filter((slide) => slide && typeof slide === 'object')
-    .map((slide, index) => ({
-      id: String(slide.id || `other-education-${index}`),
-      image: String(slide.image || ''),
-      imagePublicId: slide.imagePublicId || null,
-      title: String(slide.title || `Program ${index + 1}`),
-      location: String(slide.location || ''),
-      start_date: String(slide.start_date || ''),
-      end_date: String(slide.end_date || ''),
-      interval: String(slide.interval || ''),
-      short_description: String(slide.short_description || ''),
-      description_rich_tiptap: String(slide.description_rich_tiptap || ''),
-      category: String(slide.category || ''),
-      tags: Array.isArray(slide.tags)
-        ? slide.tags.map((tag) => String(tag).replace(/^#/, '').trim()).filter(Boolean)
-        : []
-    }))
+    .map((slide, index) => {
+      const title = String(slide.title || `Program ${index + 1}`)
+      const id = String(slide.id || `other-education-${index}`)
+
+      return {
+        id,
+        slug: String(slide.slug || slugify(title || id)),
+        image: String(slide.image || ''),
+        imagePublicId: slide.imagePublicId || null,
+        title,
+        location: String(slide.location || ''),
+        start_date: String(slide.start_date || ''),
+        end_date: String(slide.end_date || ''),
+        interval: String(slide.interval || ''),
+        short_description: String(slide.short_description || ''),
+        description_rich_tiptap: String(slide.description_rich_tiptap || ''),
+        category: String(slide.category || ''),
+        tags: Array.isArray(slide.tags)
+          ? slide.tags.map((tag) => String(tag).replace(/^#/, '').trim()).filter(Boolean)
+          : []
+      }
+    })
 })
 
 const categoryItems = computed(() => {
@@ -662,12 +819,16 @@ const filteredSlides = computed(() => {
   return normalizedSlides.value.filter((slide) => slide.category === selectedCategory.value)
 })
 
+const activeList = computed(() => {
+  return filteredSlides.value.length ? filteredSlides.value : normalizedSlides.value
+})
+
 const activeSlide = computed(() => {
-  return filteredSlides.value[activeIndex.value] || filteredSlides.value[0] || normalizedSlides.value[0] || null
+  return activeList.value[activeIndex.value] || activeList.value[0] || null
 })
 
 const thumbnailSlides = computed(() => {
-  const list = filteredSlides.value.length ? filteredSlides.value : normalizedSlides.value
+  const list = activeList.value
 
   if (list.length <= 3) return list
 
@@ -682,14 +843,14 @@ const thumbnailSlides = computed(() => {
   return result
 })
 
-const modalHtml = computed(() => {
-  const html = detailModal.slide?.description_rich_tiptap || ''
+const learnHtml = computed(() => {
+  const html = learnModal.slide?.description_rich_tiptap || ''
 
   if (html.trim()) {
     return sanitizeHtml(html)
   }
 
-  const fallback = detailModal.slide?.short_description || 'Belum ada deskripsi lengkap untuk program ini.'
+  const fallback = learnModal.slide?.short_description || 'Belum ada deskripsi lengkap untuk program ini.'
 
   return sanitizeHtml(`<p>${escapeHtml(fallback)}</p>`)
 })
@@ -712,11 +873,25 @@ watch(
 )
 
 watch(
-  () => [props.autoplay, props.sliderDelay, filteredSlides.value.length, isPlaying.value],
+  () => [props.autoplay, props.sliderDelay, activeList.value.length, isPlaying.value],
   () => {
+    if (activeIndex.value > activeList.value.length - 1) {
+      activeIndex.value = 0
+    }
+
     restartAutoplay()
   }
 )
+
+function slugify(value: string) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'program'
+}
 
 function selectCategory(category: string) {
   selectedCategory.value = selectedCategory.value === category ? '' : category
@@ -739,12 +914,11 @@ function categoryIcon(category?: string) {
 }
 
 function indexOfSlide(id: string) {
-  const list = filteredSlides.value.length ? filteredSlides.value : normalizedSlides.value
-  return list.findIndex((slide) => slide.id === id)
+  return activeList.value.findIndex((slide) => slide.id === id)
 }
 
 function goToSlide(index: number) {
-  const list = filteredSlides.value.length ? filteredSlides.value : normalizedSlides.value
+  const list = activeList.value
   if (!list.length) return
 
   const total = list.length
@@ -766,9 +940,7 @@ function startAutoplay() {
 
   if (!props.autoplay) return
   if (!isPlaying.value) return
-
-  const list = filteredSlides.value.length ? filteredSlides.value : normalizedSlides.value
-  if (list.length <= 1) return
+  if (activeList.value.length <= 1) return
 
   const delay = Math.max(Number(props.sliderDelay || 4500), 1000)
   const tick = 60
@@ -842,35 +1014,86 @@ function closeImageModal() {
   imageModal.slide = null
 }
 
-function openDetailModal(slide: NormalizedSlide) {
-  detailModal.slide = slide
-  detailModal.show = true
+function openLearnModal(slide: NormalizedSlide) {
+  learnModal.slide = slide
+  learnModal.show = true
 }
 
-function closeDetailModal() {
-  detailModal.show = false
-  detailModal.slide = null
+function closeLearnModal() {
+  learnModal.show = false
+  learnModal.slide = null
+}
+
+function openLearnFromImage() {
+  if (!imageModal.slide) return
+
+  const slide = imageModal.slide
+  closeImageModal()
+  openLearnModal(slide)
+}
+
+function normalizePath(path?: string) {
+  const value = String(path || '').trim()
+
+  if (!value) return '/education'
+
+  return value.startsWith('/') ? value : `/${value}`
+}
+
+async function goToAllEducation() {
+  closeLearnModal()
+  closeImageModal()
+
+  await router.push({
+    path: normalizePath(props.allEducationUrl || props.detailPagePath || '/education'),
+    query: {}
+  })
+}
+
+async function goToDetail(slide?: NormalizedSlide | null) {
+  if (!slide?.slug) return
+
+  closeLearnModal()
+  closeImageModal()
+
+  const targetPath = normalizePath(props.detailPagePath || props.allEducationUrl || '/education')
+
+  await router.push({
+    path: targetPath,
+    query: {
+      detail: slide.slug
+    }
+  })
 }
 
 async function shareSlide(slide: NormalizedSlide) {
-  const text = `${slide.title}\n${slide.short_description}`.trim()
+  const detailUrl = getDetailAbsoluteUrl(slide)
+  const text = `${slide.title}\n${slide.short_description || detailUrl}`.trim()
 
   try {
     if (typeof navigator !== 'undefined' && navigator.share) {
       await navigator.share({
         title: slide.title,
         text,
-        url: typeof window !== 'undefined' ? window.location.href : undefined
+        url: detailUrl
       })
       return
     }
 
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      await navigator.clipboard.writeText(
-        `${text}\n${typeof window !== 'undefined' ? window.location.href : ''}`.trim()
-      )
+      await navigator.clipboard.writeText(`${text}\n${detailUrl}`.trim())
     }
   } catch {}
+}
+
+function getDetailAbsoluteUrl(slide: NormalizedSlide) {
+  const path = props.detailPagePath || '/education'
+  const query = `detail=${encodeURIComponent(slide.slug)}`
+  const relative = `${path}${path.includes('?') ? '&' : '?'}${query}`
+
+  if (typeof window === 'undefined') return relative
+
+  return new URL(relative, window.location.origin).toString()
 }
 
 function escapeHtml(value: string) {
@@ -916,6 +1139,16 @@ onBeforeUnmount(() => {
   color: rgb(229 229 229);
 }
 
+.tiptap-viewer {
+  color: rgb(51 65 85);
+  font-size: 1rem;
+  line-height: 1.85;
+}
+
+.dark .tiptap-viewer {
+  color: rgb(229 229 229);
+}
+
 .tiptap-viewer :deep(h1) {
   margin-top: 1.4rem;
   margin-bottom: 0.75rem;
@@ -923,6 +1156,7 @@ onBeforeUnmount(() => {
   line-height: 1.15;
   font-weight: 900;
   letter-spacing: -0.04em;
+  color: rgb(15 23 42);
 }
 
 .tiptap-viewer :deep(h2) {
@@ -932,6 +1166,7 @@ onBeforeUnmount(() => {
   line-height: 1.25;
   font-weight: 900;
   letter-spacing: -0.03em;
+  color: rgb(15 23 42);
 }
 
 .tiptap-viewer :deep(h3) {
@@ -940,6 +1175,13 @@ onBeforeUnmount(() => {
   font-size: 1.2rem;
   line-height: 1.3;
   font-weight: 850;
+  color: rgb(15 23 42);
+}
+
+.dark .tiptap-viewer :deep(h1),
+.dark .tiptap-viewer :deep(h2),
+.dark .tiptap-viewer :deep(h3) {
+  color: white;
 }
 
 .tiptap-viewer :deep(p) {
@@ -1012,10 +1254,20 @@ onBeforeUnmount(() => {
   background: rgb(23 23 23);
 }
 
-.tiptap-viewer :deep(img) {
+.tiptap-viewer :deep(img),
+.tiptap-viewer :deep(.editor-image) {
+  display: block;
   max-width: 100%;
+  height: auto;
   border-radius: 1.25rem;
-  margin: 1rem 0;
+  margin: 1.25rem auto;
+  border: 1px solid rgb(226 232 240);
+  box-shadow: 0 18px 50px -26px rgba(15, 23, 42, 0.35);
+}
+
+.dark .tiptap-viewer :deep(img),
+.dark .tiptap-viewer :deep(.editor-image) {
+  border-color: rgb(64 64 64);
 }
 
 .tiptap-viewer :deep(a) {
@@ -1024,4 +1276,70 @@ onBeforeUnmount(() => {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
+
+.tiptap-viewer :deep(iframe[src*='youtube']),
+.tiptap-viewer :deep(iframe[src*='youtu.be']),
+.tiptap-viewer :deep(.youtube-embed) {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  margin: 1.25rem 0;
+  border: 0;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  background: rgb(15 23 42);
+}
+
+.tiptap-viewer :deep(.pdf-embed),
+.tiptap-viewer :deep(.map-embed) {
+  margin: 1.25rem 0;
+  overflow: hidden;
+  border: 1px solid rgb(226 232 240);
+  border-radius: 1.25rem;
+  background: rgb(248 250 252);
+}
+
+.dark .tiptap-viewer :deep(.pdf-embed),
+.dark .tiptap-viewer :deep(.map-embed) {
+  border-color: rgb(64 64 64);
+  background: rgb(23 23 23);
+}
+
+.tiptap-viewer :deep(.pdf-embed-title),
+.tiptap-viewer :deep(.map-embed-title) {
+  border-bottom: 1px solid rgb(226 232 240);
+  background: linear-gradient(135deg, rgb(240 253 244), rgb(255 255 255));
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: rgb(30 41 59);
+}
+
+.dark .tiptap-viewer :deep(.pdf-embed-title),
+.dark .tiptap-viewer :deep(.map-embed-title) {
+  border-color: rgb(64 64 64);
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.16), rgb(23 23 23));
+  color: white;
+}
+
+.tiptap-viewer :deep(.pdf-embed-frame),
+.tiptap-viewer :deep(.map-embed-frame) {
+  width: 100%;
+  height: 420px;
+  border: 0;
+  background: white;
+}
+
+.dark .tiptap-viewer :deep(.pdf-embed-frame),
+.dark .tiptap-viewer :deep(.map-embed-frame) {
+  background: rgb(10 10 10);
+}
+
+@media (max-width: 640px) {
+  .tiptap-viewer :deep(.pdf-embed-frame),
+  .tiptap-viewer :deep(.map-embed-frame) {
+    height: 320px;
+  }
+}
 </style>
+  
