@@ -1,109 +1,107 @@
 <template>
-  <main class="min-h-screen bg-[#f7faf8] text-slate-950 pt-12">
-     <section
-    v-if="tenantChecking"
-    class="relative flex min-h-[80vh] items-center justify-center overflow-hidden px-4"
-  >
-    <div class="pointer-events-none absolute inset-0 overflow-hidden">
-      <div class="absolute -left-32 -top-32 h-80 w-80 rounded-full bg-green-200/50 blur-3xl"></div>
-      <div class="absolute right-[-120px] top-32 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl"></div>
-      <div class="absolute bottom-[-160px] left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-lime-100/70 blur-3xl"></div>
-    </div>
-
-    <div class="relative w-full max-w-md rounded-[2rem] border border-white/80 bg-white/90 p-6 text-center shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50 text-green-700">
-        <svg class="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"/>
-        </svg>
+  <main class="min-h-screen bg-[#f7faf8] pt-12 text-slate-950">
+    <!-- Tenant checking -->
+    <section
+      v-if="tenantChecking"
+      class="relative flex min-h-[80vh] items-center justify-center overflow-hidden px-4"
+    >
+      <div class="pointer-events-none absolute inset-0 overflow-hidden">
+        <div class="absolute -left-32 -top-32 h-80 w-80 rounded-full bg-green-200/50 blur-3xl"></div>
+        <div class="absolute right-[-120px] top-32 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl"></div>
+        <div class="absolute bottom-[-160px] left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-lime-100/70 blur-3xl"></div>
       </div>
 
-      <h1 class="mt-5 text-2xl font-black tracking-tight text-slate-950">
-        Sebentar ya...
-      </h1>
+      <div class="relative w-full max-w-md rounded-[2rem] border border-white/80 bg-white/90 p-6 text-center shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50 text-green-700">
+          <svg class="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z" />
+          </svg>
+        </div>
 
-      <p class="mt-2 text-sm leading-6 text-slate-500">
-        Kami sedang memeriksa data tenant sebelum membuka halaman pembayaran.
-      </p>
+        <h1 class="mt-5 text-2xl font-black tracking-tight text-slate-950">
+          Sebentar ya...
+        </h1>
 
-      <div class="mt-5 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600">
-        /{{ tenantSlug }}
+        <p class="mt-2 text-sm leading-6 text-slate-500">
+          Kami sedang memeriksa data tenant sebelum membuka halaman pembayaran.
+        </p>
+
+        <div class="mt-5 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600">
+          /{{ tenantSlug }}
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Tenant not found -->
-  <section
-    v-else-if="!tenantReady"
-    class="relative flex min-h-[80vh] items-center justify-center overflow-hidden px-4"
-  >
-    <div class="pointer-events-none absolute inset-0 overflow-hidden">
-      <div class="absolute -left-32 -top-32 h-80 w-80 rounded-full bg-green-200/50 blur-3xl"></div>
-      <div class="absolute right-[-120px] top-32 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl"></div>
-      <div class="absolute bottom-[-160px] left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-lime-100/70 blur-3xl"></div>
-    </div>
+    <!-- Tenant not found -->
+    <section
+      v-else-if="!tenantReady"
+      class="relative flex min-h-[80vh] items-center justify-center overflow-hidden px-4"
+    >
+      <div class="pointer-events-none absolute inset-0 overflow-hidden">
+        <div class="absolute -left-32 -top-32 h-80 w-80 rounded-full bg-green-200/50 blur-3xl"></div>
+        <div class="absolute right-[-120px] top-32 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl"></div>
+        <div class="absolute bottom-[-160px] left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-lime-100/70 blur-3xl"></div>
+      </div>
 
-    <div class="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-      <div class="relative bg-slate-950 p-6 text-white sm:p-8">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,197,94,.35),transparent_30%),radial-gradient(circle_at_85%_30%,rgba(16,185,129,.22),transparent_35%)]"></div>
+      <div class="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+        <div class="relative bg-slate-950 p-6 text-white sm:p-8">
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,197,94,.35),transparent_30%),radial-gradient(circle_at_85%_30%,rgba(16,185,129,.22),transparent_35%)]"></div>
 
-        <div class="relative">
-          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-green-200">
-            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none">
-              <path d="M12 9v4m0 4h.01M10.3 4.6 2.9 17.2A2 2 0 0 0 4.6 20h14.8a2 2 0 0 0 1.7-2.8L13.7 4.6a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+          <div class="relative">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-green-200">
+              <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none">
+                <path d="M12 9v4m0 4h.01M10.3 4.6 2.9 17.2A2 2 0 0 0 4.6 20h14.8a2 2 0 0 0 1.7-2.8L13.7 4.6a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+
+            <h1 class="mt-5 text-3xl font-black tracking-tight">
+              Tenant belum ditemukan
+            </h1>
+
+            <p class="mt-3 max-w-xl text-sm leading-6 text-slate-300">
+              Sepertinya link pembayaran ini belum terhubung dengan data tenant yang valid di Obayan.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-6 sm:p-8">
+          <div class="rounded-3xl border border-slate-100 bg-slate-50 p-5">
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+              Tenant yang dicari
+            </p>
+
+            <p class="mt-2 text-lg font-black text-slate-950">
+              /{{ tenantSlug }}
+            </p>
+
+            <p class="mt-3 text-sm leading-6 text-slate-500">
+              {{ tenantCheckError || tenantMissingReason || 'Data tenant atau settings belum tersedia.' }}
+            </p>
           </div>
 
-          <h1 class="mt-5 text-3xl font-black tracking-tight">
-            Tenant belum ditemukan
-          </h1>
+          <div class="mt-5 grid gap-3 sm:grid-cols-2">
+            <a
+              href="https://obayan.id"
+              class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-green-600/20 transition hover:-translate-y-0.5 hover:bg-green-700"
+            >
+              Kembali ke Obayan
+            </a>
 
-          <p class="mt-3 max-w-xl text-sm leading-6 text-slate-300">
-            Sepertinya link pembayaran ini belum terhubung dengan data tenant yang valid di Obayan.
-          </p>
+            <a
+              href="https://wa.me/62895321848133"
+              target="_blank"
+              class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+            >
+              Hubungi Admin
+            </a>
+          </div>
         </div>
       </div>
+    </section>
 
-      <div class="p-6 sm:p-8">
-        <div class="rounded-3xl border border-slate-100 bg-slate-50 p-5">
-          <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
-            Tenant yang dicari
-          </p>
-
-          <p class="mt-2 text-lg font-black text-slate-950">
-            /{{ tenantSlug }}
-          </p>
-
-          <p class="mt-3 text-sm leading-6 text-slate-500">
-            {{ tenantCheckError || tenantMissingReason || 'Data tenant atau settings belum tersedia.' }}
-          </p>
-        </div>
-
-        <div class="mt-5 grid gap-3 sm:grid-cols-2">
-          <a
-            href="https://obayan.id"
-            class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-green-600/20 transition hover:-translate-y-0.5 hover:bg-green-700"
-          >
-            Kembali ke Obayan
-          </a>
-
-          <a
-            href="https://wa.me/62895321848133"
-            target="_blank"
-            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50"
-          >
-            Hubungi Admin
-          </a>
-        </div>
-
-        <p class="mt-5 text-center text-xs leading-5 text-slate-400">
-          Jika kamu merasa link ini benar, kemungkinan data tenant belum dibuat atau settings belum dipublish.
-        </p>
-      </div>
-    </div>
-  </section>
+    <!-- Payment page -->
     <section v-else class="relative overflow-hidden">
-      <!-- Soft background -->
       <div class="pointer-events-none absolute inset-0 overflow-hidden">
         <div class="absolute -left-32 -top-32 h-80 w-80 rounded-full bg-green-200/50 blur-3xl"></div>
         <div class="absolute right-[-120px] top-32 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl"></div>
@@ -117,8 +115,8 @@
             <div class="flex items-center gap-3">
               <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-600 text-white shadow-lg shadow-green-600/20">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 7.5A3.5 3.5 0 0 1 8.5 4h7A3.5 3.5 0 0 1 19 7.5v9A3.5 3.5 0 0 1 15.5 20h-7A3.5 3.5 0 0 1 5 16.5v-9Z" stroke="currentColor" stroke-width="1.8"/>
-                  <path d="M8.5 9h7M8.5 12.5h7M8.5 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M5 7.5A3.5 3.5 0 0 1 8.5 4h7A3.5 3.5 0 0 1 19 7.5v9A3.5 3.5 0 0 1 15.5 20h-7A3.5 3.5 0 0 1 5 16.5v-9Z" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M8.5 9h7M8.5 12.5h7M8.5 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
                 </svg>
               </div>
 
@@ -133,8 +131,15 @@
             </div>
 
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <div class="rounded-2xl bg-green-50 px-4 py-2 text-sm font-bold text-green-700">
-                Promo launching aktif
+              <div
+                v-if="withoutPayment"
+                class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-black text-amber-700"
+              >
+                WITHOUT_PAYMENT aktif
+              </div>
+
+              <div v-else class="rounded-2xl bg-green-50 px-4 py-2 text-sm font-bold text-green-700">
+                Midtrans aktif
               </div>
 
               <div class="rounded-2xl border border-slate-200 bg-white px-4 py-2">
@@ -160,13 +165,16 @@
                 </div>
 
                 <h2 class="max-w-2xl text-3xl font-black tracking-tight sm:text-4xl">
-                  Pilih paket, isi data, lalu bayar.
+                  Pembayaran langganan Obayan jadi lebih mudah dan cepat
                 </h2>
 
                 <p class="mt-3 max-w-xl text-sm leading-6 text-slate-300">
-                  Form ini membantu membuat invoice dan kontrak layanan Obayan dengan lebih rapi.
+                  {{ withoutPayment
+                    ? 'Mode demo aktif: invoice akan dibuat tanpa membuka Midtrans, lalu otomatis tersimpan sebagai PDF dan JPG.'
+                    : 'Form ini membantu membuat invoice dan kontrak layanan Obayan dengan lebih rapi.' }}
                 </p>
               </div>
+
               <div class="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur">
                 <p class="text-xs font-medium text-slate-300">Link tenant</p>
                 <p class="mt-1 truncate text-sm font-bold text-white">
@@ -236,14 +244,10 @@
                 </span>
               </div>
 
-              <!-- PIC form -->
               <div class="rounded-[1.6rem] border border-slate-100 bg-slate-50/70 p-4 sm:p-5">
                 <div class="grid gap-4">
-                  <FieldShell
-                    label="Nama lembaga"
-                    :error="errors.tenantName"
-                    hint="Nama ini akan muncul di invoice."
-                  >
+                  <div>
+                    <label class="mb-1.5 block text-sm font-bold text-slate-800">Nama lembaga</label>
                     <input
                       v-model="form.tenantName"
                       type="text"
@@ -251,10 +255,13 @@
                       :class="inputClass(errors.tenantName)"
                       @blur="touch('tenantName')"
                     >
-                  </FieldShell>
+                    <p v-if="errors.tenantName" class="mt-1.5 text-xs font-semibold text-red-600">{{ errors.tenantName }}</p>
+                    <p v-else class="mt-1.5 text-xs leading-5 text-slate-500">Nama ini akan muncul di invoice.</p>
+                  </div>
 
                   <div class="grid gap-4 md:grid-cols-3">
-                    <FieldShell label="Nama PIC" :error="errors.picName">
+                    <div>
+                      <label class="mb-1.5 block text-sm font-bold text-slate-800">Nama PIC</label>
                       <input
                         v-model="form.picName"
                         type="text"
@@ -262,9 +269,11 @@
                         :class="inputClass(errors.picName)"
                         @blur="touch('picName')"
                       >
-                    </FieldShell>
+                      <p v-if="errors.picName" class="mt-1.5 text-xs font-semibold text-red-600">{{ errors.picName }}</p>
+                    </div>
 
-                    <FieldShell label="Jabatan" :error="errors.picPosition">
+                    <div>
+                      <label class="mb-1.5 block text-sm font-bold text-slate-800">Jabatan</label>
                       <input
                         v-model="form.picPosition"
                         type="text"
@@ -272,9 +281,11 @@
                         :class="inputClass(errors.picPosition)"
                         @blur="touch('picPosition')"
                       >
-                    </FieldShell>
+                      <p v-if="errors.picPosition" class="mt-1.5 text-xs font-semibold text-red-600">{{ errors.picPosition }}</p>
+                    </div>
 
-                    <FieldShell label="WhatsApp" :error="errors.picWhatsapp">
+                    <div>
+                      <label class="mb-1.5 block text-sm font-bold text-slate-800">WhatsApp</label>
                       <input
                         v-model="form.picWhatsapp"
                         type="tel"
@@ -283,7 +294,8 @@
                         :class="inputClass(errors.picWhatsapp)"
                         @blur="touch('picWhatsapp')"
                       >
-                    </FieldShell>
+                      <p v-if="errors.picWhatsapp" class="mt-1.5 text-xs font-semibold text-red-600">{{ errors.picWhatsapp }}</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -302,16 +314,16 @@
                     v-if="requiresSantriCount"
                     class="w-full rounded-[1.4rem] border border-green-100 bg-green-50 p-3 sm:w-64"
                   >
-                    <FieldShell label="Jumlah santri/siswa" :error="errors.santriCount">
-                      <input
-                        v-model.number="form.santriCount"
-                        type="number"
-                        min="0"
-                        placeholder="Contoh: 150"
-                        :class="inputClass(errors.santriCount)"
-                        @blur="touch('santriCount')"
-                      >
-                    </FieldShell>
+                    <label class="mb-1.5 block text-sm font-bold text-slate-800">Jumlah santri/siswa</label>
+                    <input
+                      v-model.number="form.santriCount"
+                      type="number"
+                      min="0"
+                      placeholder="Contoh: 150"
+                      :class="inputClass(errors.santriCount)"
+                      @blur="touch('santriCount')"
+                    >
+                    <p v-if="errors.santriCount" class="mt-1.5 text-xs font-semibold text-red-600">{{ errors.santriCount }}</p>
                   </div>
                 </div>
 
@@ -339,7 +351,7 @@
                         :class="form.packageId === pkg.id ? 'border-green-600 bg-green-600 text-white' : 'border-slate-200 bg-white text-transparent'"
                       >
                         <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.8 3.8 6.8-6.8a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/>
+                          <path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.8 3.8 6.8-6.8a1 1 0 0 1 1.4 0Z" clip-rule="evenodd" />
                         </svg>
                       </span>
                     </div>
@@ -430,37 +442,47 @@
                 </label>
               </div>
 
-              <!-- Date + note -->
               <div class="grid gap-4 md:grid-cols-2">
-                <FieldShell label="Mulai kontrak" :error="errors.contractStart">
+                <div>
+                  <label class="mb-1.5 block text-sm font-bold text-slate-800">Mulai kontrak</label>
                   <input
                     v-model="form.contractStart"
                     type="date"
                     :class="inputClass(errors.contractStart)"
                     @blur="touch('contractStart')"
                   >
-                </FieldShell>
+                  <p v-if="errors.contractStart" class="mt-1.5 text-xs font-semibold text-red-600">{{ errors.contractStart }}</p>
+                </div>
 
-                <FieldShell label="Berakhir kontrak" hint="Terisi otomatis.">
+                <div>
+                  <label class="mb-1.5 block text-sm font-bold text-slate-800">Berakhir kontrak</label>
                   <input
                     v-model="form.contractEnd"
                     type="date"
                     readonly
                     class="w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-500 outline-none"
                   >
-                </FieldShell>
+                  <p class="mt-1.5 text-xs leading-5 text-slate-500">Terisi otomatis.</p>
+                </div>
               </div>
 
-              <FieldShell label="Catatan tambahan" hint="Opsional. Request di luar paket akan dianalisis terpisah.">
+              <div>
+                <label class="mb-1.5 block text-sm font-bold text-slate-800">Catatan tambahan</label>
                 <textarea
                   v-model="form.requestNote"
                   rows="3"
                   placeholder="Misalnya: mau request import Excel, custom laporan, atau integrasi WhatsApp."
                   class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-green-500 focus:ring-4 focus:ring-green-100"
                 ></textarea>
-              </FieldShell>
+                <p class="mt-1.5 text-xs leading-5 text-slate-500">Opsional. Request di luar paket akan dianalisis terpisah.</p>
+              </div>
 
-              <AlertBox v-if="errors.general" type="error" :message="errors.general" />
+              <div
+                v-if="errors.general"
+                class="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700"
+              >
+                {{ errors.general }}
+              </div>
 
               <div class="flex justify-end">
                 <button
@@ -470,7 +492,7 @@
                 >
                   Lanjut
                   <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M3 10a1 1 0 0 1 1-1h9.59l-3.3-3.3a1 1 0 1 1 1.42-1.4l5 5a1 1 0 0 1 0 1.4l-5 5a1 1 0 0 1-1.42-1.4l3.3-3.3H4a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+                    <path fill-rule="evenodd" d="M3 10a1 1 0 0 1 1-1h9.59l-3.3-3.3a1 1 0 1 1 1.42-1.4l5 5a1 1 0 0 1 0 1.4l-5 5a1 1 0 0 1-1.42-1.4l3.3-3.3H4a1 1 0 0 1-1-1Z" clip-rule="evenodd" />
                   </svg>
                 </button>
               </div>
@@ -504,7 +526,7 @@
 
                       <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition group-open:rotate-180">
                         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M5.2 7.2a1 1 0 0 1 1.4 0L10 10.6l3.4-3.4a1 1 0 1 1 1.4 1.4l-4.1 4.1a1 1 0 0 1-1.4 0L5.2 8.6a1 1 0 0 1 0-1.4Z" clip-rule="evenodd"/>
+                          <path fill-rule="evenodd" d="M5.2 7.2a1 1 0 0 1 1.4 0L10 10.6l3.4-3.4a1 1 0 1 1 1.4 1.4l-4.1 4.1a1 1 0 0 1-1.4 0L5.2 8.6a1 1 0 0 1 0-1.4Z" clip-rule="evenodd" />
                         </svg>
                       </span>
                     </summary>
@@ -540,7 +562,12 @@
                 </span>
               </label>
 
-              <AlertBox v-if="errors.general" type="error" :message="errors.general" />
+              <div
+                v-if="errors.general"
+                class="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700"
+              >
+                {{ errors.general }}
+              </div>
 
               <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
                 <button
@@ -557,7 +584,7 @@
                   :disabled="!form.termsAccepted"
                   @click="nextToPayment"
                 >
-                  Lanjut pembayaran
+                  Lanjut invoice
                 </button>
               </div>
             </div>
@@ -568,7 +595,7 @@
                 <div>
                   <h3 class="text-2xl font-black tracking-tight">Invoice & pembayaran</h3>
                   <p class="mt-1 text-sm text-slate-500">
-                    Cek ringkasan tagihan sebelum membuka Midtrans.
+                    Cek ringkasan tagihan sebelum generate invoice.
                   </p>
                 </div>
 
@@ -640,17 +667,17 @@
                   </div>
 
                   <div class="mt-4 rounded-3xl bg-slate-50 p-4">
-                    <PriceRow label="Harga normal" :value="formatIDR(pricing.regularSubtotal)" muted />
-                    <PriceRow label="Subtotal promo" :value="formatIDR(pricing.subtotal)" />
+                    <PriceLine label="Harga normal" :value="formatIDR(pricing.regularSubtotal)" muted />
+                    <PriceLine label="Subtotal promo" :value="formatIDR(pricing.subtotal)" />
 
-                    <PriceRow
+                    <PriceLine
                       v-if="pricing.launchingDiscount > 0"
                       label="Diskon launching"
                       :value="`-${formatIDR(pricing.launchingDiscount)}`"
                       success
                     />
 
-                    <PriceRow
+                    <PriceLine
                       v-if="pricing.yearlyDiscount > 0"
                       label="Diskon tahunan"
                       :value="`-${formatIDR(pricing.yearlyDiscount)}`"
@@ -666,22 +693,20 @@
                   </div>
 
                   <div
-                    v-if="currentInvoice?.midtrans?.redirectUrl"
+                    v-if="currentInvoice"
                     class="mt-4 rounded-3xl border border-green-100 bg-green-50 p-4 text-sm leading-6 text-green-800"
                   >
-                    Link pembayaran sudah dibuat.
-                    <a
-                      :href="currentInvoice.midtrans.redirectUrl"
-                      target="_blank"
-                      class="font-black underline"
-                    >
-                      Buka payment page
-                    </a>
+                    Invoice sudah dibuat. Kamu bisa membuka preview, save PDF, atau save JPG.
                   </div>
                 </div>
               </div>
 
-              <AlertBox v-if="errors.general" type="error" :message="errors.general" />
+              <div
+                v-if="errors.general"
+                class="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700"
+              >
+                {{ errors.general }}
+              </div>
 
               <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
                 <button
@@ -692,19 +717,36 @@
                   Kembali
                 </button>
 
-                <button
-                  type="button"
-                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-green-600/20 transition hover:-translate-y-0.5 hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
-                  :disabled="submitting"
-                  @click="generateInvoiceAndPay"
-                >
-                  <svg v-if="submitting" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"/>
-                  </svg>
+                <div class="flex flex-col gap-3 sm:flex-row">
+                  <button
+                    v-if="currentInvoice"
+                    type="button"
+                    class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+                    @click="invoiceModalOpen = true"
+                  >
+                    Lihat Invoice
+                  </button>
 
-                  {{ submitting ? 'Sedang membuat invoice...' : currentInvoice ? 'Bayar sekarang' : 'Generate invoice & bayar' }}
-                </button>
+                  <button
+                    type="button"
+                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-green-600/20 transition hover:-translate-y-0.5 hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                    :disabled="submitting || exporting"
+                    @click="generateInvoiceAndPay"
+                  >
+                    <svg v-if="submitting" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z" />
+                    </svg>
+
+                    {{ submitting
+                      ? 'Sedang membuat invoice...'
+                      : withoutPayment
+                        ? 'Generate invoice tanpa payment'
+                        : currentInvoice
+                          ? 'Bayar sekarang'
+                          : 'Generate invoice & bayar' }}
+                  </button>
+                </div>
               </div>
             </div>
           </section>
@@ -748,16 +790,16 @@
             </div>
 
             <div class="mt-5 space-y-3">
-              <PriceRow label="Subtotal promo" :value="formatIDR(pricing.subtotal)" />
+              <PriceLine label="Subtotal promo" :value="formatIDR(pricing.subtotal)" />
 
-              <PriceRow
+              <PriceLine
                 v-if="pricing.launchingDiscount > 0"
                 label="Diskon launching"
                 :value="`-${formatIDR(pricing.launchingDiscount)}`"
                 success
               />
 
-              <PriceRow
+              <PriceLine
                 v-if="pricing.yearlyDiscount > 0"
                 label="Diskon tahunan"
                 :value="`-${formatIDR(pricing.yearlyDiscount)}`"
@@ -772,6 +814,18 @@
               </div>
             </div>
 
+            <div
+              v-if="withoutPayment"
+              class="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-4"
+            >
+              <p class="text-sm font-black text-amber-800">
+                Mode tanpa payment
+              </p>
+              <p class="mt-1 text-sm leading-6 text-amber-700">
+                Invoice akan otomatis dibuat sebagai paid/demo, disimpan, lalu diunduh PDF dan JPG.
+              </p>
+            </div>
+
             <div class="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-4">
               <p class="text-sm font-black text-slate-950">
                 Info kecil
@@ -784,151 +838,90 @@
         </div>
       </div>
     </section>
+
+    <!-- Invoice Modal -->
+    <Teleport to="body">
+      <div v-if="invoiceModalOpen && currentInvoice" class="fixed inset-0 z-[120] overflow-y-auto bg-slate-950/70 px-4 py-8 backdrop-blur-sm">
+        <div class="mx-auto w-full max-w-5xl overflow-hidden rounded-[2rem] bg-white shadow-2xl">
+          <div class="flex flex-col gap-3 bg-slate-950 p-5 text-white sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-[0.2em] text-green-300">
+                Invoice Preview
+              </p>
+              <h3 class="mt-1 text-xl font-black">
+                {{ currentInvoice.invoiceNo }}
+              </h3>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                class="rounded-2xl bg-white/10 px-4 py-2 text-sm font-black text-white transition hover:bg-white/20 disabled:opacity-60"
+                :disabled="exporting"
+                @click="downloadInvoicePdf(false)"
+              >
+                Save PDF
+              </button>
+
+              <button
+                type="button"
+                class="rounded-2xl bg-white/10 px-4 py-2 text-sm font-black text-white transition hover:bg-white/20 disabled:opacity-60"
+                :disabled="exporting"
+                @click="downloadInvoiceJpg(false)"
+              >
+                Save JPG
+              </button>
+
+              <span
+                v-if="exporting"
+                class="inline-flex items-center rounded-2xl bg-amber-400/15 px-3 py-2 text-xs font-black text-amber-200"
+              >
+                {{ exportMessage || 'Preparing export...' }}
+              </span>
+
+              <button
+                type="button"
+                class="rounded-2xl bg-white px-4 py-2 text-sm font-black text-slate-950 transition hover:bg-green-100"
+                @click="invoiceModalOpen = false"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+
+          <div
+            ref="invoiceModalBodyRef"
+            class="invoice-modal-scroll max-h-[78vh] overflow-y-auto overscroll-contain bg-slate-100 p-4 sm:p-6"
+          >
+            <div class="mx-auto w-full max-w-[794px] overflow-hidden rounded-3xl bg-white shadow-xl">
+              <InvoiceContent
+                :invoice="currentInvoice"
+                :form-data="form"
+                :selected-package-data="selectedPackage"
+                :pricing-data="pricing"
+                :requires-santri-count="requiresSantriCount"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Hidden export area -->
     <div
-  v-if="currentInvoice"
-  class="fixed left-[-9999px] top-0 w-[794px] bg-white text-slate-950"
->
-  <div
-    ref="invoicePrintArea"
-    class="bg-white p-10"
-  >
-    <div class="flex items-start justify-between border-b border-slate-200 pb-6">
-      <div>
-        <p class="text-xs font-bold uppercase tracking-[0.22em] text-green-700">
-          Obayan Invoice
-        </p>
-        <h1 class="mt-2 text-3xl font-black text-slate-950">
-          Invoice Pembayaran
-        </h1>
-        <p class="mt-2 text-sm text-slate-500">
-          Invoice ini diterbitkan otomatis oleh sistem Obayan.
-        </p>
-      </div>
-
-      <div class="text-right">
-        <p class="text-sm font-bold text-slate-500">Status</p>
-        <p class="mt-1 rounded-full bg-green-100 px-4 py-1 text-sm font-black text-green-700">
-          PAID
-        </p>
+      v-if="currentInvoice"
+      class="invoice-export-wrapper pointer-events-none fixed left-0 top-0 w-[794px] bg-white text-slate-950"
+    >
+      <div ref="invoiceExportArea" class="bg-white">
+        <InvoiceContent
+          :invoice="currentInvoice"
+          :form-data="form"
+          :selected-package-data="selectedPackage"
+          :pricing-data="pricing"
+          :requires-santri-count="requiresSantriCount"
+        />
       </div>
     </div>
-
-    <div class="mt-8 grid grid-cols-2 gap-6">
-      <div>
-        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
-          Invoice No.
-        </p>
-        <p class="mt-2 text-lg font-black">
-          {{ currentInvoice.invoiceNo }}
-        </p>
-      </div>
-
-      <div>
-        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
-          Order ID
-        </p>
-        <p class="mt-2 text-lg font-black">
-          {{ currentInvoice.orderId }}
-        </p>
-      </div>
-
-      <div>
-        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
-          Ditagihkan Kepada
-        </p>
-        <p class="mt-2 font-black">
-          {{ form.tenantName }}
-        </p>
-        <p class="mt-1 text-sm text-slate-600">
-          {{ form.picName }} · {{ form.picPosition }}
-        </p>
-        <p class="text-sm text-slate-600">
-          {{ form.picWhatsapp }}
-        </p>
-      </div>
-
-      <div>
-        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
-          Masa Kontrak
-        </p>
-        <p class="mt-2 text-sm text-slate-700">
-          Mulai: <b>{{ form.contractStart }}</b>
-        </p>
-        <p class="text-sm text-slate-700">
-          Berakhir: <b>{{ form.contractEnd }}</b>
-        </p>
-        <p class="text-sm text-slate-700">
-          Durasi: <b>{{ pricing.durationLabel }}</b>
-        </p>
-      </div>
-    </div>
-
-    <div class="mt-8 overflow-hidden rounded-2xl border border-slate-200">
-      <table class="w-full border-collapse text-left text-sm">
-        <thead class="bg-slate-50">
-          <tr>
-            <th class="px-5 py-4 font-black text-slate-700">Layanan</th>
-            <th class="px-5 py-4 text-right font-black text-slate-700">Jumlah</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr class="border-t border-slate-200">
-            <td class="px-5 py-5">
-              <p class="font-black text-slate-950">
-                {{ selectedPackage.name }} - {{ selectedPackage.subtitle }}
-              </p>
-              <p class="mt-1 text-xs text-slate-500">
-                {{ pricing.durationLabel }}
-                <span v-if="requiresSantriCount">
-                  · {{ form.santriCount }} santri/siswa
-                </span>
-              </p>
-            </td>
-            <td class="px-5 py-5 text-right font-black">
-              {{ formatIDR(pricing.subtotal) }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="mt-8 ml-auto w-full max-w-sm space-y-3">
-      <PriceRow label="Harga normal" :value="formatIDR(pricing.regularSubtotal)" muted />
-      <PriceRow label="Subtotal promo" :value="formatIDR(pricing.subtotal)" />
-
-      <PriceRow
-        v-if="pricing.launchingDiscount > 0"
-        label="Diskon launching"
-        :value="`-${formatIDR(pricing.launchingDiscount)}`"
-        success
-      />
-
-      <PriceRow
-        v-if="pricing.yearlyDiscount > 0"
-        label="Diskon tahunan"
-        :value="`-${formatIDR(pricing.yearlyDiscount)}`"
-        success
-      />
-
-      <div class="flex items-center justify-between border-t border-slate-200 pt-4">
-        <span class="text-lg font-black">Total Dibayar</span>
-        <span class="text-2xl font-black text-green-700">
-          {{ formatIDR(pricing.total) }}
-        </span>
-      </div>
-    </div>
-
-    <div class="mt-10 rounded-2xl bg-slate-50 p-5 text-xs leading-6 text-slate-500">
-      <p>
-        Invoice ini sah sebagai bukti pembayaran layanan Obayan setelah status pembayaran dinyatakan PAID.
-      </p>
-      <p class="mt-2">
-        Request tambahan di luar paket akan dianalisis dan ditagihkan secara terpisah apabila disetujui kedua pihak.
-      </p>
-    </div>
-  </div>
-</div>
   </main>
 </template>
 
@@ -957,6 +950,7 @@ declare global {
 }
 
 type StepValue = 1 | 2 | 3
+
 type ErrorKey =
   | 'tenantName'
   | 'picName'
@@ -967,70 +961,8 @@ type ErrorKey =
   | 'termsAccepted'
   | 'general'
 
-const FieldShell = defineComponent({
-  name: 'FieldShell',
-  props: {
-    label: { type: String, required: true },
-    error: { type: String, default: '' },
-    hint: { type: String, default: '' }
-  },
-  setup(props, { slots }) {
-    return () => h('label', { class: 'block' }, [
-      h('span', { class: 'mb-1.5 block text-sm font-bold text-slate-800' }, props.label),
-      slots.default?.(),
-      props.error
-        ? h('span', { class: 'mt-1.5 block text-xs font-semibold text-red-600' }, props.error)
-        : props.hint
-          ? h('span', { class: 'mt-1.5 block text-xs leading-5 text-slate-500' }, props.hint)
-          : null
-    ])
-  }
-})
-
-const PriceRow = defineComponent({
-  name: 'PriceRow',
-  props: {
-    label: { type: String, required: true },
-    value: { type: String, required: true },
-    success: { type: Boolean, default: false },
-    muted: { type: Boolean, default: false }
-  },
-  setup(props) {
-    return () => h('div', {
-      class: [
-        'flex items-center justify-between gap-4 text-sm',
-        props.success ? 'text-green-700' : props.muted ? 'text-slate-400' : 'text-slate-700'
-      ]
-    }, [
-      h('span', {}, props.label),
-      h('span', {
-        class: [
-          'font-bold',
-          props.muted ? 'line-through' : ''
-        ]
-      }, props.value)
-    ])
-  }
-})
-
-const AlertBox = defineComponent({
-  name: 'AlertBox',
-  props: {
-    type: { type: String, default: 'error' },
-    message: { type: String, required: true }
-  },
-  setup(props) {
-    return () => h('div', {
-      class: props.type === 'error'
-        ? 'rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700'
-        : 'rounded-3xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold leading-6 text-green-700'
-    }, props.message)
-  }
-})
-
 const route = useRoute()
 const runtime = useRuntimeConfig()
-
 const { $realtimeDb } = useNuxtApp() as any
 
 const tenantChecking = ref(true)
@@ -1041,63 +973,35 @@ const tenantCheckError = ref('')
 const rawTenant = computed(() => String(route.params.tenant || 'obayan'))
 const tenantSlug = computed(() => sanitizeTenantSlug(rawTenant.value))
 
-async function checkTenantAndSettings() {
-  tenantChecking.value = true
-  tenantReady.value = false
-  tenantMissingReason.value = ''
-  tenantCheckError.value = ''
+const withoutPayment = computed(() => {
+  const value = (runtime.public as any).withoutPayment
 
-  try {
-    if (!$realtimeDb) {
-      tenantCheckError.value = 'Koneksi database belum siap. Coba refresh halaman beberapa saat lagi.'
-      return
-    }
+  return value === true || value === 'true' || value === '1'
+})
 
-    const tenantPath = tenantSlug.value
-    const settingsPath = `${tenantPath}/settings`
+const invoiceExportArea = ref<HTMLElement | null>(null)
+const invoiceModalBodyRef = ref<HTMLElement | null>(null)
+const invoiceModalOpen = ref(false)
+const exporting = ref(false)
+const exportMessage = ref('')
 
-    const [tenantSnap, settingsSnap] = await Promise.all([
-      get(dbRef($realtimeDb, tenantPath)),
-      get(dbRef($realtimeDb, settingsPath))
-    ])
-
-    if (!tenantSnap.exists()) {
-      tenantMissingReason.value = `Tenant "${tenantSlug.value}" belum terdaftar di sistem Obayan.`
-      return
-    }
-
-    if (!settingsSnap.exists()) {
-      tenantMissingReason.value = `Tenant "${tenantSlug.value}" sudah ada, tapi data settings belum tersedia.`
-      return
-    }
-
-    tenantReady.value = true
-
-    // Baru load settings setelah tenant benar-benar valid
-    loadSettings()
-  } catch (e: any) {
-    tenantCheckError.value =
-      e?.message ||
-      'Kami belum bisa memeriksa data tenant saat ini. Coba refresh halaman beberapa saat lagi.'
-  } finally {
-    tenantChecking.value = false
-  }
-}
-
-const invoicePrintArea = ref<HTMLElement | null>(null)
-const downloadedInvoiceOrderIds = ref<Set<string>>(new Set())
+const downloadedInvoiceKeys = ref<Set<string>>(new Set())
 
 const { settings, load: loadSettings } = useSettings({
   path: `/${tenantSlug.value}/settings`,
   debounceMs: 900
 })
 
-const { createInvoice, updateInvoiceStatus, activateTenantSubscription } = usePayment(tenantSlug.value)
+const {
+  createInvoice,
+  updateInvoiceStatus,
+  activateTenantSubscription
+} = usePayment(tenantSlug.value)
 
 const steps = [
   { value: 1 as StepValue, title: 'Data & Paket', subtitle: 'PIC, paket, kontrak' },
   { value: 2 as StepValue, title: 'Terms', subtitle: 'Persetujuan layanan' },
-  { value: 3 as StepValue, title: 'Payment', subtitle: 'Invoice & Midtrans' }
+  { value: 3 as StepValue, title: 'Payment', subtitle: 'Invoice & modal' }
 ]
 
 const step = ref<StepValue>(1)
@@ -1215,86 +1119,27 @@ useHead(() => ({
   title: seoTitle.value,
 
   meta: [
-    {
-      name: 'description',
-      content: seoDescription.value
-    },
-    {
-      name: 'robots',
-      content: 'noindex, nofollow'
-    },
-    {
-      name: 'theme-color',
-      content: '#16a34a'
-    },
-
-    // Open Graph
-    {
-      property: 'og:type',
-      content: 'website'
-    },
-    {
-      property: 'og:title',
-      content: seoTitle.value
-    },
-    {
-      property: 'og:description',
-      content: seoDescription.value
-    },
-    {
-      property: 'og:url',
-      content: pageUrl.value
-    },
-    {
-      property: 'og:image',
-      content: seoImage.value
-    },
-    {
-      property: 'og:site_name',
-      content: 'Obayan'
-    },
-    {
-      property: 'og:locale',
-      content: 'id_ID'
-    },
-
-    // Twitter / X
-    {
-      name: 'twitter:card',
-      content: 'summary_large_image'
-    },
-    {
-      name: 'twitter:title',
-      content: seoTitle.value
-    },
-    {
-      name: 'twitter:description',
-      content: seoDescription.value
-    },
-    {
-      name: 'twitter:image',
-      content: seoImage.value
-    }
+    { name: 'description', content: seoDescription.value },
+    { name: 'robots', content: 'noindex, nofollow' },
+    { name: 'theme-color', content: '#16a34a' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:title', content: seoTitle.value },
+    { property: 'og:description', content: seoDescription.value },
+    { property: 'og:url', content: pageUrl.value },
+    { property: 'og:image', content: seoImage.value },
+    { property: 'og:site_name', content: 'Obayan' },
+    { property: 'og:locale', content: 'id_ID' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: seoTitle.value },
+    { name: 'twitter:description', content: seoDescription.value },
+    { name: 'twitter:image', content: seoImage.value }
   ],
 
   link: [
-    {
-      rel: 'canonical',
-      href: pageUrl.value
-    },
-    {
-      rel: 'icon',
-      type: 'image/x-icon',
-      href: faviconUrl.value
-    },
-    {
-      rel: 'shortcut icon',
-      href: faviconUrl.value
-    },
-    {
-      rel: 'apple-touch-icon',
-      href: faviconUrl.value
-    }
+    { rel: 'canonical', href: pageUrl.value },
+    { rel: 'icon', type: 'image/x-icon', href: faviconUrl.value },
+    { rel: 'shortcut icon', href: faviconUrl.value },
+    { rel: 'apple-touch-icon', href: faviconUrl.value }
   ]
 }))
 
@@ -1302,56 +1147,12 @@ const statusClass = computed(() => {
   const status = currentInvoice.value?.status
 
   if (status === 'paid') return 'bg-green-100 text-green-700'
+  if (status === 'demo_paid') return 'bg-amber-100 text-amber-700'
   if (status === 'failed' || status === 'expired' || status === 'cancelled') return 'bg-red-100 text-red-700'
   if (status === 'pending') return 'bg-amber-100 text-amber-700'
 
   return 'bg-white/10 text-slate-200'
 })
-
-async function autoDownloadPaidInvoice() {
-  if (!currentInvoice.value) return
-  if (currentInvoice.value.status !== 'paid') return
-
-  const orderId = String(currentInvoice.value.orderId || '')
-  if (!orderId) return
-
-  // Biar tidak download dobel kalau callback terpanggil ulang
-  if (downloadedInvoiceOrderIds.value.has(orderId)) return
-  downloadedInvoiceOrderIds.value.add(orderId)
-
-  await nextTick()
-
-  // Kasih jeda kecil agar DOM invoice hidden benar-benar sudah render
-  await new Promise((resolve) => setTimeout(resolve, 350))
-
-  if (!invoicePrintArea.value) return
-
-  const html2pdf = (await import('html2pdf.js')).default
-
-  const filename = `${currentInvoice.value.invoiceNo || 'invoice-obayan'}.pdf`
-
-  await html2pdf()
-    .set({
-      margin: 8,
-      filename,
-      image: {
-        type: 'jpeg',
-        quality: 0.98
-      },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff'
-      },
-      jsPDF: {
-        unit: 'mm',
-        format: 'a4',
-        orientation: 'portrait'
-      }
-    })
-    .from(invoicePrintArea.value)
-    .save()
-}
 
 watch(
   () => settings.value,
@@ -1391,8 +1192,49 @@ watch(
 )
 
 onMounted(() => {
-    checkTenantAndSettings()
+  checkTenantAndSettings()
 })
+
+async function checkTenantAndSettings() {
+  tenantChecking.value = true
+  tenantReady.value = false
+  tenantMissingReason.value = ''
+  tenantCheckError.value = ''
+
+  try {
+    if (!$realtimeDb) {
+      tenantCheckError.value = 'Koneksi database belum siap. Coba refresh halaman beberapa saat lagi.'
+      return
+    }
+
+    const tenantPath = tenantSlug.value
+    const settingsPath = `${tenantPath}/settings`
+
+    const [tenantSnap, settingsSnap] = await Promise.all([
+      get(dbRef($realtimeDb, tenantPath)),
+      get(dbRef($realtimeDb, settingsPath))
+    ])
+
+    if (!tenantSnap.exists()) {
+      tenantMissingReason.value = `Tenant "${tenantSlug.value}" belum terdaftar di sistem Obayan.`
+      return
+    }
+
+    if (!settingsSnap.exists()) {
+      tenantMissingReason.value = `Tenant "${tenantSlug.value}" sudah ada, tapi data settings belum tersedia.`
+      return
+    }
+
+    tenantReady.value = true
+    loadSettings()
+  } catch (error: any) {
+    tenantCheckError.value =
+      error?.message ||
+      'Kami belum bisa memeriksa data tenant saat ini. Coba refresh halaman beberapa saat lagi.'
+  } finally {
+    tenantChecking.value = false
+  }
+}
 
 function touch(field: ErrorKey) {
   touched[field] = true
@@ -1511,6 +1353,7 @@ function validateStepOne() {
 
 function nextToTerms() {
   if (!validateStepOne()) return
+
   errors.general = ''
   step.value = 2
   window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -1522,7 +1365,7 @@ function nextToPayment() {
   validateField('termsAccepted')
 
   if (errors.termsAccepted) {
-    errors.general = 'Setujui Terms & Conditions terlebih dahulu sebelum lanjut pembayaran.'
+    errors.general = 'Setujui Terms & Conditions terlebih dahulu sebelum lanjut invoice.'
     return
   }
 
@@ -1586,12 +1429,70 @@ function loadSnapScript() {
   })
 }
 
+function makeOrderId() {
+  const now = Date.now()
+  const random = Math.random().toString(36).slice(2, 8).toUpperCase()
+
+  return `OBY-${tenantSlug.value}-${now}-${random}`
+}
+
+function makeInvoiceNo(orderId: string) {
+  const date = new Date()
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+
+  return `INV/${tenantSlug.value.toUpperCase()}/${yyyy}${mm}${dd}/${orderId.slice(-6)}`
+}
+
+function buildInvoicePayload(status: 'waiting_payment' | 'paid' | 'demo_paid') {
+  const orderId = makeOrderId()
+  const invoiceNo = makeInvoiceNo(orderId)
+  const now = Date.now()
+
+  return {
+    id: orderId,
+    orderId,
+    invoiceNo,
+    tenant: tenantSlug.value,
+    tenantName: form.tenantName,
+    picName: form.picName,
+    picPosition: form.picPosition,
+    picWhatsapp: form.picWhatsapp,
+    packageId: form.packageId,
+    packageName: selectedPackage.value.name,
+    packageSubtitle: selectedPackage.value.subtitle,
+    duration: form.duration,
+    durationLabel: pricing.value.durationLabel,
+    santriCount: form.santriCount,
+    requestNote: form.requestNote,
+    contractStart: form.contractStart,
+    contractEnd: form.contractEnd,
+    pricing: {
+      ...pricing.value
+    },
+    total: pricing.value.total,
+    status,
+    createdAt: now,
+    updatedAt: now,
+    source: withoutPayment.value ? 'without_payment' : 'midtrans',
+    midtrans: withoutPayment.value
+      ? {
+          mode: 'without_payment',
+          redirectUrl: '',
+          token: ''
+        }
+      : null
+  }
+}
+
 async function generateInvoiceAndPay() {
   errors.general = ''
+
   if (!tenantReady.value) {
     errors.general = 'Tenant belum valid, jadi invoice belum bisa dibuat.'
     return
-}
+  }
 
   if (!validateStepOne()) return
 
@@ -1601,6 +1502,56 @@ async function generateInvoiceAndPay() {
     return
   }
 
+  if (withoutPayment.value) {
+    await generateWithoutPayment()
+    return
+  }
+
+  await generateWithMidtrans()
+}
+
+async function generateWithoutPayment() {
+  submitting.value = true
+
+  try {
+    const invoice = buildInvoicePayload('demo_paid')
+
+    currentInvoice.value = invoice
+    invoiceModalOpen.value = true
+
+    await createInvoice(invoice)
+    await updateInvoiceStatus(invoice.orderId, 'paid', {
+      source: 'without_payment',
+      mode: 'demo',
+      paidAt: Date.now()
+    })
+    await activateTenantSubscription(
+      {
+        ...invoice,
+        status: 'paid'
+      },
+      {
+        source: 'without_payment',
+        mode: 'demo',
+        paidAt: Date.now()
+      }
+    )
+
+    currentInvoice.value.status = 'paid'
+
+    await autoExportPaidInvoice()
+  } catch (error: any) {
+    errors.general =
+      error?.data?.message ||
+      error?.statusMessage ||
+      error?.message ||
+      'Invoice tanpa payment belum bisa dibuat.'
+  } finally {
+    submitting.value = false
+  }
+}
+
+async function generateWithMidtrans() {
   submitting.value = true
 
   try {
@@ -1622,28 +1573,30 @@ async function generateInvoiceAndPay() {
     })
 
     currentInvoice.value = response.invoice
+    invoiceModalOpen.value = true
 
     await createInvoice(response.invoice)
     await loadSnapScript()
 
     window.snap.pay(response.midtrans.token, {
       onSuccess: async (result: unknown) => {
-            currentInvoice.value.status = 'paid'
-            currentInvoice.value.paymentResult = result
+        currentInvoice.value.status = 'paid'
+        currentInvoice.value.paymentResult = result
 
-            await updateInvoiceStatus(response.orderId, 'paid', result)
-            await activateTenantSubscription(response.invoice, result)
-            try {
-                await autoDownloadPaidInvoice()
-            } catch (downloadError) {
-                console.error('Gagal auto download invoice:', downloadError)
-                errors.general = 'Pembayaran berhasil, tapi invoice belum berhasil diunduh otomatis. Silakan cek data invoice di sistem.'
-            }
-        },
+        await updateInvoiceStatus(response.orderId, 'paid', result)
+        await activateTenantSubscription(response.invoice, result)
+
+        try {
+          await autoExportPaidInvoice()
+        } catch (downloadError) {
+          console.error('Gagal auto download invoice:', downloadError)
+          errors.general = 'Pembayaran berhasil, tapi invoice belum berhasil diunduh otomatis. Silakan gunakan tombol Save PDF/JPG.'
+        }
+      },
 
       onPending: async (result: unknown) => {
-        currentInvoice.value.status = 'pending'
-        await updateInvoiceStatus(response.orderId, 'pending', result)
+        currentInvoice.value.status = 'paid'
+        await updateInvoiceStatus(response.orderId, 'paid', result)
       },
 
       onError: async (result: unknown) => {
@@ -1653,17 +1606,1079 @@ async function generateInvoiceAndPay() {
 
       onClose: async () => {
         if (currentInvoice.value?.status === 'waiting_payment') {
-          currentInvoice.value.status = 'pending'
-          await updateInvoiceStatus(response.orderId, 'pending', {
+          currentInvoice.value.status = 'paid'
+          await updateInvoiceStatus(response.orderId, 'paid', {
             source: 'snap_closed_by_customer'
           })
         }
       }
     })
-  } catch (e: any) {
-    errors.general = e?.data?.message || e?.statusMessage || e?.message || 'Pembayaran belum bisa dibuat. Coba cek konfigurasi Midtrans atau koneksi server.'
+  } catch (error: any) {
+    errors.general =
+      error?.data?.message ||
+      error?.statusMessage ||
+      error?.message ||
+      'Pembayaran belum bisa dibuat. Coba cek konfigurasi Midtrans atau koneksi server.'
   } finally {
     submitting.value = false
   }
 }
+
+async function autoExportPaidInvoice() {
+  if (!currentInvoice.value) return
+
+  const status = currentInvoice.value.status
+  if (status !== 'paid' && status !== 'demo_paid') return
+
+  const orderId = String(currentInvoice.value.orderId || '')
+  if (!orderId) return
+
+  await nextTick()
+  await new Promise((resolve) => setTimeout(resolve, 500))
+
+  invoiceModalOpen.value = true
+}
+
+function invoiceFilename(ext: 'pdf' | 'jpg') {
+  const base = String(currentInvoice.value?.invoiceNo || 'invoice-obayan')
+    .replace(/[^\w.-]+/g, '-')
+    .replace(/-+/g, '-')
+
+  return `${base}.${ext}`
+}
+
+function unlockModalScroll() {
+  if (typeof document === 'undefined') return
+
+  document.documentElement.style.overflow = ''
+  document.body.style.overflow = ''
+  document.body.style.pointerEvents = ''
+}
+
+async function waitForPaint() {
+  await nextTick()
+  await new Promise((resolve) => requestAnimationFrame(resolve))
+  await new Promise((resolve) => setTimeout(resolve, 80))
+}
+
+async function createExportClone() {
+  if (!invoiceExportArea.value) return null
+
+  await waitForPaint()
+
+  const clone = invoiceExportArea.value.cloneNode(true) as HTMLElement
+
+  clone.style.width = '794px'
+  clone.style.maxWidth = '794px'
+  clone.style.minHeight = '1123px'
+  clone.style.background = '#ffffff'
+  clone.style.color = '#0f172a'
+  clone.style.position = 'fixed'
+  clone.style.left = '0'
+  clone.style.top = '0'
+  clone.style.zIndex = '-1'
+  clone.style.opacity = '1'
+  clone.style.pointerEvents = 'none'
+  clone.style.transform = 'none'
+
+  const wrapper = document.createElement('div')
+  wrapper.style.position = 'fixed'
+  wrapper.style.left = '0'
+  wrapper.style.top = '0'
+  wrapper.style.width = '794px'
+  wrapper.style.background = '#ffffff'
+  wrapper.style.zIndex = '-1'
+  wrapper.style.opacity = '1'
+  wrapper.style.pointerEvents = 'none'
+  wrapper.style.transform = 'none'
+  wrapper.appendChild(clone)
+
+  document.body.appendChild(wrapper)
+
+  await new Promise((resolve) => requestAnimationFrame(resolve))
+  await new Promise((resolve) => setTimeout(resolve, 120))
+
+  return {
+    wrapper,
+    element: clone
+  }
+}
+
+function removeExportClone(wrapper?: HTMLElement | null) {
+  if (!wrapper) return
+  wrapper.remove()
+}
+
+async function downloadInvoicePdf(auto = false) {
+  if (!currentInvoice.value) {
+    errors.general = 'Invoice belum tersedia. Generate invoice terlebih dahulu.'
+    return
+  }
+
+  const isAuto = auto === true
+  const key = `${currentInvoice.value.orderId}:pdf`
+
+  if (isAuto && downloadedInvoiceKeys.value.has(key)) return
+
+  exporting.value = true
+  exportMessage.value = 'Membuat PDF...'
+
+  try {
+    const { jsPDF } = await import('jspdf')
+
+    const invoice = currentInvoice.value || {}
+    const pkg = selectedPackage.value || {}
+    const price = pricing.value || {}
+
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    })
+
+    const pageWidth = pdf.internal.pageSize.getWidth()
+    const pageHeight = pdf.internal.pageSize.getHeight()
+    const marginX = 16
+    const rightX = pageWidth - marginX
+
+    let y = 18
+
+    const green: [number, number, number] = [22, 163, 74]
+    const dark: [number, number, number] = [15, 23, 42]
+    const gray: [number, number, number] = [100, 116, 139]
+    const slate100: [number, number, number] = [241, 245, 249]
+    const slate200: [number, number, number] = [226, 232, 240]
+    const white: [number, number, number] = [255, 255, 255]
+
+    function setColor(color: [number, number, number]) {
+      pdf.setTextColor(color[0], color[1], color[2])
+    }
+
+    function setFill(color: [number, number, number]) {
+      pdf.setFillColor(color[0], color[1], color[2])
+    }
+
+    function setDraw(color: [number, number, number]) {
+      pdf.setDrawColor(color[0], color[1], color[2])
+    }
+
+    function cleanText(value: unknown, fallback = '-') {
+      const text = String(value ?? '').trim()
+      return text || fallback
+    }
+
+    function safeMoney(value: unknown) {
+      return formatIDR(Number(value || 0))
+    }
+
+    function wrapped(text: string, x: number, maxWidth: number, lineHeight = 5.5) {
+      const lines = pdf.splitTextToSize(cleanText(text), maxWidth)
+      pdf.text(lines, x, y)
+      y += lines.length * lineHeight
+    }
+
+    function priceLine(
+      label: string,
+      value: string,
+      options: { bold?: boolean; green?: boolean; muted?: boolean } = {}
+    ) {
+      pdf.setFont('helvetica', options.bold ? 'bold' : 'normal')
+      pdf.setFontSize(options.bold ? 11 : 9.5)
+      setColor(options.muted ? gray : dark)
+      pdf.text(label, 116, y)
+
+      setColor(options.green ? green : options.muted ? gray : dark)
+      pdf.text(value, rightX, y, { align: 'right' })
+
+      y += options.bold ? 8 : 6.5
+    }
+
+    function sectionTitle(title: string) {
+      y += 5
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(12)
+      setColor(dark)
+      pdf.text(title, marginX, y)
+      y += 7
+    }
+
+    // Header
+    setFill(dark)
+    pdf.rect(0, 0, pageWidth, 48, 'F')
+
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(10)
+    pdf.setTextColor(134, 239, 172)
+    pdf.text('OBAYAN INVOICE', marginX, 15)
+
+    pdf.setFontSize(22)
+    pdf.setTextColor(255, 255, 255)
+    pdf.text('Invoice Pembayaran', marginX, 29)
+
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(8.5)
+    pdf.setTextColor(203, 213, 225)
+    pdf.text('Invoice ini diterbitkan otomatis oleh sistem Obayan.', marginX, 38)
+
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9)
+    pdf.setTextColor(255, 255, 255)
+    pdf.text(cleanText(invoice.status, 'DRAFT').toUpperCase(), rightX, 16, { align: 'right' })
+
+    y = 62
+
+    // Meta box
+    setDraw(slate200)
+    pdf.roundedRect(marginX, y, pageWidth - marginX * 2, 46, 4, 4, 'S')
+
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(7.5)
+    setColor(gray)
+    pdf.text('INVOICE NO.', marginX + 5, y + 9)
+    pdf.text('ORDER ID', pageWidth / 2 + 4, y + 9)
+
+    pdf.setFontSize(10)
+    setColor(dark)
+    pdf.text(cleanText(invoice.invoiceNo), marginX + 5, y + 18)
+    pdf.text(cleanText(invoice.orderId), pageWidth / 2 + 4, y + 18)
+
+    pdf.setFontSize(7.5)
+    setColor(gray)
+    pdf.text('DITAGIHKAN KEPADA', marginX + 5, y + 31)
+    pdf.text('MASA KONTRAK', pageWidth / 2 + 4, y + 31)
+
+    pdf.setFontSize(9.5)
+    setColor(dark)
+    pdf.text(cleanText(form.tenantName || invoice.tenantName), marginX + 5, y + 39)
+    pdf.text(
+      `${cleanText(form.contractStart || invoice.contractStart)} s/d ${cleanText(form.contractEnd || invoice.contractEnd)}`,
+      pageWidth / 2 + 4,
+      y + 39
+    )
+
+    y += 60
+
+    // Customer
+    sectionTitle('Data Pemesan')
+
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(9.5)
+    setColor(gray)
+
+    wrapped(
+      `${cleanText(form.picName || invoice.picName)} · ${cleanText(form.picPosition || invoice.picPosition)}`,
+      marginX,
+      pageWidth - marginX * 2
+    )
+
+    wrapped(
+      `WhatsApp: ${cleanText(form.picWhatsapp || invoice.picWhatsapp)}`,
+      marginX,
+      pageWidth - marginX * 2
+    )
+
+    if (form.requestNote || invoice.requestNote) {
+      wrapped(
+        `Catatan: ${cleanText(form.requestNote || invoice.requestNote)}`,
+        marginX,
+        pageWidth - marginX * 2
+      )
+    }
+
+    // Service
+    sectionTitle('Detail Layanan')
+
+    const tableY = y
+
+    setFill(slate100)
+    pdf.roundedRect(marginX, tableY, pageWidth - marginX * 2, 13, 3, 3, 'F')
+
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(9)
+    setColor(dark)
+    pdf.text('Layanan', marginX + 5, tableY + 8)
+    pdf.text('Jumlah', rightX - 5, tableY + 8, { align: 'right' })
+
+    y = tableY + 21
+
+    const serviceTitle = `${cleanText(pkg.name || invoice.packageName)} - ${cleanText(pkg.subtitle || invoice.packageSubtitle)}`
+    const serviceDetail = `${cleanText(price.durationLabel || invoice.durationLabel)}${
+      requiresSantriCount.value
+        ? ` · ${cleanText(form.santriCount || invoice.santriCount || 0)} santri/siswa`
+        : ''
+    }`
+
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(10)
+    setColor(dark)
+    wrapped(serviceTitle, marginX + 5, 112)
+
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(8.5)
+    setColor(gray)
+    wrapped(serviceDetail, marginX + 5, 112)
+
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(10)
+    setColor(dark)
+    pdf.text(
+      safeMoney(price.subtotal || invoice?.pricing?.subtotal || invoice.total),
+      rightX - 5,
+      tableY + 25,
+      { align: 'right' }
+    )
+
+    y += 8
+    setDraw(slate200)
+    pdf.line(marginX, y, rightX, y)
+    y += 12
+
+    // Summary
+    y = Math.max(y, 168)
+
+    priceLine('Harga normal', safeMoney(price.regularSubtotal || invoice?.pricing?.regularSubtotal), { muted: true })
+    priceLine('Subtotal promo', safeMoney(price.subtotal || invoice?.pricing?.subtotal))
+
+    if (Number(price.launchingDiscount || invoice?.pricing?.launchingDiscount || 0) > 0) {
+      priceLine(
+        'Diskon launching',
+        `-${safeMoney(price.launchingDiscount || invoice?.pricing?.launchingDiscount)}`,
+        { green: true }
+      )
+    }
+
+    if (Number(price.yearlyDiscount || invoice?.pricing?.yearlyDiscount || 0) > 0) {
+      priceLine(
+        'Diskon tahunan',
+        `-${safeMoney(price.yearlyDiscount || invoice?.pricing?.yearlyDiscount)}`,
+        { green: true }
+      )
+    }
+
+    y += 2
+    setDraw(slate200)
+    pdf.line(116, y, rightX, y)
+    y += 8
+
+    priceLine(
+      'Total Dibayar',
+      safeMoney(price.total || invoice.total || invoice?.pricing?.total),
+      { bold: true, green: true }
+    )
+
+    // Notes
+    y += 10
+    setFill(slate100)
+    pdf.roundedRect(marginX, y, pageWidth - marginX * 2, 34, 4, 4, 'F')
+
+    y += 9
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(8)
+    setColor(gray)
+
+    wrapped(
+      'Invoice ini sah sebagai bukti pembayaran layanan Obayan setelah status pembayaran dinyatakan PAID.',
+      marginX + 5,
+      pageWidth - marginX * 2 - 10,
+      4.8
+    )
+
+    wrapped(
+      'Request tambahan di luar paket akan dianalisis dan ditagihkan secara terpisah apabila disetujui kedua pihak.',
+      marginX + 5,
+      pageWidth - marginX * 2 - 10,
+      4.8
+    )
+
+    // Footer
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(8)
+    setColor(gray)
+    pdf.text('Generated by Obayan Payment', marginX, pageHeight - 10)
+    pdf.text(new Date().toLocaleString('id-ID'), rightX, pageHeight - 10, { align: 'right' })
+
+    pdf.save(invoiceFilename('pdf'))
+
+    downloadedInvoiceKeys.value.add(key)
+  } catch (error: any) {
+    console.error('Gagal save PDF:', error)
+
+    errors.general = error?.message
+      ? `Gagal membuat PDF: ${error.message}`
+      : 'Gagal membuat PDF. Pastikan package jspdf sudah terinstall.'
+  } finally {
+    exporting.value = false
+    exportMessage.value = ''
+    unlockModalScroll()
+
+    await nextTick()
+  }
+}
+
+async function downloadInvoiceJpg(auto = false) {
+  if (!currentInvoice.value) {
+    errors.general = 'Invoice belum tersedia. Generate invoice terlebih dahulu.'
+    return
+  }
+
+  const isAuto = auto === true
+  const key = `${currentInvoice.value.orderId}:jpg`
+
+  if (isAuto && downloadedInvoiceKeys.value.has(key)) return
+
+  exporting.value = true
+  exportMessage.value = 'Membuat JPG...'
+
+  try {
+    const invoice = currentInvoice.value || {}
+    const pkg = selectedPackage.value || {}
+    const price = pricing.value || {}
+
+    const width = 1240
+    const height = 1754
+    const scale = 1
+
+    const canvas = document.createElement('canvas')
+    canvas.width = width * scale
+    canvas.height = height * scale
+
+    const ctx = canvas.getContext('2d')
+
+    if (!ctx) {
+      throw new Error('Canvas tidak tersedia di browser ini.')
+    }
+
+    ctx.scale(scale, scale)
+
+    const green = '#16a34a'
+    const greenLight = '#dcfce7'
+    const dark = '#0f172a'
+    const slate = '#64748b'
+    const slate100 = '#f1f5f9'
+    const slate200 = '#e2e8f0'
+    const white = '#ffffff'
+
+    function cleanText(value: unknown, fallback = '-') {
+      const text = String(value ?? '').trim()
+      return text || fallback
+    }
+
+    function safeMoney(value: unknown) {
+      return formatIDR(Number(value || 0))
+    }
+
+    function roundedRect(x: number, y: number, w: number, h: number, r: number, fill: string, stroke?: string) {
+      ctx.beginPath()
+      ctx.moveTo(x + r, y)
+      ctx.lineTo(x + w - r, y)
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+      ctx.lineTo(x + w, y + h - r)
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+      ctx.lineTo(x + r, y + h)
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+      ctx.lineTo(x, y + r)
+      ctx.quadraticCurveTo(x, y, x + r, y)
+      ctx.closePath()
+
+      ctx.fillStyle = fill
+      ctx.fill()
+
+      if (stroke) {
+        ctx.strokeStyle = stroke
+        ctx.lineWidth = 2
+        ctx.stroke()
+      }
+    }
+
+    function text(
+      value: string,
+      x: number,
+      y: number,
+      options: {
+        size?: number
+        weight?: string
+        color?: string
+        align?: CanvasTextAlign
+        maxWidth?: number
+      } = {}
+    ) {
+      ctx.font = `${options.weight || '400'} ${options.size || 24}px Arial, sans-serif`
+      ctx.fillStyle = options.color || dark
+      ctx.textAlign = options.align || 'left'
+      ctx.textBaseline = 'top'
+      ctx.fillText(value, x, y, options.maxWidth)
+    }
+
+    function wrapText(
+      value: string,
+      x: number,
+      y: number,
+      maxWidth: number,
+      lineHeight: number,
+      options: {
+        size?: number
+        weight?: string
+        color?: string
+      } = {}
+    ) {
+      const words = cleanText(value).split(' ')
+      let line = ''
+      let currentY = y
+
+      ctx.font = `${options.weight || '400'} ${options.size || 24}px Arial, sans-serif`
+      ctx.fillStyle = options.color || dark
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'top'
+
+      for (const word of words) {
+        const testLine = line ? `${line} ${word}` : word
+        const metrics = ctx.measureText(testLine)
+
+        if (metrics.width > maxWidth && line) {
+          ctx.fillText(line, x, currentY)
+          line = word
+          currentY += lineHeight
+        } else {
+          line = testLine
+        }
+      }
+
+      if (line) {
+        ctx.fillText(line, x, currentY)
+        currentY += lineHeight
+      }
+
+      return currentY
+    }
+
+    function priceLine(label: string, value: string, y: number, options: { bold?: boolean; green?: boolean; muted?: boolean } = {}) {
+      text(label, 720, y, {
+        size: options.bold ? 28 : 22,
+        weight: options.bold ? '800' : '500',
+        color: options.muted ? slate : dark
+      })
+
+      text(value, 1080, y, {
+        size: options.bold ? 28 : 22,
+        weight: options.bold ? '800' : '700',
+        color: options.green ? green : options.muted ? slate : dark,
+        align: 'right'
+      })
+
+      return y + (options.bold ? 42 : 34)
+    }
+
+    // Background
+    ctx.fillStyle = white
+    ctx.fillRect(0, 0, width, height)
+
+    // Header
+    ctx.fillStyle = dark
+    ctx.fillRect(0, 0, width, 245)
+
+    text('OBAYAN INVOICE', 80, 62, {
+      size: 22,
+      weight: '800',
+      color: '#86efac'
+    })
+
+    text('Invoice Pembayaran', 80, 105, {
+      size: 50,
+      weight: '900',
+      color: white
+    })
+
+    text('Invoice ini diterbitkan otomatis oleh sistem Obayan.', 80, 170, {
+      size: 22,
+      weight: '400',
+      color: '#cbd5e1'
+    })
+
+    roundedRect(960, 60, 180, 48, 24, greenLight)
+    text(cleanText(invoice.status, 'DRAFT').toUpperCase(), 1050, 74, {
+      size: 20,
+      weight: '900',
+      color: green,
+      align: 'center'
+    })
+
+    // Meta box
+    roundedRect(80, 310, 1080, 215, 24, white, slate200)
+
+    text('INVOICE NO.', 115, 345, {
+      size: 18,
+      weight: '800',
+      color: slate
+    })
+
+    text(cleanText(invoice.invoiceNo), 115, 383, {
+      size: 25,
+      weight: '900',
+      color: dark,
+      maxWidth: 470
+    })
+
+    text('ORDER ID', 650, 345, {
+      size: 18,
+      weight: '800',
+      color: slate
+    })
+
+    text(cleanText(invoice.orderId), 650, 383, {
+      size: 25,
+      weight: '900',
+      color: dark,
+      maxWidth: 470
+    })
+
+    text('DITAGIHKAN KEPADA', 115, 455, {
+      size: 18,
+      weight: '800',
+      color: slate
+    })
+
+    text(cleanText(form.tenantName || invoice.tenantName), 115, 492, {
+      size: 23,
+      weight: '900',
+      color: dark,
+      maxWidth: 470
+    })
+
+    text('MASA KONTRAK', 650, 455, {
+      size: 18,
+      weight: '800',
+      color: slate
+    })
+
+    text(`${cleanText(form.contractStart || invoice.contractStart)} s/d ${cleanText(form.contractEnd || invoice.contractEnd)}`, 650, 492, {
+      size: 23,
+      weight: '800',
+      color: dark,
+      maxWidth: 470
+    })
+
+    // Customer
+    let y = 600
+
+    text('Data Pemesan', 80, y, {
+      size: 30,
+      weight: '900',
+      color: dark
+    })
+
+    y += 55
+
+    y = wrapText(
+      `${cleanText(form.picName || invoice.picName)} · ${cleanText(form.picPosition || invoice.picPosition)}`,
+      80,
+      y,
+      1080,
+      34,
+      {
+        size: 24,
+        weight: '500',
+        color: slate
+      }
+    )
+
+    y = wrapText(`WhatsApp: ${cleanText(form.picWhatsapp || invoice.picWhatsapp)}`, 80, y + 6, 1080, 34, {
+      size: 24,
+      weight: '500',
+      color: slate
+    })
+
+    if (form.requestNote || invoice.requestNote) {
+      y = wrapText(`Catatan: ${cleanText(form.requestNote || invoice.requestNote)}`, 80, y + 6, 1080, 34, {
+        size: 22,
+        weight: '500',
+        color: slate
+      })
+    }
+
+    // Service table
+    y += 45
+
+    text('Detail Layanan', 80, y, {
+      size: 30,
+      weight: '900',
+      color: dark
+    })
+
+    y += 55
+
+    roundedRect(80, y, 1080, 70, 18, slate100)
+
+    text('Layanan', 115, y + 24, {
+      size: 22,
+      weight: '900',
+      color: dark
+    })
+
+    text('Jumlah', 1125, y + 24, {
+      size: 22,
+      weight: '900',
+      color: dark,
+      align: 'right'
+    })
+
+    y += 95
+
+    const serviceTitle = `${cleanText(pkg.name || invoice.packageName)} - ${cleanText(pkg.subtitle || invoice.packageSubtitle)}`
+    const serviceDetail = `${cleanText(price.durationLabel || invoice.durationLabel)}${
+      requiresSantriCount.value
+        ? ` · ${cleanText(form.santriCount || invoice.santriCount || 0)} santri/siswa`
+        : ''
+    }`
+
+    const serviceStartY = y
+
+    y = wrapText(serviceTitle, 115, y, 650, 34, {
+      size: 24,
+      weight: '900',
+      color: dark
+    })
+
+    y = wrapText(serviceDetail, 115, y + 8, 650, 30, {
+      size: 20,
+      weight: '500',
+      color: slate
+    })
+
+    text(safeMoney(price.subtotal || invoice?.pricing?.subtotal || invoice.total), 1125, serviceStartY, {
+      size: 24,
+      weight: '900',
+      color: dark,
+      align: 'right'
+    })
+
+    y += 45
+
+    ctx.strokeStyle = slate200
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.moveTo(80, y)
+    ctx.lineTo(1160, y)
+    ctx.stroke()
+
+    // Summary
+    y += 60
+    y = Math.max(y, 1040)
+
+    y = priceLine('Harga normal', safeMoney(price.regularSubtotal || invoice?.pricing?.regularSubtotal), y, {
+      muted: true
+    })
+
+    y = priceLine('Subtotal promo', safeMoney(price.subtotal || invoice?.pricing?.subtotal), y)
+
+    if (Number(price.launchingDiscount || invoice?.pricing?.launchingDiscount || 0) > 0) {
+      y = priceLine(
+        'Diskon launching',
+        `-${safeMoney(price.launchingDiscount || invoice?.pricing?.launchingDiscount)}`,
+        y,
+        { green: true }
+      )
+    }
+
+    if (Number(price.yearlyDiscount || invoice?.pricing?.yearlyDiscount || 0) > 0) {
+      y = priceLine(
+        'Diskon tahunan',
+        `-${safeMoney(price.yearlyDiscount || invoice?.pricing?.yearlyDiscount)}`,
+        y,
+        { green: true }
+      )
+    }
+
+    ctx.strokeStyle = slate200
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.moveTo(720, y + 8)
+    ctx.lineTo(1125, y + 8)
+    ctx.stroke()
+
+    y += 35
+
+    priceLine('Total Dibayar', safeMoney(price.total || invoice.total || invoice?.pricing?.total), y, {
+      bold: true,
+      green: true
+    })
+
+    // Notes
+    roundedRect(80, 1380, 1080, 135, 24, slate100)
+
+    wrapText(
+      'Invoice ini sah sebagai bukti pembayaran layanan Obayan setelah status pembayaran dinyatakan PAID.',
+      115,
+      1415,
+      1000,
+      28,
+      {
+        size: 20,
+        weight: '500',
+        color: slate
+      }
+    )
+
+    wrapText(
+      'Request tambahan di luar paket akan dianalisis dan ditagihkan secara terpisah apabila disetujui kedua pihak.',
+      115,
+      1470,
+      1000,
+      28,
+      {
+        size: 20,
+        weight: '500',
+        color: slate
+      }
+    )
+
+    // Footer
+    text('Generated by Obayan Payment', 80, 1680, {
+      size: 18,
+      weight: '500',
+      color: slate
+    })
+
+    text(new Date().toLocaleString('id-ID'), 1160, 1680, {
+      size: 18,
+      weight: '500',
+      color: slate,
+      align: 'right'
+    })
+
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.96)
+    const link = document.createElement('a')
+
+    link.href = dataUrl
+    link.download = invoiceFilename('jpg')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    downloadedInvoiceKeys.value.add(key)
+  } catch (error: any) {
+    console.error('Gagal save JPG:', error)
+
+    errors.general = error?.message
+      ? `Gagal membuat JPG: ${error.message}`
+      : 'Gagal membuat JPG. Cek console browser untuk detail error.'
+  } finally {
+    exporting.value = false
+    exportMessage.value = ''
+    unlockModalScroll()
+
+    await nextTick()
+  }
+}
+
+const PriceLine = defineComponent({
+  name: 'PriceLine',
+  props: {
+    label: { type: String, required: true },
+    value: { type: String, required: true },
+    success: { type: Boolean, default: false },
+    muted: { type: Boolean, default: false }
+  },
+  setup(props) {
+    return () => h('div', {
+      class: [
+        'flex items-center justify-between gap-4 text-sm',
+        props.success ? 'text-green-700' : props.muted ? 'text-slate-400' : 'text-slate-700'
+      ]
+    }, [
+      h('span', {}, props.label),
+      h('span', {
+        class: [
+          'font-bold',
+          props.muted ? 'line-through' : ''
+        ]
+      }, props.value)
+    ])
+  }
+})
+
+const InvoiceContent = defineComponent({
+  name: 'InvoiceContent',
+  props: {
+    invoice: {
+      type: Object,
+      required: true
+    },
+    formData: {
+      type: Object,
+      required: true
+    },
+    selectedPackageData: {
+      type: Object,
+      required: true
+    },
+    pricingData: {
+      type: Object,
+      required: true
+    },
+    requiresSantriCount: {
+      type: Boolean,
+      default: false
+    }
+  },
+  setup(props) {
+    return () => {
+      const invoice = props.invoice as any
+      const formData = props.formData as any
+      const selectedPackageData = props.selectedPackageData as any
+      const pricingData = props.pricingData as any
+
+      return h('div', { class: 'bg-white p-10 text-slate-950' }, [
+        h('div', { class: 'flex items-start justify-between border-b border-slate-200 pb-6' }, [
+          h('div', {}, [
+            h('p', { class: 'text-xs font-bold uppercase tracking-[0.22em] text-green-700' }, 'Obayan Invoice'),
+            h('h1', { class: 'mt-2 text-3xl font-black text-slate-950' }, 'Invoice Pembayaran'),
+            h('p', { class: 'mt-2 text-sm text-slate-500' }, 'Invoice ini diterbitkan otomatis oleh sistem Obayan.')
+          ]),
+
+          h('div', { class: 'text-right' }, [
+            h('p', { class: 'text-sm font-bold text-slate-500' }, 'Status'),
+            h(
+              'p',
+              { class: 'mt-1 rounded-full bg-green-100 px-4 py-1 text-sm font-black text-green-700' },
+              String(invoice?.status || 'draft').toUpperCase()
+            )
+          ])
+        ]),
+
+        h('div', { class: 'mt-8 grid grid-cols-2 gap-6' }, [
+          h('div', {}, [
+            h('p', { class: 'text-xs font-bold uppercase tracking-[0.18em] text-slate-400' }, 'Invoice No.'),
+            h('p', { class: 'mt-2 text-lg font-black' }, invoice?.invoiceNo || '-')
+          ]),
+
+          h('div', {}, [
+            h('p', { class: 'text-xs font-bold uppercase tracking-[0.18em] text-slate-400' }, 'Order ID'),
+            h('p', { class: 'mt-2 text-lg font-black' }, invoice?.orderId || '-')
+          ]),
+
+          h('div', {}, [
+            h('p', { class: 'text-xs font-bold uppercase tracking-[0.18em] text-slate-400' }, 'Ditagihkan Kepada'),
+            h('p', { class: 'mt-2 font-black' }, formData?.tenantName || invoice?.tenantName || '-'),
+            h(
+              'p',
+              { class: 'mt-1 text-sm text-slate-600' },
+              `${formData?.picName || invoice?.picName || '-'} · ${formData?.picPosition || invoice?.picPosition || '-'}`
+            ),
+            h('p', { class: 'text-sm text-slate-600' }, formData?.picWhatsapp || invoice?.picWhatsapp || '-')
+          ]),
+
+          h('div', {}, [
+            h('p', { class: 'text-xs font-bold uppercase tracking-[0.18em] text-slate-400' }, 'Masa Kontrak'),
+            h('p', { class: 'mt-2 text-sm text-slate-700' }, [
+              'Mulai: ',
+              h('b', {}, formData?.contractStart || invoice?.contractStart || '-')
+            ]),
+            h('p', { class: 'text-sm text-slate-700' }, [
+              'Berakhir: ',
+              h('b', {}, formData?.contractEnd || invoice?.contractEnd || '-')
+            ]),
+            h('p', { class: 'text-sm text-slate-700' }, [
+              'Durasi: ',
+              h('b', {}, pricingData?.durationLabel || invoice?.durationLabel || '-')
+            ])
+          ])
+        ]),
+
+        h('div', { class: 'mt-8 overflow-hidden rounded-2xl border border-slate-200' }, [
+          h('table', { class: 'w-full border-collapse text-left text-sm' }, [
+            h('thead', { class: 'bg-slate-50' }, [
+              h('tr', {}, [
+                h('th', { class: 'px-5 py-4 font-black text-slate-700' }, 'Layanan'),
+                h('th', { class: 'px-5 py-4 text-right font-black text-slate-700' }, 'Jumlah')
+              ])
+            ]),
+
+            h('tbody', {}, [
+              h('tr', { class: 'border-t border-slate-200' }, [
+                h('td', { class: 'px-5 py-5' }, [
+                  h(
+                    'p',
+                    { class: 'font-black text-slate-950' },
+                    `${selectedPackageData?.name || invoice?.packageName || '-'} - ${selectedPackageData?.subtitle || invoice?.packageSubtitle || '-'}`
+                  ),
+                  h(
+                    'p',
+                    { class: 'mt-1 text-xs text-slate-500' },
+                    `${pricingData?.durationLabel || invoice?.durationLabel || '-'}${
+                      props.requiresSantriCount
+                        ? ` · ${formData?.santriCount || invoice?.santriCount || 0} santri/siswa`
+                        : ''
+                    }`
+                  )
+                ]),
+
+                h(
+                  'td',
+                  { class: 'px-5 py-5 text-right font-black' },
+                  formatIDR(pricingData?.subtotal || invoice?.pricing?.subtotal || invoice?.total || 0)
+                )
+              ])
+            ])
+          ])
+        ]),
+
+        h('div', { class: 'mt-8 ml-auto w-full max-w-sm space-y-3' }, [
+          h(PriceLine, {
+            label: 'Harga normal',
+            value: formatIDR(pricingData?.regularSubtotal || invoice?.pricing?.regularSubtotal || 0),
+            muted: true
+          }),
+
+          h(PriceLine, {
+            label: 'Subtotal promo',
+            value: formatIDR(pricingData?.subtotal || invoice?.pricing?.subtotal || 0)
+          }),
+
+          Number(pricingData?.launchingDiscount || invoice?.pricing?.launchingDiscount || 0) > 0
+            ? h(PriceLine, {
+                label: 'Diskon launching',
+                value: `-${formatIDR(pricingData?.launchingDiscount || invoice?.pricing?.launchingDiscount || 0)}`,
+                success: true
+              })
+            : null,
+
+          Number(pricingData?.yearlyDiscount || invoice?.pricing?.yearlyDiscount || 0) > 0
+            ? h(PriceLine, {
+                label: 'Diskon tahunan',
+                value: `-${formatIDR(pricingData?.yearlyDiscount || invoice?.pricing?.yearlyDiscount || 0)}`,
+                success: true
+              })
+            : null,
+
+          h('div', { class: 'flex items-center justify-between border-t border-slate-200 pt-4' }, [
+            h('span', { class: 'text-lg font-black' }, 'Total Dibayar'),
+            h(
+              'span',
+              { class: 'text-2xl font-black text-green-700' },
+              formatIDR(pricingData?.total || invoice?.total || invoice?.pricing?.total || 0)
+            )
+          ])
+        ]),
+
+        h('div', { class: 'mt-10 rounded-2xl bg-slate-50 p-5 text-xs leading-6 text-slate-500' }, [
+          h('p', {}, 'Invoice ini sah sebagai bukti pembayaran layanan Obayan setelah status pembayaran dinyatakan PAID.'),
+          h('p', { class: 'mt-2' }, 'Request tambahan di luar paket akan dianalisis dan ditagihkan secara terpisah apabila disetujui kedua pihak.')
+        ])
+      ])
+    }
+  }
+})
+
 </script>
+
+<style scoped>
+.invoice-modal-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+.invoice-export-wrapper {
+  opacity: 0.01;
+  z-index: -1;
+}
+</style>

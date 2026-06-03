@@ -126,8 +126,8 @@ export default defineNuxtConfig({
       apiRemoteEnabled: process.env.NUXT_PUBLIC_API_REMOTE_ENABLED || false,
       
       midtransClientKey: process.env.NUXT_PUBLIC_MIDTRANS_CLIENT_KEY || '',
-      midtransIsProduction: process.env.NUXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true'
-
+      midtransIsProduction: process.env.NUXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true',
+      withoutPayment: process.env.NUXT_PUBLIC_WITHOUT_PAYMENT === 'true' || process.env.WITHOUT_PAYMENT === 'true'
     },
     midtransServerKey: process.env.MIDTRANS_SERVER_KEY || '',
     midtransIsProduction: process.env.MIDTRANS_IS_PRODUCTION === 'true',

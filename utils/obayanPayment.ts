@@ -26,8 +26,8 @@ export const PAYMENT_PACKAGES: Record<PaymentPackageId, PaymentPackage> = {
     name: 'Basic',
     subtitle: 'Website Informasi',
     description: 'Cocok untuk lembaga yang ingin punya website resmi, profil, berita, galeri, dan informasi PPDB.',
-    regularMonthlyPrice: 350_000,
-    baseMonthlyPrice: 250_000,
+    regularMonthlyPrice: 300_000,
+    baseMonthlyPrice: 300_000,
     perSantriPrice: 0,
     badge: 'Launching Deal',
     promoLabel: 'Hemat Rp100rb/bln',
@@ -46,7 +46,7 @@ export const PAYMENT_PACKAGES: Record<PaymentPackageId, PaymentPackage> = {
     subtitle: 'Website + SIAKAD Dasar',
     description: 'Paket awal terbaik untuk mulai digitalisasi data peserta didik, absensi, akademik, dan keuangan dasar.',
     regularMonthlyPrice: 400_000,
-    baseMonthlyPrice: 300_000,
+    baseMonthlyPrice: 400_000,
     regularPerSantriPrice: 3_000,
     perSantriPrice: 3_000,
     badge: 'Recommended',
@@ -193,11 +193,8 @@ export function calculateInvoice(input: {
     }
   }
 
-  const regularMonthlyUnitPrice =
-    pkg.regularMonthlyPrice + ((pkg.regularPerSantriPrice || pkg.perSantriPrice) * santriCount)
-
-  const monthlyUnitPrice =
-    pkg.baseMonthlyPrice + (pkg.perSantriPrice * santriCount)
+  const regularMonthlyUnitPrice = pkg.regularMonthlyPrice + ((pkg.regularPerSantriPrice || pkg.perSantriPrice) * santriCount)
+  const monthlyUnitPrice = pkg.baseMonthlyPrice + (pkg.perSantriPrice * santriCount)
 
   const normalMonths = input.duration === 'yearly' ? 12 : 1
   const chargedMonths = input.duration === 'yearly' ? 10 : 1
