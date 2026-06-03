@@ -30,7 +30,7 @@
           </h1>
 
           <p class="mt-3 max-w-xl text-sm text-green-50/90 md:text-base">
-            Atur hero, teks pencarian, kategori, dan koleksi dokumentasi dalam tampilan card yang lebih modern.
+            Upload gambar ke Cloudinary, atur kategori, dan hapus file lama otomatis saat gambar diperbarui.
           </p>
         </div>
 
@@ -76,7 +76,7 @@
               :class="[
                 'inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold transition',
                 activeTab === tab.key
-                  ? 'bg-white text-gray-900 shadow-sm dark:bg-neutral-200'
+                  ? 'bg-white text-gray-900 shadow-sm dark:bg-neutral-200 dark:text-gray-900'
                   : 'text-gray-500 hover:text-gray-900 dark:text-neutral-300 dark:hover:text-white'
               ]"
             >
@@ -107,10 +107,13 @@
           <button
             type="button"
             class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
-            :disabled="savingConfig"
+            :disabled="savingConfig || itemSaving"
             @click="activeTab === 'settings' ? saveConfig() : openItemCreate()"
           >
-            <Icon :icon="savingConfig ? 'svg-spinners:3-dots-fade' : activeTab === 'settings' ? 'lucide:save' : 'lucide:plus'" class="h-4 w-4" />
+            <Icon
+              :icon="savingConfig || itemSaving ? 'svg-spinners:3-dots-fade' : activeTab === 'settings' ? 'lucide:save' : 'lucide:plus'"
+              class="h-4 w-4"
+            />
             {{ savingConfig ? 'Menyimpan…' : activeTab === 'settings' ? 'Simpan Konfigurasi' : 'Tambah Foto' }}
           </button>
         </div>
@@ -126,7 +129,7 @@
     </div>
 
     <!-- Settings -->
-    <div v-show="activeTab === 'settings'" class="grid gap-5 xl:grid-cols-[minmax(0,1.4fr),minmax(340px,0.6fr)]">
+    <div v-show="activeTab === 'settings'" class="grid gap-5 xl:grid-cols-[minmax(0,1.35fr),minmax(340px,0.65fr)]">
       <!-- Hero Config -->
       <section class="overflow-hidden rounded-[30px] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <div class="border-b border-gray-200 bg-gradient-to-br from-white via-green-50/60 to-lime-50/70 px-5 py-4 dark:border-neutral-800 dark:from-neutral-900 dark:via-green-950/10 dark:to-neutral-900">
@@ -134,7 +137,7 @@
             <div>
               <h2 class="text-base font-bold text-gray-900 dark:text-white">Hero Galeri</h2>
               <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
-                Atur cover, badge, judul, subjudul, dan tinggi hero di halaman publik.
+                Cover hero diunggah ke Cloudinary. File lama akan dihapus setelah konfigurasi berhasil disimpan.
               </p>
             </div>
             <Icon icon="lucide:images" class="h-5 w-5 text-green-600" />
@@ -153,24 +156,32 @@
                   v-model.trim="form.hero.cover"
                   placeholder="/assets/images/activity1.jpg"
                   class="h-11 min-w-0 flex-1 rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                  @input="clearHeroPublicIdOnManualInput"
                 />
 
-                <label class="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800">
-                  <input type="file" accept="image/*" class="hidden" @change="onPickHero" />
-                  <Icon :icon="uploadingKey === 'hero' ? 'svg-spinners:3-dots-fade' : 'lucide:upload-cloud'" class="h-4 w-4" />
-                  Unggah
+                <label
+                  class="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  :class="uploadingKey === 'hero' ? 'pointer-events-none opacity-70' : ''"
+                >
+                  <input type="file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden" @change="onPickHero" />
+                  <Icon :icon="uploadingKey === 'hero' ? 'svg-spinners:3-dots-fade' : 'lucide:cloud-upload'" class="h-4 w-4" />
+                  {{ uploadingKey === 'hero' ? 'Upload…' : 'Cloudinary' }}
                 </label>
 
                 <button
                   v-if="form.hero.cover"
                   type="button"
                   class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10"
-                  @click="form.hero.cover = ''"
+                  @click="removeHeroCover"
                 >
                   <Icon icon="lucide:trash-2" class="h-4 w-4" />
                   Hapus
                 </button>
               </div>
+
+              <p v-if="form.hero.coverPublicId" class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
+                Image ID: <span class="font-semibold text-green-700 dark:text-green-300">{{ form.hero.coverPublicId }}</span>
+              </p>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2">
@@ -241,20 +252,23 @@
                 @error="markBroken(form.hero.cover)"
               />
 
-              <div v-else class="grid h-full place-items-center p-6 text-center">
-                <div>
-                  <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-white text-green-600 shadow-sm dark:bg-neutral-900">
-                    <Icon icon="lucide:image" class="h-6 w-6" />
-                  </div>
-                  <p class="mt-3 text-sm font-bold text-gray-900 dark:text-white">Belum ada cover</p>
-                  <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">Upload atau isi link gambar.</p>
-                </div>
-              </div>
+              <InvalidImageState
+                v-else
+                :is-invalid="Boolean(form.hero.cover && isBrokenImage(form.hero.cover))"
+                title-empty="Belum ada cover"
+                note-empty="Upload file atau isi link gambar."
+              />
 
               <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent p-5">
-                <p class="text-xs font-bold uppercase tracking-wide text-green-200">{{ form.hero.badge || 'Galeri' }}</p>
-                <h3 class="mt-1 line-clamp-2 text-xl font-black text-white">{{ form.hero.title || 'Judul Hero' }}</h3>
-                <p class="mt-1 line-clamp-2 text-xs text-green-50/90">{{ form.hero.subtitle || 'Subjudul hero galeri.' }}</p>
+                <p class="text-xs font-bold uppercase tracking-wide text-green-200">
+                  {{ form.hero.badge || 'Galeri' }}
+                </p>
+                <h3 class="mt-1 line-clamp-2 text-xl font-black text-white">
+                  {{ form.hero.title || 'Judul Hero' }}
+                </h3>
+                <p class="mt-1 line-clamp-2 text-xs text-green-50/90">
+                  {{ form.hero.subtitle || 'Subjudul hero galeri.' }}
+                </p>
               </div>
             </div>
           </div>
@@ -267,9 +281,11 @@
           <div class="flex items-center justify-between gap-3">
             <div>
               <h2 class="text-base font-bold text-gray-900 dark:text-white">Teks Interface</h2>
-              <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Atur label yang tampil di halaman publik.</p>
+              <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
+                Atur label yang tampil di halaman publik.
+              </p>
             </div>
-            <Icon icon="lucide:text-cursor-input" class="h-5 w-5 text-sky-600" />
+            <Icon icon="lucide:text-cursor-input" class="h-5 w-5 text-green-600" />
           </div>
         </div>
 
@@ -416,21 +432,26 @@
               @error="markBroken(g.src)"
             />
 
-            <div
+            <InvalidImageState
               v-else
-              class="grid h-full place-items-center bg-gradient-to-br from-green-50 to-lime-50 text-green-600 dark:from-neutral-800 dark:to-neutral-900 dark:text-green-300"
-            >
-              <div class="text-center">
-                <Icon icon="lucide:image" class="mx-auto h-10 w-10" />
-                <p class="mt-2 text-xs font-bold">No Image</p>
-              </div>
-            </div>
+              compact
+              :is-invalid="Boolean(g.src && isBrokenImage(g.src))"
+              title-empty="Belum ada gambar"
+              note-empty="Upload gambar ke Cloudinary."
+            />
 
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-80"></div>
 
             <div class="absolute left-3 top-3 flex flex-wrap gap-2">
               <span class="rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
                 {{ g.category || 'Umum' }}
+              </span>
+
+              <span
+                v-if="g.cloudinaryPublicId"
+                class="rounded-full bg-green-600/85 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur"
+              >
+                Cloudinary
               </span>
             </div>
 
@@ -507,6 +528,7 @@
                 v-if="g.src"
                 :href="g.src"
                 target="_blank"
+                rel="noopener"
                 class="ml-auto inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
               >
                 Lihat
@@ -530,10 +552,10 @@
     <!-- Create / Edit Modal -->
     <teleport to="body">
       <div v-if="itemModal.open" class="fixed inset-0 z-[95]">
-        <div class="absolute inset-0 bg-black/45 backdrop-blur-sm" @click="closeItemModal"></div>
+        <div class="absolute inset-0 bg-black/45 backdrop-blur-sm" @click="closeItemModal()"></div>
 
         <div class="absolute inset-0 flex items-center justify-center p-4">
-          <div class="w-full max-w-4xl overflow-hidden rounded-[30px] border border-gray-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+          <div class="w-full max-w-5xl overflow-hidden rounded-[30px] border border-gray-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
             <div class="border-b border-gray-200 bg-gradient-to-br from-white via-green-50/50 to-lime-50/60 px-5 py-4 dark:border-neutral-800 dark:from-neutral-900 dark:via-green-950/10 dark:to-neutral-900">
               <div class="flex items-start justify-between gap-3">
                 <div>
@@ -541,142 +563,147 @@
                     {{ itemModal.mode === 'create' ? 'Tambah Foto Galeri' : 'Edit Foto Galeri' }}
                   </h3>
                   <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
-                    Lengkapi gambar, judul, kategori, dan tags agar galeri mudah dicari.
+                    Upload gambar ke Cloudinary, lalu isi judul, kategori, dan tags.
                   </p>
                 </div>
 
                 <button
                   type="button"
                   class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                  @click="closeItemModal"
+                  @click="closeItemModal()"
                 >
                   <Icon icon="lucide:x" class="h-4 w-4" />
                 </button>
               </div>
             </div>
 
-            <form class="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr),340px]" @submit.prevent="saveItem">
-              <div class="grid gap-4 grid-cols-3 max-h-[60vh] overflow-y-auto">
-                <div class="md:col-span-1 col-span-3 overflow-hidden rounded-[26px] border border-gray-200 bg-gray-100 dark:border-neutral-800 dark:bg-neutral-800">
-                  <div class="relative aspect-[4/5] min-h-[280px] max-h-[520px] overflow-hidden">
-                    <img
-                      v-if="itemForm.src && !isBrokenImage(itemForm.src)"
-                      :src="itemForm.src"
-                      alt="Preview"
-                      class="h-full w-full object-cover transition duration-500"
-                      @error="markBroken(itemForm.src)"
-                    />
+            <form class="grid gap-5 p-5 lg:grid-cols-[150px,minmax(0,1fr)]" @submit.prevent="saveItem">
+              <div class="overflow-hidden rounded-[26px] border border-gray-200 bg-gray-100 dark:border-neutral-800 dark:bg-neutral-800">
+                <div class="relative h-40 overflow-hidden sm:h-44 lg:h-48">
+                  <img
+                    v-if="itemForm.src && !isBrokenImage(itemForm.src)"
+                    :src="itemForm.src"
+                    alt="Preview"
+                    class="h-full w-full object-cover transition duration-500"
+                    @error="markBroken(itemForm.src)"
+                  />
 
-                    <div v-else class="grid h-full min-h-[280px] place-items-center p-6 text-center">
-                      <div>
-                        <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-white text-green-600 shadow-sm dark:bg-neutral-900">
-                          <Icon icon="lucide:image" class="h-6 w-6" />
-                        </div>
-                        <p class="mt-3 text-sm font-bold text-gray-900 dark:text-white">Preview gambar</p>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">Upload atau isi link gambar.</p>
-                      </div>
-                    </div>
+                  <InvalidImageState
+                    v-else
+                    :is-invalid="Boolean(itemForm.src && isBrokenImage(itemForm.src))"
+                    title-empty="Preview gambar"
+                    note-empty="Upload gambar atau isi link gambar."
+                  />
 
-                    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-4">
-                      <span class="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold text-white ring-1 ring-white/20 backdrop-blur">
-                        {{ itemForm.category || 'Kategori' }}
-                      </span>
+                  <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-4">
+                    <span class="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold text-white ring-1 ring-white/20 backdrop-blur">
+                      {{ itemForm.category || 'Kategori' }}
+                    </span>
 
-                      <h4 class="mt-2 line-clamp-2 text-base font-black text-white md:text-lg">
-                        {{ itemForm.title || 'Judul Foto' }}
-                      </h4>
+                    <h4 class="mt-2 line-clamp-2 text-base font-black text-white md:text-lg">
+                      {{ itemForm.title || 'Judul Foto' }}
+                    </h4>
 
-                      <p class="mt-1 line-clamp-2 text-xs text-white/80">
-                        {{ tagsArray(itemForm.tagsText).join(', ') || 'Tags akan tampil di sini.' }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="space-y-4 md:col-span-2 col-span-3">
-                  <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-neutral-400">
-                      Link Gambar
-                    </label>
-  
-                    <div class="flex flex-col gap-2 sm:flex-row">
-                      <input
-                        v-model.trim="itemForm.src"
-                        placeholder="https://example.com/foto.jpg"
-                        class="h-11 min-w-0 flex-1 rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                      />
-  
-                      <label class="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800">
-                        <input type="file" accept="image/*" class="hidden" @change="onPickItemImage" />
-                        <Icon :icon="uploadingKey === 'item' ? 'svg-spinners:3-dots-fade' : 'lucide:upload-cloud'" class="h-4 w-4" />
-                        Unggah
-                      </label>
-                    </div>
-                  </div>
-  
-                  <div class="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-neutral-400">
-                        Judul
-                      </label>
-                      <input
-                        v-model.trim="itemForm.title"
-                        required
-                        maxlength="90"
-                        class="h-11 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                        placeholder="Dokumentasi Kegiatan Santri"
-                      />
-                    </div>
-  
-                    <div>
-                      <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-neutral-400">
-                        Kategori
-                      </label>
-                      <input
-                        v-model.trim="itemForm.category"
-                        list="gallery-category-options"
-                        maxlength="40"
-                        class="h-11 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                        placeholder="Kegiatan / Fasilitas / Prestasi"
-                      />
-                      <datalist id="gallery-category-options">
-                        <option v-for="category in categories" :key="category" :value="category" />
-                      </datalist>
-                    </div>
-                  </div>
-  
-                  <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-neutral-400">
-                      Tags
-                    </label>
-                    <input
-                      v-model.trim="itemForm.tagsText"
-                      maxlength="140"
-                      class="h-11 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                      placeholder="santri, kajian, kelas"
-                    />
-                    <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
-                      Pisahkan tags dengan koma.
+                    <p class="mt-1 line-clamp-2 text-xs text-white/80">
+                      {{ tagsArray(itemForm.tagsText).join(', ') || 'Tags akan tampil di sini.' }}
                     </p>
                   </div>
-  
-                  <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                    <button
-                      type="button"
-                      class="inline-flex h-11 items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                      @click="closeItemModal"
+                </div>
+              </div>
+
+              <div class="max-h-[65vh] space-y-4 overflow-y-auto pr-1">
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-neutral-400">
+                    Link Gambar
+                  </label>
+
+                  <div class="flex flex-col gap-2 sm:flex-row">
+                    <input
+                      v-model.trim="itemForm.src"
+                      placeholder="https://res.cloudinary.com/..."
+                      class="h-11 min-w-0 flex-1 rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                      @input="clearItemPublicIdOnManualInput"
+                    />
+
+                    <label
+                      class="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      :class="uploadingKey === 'item' ? 'pointer-events-none opacity-70' : ''"
                     >
-                      Batal
-                    </button>
-  
-                    <button
-                      type="submit"
-                      class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
-                      :disabled="itemSaving"
-                    >
-                      <Icon :icon="itemSaving ? 'svg-spinners:3-dots-fade' : 'lucide:save'" class="h-4 w-4" />
-                      {{ itemSaving ? 'Menyimpan…' : itemModal.mode === 'create' ? 'Simpan Foto' : 'Update Foto' }}
-                    </button>
+                      <input type="file" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden" @change="onPickItemImage" />
+                      <Icon :icon="uploadingKey === 'item' ? 'svg-spinners:3-dots-fade' : 'lucide:cloud-upload'" class="h-4 w-4" />
+                      {{ uploadingKey === 'item' ? 'Uploading' : 'Upload' }}
+                    </label>
                   </div>
+
+                  <p v-if="itemForm.cloudinaryPublicId" class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
+                    Image ID:
+                    <span class="font-semibold text-green-700 dark:text-green-300">{{ itemForm.cloudinaryPublicId }}</span>
+                  </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-neutral-400">
+                      Judul
+                    </label>
+                    <input
+                      v-model.trim="itemForm.title"
+                      required
+                      maxlength="90"
+                      class="h-11 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                      placeholder="Dokumentasi Kegiatan Santri"
+                    />
+                  </div>
+
+                  <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-neutral-400">
+                      Kategori
+                    </label>
+                    <input
+                      v-model.trim="itemForm.category"
+                      list="gallery-category-options"
+                      maxlength="40"
+                      class="h-11 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                      placeholder="Kegiatan / Fasilitas / Prestasi"
+                    />
+                    <datalist id="gallery-category-options">
+                      <option v-for="category in categories" :key="category" :value="category" />
+                    </datalist>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-neutral-400">
+                    Tags
+                  </label>
+                  <input
+                    v-model.trim="itemForm.tagsText"
+                    maxlength="140"
+                    class="h-11 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                    placeholder="santri, kajian, kelas"
+                  />
+                  <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
+                    Pisahkan tags dengan koma.
+                  </p>
+                </div>
+
+                <div class="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    class="inline-flex h-11 items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    @click="closeItemModal()"
+                  >
+                    Batal
+                  </button>
+
+                  <button
+                    type="submit"
+                    class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
+                    :disabled="itemSaving || uploadingKey === 'item'"
+                  >
+                    <Icon :icon="itemSaving ? 'svg-spinners:3-dots-fade' : 'lucide:save'" class="h-4 w-4" />
+                    {{ itemSaving ? 'Menyimpan…' : itemModal.mode === 'create' ? 'Simpan Foto' : 'Update Foto' }}
+                  </button>
                 </div>
               </div>
             </form>
@@ -701,7 +728,7 @@
                   <div>
                     <h3 class="text-base font-bold text-gray-900 dark:text-white">Hapus Item</h3>
                     <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
-                      Data foto akan dihapus dari konfigurasi galeri.
+                      Data foto akan dihapus. Jika file memiliki Image ID, file Image juga akan dihapus.
                     </p>
                   </div>
                 </div>
@@ -731,10 +758,12 @@
 
               <button
                 type="button"
-                class="inline-flex h-11 items-center justify-center rounded-2xl bg-rose-600 px-4 text-sm font-semibold text-white transition hover:bg-rose-700"
+                class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-rose-600 px-4 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-70"
+                :disabled="deletingItem"
                 @click="doDelete"
               >
-                Hapus
+                <Icon :icon="deletingItem ? 'svg-spinners:3-dots-fade' : 'lucide:trash-2'" class="h-4 w-4" />
+                {{ deletingItem ? 'Menghapus…' : 'Hapus' }}
               </button>
             </div>
           </div>
@@ -769,9 +798,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, defineComponent, h, onMounted, reactive, ref, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useWeb } from '~/composables/data/useWeb'
+import { useCloudinaryUpload } from '~/composables/useCloudinaryUpload'
 
 definePageMeta({
   layout: 'app',
@@ -784,6 +814,7 @@ type GalleryItem = {
   title: string
   category: string
   tagsText?: string
+  cloudinaryPublicId?: string
 }
 
 type IndexedGalleryItem = GalleryItem & {
@@ -793,6 +824,7 @@ type IndexedGalleryItem = GalleryItem & {
 type Shape = {
   hero: {
     cover: string
+    coverPublicId?: string
     badge: string
     title: string
     subtitle: string
@@ -816,9 +848,11 @@ type Toast = {
 }
 
 const ACTIVE_PATH = '/gallery'
+const CLOUDINARY_FOLDER = 'gallery'
 
 const tabs = [
   { key: 'gallery', label: 'Galeri', icon: 'lucide:images' },
+  { key: 'settings', label: 'Pengaturan', icon: 'lucide:settings-2' }
 ] as const
 
 const activeTab = ref<typeof tabs[number]['key']>('gallery')
@@ -826,6 +860,7 @@ const activeTab = ref<typeof tabs[number]['key']>('gallery')
 const defaults: Shape = {
   hero: {
     cover: '/assets/images/activity1.jpg',
+    coverPublicId: '',
     badge: 'Galeri Al-Inayah',
     title: 'Galeri Al-Inayah',
     subtitle: 'Dokumentasi kegiatan, fasilitas, dan momen terbaik di pesantren.',
@@ -843,25 +878,34 @@ const defaults: Shape = {
         src: '/assets/images/gallery/1.jpg',
         title: 'Dokumentasi #1',
         category: 'Kegiatan',
-        tagsText: 'santri, kajian'
+        tagsText: 'santri, kajian',
+        cloudinaryPublicId: ''
       },
       {
         src: '/assets/images/gallery/2.jpg',
         title: 'Dokumentasi #2',
         category: 'Fasilitas',
-        tagsText: 'kelas, perpustakaan'
+        tagsText: 'kelas, perpustakaan',
+        cloudinaryPublicId: ''
       }
     ]
   }
 }
 
 const web = useWeb()
-const { subscribePage, sections, updateSection, uploadMedia, addSection, normalizePath } = web
+const { subscribePage, sections, updateSection, addSection, normalizePath } = web
+
+const {
+  uploadImage,
+  deleteImage
+} = useCloudinaryUpload()
 
 const form = reactive<Shape>(clone(defaults))
+
 const loading = ref(true)
 const savingConfig = ref(false)
 const itemSaving = ref(false)
+const deletingItem = ref(false)
 const uploadingKey = ref<string | null>(null)
 const errorMessage = ref('')
 
@@ -871,6 +915,12 @@ const page = ref(1)
 const pageSize = 12
 
 const brokenImages = ref<Record<string, boolean>>({})
+
+const lastSavedHeroPublicId = ref<string | null>(null)
+const heroLastUploadedUrl = ref('')
+
+const itemOriginalPublicId = ref<string | null>(null)
+const itemLastUploadedUrl = ref('')
 
 const itemModal = reactive<{
   open: boolean
@@ -886,7 +936,8 @@ const itemForm = reactive<GalleryItem>({
   src: '',
   title: '',
   category: '',
-  tagsText: ''
+  tagsText: '',
+  cloudinaryPublicId: ''
 })
 
 const delModal = reactive<{
@@ -1004,6 +1055,7 @@ function merge(base: Shape, patch?: Partial<Shape>): Shape {
   return {
     hero: {
       cover: patch?.hero?.cover ?? base.hero.cover,
+      coverPublicId: patch?.hero?.coverPublicId ?? '',
       badge: patch?.hero?.badge ?? base.hero.badge,
       title: patch?.hero?.title ?? base.hero.title,
       subtitle: patch?.hero?.subtitle ?? base.hero.subtitle,
@@ -1017,16 +1069,31 @@ function merge(base: Shape, patch?: Partial<Shape>): Shape {
     },
     gallery: {
       items: Array.isArray(patch?.gallery?.items)
-        ? clone(patch.gallery!.items)
+        ? patch.gallery!.items.map(normalizeItem)
         : clone(base.gallery.items)
     }
+  }
+}
+
+function normalizeItem(item: Partial<GalleryItem>): GalleryItem {
+  return {
+    src: String(item?.src || '').trim(),
+    title: String(item?.title || '').trim() || 'Tanpa judul',
+    category: String(item?.category || '').trim() || 'Umum',
+    tagsText: tagsArray(item?.tagsText).join(', '),
+    cloudinaryPublicId: String(item?.cloudinaryPublicId || '').trim()
   }
 }
 
 function hydrateForm() {
   const section = sections.value.find((item: any) => item.key === 'GalleryPage')
   const props = (section?.props || {}) as Partial<Shape>
-  Object.assign(form, merge(defaults, props))
+  const next = merge(defaults, props)
+
+  Object.assign(form, next)
+
+  lastSavedHeroPublicId.value = next.hero.coverPublicId || null
+  heroLastUploadedUrl.value = next.hero.coverPublicId ? next.hero.cover : ''
 }
 
 async function ensureSectionExists() {
@@ -1059,7 +1126,18 @@ async function saveConfig() {
       throw new Error('Section GalleryPage tidak ditemukan.')
     }
 
+    const previousHeroPublicId = lastSavedHeroPublicId.value
+    const nextHeroPublicId = form.hero.coverPublicId || null
+
     await updateSection(id, { props: clone(form) })
+
+    if (previousHeroPublicId && previousHeroPublicId !== nextHeroPublicId) {
+      await safeDeleteCloudinary(previousHeroPublicId, 'Cover lama berhasil dihapus.')
+    }
+
+    lastSavedHeroPublicId.value = nextHeroPublicId
+    heroLastUploadedUrl.value = nextHeroPublicId ? form.hero.cover : ''
+
     toast('Konfigurasi galeri tersimpan.')
   } catch (error: any) {
     console.error(error)
@@ -1084,11 +1162,15 @@ function openItemCreate() {
   itemModal.mode = 'create'
   itemModal.idx = null
 
+  itemOriginalPublicId.value = null
+  itemLastUploadedUrl.value = ''
+
   Object.assign(itemForm, {
     src: '',
     title: '',
     category: categories.value[0] || '',
-    tagsText: ''
+    tagsText: '',
+    cloudinaryPublicId: ''
   })
 }
 
@@ -1102,12 +1184,40 @@ function openItemEdit(index: number) {
   itemModal.mode = 'edit'
   itemModal.idx = index
 
-  Object.assign(itemForm, clone(item))
+  const normalized = normalizeItem(item)
+
+  itemOriginalPublicId.value = normalized.cloudinaryPublicId || null
+  itemLastUploadedUrl.value = normalized.cloudinaryPublicId ? normalized.src : ''
+
+  Object.assign(itemForm, normalized)
 }
 
-function closeItemModal() {
+async function closeItemModal(cleanupPending = true) {
+  if (cleanupPending) {
+    await cleanupPendingItemUpload()
+  }
+
   itemModal.open = false
   itemModal.idx = null
+  itemOriginalPublicId.value = null
+  itemLastUploadedUrl.value = ''
+
+  Object.assign(itemForm, {
+    src: '',
+    title: '',
+    category: '',
+    tagsText: '',
+    cloudinaryPublicId: ''
+  })
+}
+
+async function cleanupPendingItemUpload() {
+  const currentPublicId = itemForm.cloudinaryPublicId || ''
+  const originalPublicId = itemOriginalPublicId.value || ''
+
+  if (currentPublicId && currentPublicId !== originalPublicId) {
+    await safeDeleteCloudinary(currentPublicId)
+  }
 }
 
 async function saveItem() {
@@ -1124,6 +1234,10 @@ async function saveItem() {
     const arr = clone(items.value)
     const nextItem = sanitizeItem(itemForm)
 
+    const oldItem = itemModal.idx !== null ? arr[itemModal.idx] : null
+    const oldPublicId = oldItem?.cloudinaryPublicId || null
+    const nextPublicId = nextItem.cloudinaryPublicId || null
+
     if (itemModal.mode === 'create') {
       arr.unshift(nextItem)
     } else if (itemModal.idx !== null) {
@@ -1138,10 +1252,15 @@ async function saveItem() {
     })
 
     await updateSection(id, { props: nextProps })
+
     Object.assign(form.gallery, { items: arr })
 
+    if (oldPublicId && oldPublicId !== nextPublicId) {
+      await safeDeleteCloudinary(oldPublicId, 'File gambar lama berhasil dihapus.')
+    }
+
     toast(itemModal.mode === 'create' ? 'Foto berhasil ditambahkan.' : 'Foto berhasil diperbarui.')
-    closeItemModal()
+    await closeItemModal(false)
   } catch (error: any) {
     console.error(error)
     errorMessage.value = error?.message || 'Gagal menyimpan item.'
@@ -1171,6 +1290,9 @@ async function doDelete() {
   if (delModal.idx === null) return
 
   try {
+    deletingItem.value = true
+    errorMessage.value = ''
+
     const id = await ensureSectionExists()
 
     if (!id) {
@@ -1178,6 +1300,8 @@ async function doDelete() {
     }
 
     const arr = clone(items.value)
+    const removed = arr[delModal.idx]
+
     arr.splice(delModal.idx, 1)
 
     await updateSection(id, {
@@ -1191,12 +1315,17 @@ async function doDelete() {
 
     Object.assign(form.gallery, { items: arr })
 
+    if (removed?.cloudinaryPublicId) {
+      await safeDeleteCloudinary(removed.cloudinaryPublicId, 'File gambar berhasil dihapus.')
+    }
+
     toast('Item galeri dihapus.')
   } catch (error: any) {
     console.error(error)
     errorMessage.value = error?.message || 'Gagal menghapus item.'
     toast('Gagal menghapus item.', 'error')
   } finally {
+    deletingItem.value = false
     closeDelete()
   }
 }
@@ -1217,17 +1346,32 @@ async function onPickHero(event: Event) {
 
   try {
     uploadingKey.value = 'hero'
-    const result = await uploadMedia(file)
+    errorMessage.value = ''
 
-    if (result?.url) {
-      form.hero.cover = result.url
-      toast('Cover hero berhasil diunggah.')
-    } else {
-      throw new Error('Upload tidak menghasilkan URL.')
+    const pendingPublicId = form.hero.coverPublicId || ''
+    const savedPublicId = lastSavedHeroPublicId.value || ''
+
+    if (pendingPublicId && pendingPublicId !== savedPublicId) {
+      await safeDeleteCloudinary(pendingPublicId)
     }
+
+    const result = await uploadImage(file, {
+      folder: CLOUDINARY_FOLDER,
+      maxWidth: 1800,
+      maxHeight: 1800,
+      quality: 0.82,
+      maxBytes: 5 * 1024 * 1024
+    })
+
+    form.hero.cover = result.secure_url
+    form.hero.coverPublicId = result.public_id
+    heroLastUploadedUrl.value = result.secure_url
+
+    clearBroken(result.secure_url)
+    toast('Cover hero berhasil diunggah ke Cloudinary.')
   } catch (error: any) {
     console.error(error)
-    toast(error?.message || 'Gagal unggah cover.', 'error')
+    toast(error?.message || 'Gagal unggah cover ke Cloudinary.', 'error')
   } finally {
     uploadingKey.value = null
   }
@@ -1249,27 +1393,76 @@ async function onPickItemImage(event: Event) {
 
   try {
     uploadingKey.value = 'item'
-    const result = await uploadMedia(file)
+    errorMessage.value = ''
 
-    if (result?.url) {
-      itemForm.src = result.url
-      toast('Gambar berhasil diunggah.')
-    } else {
-      throw new Error('Upload tidak menghasilkan URL.')
+    const currentPublicId = itemForm.cloudinaryPublicId || ''
+    const originalPublicId = itemOriginalPublicId.value || ''
+
+    if (currentPublicId && currentPublicId !== originalPublicId) {
+      await safeDeleteCloudinary(currentPublicId)
     }
+
+    const result = await uploadImage(file, {
+      folder: CLOUDINARY_FOLDER,
+      maxWidth: 1800,
+      maxHeight: 1800,
+      quality: 0.82,
+      maxBytes: 5 * 1024 * 1024
+    })
+
+    itemForm.src = result.secure_url
+    itemForm.cloudinaryPublicId = result.public_id
+    itemLastUploadedUrl.value = result.secure_url
+
+    clearBroken(result.secure_url)
+    toast('Gambar berhasil diunggah ke Cloudinary.')
   } catch (error: any) {
     console.error(error)
-    toast(error?.message || 'Gagal unggah gambar.', 'error')
+    toast(error?.message || 'Gagal unggah gambar ke Cloudinary.', 'error')
   } finally {
     uploadingKey.value = null
   }
 }
 
+function removeHeroCover() {
+  form.hero.cover = ''
+  form.hero.coverPublicId = ''
+  heroLastUploadedUrl.value = ''
+}
+
+function clearHeroPublicIdOnManualInput() {
+  if (form.hero.cover !== heroLastUploadedUrl.value) {
+    form.hero.coverPublicId = ''
+  }
+}
+
+function clearItemPublicIdOnManualInput() {
+  if (itemForm.src !== itemLastUploadedUrl.value) {
+    itemForm.cloudinaryPublicId = ''
+  }
+}
+
+async function safeDeleteCloudinary(publicId?: string | null, successMessage?: string) {
+  if (!publicId) return
+
+  try {
+    await deleteImage(publicId)
+
+    if (successMessage) {
+      toast(successMessage, 'info')
+    }
+  } catch (error: any) {
+    console.error(error)
+    toast(error?.message || 'Data tersimpan, tetapi file lama gagal dihapus.', 'error')
+  }
+}
+
 function validateImageFile(file: File) {
   const maxBytes = 5 * 1024 * 1024
+  const allowedTypes = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp'])
 
-  if (!file.type.startsWith('image/')) {
-    return 'File harus berupa gambar.'
+  if (!allowedTypes.has(file.type)) {
+    return 'Format gambar harus JPG, PNG, atau WebP.'
   }
 
   if (file.size > maxBytes) {
@@ -1284,7 +1477,8 @@ function sanitizeItem(item: GalleryItem): GalleryItem {
     src: String(item.src || '').trim(),
     title: String(item.title || '').trim() || 'Tanpa judul',
     category: String(item.category || '').trim() || 'Umum',
-    tagsText: tagsArray(item.tagsText).join(', ')
+    tagsText: tagsArray(item.tagsText).join(', '),
+    cloudinaryPublicId: String(item.cloudinaryPublicId || '').trim()
   }
 }
 
@@ -1330,6 +1524,74 @@ function toast(message: string, type: Toast['type'] = 'success') {
     toasts.value = toasts.value.filter((item) => item.id !== id)
   }, 3000)
 }
+
+const InvalidImageState = defineComponent({
+  name: 'InvalidImageState',
+  props: {
+    isInvalid: {
+      type: Boolean,
+      default: false
+    },
+    compact: {
+      type: Boolean,
+      default: false
+    },
+    titleEmpty: {
+      type: String,
+      default: 'Belum ada gambar'
+    },
+    noteEmpty: {
+      type: String,
+      default: 'Upload atau isi link gambar.'
+    }
+  },
+  setup(props) {
+    return () =>
+      h(
+        'div',
+        {
+          class:
+            'grid h-full min-h-[64px] place-items-center bg-gradient-to-br from-green-50 to-lime-50 p-6 text-center text-green-700 dark:from-neutral-800 dark:to-neutral-900 dark:text-green-300'
+        },
+        [
+          h('div', [
+            h(
+              'div',
+              {
+                class:
+                  'mx-auto grid place-items-center rounded-2xl bg-white shadow-sm dark:bg-neutral-950 ' +
+                  (props.compact ? 'h-12 w-12' : 'h-14 w-14')
+              },
+              [
+                h(Icon, {
+                  icon: props.isInvalid ? 'lucide:image-off' : 'lucide:image',
+                  class: props.compact ? 'h-5 w-5' : 'h-6 w-6'
+                })
+              ]
+            ),
+            h(
+              'p',
+              {
+                class:
+                  'mt-3 font-bold text-gray-900 dark:text-white ' +
+                  (props.compact ? 'text-xs' : 'text-sm')
+              },
+              props.isInvalid ? 'Image invalid' : props.titleEmpty
+            ),
+            h(
+              'p',
+              {
+                class:
+                  'mt-1 text-gray-500 dark:text-neutral-400 ' +
+                  (props.compact ? 'text-[11px]' : 'text-xs')
+              },
+              props.isInvalid ? 'Gambar tidak dapat dimuat atau URL tidak valid.' : props.noteEmpty
+            )
+          ])
+        ]
+      )
+  }
+})
 </script>
 
 <style scoped>

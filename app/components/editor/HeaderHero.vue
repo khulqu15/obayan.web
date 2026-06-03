@@ -1,9 +1,8 @@
 <!-- /components/editor/HeaderHero.vue -->
-
 <template>
   <section class="relative overflow-hidden rounded-4xl border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
     <!-- Header -->
-    <div class="relative overflow-hidden border-b border-gray-200 bg-linear-to-br from-green-50 via-white to-lime-50 px-5 py-5 dark:border-neutral-800 dark:from-green-950/20 dark:via-neutral-900 dark:to-neutral-900 md:px-6">
+    <div class="relative overflow-hidden border-b border-gray-200 bg-gradient-to-br from-green-50 via-white to-lime-50 px-5 py-5 dark:border-neutral-800 dark:from-green-950/20 dark:via-neutral-900 dark:to-neutral-900 md:px-6">
       <div class="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-green-300/20 blur-3xl"></div>
       <div class="pointer-events-none absolute -bottom-20 left-8 h-40 w-40 rounded-full bg-lime-300/20 blur-3xl"></div>
 
@@ -13,6 +12,14 @@
             <span class="h-2 w-2 rounded-full bg-green-500"></span>
             Hero Section Editor
           </div>
+
+          <h2 class="mt-4 text-xl font-black tracking-tight text-gray-950 dark:text-white">
+            Kelola Header Hero
+          </h2>
+
+          <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-500 dark:text-neutral-400">
+            Atur konten hero, media, CTA dinamis, statistik, dan quick info untuk halaman utama.
+          </p>
         </div>
       </div>
 
@@ -62,7 +69,7 @@
             <input
               v-model.trim="form.brand"
               class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.10)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
-              placeholder="Al-Berr"
+              placeholder="Al-Inayah"
             />
           </div>
 
@@ -126,12 +133,15 @@
 
       <!-- Media -->
       <div v-show="activeTab === 'Media'" class="space-y-5">
-        <div class="rounded-[28px] border border-green-100 bg-linear-to-br from-green-50 via-white to-lime-50 p-5 dark:border-green-900/30 dark:from-green-900/10 dark:via-neutral-900 dark:to-neutral-900">
+        <div class="rounded-[28px] border border-green-100 bg-gradient-to-br from-green-50 via-white to-lime-50 p-5 dark:border-green-900/30 dark:from-green-900/10 dark:via-neutral-900 dark:to-neutral-900">
           <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
               <h3 class="text-lg font-black text-gray-900 dark:text-white">
                 Media Hero
               </h3>
+              <p class="mt-1 text-sm leading-6 text-gray-500 dark:text-neutral-400">
+                Upload gambar ke Cloudinary atau gunakan URL gambar publik.
+              </p>
             </div>
 
             <div class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-green-700 shadow-sm ring-1 ring-green-100 dark:bg-neutral-900 dark:text-green-300 dark:ring-green-900/40">
@@ -183,12 +193,12 @@
               </div>
 
               <div
-                v-if="progress['bgImage'] != null"
+                v-if="progress.bgImage != null"
                 class="absolute inset-x-4 bottom-4 overflow-hidden rounded-full bg-white/70 p-1 backdrop-blur dark:bg-neutral-950/70"
               >
                 <div
                   class="h-2 rounded-full bg-green-500 transition-all"
-                  :style="{ width: `${progress['bgImage']}%` }"
+                  :style="{ width: `${progress.bgImage}%` }"
                 ></div>
               </div>
             </div>
@@ -223,7 +233,7 @@
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   class="hidden"
-                  @change="(e) => uploadCloudinaryImage(e, 'bgImage')"
+                  @change="(event) => uploadCloudinaryImage(event, 'bgImage')"
                 />
 
                 <label
@@ -356,7 +366,7 @@
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   class="hidden"
-                  @change="(e) => uploadCloudinaryImage(e, `photos.${idx - 1}`)"
+                  @change="(event) => uploadCloudinaryImage(event, `photos.${idx - 1}`)"
                 />
 
                 <label
@@ -399,125 +409,284 @@
       </div>
 
       <!-- CTA -->
-      <div v-show="activeTab === 'CTA'" class="grid gap-4 md:grid-cols-2">
-        <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50">
-          <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">
-            CTA Primary Label
-          </label>
-          <input v-model.trim="form.ctaPrimary.label" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+      <div v-show="activeTab === 'CTA'" class="space-y-5">
+        <div class="rounded-[28px] border border-green-100 bg-gradient-to-br from-green-50 via-white to-lime-50 p-5 dark:border-green-900/30 dark:from-green-900/10 dark:via-neutral-900 dark:to-neutral-900">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h3 class="text-lg font-black text-gray-900 dark:text-white">
+                CTA Buttons
+              </h3>
+              <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500 dark:text-neutral-400">
+                Buat, edit, urutkan, dan hapus tombol CTA. Tombol pertama dan kedua tetap disinkronkan ke data lama
+                <code class="rounded bg-white px-1 py-0.5 text-green-700 dark:bg-neutral-950 dark:text-green-300">ctaPrimary</code>
+                dan
+                <code class="rounded bg-white px-1 py-0.5 text-green-700 dark:bg-neutral-950 dark:text-green-300">ctaSecondary</code>.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-sm font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+              @click="addCta"
+            >
+              <Icon icon="lucide:plus" class="h-4 w-4" />
+              Create New CTA
+            </button>
+          </div>
         </div>
 
-        <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50">
-          <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">
-            CTA Primary Href
-          </label>
-          <input v-model.trim="form.ctaPrimary.href" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+        <div
+          v-if="!form.ctas.length"
+          class="rounded-[28px] border border-dashed border-gray-300 bg-white p-10 text-center dark:border-neutral-700 dark:bg-neutral-900"
+        >
+          <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-300">
+            <Icon icon="lucide:mouse-pointer-click" class="h-6 w-6" />
+          </div>
+
+          <h4 class="mt-4 text-base font-black text-gray-900 dark:text-white">
+            Belum ada CTA
+          </h4>
+
+          <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
+            Klik tombol Create New CTA untuk menambahkan tombol baru.
+          </p>
+
+          <button
+            type="button"
+            class="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-sm font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+            @click="addCta"
+          >
+            <Icon icon="lucide:plus" class="h-4 w-4" />
+            Create New CTA
+          </button>
         </div>
 
-        <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50">
-          <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">
-            CTA Secondary Label
-          </label>
-          <input v-model.trim="form.ctaSecondary.label" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
-        </div>
+        <div v-else class="grid gap-4">
+          <article
+            v-for="(cta, ci) in form.ctas"
+            :key="`cta-${ci}`"
+            class="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+          >
+            <div class="flex flex-col gap-3 border-b border-gray-200 bg-gray-50 px-4 py-4 dark:border-neutral-800 dark:bg-neutral-950/40 md:flex-row md:items-center md:justify-between">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-black text-green-700 dark:bg-green-900/20 dark:text-green-300">
+                    <Icon icon="lucide:mouse-pointer-click" class="h-3.5 w-3.5" />
+                    CTA {{ ci + 1 }}
+                  </span>
 
-        <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50">
-          <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">
-            CTA Secondary Href
-          </label>
-          <input v-model.trim="form.ctaSecondary.href" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+                  <span
+                    v-if="ci === 0"
+                    class="rounded-full bg-gray-900 px-3 py-1 text-xs font-black text-white dark:bg-white dark:text-gray-900"
+                  >
+                    Legacy Primary
+                  </span>
+
+                  <span
+                    v-if="ci === 1"
+                    class="rounded-full bg-gray-100 px-3 py-1 text-xs font-black text-gray-600 dark:bg-neutral-800 dark:text-neutral-300"
+                  >
+                    Legacy Secondary
+                  </span>
+                </div>
+
+                <p class="mt-2 truncate text-sm font-bold text-gray-900 dark:text-white">
+                  {{ cta.label || 'CTA tanpa label' }}
+                </p>
+              </div>
+
+              <div class="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  :disabled="ci === 0"
+                  title="Naikkan"
+                  @click="moveCta(ci, -1)"
+                >
+                  <Icon icon="lucide:arrow-up" class="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  :disabled="ci === form.ctas.length - 1"
+                  title="Turunkan"
+                  @click="moveCta(ci, 1)"
+                >
+                  <Icon icon="lucide:arrow-down" class="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-rose-200 bg-white text-rose-700 transition hover:bg-rose-50 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10"
+                  title="Delete CTA"
+                  @click="removeCta(ci)"
+                >
+                  <Icon icon="lucide:trash-2" class="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            <div class="grid gap-4 p-4 md:grid-cols-[1fr,1.4fr]">
+              <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50">
+                <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">
+                  CTA Label
+                </label>
+                <input
+                  v-model.trim="cta.label"
+                  class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.10)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
+                  placeholder="Contoh: Daftar Sekarang"
+                />
+              </div>
+
+              <div class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50">
+                <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">
+                  CTA Href
+                </label>
+                <input
+                  v-model.trim="cta.href"
+                  class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 focus:shadow-[0_0_0_4px_rgba(34,197,94,0.10)] dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
+                  placeholder="/program atau https://wa.me/62..."
+                />
+              </div>
+            </div>
+          </article>
         </div>
       </div>
 
       <!-- Stats -->
-      <div v-show="activeTab === 'Stats'" class="space-y-4 grid grid-cols-2 gap-4">
-        <div
-          v-for="(st, si) in form.stats"
-          :key="'st' + si"
-          class="grid gap-4 rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50 md:grid-cols-[1fr,1fr,auto]"
-        >
-          <div>
-            <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Label</label>
-            <input v-model.trim="st.label" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
-          </div>
+      <div v-show="activeTab === 'Stats'" class="space-y-5">
+        <div class="rounded-[28px] border border-green-100 bg-gradient-to-br from-green-50 via-white to-lime-50 p-5 dark:border-green-900/30 dark:from-green-900/10 dark:via-neutral-900 dark:to-neutral-900">
+          <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h3 class="text-lg font-black text-gray-900 dark:text-white">
+                Statistik Hero
+              </h3>
+              <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
+                Tambah dan hapus statistik yang akan tampil pada hero.
+              </p>
+            </div>
 
-          <div>
-            <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Value</label>
-            <input v-model.trim="st.value" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
-          </div>
-
-          <div class="flex items-end">
             <button
               type="button"
-              class="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-rose-200 bg-white px-4 text-sm font-bold text-rose-700 transition hover:bg-rose-50 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10 md:w-12"
-              @click="form.stats.splice(si, 1)"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-sm font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+              @click="addStat"
             >
-              <Icon icon="lucide:trash-2" class="h-4 w-4" />
+              <Icon icon="lucide:plus" class="h-4 w-4" />
+              Tambah Stat
             </button>
           </div>
         </div>
 
-        <button
-          type="button"
-          class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
-          @click="form.stats.push({ label: 'Label', value: '0' })"
-        >
-          <Icon icon="lucide:plus" class="h-4 w-4" />
-          Tambah Stat
-        </button>
+        <div v-if="!form.stats.length" class="rounded-[28px] border border-dashed border-gray-300 bg-white p-10 text-center dark:border-neutral-700 dark:bg-neutral-900">
+          <Icon icon="lucide:bar-chart-3" class="mx-auto h-9 w-9 text-green-600" />
+          <p class="mt-3 text-sm font-bold text-gray-600 dark:text-neutral-300">
+            Belum ada statistik.
+          </p>
+        </div>
+
+        <div v-else class="grid gap-4 md:grid-cols-2">
+          <div
+            v-for="(stat, si) in form.stats"
+            :key="'stat-' + si"
+            class="grid gap-4 rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50 md:grid-cols-[1fr,1fr,auto]"
+          >
+            <div>
+              <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Label</label>
+              <input v-model.trim="stat.label" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+            </div>
+
+            <div>
+              <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Value</label>
+              <input v-model.trim="stat.value" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+            </div>
+
+            <div class="flex items-end">
+              <button
+                type="button"
+                class="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-rose-200 bg-white px-4 text-sm font-bold text-rose-700 transition hover:bg-rose-50 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10 md:w-12"
+                @click="removeStat(si)"
+              >
+                <Icon icon="lucide:trash-2" class="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Quick Info -->
-      <div v-show="activeTab === 'Quick Info'" class="space-y-4 grid grid-cols-2 gap-4">
-        <div
-          v-for="(q, qi) in form.quicks"
-          :key="'q' + qi"
-          class="grid gap-4 rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50 md:grid-cols-[1fr,1fr,1fr,auto]"
-        >
-          <div>
-            <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Label</label>
-            <input v-model.trim="q.label" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
-          </div>
+      <div v-show="activeTab === 'Quick Info'" class="space-y-5">
+        <div class="rounded-[28px] border border-green-100 bg-gradient-to-br from-green-50 via-white to-lime-50 p-5 dark:border-green-900/30 dark:from-green-900/10 dark:via-neutral-900 dark:to-neutral-900">
+          <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h3 class="text-lg font-black text-gray-900 dark:text-white">
+                Quick Info
+              </h3>
+              <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
+                Informasi ringkas yang tampil pada hero.
+              </p>
+            </div>
 
-          <div>
-            <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Value</label>
-            <input v-model.trim="q.value" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
-          </div>
-
-          <div>
-            <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Icon</label>
             <button
               type="button"
-              class="flex h-12 w-full items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
-              @click="openIconPickerQuick(qi)"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-sm font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+              @click="addQuick"
             >
-              <span class="inline-flex min-w-0 items-center gap-2">
-                <Icon v-if="q.icon" :icon="q.icon" class="h-5 w-5 shrink-0" />
-                <span class="truncate">{{ q.icon || 'Pilih Icon' }}</span>
-              </span>
-              <Icon icon="lucide:chevron-down" class="h-4 w-4 shrink-0 text-gray-400" />
-            </button>
-          </div>
-
-          <div class="flex items-end">
-            <button
-              type="button"
-              class="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-rose-200 bg-white px-4 text-sm font-bold text-rose-700 transition hover:bg-rose-50 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10 md:w-12"
-              @click="form.quicks.splice(qi, 1)"
-            >
-              <Icon icon="lucide:trash-2" class="h-4 w-4" />
+              <Icon icon="lucide:plus" class="h-4 w-4" />
+              Tambah Info
             </button>
           </div>
         </div>
 
-        <button
-          type="button"
-          class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
-          @click="form.quicks.push({ label: 'Info', value: '-', icon: 'ph:info' })"
-        >
-          <Icon icon="lucide:plus" class="h-4 w-4" />
-          Tambah Info
-        </button>
+        <div v-if="!form.quicks.length" class="rounded-[28px] border border-dashed border-gray-300 bg-white p-10 text-center dark:border-neutral-700 dark:bg-neutral-900">
+          <Icon icon="lucide:info" class="mx-auto h-9 w-9 text-green-600" />
+          <p class="mt-3 text-sm font-bold text-gray-600 dark:text-neutral-300">
+            Belum ada quick info.
+          </p>
+        </div>
+
+        <div v-else class="grid gap-4">
+          <div
+            v-for="(quick, qi) in form.quicks"
+            :key="'quick-' + qi"
+            class="grid gap-4 rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/50 md:grid-cols-[1fr,1fr,1fr,auto]"
+          >
+            <div>
+              <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Label</label>
+              <input v-model.trim="quick.label" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+            </div>
+
+            <div>
+              <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Value</label>
+              <input v-model.trim="quick.value" class="block h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+            </div>
+
+            <div>
+              <label class="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Icon</label>
+              <button
+                type="button"
+                class="flex h-12 w-full items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                @click="openIconPickerQuick(qi)"
+              >
+                <span class="inline-flex min-w-0 items-center gap-2">
+                  <Icon v-if="quick.icon" :icon="quick.icon" class="h-5 w-5 shrink-0" />
+                  <span class="truncate">{{ quick.icon || 'Pilih Icon' }}</span>
+                </span>
+                <Icon icon="lucide:chevron-down" class="h-4 w-4 shrink-0 text-gray-400" />
+              </button>
+            </div>
+
+            <div class="flex items-end">
+              <button
+                type="button"
+                class="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-rose-200 bg-white px-4 text-sm font-bold text-rose-700 transition hover:bg-rose-50 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10 md:w-12"
+                @click="removeQuick(qi)"
+              >
+                <Icon icon="lucide:trash-2" class="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -548,16 +717,16 @@
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div class="inline-flex rounded-2xl border border-gray-200 bg-gray-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
                 <button
-                  v-for="t in iconModal.tabs"
-                  :key="t"
+                  v-for="tab in iconModal.tabs"
+                  :key="tab"
                   type="button"
                   class="rounded-xl px-4 py-2 text-xs font-bold transition"
-                  :class="iconModal.activeTab === t
+                  :class="iconModal.activeTab === tab
                     ? 'bg-white text-gray-900 shadow-sm dark:bg-neutral-200'
                     : 'text-gray-500 dark:text-neutral-300'"
-                  @click="setTab(t)"
+                  @click="setTab(tab)"
                 >
-                  {{ t }}
+                  {{ tab }}
                 </button>
               </div>
 
@@ -634,6 +803,7 @@
         </div>
       </div>
     </Teleport>
+
     <!-- Sticky Save Bar -->
     <div class="fixed inset-x-3 bottom-3 z-[90] xl:left-[370px] xl:right-8">
       <div class="flex flex-col gap-3 rounded-[24px] border border-gray-200 bg-white p-3 shadow-[0_-18px_50px_-28px_rgba(15,23,42,0.35)] dark:border-neutral-800 dark:bg-neutral-950 sm:flex-row sm:items-center sm:justify-between">
@@ -654,6 +824,9 @@
           <div class="min-w-0">
             <p class="text-sm font-black text-gray-900 dark:text-white">
               {{ saving ? 'Menyimpan perubahan...' : mediaBusy ? 'Memproses media...' : 'Perubahan siap disimpan' }}
+            </p>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-neutral-400">
+              Klik Simpan agar create/delete CTA tersimpan ke Firebase.
             </p>
           </div>
         </div>
@@ -686,6 +859,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Error Modal -->
     <Teleport to="body">
       <div
         v-if="errorModal.show"
@@ -758,8 +933,20 @@ type Shape = {
   photos: string[]
   photoPublicIds?: Array<string | null>
   waIntl: string
+
+  /**
+   * Legacy fields.
+   * Tetap dipertahankan supaya component frontend lama yang membaca
+   * ctaPrimary / ctaSecondary tetap aman.
+   */
   ctaPrimary: CTA
   ctaSecondary: CTA
+
+  /**
+   * New dynamic CTA list.
+   */
+  ctas: CTA[]
+
   stats: Stat[]
   quicks: Quick[]
 }
@@ -785,19 +972,23 @@ type TabKey = typeof tabs[number]['key']
 const activeTab = ref<TabKey>('Konten')
 
 const defaults: Shape = {
-  brand: 'Al-Berr',
+  brand: 'Al-Inayah',
   bgImage: '/assets/images/masjid.jpg',
   bgImagePublicId: null,
-  titleMain: 'Pesantren Pencetak Insan ',
+  titleMain: 'Pesantren Pencetak Insan',
   titleHighlight: 'Berakhlaqul Karimah',
   tagline: 'Pondok Pesantren Inovatif',
   subtitle:
-    'Pondok Pesantren Al-Berr hadir sebagai pusat pendidikan akhlaq mulia dan ilmu pengetahuan, mengintegrasikan agama-umum, salaf-modern, metode Amtsilati, pembelajaran aktif, fasilitas memadai, serta lingkungan bersih, indah, dan nyaman.',
+    'Pondok Pesantren Al-Inayah hadir sebagai pusat pendidikan akhlaq mulia dan ilmu pengetahuan, mengintegrasikan nilai agama, pembelajaran aktif, fasilitas memadai, serta lingkungan bersih, indah, dan nyaman.',
   photos: ['/assets/images/activity.jpg', '/assets/images/activity1.jpg', '/assets/images/activity2.jpg'],
   photoPublicIds: [null, null, null],
   waIntl: '6285856376399',
   ctaPrimary: { label: 'Login Wali', href: '/waliLogin' },
   ctaSecondary: { label: 'Pelajari Program', href: '/program' },
+  ctas: [
+    { label: 'Login Wali', href: '/waliLogin' },
+    { label: 'Pelajari Program', href: '/program' }
+  ],
   stats: [
     { label: 'Santri Putra', value: '1000+' },
     { label: 'Santri Putri', value: '50+' },
@@ -806,7 +997,7 @@ const defaults: Shape = {
   ],
   quicks: [
     { label: 'PPDB Berakhir', value: '1 Oktober - Kuota Terpenuhi', icon: 'ph:calendar-check' },
-    { label: 'Jenjang', value: 'SMP - SMA Al Berr', icon: 'ph:student' },
+    { label: 'Jenjang', value: 'SMP - SMA Al-Inayah', icon: 'ph:student' },
     { label: 'Admin', value: 'WA: 085856376399', icon: 'ph:phone' }
   ]
 }
@@ -815,25 +1006,53 @@ function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value))
 }
 
-function ensure3(arr: unknown): string[] {
-  const a = Array.isArray(arr) ? [...arr] : []
-
-  while (a.length < 3) a.push('')
-
-  return a.slice(0, 3).map((item) => String(item || ''))
+function normalizeCta(value?: Partial<CTA> | null): CTA {
+  return {
+    label: String(value?.label || '').trim(),
+    href: String(value?.href || '').trim()
+  }
 }
 
-function ensurePublicIds(arr: unknown): Array<string | null> {
-  const a = Array.isArray(arr) ? [...arr] : []
+function normalizeCtas(value: unknown): CTA[] {
+  if (!Array.isArray(value)) return []
 
-  while (a.length < 3) a.push(null)
+  return value
+    .map((item) => normalizeCta(item))
+    .filter((item) => item.label || item.href)
+}
 
-  return a.slice(0, 3).map((item) => {
+function ensure3(value: unknown): string[] {
+  const arr = Array.isArray(value) ? [...value] : []
+
+  while (arr.length < 3) arr.push('')
+
+  return arr.slice(0, 3).map((item) => String(item || ''))
+}
+
+function ensurePublicIds(value: unknown): Array<string | null> {
+  const arr = Array.isArray(value) ? [...value] : []
+
+  while (arr.length < 3) arr.push(null)
+
+  return arr.slice(0, 3).map((item) => {
     return item ? String(item) : null
   })
 }
 
-function merge(base: Shape, patch: Partial<Shape>): Shape {
+function merge(base: Shape, patch: Partial<Shape> = {}): Shape {
+  const legacyPrimary = normalizeCta({
+    ...base.ctaPrimary,
+    ...(patch.ctaPrimary || {})
+  })
+
+  const legacySecondary = normalizeCta({
+    ...base.ctaSecondary,
+    ...(patch.ctaSecondary || {})
+  })
+
+  const legacyCtas = [legacyPrimary, legacySecondary].filter((item) => item.label || item.href)
+  const dynamicCtas = Array.isArray(patch.ctas) ? normalizeCtas(patch.ctas) : legacyCtas
+
   return {
     brand: patch.brand ?? base.brand,
     bgImage: patch.bgImage ?? base.bgImage,
@@ -845,10 +1064,11 @@ function merge(base: Shape, patch: Partial<Shape>): Shape {
     photos: ensure3(patch.photos ?? base.photos),
     photoPublicIds: ensurePublicIds(patch.photoPublicIds ?? base.photoPublicIds),
     waIntl: patch.waIntl ?? base.waIntl,
-    ctaPrimary: { ...base.ctaPrimary, ...(patch.ctaPrimary || {}) },
-    ctaSecondary: { ...base.ctaSecondary, ...(patch.ctaSecondary || {}) },
-    stats: Array.isArray(patch.stats) && patch.stats.length ? clone(patch.stats) : clone(base.stats),
-    quicks: Array.isArray(patch.quicks) && patch.quicks.length ? clone(patch.quicks) : clone(base.quicks)
+    ctaPrimary: legacyPrimary,
+    ctaSecondary: legacySecondary,
+    ctas: dynamicCtas,
+    stats: Array.isArray(patch.stats) ? clone(patch.stats) : clone(base.stats),
+    quicks: Array.isArray(patch.quicks) ? clone(patch.quicks) : clone(base.quicks)
   }
 }
 
@@ -877,6 +1097,8 @@ watch(
   () => props.section?.props,
   (nextProps) => {
     Object.assign(form, merge(defaults, nextProps || {}))
+    syncMediaDrafts()
+    syncLegacyCtas()
   }
 )
 
@@ -922,6 +1144,91 @@ function closeErrorModal() {
   errorModal.message = ''
 }
 
+function clearNoteSoon() {
+  setTimeout(() => {
+    savedNote.value = ''
+  }, 1800)
+}
+
+/* ===== CTA Dynamic CRUD ===== */
+function syncLegacyCtas() {
+  const primary = normalizeCta(form.ctas[0] || null)
+  const secondary = normalizeCta(form.ctas[1] || null)
+
+  form.ctaPrimary = primary
+  form.ctaSecondary = secondary
+}
+
+function addCta() {
+  form.ctas.push({
+    label: `CTA Baru ${form.ctas.length + 1}`,
+    href: '#'
+  })
+
+  syncLegacyCtas()
+  activeTab.value = 'CTA'
+
+  savedNote.value = 'CTA baru ditambahkan. Klik Simpan untuk menyimpan ke Firebase.'
+  clearNoteSoon()
+}
+
+function removeCta(index: number) {
+  if (index < 0 || index >= form.ctas.length) return
+
+  form.ctas.splice(index, 1)
+  syncLegacyCtas()
+
+  savedNote.value = 'CTA dihapus dari form. Klik Simpan untuk menyimpan perubahan.'
+  clearNoteSoon()
+}
+
+function moveCta(index: number, direction: -1 | 1) {
+  const targetIndex = index + direction
+
+  if (targetIndex < 0 || targetIndex >= form.ctas.length) return
+
+  const current = form.ctas[index]
+  const target = form.ctas[targetIndex]
+
+  form.ctas[index] = target
+  form.ctas[targetIndex] = current
+
+  syncLegacyCtas()
+}
+
+function sanitizeCtas() {
+  form.ctas = form.ctas
+    .map((item) => normalizeCta(item))
+    .filter((item) => item.label || item.href)
+
+  syncLegacyCtas()
+}
+
+/* ===== Stats / Quick CRUD ===== */
+function addStat() {
+  form.stats.push({
+    label: 'Label',
+    value: '0'
+  })
+}
+
+function removeStat(index: number) {
+  form.stats.splice(index, 1)
+}
+
+function addQuick() {
+  form.quicks.push({
+    label: 'Info',
+    value: '-',
+    icon: 'ph:info'
+  })
+}
+
+function removeQuick(index: number) {
+  form.quicks.splice(index, 1)
+}
+
+/* ===== Image Handling ===== */
 const allowedImageTypes = new Set([
   'image/jpeg',
   'image/jpg',
@@ -1017,12 +1324,6 @@ function setImageValue(fieldKey: string, url: string, publicId?: string | null) 
 
     form.photoPublicIds[index] = publicId || null
   }
-}
-
-function clearNoteSoon() {
-  setTimeout(() => {
-    savedNote.value = ''
-  }, 1800)
 }
 
 async function uploadCloudinaryImage(event: Event, fieldKey: string) {
@@ -1203,10 +1504,23 @@ async function resetToDefault() {
   } catch {}
 
   Object.assign(form, clone(defaults))
+  syncMediaDrafts()
+  syncLegacyCtas()
   activeTab.value = 'Konten'
 
   savedNote.value = 'Form dikembalikan ke default.'
   clearNoteSoon()
+}
+
+function buildPayloadForSave() {
+  sanitizeCtas()
+
+  return clone({
+    ...form,
+    ctaPrimary: normalizeCta(form.ctas[0] || null),
+    ctaSecondary: normalizeCta(form.ctas[1] || null),
+    ctas: form.ctas.map((item) => normalizeCta(item))
+  })
 }
 
 async function save() {
@@ -1216,9 +1530,13 @@ async function save() {
 
     await normalizeExternalImagesBeforeSave()
 
+    const payload = buildPayloadForSave()
+
     await updateSection(props.section.id, {
-      props: clone(form)
+      props: payload
     })
+
+    Object.assign(form, merge(defaults, payload))
 
     savedNote.value = 'Tersimpan.'
     clearNoteSoon()
@@ -1305,14 +1623,14 @@ async function searchOnline(forced = false) {
   if (typeof window === 'undefined') return
   if (!iconModal.allowOnline) return
 
-  const q = iconModal.query.trim()
+  const query = iconModal.query.trim()
 
-  if (!q && !forced) return
+  if (!query && !forced) return
 
   try {
     iconModal.loading = true
 
-    const url = `https://api.iconify.design/search?query=${encodeURIComponent(q || 'logo')}&limit=${iconModal.limit}&start=${iconModal.start}`
+    const url = `https://api.iconify.design/search?query=${encodeURIComponent(query || 'logo')}&limit=${iconModal.limit}&start=${iconModal.start}`
     const res = await fetch(url)
     const json = await res.json().catch(() => ({}))
     const icons: string[] = Array.isArray(json?.icons) ? json.icons : []

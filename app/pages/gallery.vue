@@ -1,153 +1,418 @@
-<!-- pages/gallery.vue -->
+<!-- /pages/gallery.vue -->
 <template>
-  <section id="gallery" class="relative overflow-hidden dark:bg-neutral-900 bg-gray-100">
+  <section id="gallery" class="relative min-h-screen overflow-hidden bg-gray-50 text-gray-800 dark:bg-neutral-950 dark:text-neutral-200">
+    <!-- Background -->
     <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-      <div class="absolute top-10 -left-24 w-[42rem] h-[42rem] rounded-full opacity-40 blur-3xl
-                  bg-gradient-to-br from-blue-200 to-blue-200 dark:from-blue-900/40 dark:to-blue-900/30" />
-      <div class="absolute bottom-10 -right-24 w-[36rem] h-[36rem] rounded-full opacity-30 blur-3xl
-                  bg-gradient-to-tr from-blue-100 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/30" />
-      <div class="absolute inset-0 [mask-image:radial-gradient(70%_60%_at_50%_40%,#000,transparent_80%)]">
-        <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(0,0,0,.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,.06)_1px,transparent_1px)] bg-[size:32px_32px]
-                    dark:bg-[linear-gradient(to_right,rgba(255,255,255,.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,.06)_1px,transparent_1px)]" />
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(22,163,74,0.14),transparent_32%),radial-gradient(circle_at_80%_20%,rgba(132,204,22,0.14),transparent_28%),linear-gradient(to_bottom,#f9fafb,#f3f4f6)] dark:bg-[radial-gradient(circle_at_top_left,rgba(22,163,74,0.18),transparent_32%),radial-gradient(circle_at_80%_20%,rgba(132,204,22,0.12),transparent_28%),linear-gradient(to_bottom,#0a0a0a,#111827)]"></div>
+      <div class="absolute -left-28 top-16 h-[34rem] w-[34rem] rounded-full bg-green-200/40 blur-3xl dark:bg-green-900/20"></div>
+      <div class="absolute -right-28 top-80 h-[30rem] w-[30rem] rounded-full bg-lime-200/35 blur-3xl dark:bg-lime-900/10"></div>
+      <div class="absolute inset-0 opacity-[0.35] dark:opacity-[0.16]">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(22,163,74,.13)_1px,transparent_1px),linear-gradient(to_bottom,rgba(22,163,74,.13)_1px,transparent_1px)] bg-[size:34px_34px]"></div>
       </div>
     </div>
 
-    <!-- HERO -->
-    <div class="relative pt-36">
+    <!-- Hero -->
+    <section class="relative pt-28 md:pt-32">
       <div class="absolute inset-0">
-        <img :src="hero.cover" class="w-full h-full object-cover opacity-80" alt="Cover Gallery">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
-      </div>
+        <img
+          v-if="hero.cover && !isBrokenImage(hero.cover)"
+          :src="hero.cover"
+          alt="Cover Gallery"
+          class="h-full w-full object-cover opacity-90"
+          @error="markBroken(hero.cover)"
+        >
 
-      <!-- height mengikuti data editor (hero.heightSm / hero.heightLg) -->
-      <div
-        class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 flex items-end"
-        :style="{ height: heroHeight }"
-      >
-        <div class="mb-10">
-          <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-blue-200">
-            <span class="inline-block size-2 rounded-full bg-blue-400" /> {{ hero.badge }}
-          </p>
-          <h1 class="mt-1 text-3xl sm:text-5xl font-bold text-white">{{ hero.title }}</h1>
-          <p class="mt-2 text-blue-100">{{ hero.subtitle }}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- FILTER BAR -->
-    <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
-      <div class="rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/60 backdrop-blur p-4">
-        <div class="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-          <div class="flex flex-wrap items-center gap-2">
-            <label class="relative md:w-xl w-full">
-              <input v-model="q" type="text" :placeholder="texts.searchPlaceholder"
-                     class="w-full rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-800 dark:text-neutral-100 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-600">
-              <span class="absolute right-3 top-2.5 text-gray-400 text-xs">{{ filtered.length }} hasil</span>
-            </label>
-
-            <div class="relative md:w-auto w-full">
-              <select v-model="selectedCategory"
-                      @change="setCategory(selectedCategory)"
-                      class="block w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm text-gray-700 dark:text-neutral-200 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                <option value="">{{ texts.categoryAll }}</option>
-                <option v-for="c in categories" :key="c" :value="c">
-                  {{ c }}
-                </option>
-              </select>
-            </div>
-
-            <div class="hidden sm:block">
-              <select v-model="sortBy"
-                      class="rounded-lg border border-gray-200 text-gray-800 dark:text-neutral-100 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden">
-                <option value="newest">Terbaru</option>
-                <option value="oldest">Terlama</option>
-                <option value="title">Judul (A–Z)</option>
-              </select>
-            </div>
+        <div
+          v-else
+          class="grid h-full w-full place-items-center bg-gradient-to-br from-green-700 via-green-600 to-lime-500 text-white"
+        >
+          <div class="text-center">
+            <Icon icon="lucide:image-off" class="mx-auto h-10 w-10 opacity-90" />
+            <p class="mt-3 text-sm font-bold">Invalid image url</p>
           </div>
         </div>
 
-        <div class="flex flex-wrap gap-2 mt-3">
-          <button v-for="t in tagsUi" :key="t"
-                  @click="toggleTag(t)"
-                  class="text-[12px] px-2.5 py-1.5 rounded-full border border-gray-200 dark:border-neutral-700"
-                  :class="selectedTags.has(t) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white/80 dark:bg-neutral-900 text-gray-700 dark:text-neutral-300'">
-            #{{ t }}
-          </button>
-          <button @click="resetFilters"
-                  class="text-[12px] px-2.5 py-1.5 rounded-full border text-gray-800 dark:text-neutral-100 border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800">
-            Reset
-          </button>
-        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/20"></div>
       </div>
 
-      <!-- MASONRY -->
-      <div class="mt-6 columns-1 sm:columns-2 lg:columns-3 gap-4 [column-fill:_balance]">
-        <div v-for="(img, idx) in paged" :key="img.src" class="mb-4 break-inside-avoid">
-          <figure class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60">
+      <div
+        class="relative mx-auto flex max-w-[85rem] items-end px-4 sm:px-6 lg:px-8"
+        :style="{ height: heroHeight }"
+      >
+        <div class="mb-10 max-w-3xl">
+          <p class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-green-100 backdrop-blur">
+            <span class="inline-block h-2 w-2 rounded-full bg-lime-300"></span>
+            {{ hero.badge }}
+          </p>
+
+          <h1 class="mt-4 text-3xl font-black tracking-tight text-white sm:text-5xl">
+            {{ hero.title }}
+          </h1>
+
+          <p class="mt-3 max-w-2xl text-sm leading-relaxed text-green-50/90 sm:text-base">
+            {{ hero.subtitle }}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main -->
+    <main class="relative mx-auto max-w-[85rem] px-4 pb-16 pt-8 sm:px-6 lg:px-8">
+      <!-- Floating Filter Panel -->
+      <section class="-mt-16 rounded-[30px] border border-white/80 bg-white/90 p-4 shadow-2xl shadow-green-950/10 backdrop-blur-2xl dark:border-neutral-800 dark:bg-neutral-900/90 dark:shadow-black/30 md:p-5">
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <p class="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700 dark:bg-green-900/20 dark:text-green-300">
+                <Icon icon="lucide:sparkles" class="h-3.5 w-3.5" />
+                Gallery Collection
+              </p>
+
+              <h2 class="mt-3 text-xl font-black tracking-tight text-gray-950 dark:text-white md:text-2xl">
+                Jelajahi Dokumentasi
+              </h2>
+
+              <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
+                Cari berdasarkan judul, kategori, atau tags dengan tampilan yang lebih ringan dan rapi.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center gap-2 rounded-2xl bg-gray-100 px-3 py-2 text-xs font-bold text-gray-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <Icon icon="lucide:images" class="h-4 w-4 text-green-600" />
+                {{ items.length }} foto
+              </span>
+
+              <span class="inline-flex items-center gap-2 rounded-2xl bg-gray-100 px-3 py-2 text-xs font-bold text-gray-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <Icon icon="lucide:folder" class="h-4 w-4 text-green-600" />
+                {{ categories.length }} kategori
+              </span>
+
+              <span class="inline-flex items-center gap-2 rounded-2xl bg-gray-100 px-3 py-2 text-xs font-bold text-gray-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <Icon icon="lucide:hash" class="h-4 w-4 text-green-600" />
+                {{ allTags.length }} tags
+              </span>
+            </div>
+          </div>
+
+          <!-- Dribbble Style Filter Flexbox -->
+          <div class="flex flex-col gap-3 rounded-[26px] border border-gray-200 bg-gray-50/80 p-3 dark:border-neutral-800 dark:bg-neutral-950/60 lg:flex-row lg:items-center">
+            <!-- Search -->
+            <label class="relative min-w-0 flex-1">
+              <Icon icon="lucide:search" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+
+              <input
+                v-model.trim="q"
+                type="search"
+                :placeholder="texts.searchPlaceholder"
+                class="h-12 w-full rounded-2xl border border-gray-200 bg-white pl-11 pr-24 text-sm font-medium text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-green-500 focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+              >
+
+              <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-black text-green-700 dark:bg-green-900/20 dark:text-green-300">
+                {{ filtered.length }} hasil
+              </span>
+            </label>
+
+            <!-- Category -->
+            <label class="relative w-full lg:w-56">
+              <Icon icon="lucide:folder" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+
+              <select
+                v-model="selectedCategory"
+                class="h-12 w-full appearance-none rounded-2xl border border-gray-200 bg-white pl-11 pr-10 text-sm font-bold text-gray-700 outline-none transition focus:border-green-500 focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+              >
+                <option value="all">{{ texts.categoryAll || 'Semua Kategori' }}</option>
+                <option v-for="category in categories" :key="category" :value="category">
+                  {{ category }}
+                </option>
+              </select>
+
+              <Icon icon="lucide:chevron-down" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            </label>
+
+            <!-- Tags -->
+            <label class="relative w-full lg:w-56">
+              <Icon icon="lucide:hash" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+
+              <select
+                v-model="selectedTag"
+                class="h-12 w-full appearance-none rounded-2xl border border-gray-200 bg-white pl-11 pr-10 text-sm font-bold text-gray-700 outline-none transition focus:border-green-500 focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+              >
+                <option value="all">Semua Tags</option>
+                <option v-for="tag in allTags" :key="tag" :value="tag">
+                  #{{ tag }}
+                </option>
+              </select>
+
+              <Icon icon="lucide:chevron-down" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            </label>
+
+            <!-- Sort -->
+            <label class="relative w-full lg:w-48">
+              <Icon icon="lucide:arrow-up-down" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+
+              <select
+                v-model="sortBy"
+                class="h-12 w-full appearance-none rounded-2xl border border-gray-200 bg-white pl-11 pr-10 text-sm font-bold text-gray-700 outline-none transition focus:border-green-500 focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+              >
+                <option value="newest">Terbaru</option>
+                <option value="oldest">Terlama</option>
+                <option value="title">Judul A-Z</option>
+              </select>
+
+              <Icon icon="lucide:chevron-down" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            </label>
+
+            <!-- Reset -->
+            <button
+              type="button"
+              class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 transition hover:border-green-200 hover:bg-green-50 hover:text-green-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-green-900/60 dark:hover:bg-green-900/10 dark:hover:text-green-300 lg:w-auto"
+              @click="resetFilters"
+            >
+              <Icon icon="lucide:rotate-ccw" class="h-4 w-4" />
+              Reset
+            </button>
+          </div>
+
+          <!-- Active Filter Pills -->
+          <div
+            v-if="hasActiveFilter"
+            class="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-4 dark:border-neutral-800"
+          >
+            <span class="text-xs font-black uppercase tracking-wide text-gray-400">
+              Aktif:
+            </span>
+
+            <span
+              v-if="q"
+              class="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700 dark:bg-green-900/20 dark:text-green-300"
+            >
+              Search: {{ q }}
+            </span>
+
+            <span
+              v-if="selectedCategory !== 'all'"
+              class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
+            >
+              {{ selectedCategory }}
+            </span>
+
+            <span
+              v-if="selectedTag !== 'all'"
+              class="inline-flex items-center gap-2 rounded-full bg-lime-50 px-3 py-1.5 text-xs font-bold text-lime-700 dark:bg-lime-900/20 dark:text-lime-300"
+            >
+              #{{ selectedTag }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Empty -->
+      <section
+        v-if="!loading && filtered.length === 0"
+        class="mt-6 rounded-[30px] border border-dashed border-gray-300 bg-white/90 p-10 text-center shadow-sm backdrop-blur dark:border-neutral-700 dark:bg-neutral-900/80"
+      >
+        <div class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-300">
+          <Icon icon="lucide:image-off" class="h-7 w-7" />
+        </div>
+
+        <h3 class="mt-4 text-lg font-black text-gray-950 dark:text-white">
+          Tidak ada foto yang cocok
+        </h3>
+
+        <p class="mt-2 text-sm text-gray-500 dark:text-neutral-400">
+          Coba ubah kata kunci, kategori, atau tag yang dipilih.
+        </p>
+      </section>
+
+      <!-- Loading -->
+      <section v-else-if="loading" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div
+          v-for="i in 8"
+          :key="i"
+          class="h-80 animate-pulse rounded-[26px] border border-gray-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+        ></div>
+      </section>
+
+      <!-- Gallery Cards -->
+      <section v-else class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <article
+          v-for="(img, idx) in paged"
+          :key="`${img.src}-${img.title}-${idx}`"
+          class="group overflow-hidden rounded-[26px] border border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-green-200 hover:shadow-xl hover:shadow-green-950/10 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-green-900/50"
+        >
+          <button
+            type="button"
+            class="relative block aspect-[16/11] w-full overflow-hidden bg-gray-100 text-left dark:bg-neutral-800"
+            @click="openLightbox(startIndex + idx)"
+          >
             <img
+              v-if="img.src && !isBrokenImage(img.src)"
               :src="img.src"
-              :alt="img.title"
+              :alt="img.title || 'Gallery image'"
               loading="lazy"
-              class="w-full h-auto object-cover group-hover:scale-[1.02] transition"
-              @click="openLightbox(startIndex + idx)"
-            />
-            <figcaption class="pointer-events-none absolute inset-x-0 bottom-0 p-3 text-white text-xs
-                                bg-gradient-to-t from-black/50 via-black/10 to-transparent">
-              <div class="flex items-center justify-between gap-2">
-                <div class="truncate">{{ img.title }}</div>
-                <div class="hidden sm:flex flex-wrap gap-1 opacity-90">
-                  <span v-for="t in img.tags" :key="t" class="px-1.5 py-0.5 rounded bg-black/40">#{{ t }}</span>
-                </div>
-              </div>
-            </figcaption>
-          </figure>
-        </div>
-      </div>
+              class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.05]"
+              @error="markBroken(img.src)"
+            >
 
-      <!-- LOAD MORE -->
-      <div v-if="hasMore" class="mt-6 text-center">
+            <div
+              v-else
+              class="grid h-full place-items-center bg-gradient-to-br from-green-50 to-lime-50 p-6 text-center dark:from-neutral-800 dark:to-neutral-900"
+            >
+              <div>
+                <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-white text-green-600 shadow-sm dark:bg-neutral-950 dark:text-green-300">
+                  <Icon icon="lucide:image-off" class="h-6 w-6" />
+                </div>
+                <p class="mt-3 text-sm font-black text-gray-950 dark:text-white">Invalid image url</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">Gambar tidak dapat dimuat.</p>
+              </div>
+            </div>
+
+            <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent opacity-85"></div>
+
+            <div class="absolute left-3 top-3 flex flex-wrap gap-2">
+              <span class="rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">
+                {{ img.category || 'Umum' }}
+              </span>
+            </div>
+
+            <div class="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-2xl bg-white/90 text-gray-800 opacity-0 shadow-sm backdrop-blur transition duration-300 group-hover:opacity-100 dark:bg-neutral-950/90 dark:text-white">
+              <Icon icon="lucide:expand" class="h-4 w-4" />
+            </div>
+
+            <div class="absolute inset-x-0 bottom-0 p-4">
+              <h3 class="line-clamp-2 text-base font-black text-white">
+                {{ img.title || 'Tanpa judul' }}
+              </h3>
+
+              <div v-if="img.tags.length" class="mt-2 flex flex-wrap gap-1.5">
+                <span
+                  v-for="tag in img.tags.slice(0, 3)"
+                  :key="tag"
+                  class="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold text-white ring-1 ring-white/20 backdrop-blur"
+                >
+                  #{{ tag }}
+                </span>
+              </div>
+            </div>
+          </button>
+
+          <div class="space-y-3 p-4">
+            <div class="flex items-center justify-between gap-3 text-[12px] text-gray-500 dark:text-neutral-400">
+              <span class="inline-flex min-w-0 items-center gap-1">
+                <Icon icon="lucide:folder" class="h-3.5 w-3.5 shrink-0" />
+                <span class="truncate">{{ img.category || 'Umum' }}</span>
+              </span>
+
+              <span class="inline-flex items-center gap-1">
+                <Icon icon="lucide:hash" class="h-3.5 w-3.5" />
+                {{ img.tags.length }} tag
+              </span>
+            </div>
+
+            <p class="line-clamp-2 text-sm text-gray-600 dark:text-neutral-300">
+              {{ img.tags.length ? img.tags.join(', ') : 'Belum ada tag untuk foto ini.' }}
+            </p>
+
+            <button
+              type="button"
+              class="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 py-2.5 text-xs font-bold text-gray-700 transition hover:border-green-200 hover:bg-green-50 hover:text-green-700 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-200 dark:hover:border-green-900/60 dark:hover:bg-green-900/10 dark:hover:text-green-300"
+              @click="openLightbox(startIndex + idx)"
+            >
+              <Icon icon="lucide:eye" class="h-4 w-4" />
+              Lihat Preview
+            </button>
+          </div>
+        </article>
+      </section>
+
+      <!-- Load More -->
+      <div v-if="hasMore && !loading" class="mt-8 text-center">
         <button
-          class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-blue-700"
+          type="button"
+          class="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
           @click="loadMore"
         >
-          <ClientOnly><Icon icon="ph:arrow-circle-down" class="size-4" /></ClientOnly>
+          <Icon icon="lucide:arrow-down-circle" class="h-4 w-4" />
           {{ texts.loadMore }}
         </button>
       </div>
-    </div>
+    </main>
 
-    <!-- LIGHTBOX (Vue controlled) -->
+    <!-- Lightbox Modal -->
     <teleport to="body">
       <div v-if="lightboxOpen" class="fixed inset-0 z-[90]">
-        <!-- backdrop -->
-        <div class="absolute inset-0 bg-black/70" @click="closeLightbox" />
+        <div class="absolute inset-0 bg-neutral-950/80 backdrop-blur-md" @click="closeLightbox"></div>
 
-        <div class="absolute inset-0 flex items-center justify-center p-3">
-          <div class="relative w-full max-w-[96rem] rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800 bg-neutral-950">
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+          <div class="relative flex h-[70vh] max-h-[70vh] w-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-white/10 bg-neutral-950 shadow-2xl">
+            <!-- Modal Header -->
+            <header class="flex shrink-0 flex-col gap-3 border-b border-white/10 bg-neutral-950 px-4 py-4 text-white sm:flex-row sm:items-center sm:justify-between sm:px-5">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="rounded-full bg-green-500/15 px-2.5 py-1 text-[11px] font-bold text-green-200 ring-1 ring-green-400/20">
+                    {{ current?.category || 'Umum' }}
+                  </span>
 
-            <!-- Toolbar -->
-            <div class="absolute z-20 top-2 right-2 flex items-center gap-2">
-              <button @click="prev" class="size-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center">
-                <ClientOnly><Icon icon="ph:caret-left-bold" class="size-5" /></ClientOnly>
-              </button>
-              <button @click="next" class="size-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center">
-                <ClientOnly><Icon icon="ph:caret-right-bold" class="size-5" /></ClientOnly>
-              </button>
-              <button @click="resetZoom()" class="size-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center" title="Reset zoom">
-                <ClientOnly><Icon icon="ph:magnifying-glass" class="size-5" /></ClientOnly>
-              </button>
-              <button @click="closeLightbox" class="size-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center" aria-label="Close">
-                <ClientOnly><Icon icon="ph:x-bold" class="size-5" /></ClientOnly>
-              </button>
-            </div>
+                  <span
+                    v-for="tag in current?.tags || []"
+                    :key="tag"
+                    class="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/80 ring-1 ring-white/10"
+                  >
+                    #{{ tag }}
+                  </span>
+                </div>
 
-            <!-- Canvas -->
+                <h3 class="mt-2 truncate text-base font-black sm:text-lg">
+                  {{ current?.title || 'Preview Galeri' }}
+                </h3>
+              </div>
+
+              <div class="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  class="grid h-10 w-10 place-items-center rounded-2xl bg-white/10 text-white transition hover:bg-white/20"
+                  title="Sebelumnya"
+                  @click="prev"
+                >
+                  <Icon icon="lucide:chevron-left" class="h-5 w-5" />
+                </button>
+
+                <button
+                  type="button"
+                  class="grid h-10 w-10 place-items-center rounded-2xl bg-white/10 text-white transition hover:bg-white/20"
+                  title="Berikutnya"
+                  @click="next"
+                >
+                  <Icon icon="lucide:chevron-right" class="h-5 w-5" />
+                </button>
+
+                <button
+                  type="button"
+                  class="grid h-10 w-10 place-items-center rounded-2xl bg-white/10 text-white transition hover:bg-white/20"
+                  title="Reset zoom"
+                  @click="resetZoom()"
+                >
+                  <Icon icon="lucide:scan" class="h-5 w-5" />
+                </button>
+
+                <button
+                  type="button"
+                  class="grid h-10 w-10 place-items-center rounded-2xl bg-white text-neutral-950 transition hover:bg-green-100"
+                  aria-label="Close"
+                  @click="closeLightbox"
+                >
+                  <Icon icon="lucide:x" class="h-5 w-5" />
+                </button>
+              </div>
+            </header>
+
+            <!-- Image Stage -->
             <div
               ref="stageRef"
-              class="relative h-[80vh] bg-black select-none touch-none"
+              class="relative h-full min-h-0 flex-1 select-none overflow-hidden bg-black touch-none"
               :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
-              @wheel.passive="onWheel"
+              @wheel="onWheel"
               @mousedown="onPointerDown"
               @mousemove="onPointerMove"
               @mouseup="onPointerUp"
@@ -158,102 +423,358 @@
               @dblclick="onDblClick"
             >
               <img
-                :src="current?.src"
-                :alt="current?.title"
-                class="absolute top-1/2 left-1/2 will-change-transform"
+                v-if="current?.src && !isBrokenImage(current.src)"
+                :src="current.src"
+                :alt="current?.title || 'Gallery preview'"
+                class="absolute left-1/2 top-1/2 will-change-transform"
                 :style="imgStyle"
                 draggable="false"
                 @load="onImageLoaded"
-              />
-            </div>
+                @error="markBroken(current.src)"
+              >
 
-            <div class="absolute bottom-2 left-2 right-2 text-white/90 text-sm flex items-center justify-between px-2">
-              <div class="truncate">{{ current?.title }}</div>
-              <div class="text-xs">
-                {{ Math.round(scale * 100) }}% • {{ index + 1 }} / {{ filtered.length }}
+              <div
+                v-else
+                class="grid h-full min-h-[360px] place-items-center bg-gradient-to-br from-neutral-900 to-black p-6 text-center"
+              >
+                <div>
+                  <div class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-white/10 text-green-300 ring-1 ring-white/10">
+                    <Icon icon="lucide:image-off" class="h-7 w-7" />
+                  </div>
+                  <p class="mt-4 text-base font-black text-white">Invalid image url</p>
+                  <p class="mt-1 text-sm text-white/50">Gambar tidak dapat dimuat atau URL tidak valid.</p>
+                </div>
+              </div>
+
+              <div class="pointer-events-none absolute bottom-4 left-4 hidden rounded-2xl bg-black/50 px-3 py-2 text-xs font-semibold text-white/80 backdrop-blur md:block">
+                Scroll untuk zoom • Drag untuk geser • Double click untuk zoom cepat
               </div>
             </div>
 
+            <!-- Modal Footer -->
+            <footer class="flex shrink-0 flex-col gap-3 border-t border-white/10 bg-neutral-950 px-4 py-3 text-white sm:flex-row sm:items-center sm:justify-between sm:px-5">
+              <div class="flex items-center gap-2 text-xs font-semibold text-white/70">
+                <span>{{ index + 1 }} / {{ filtered.length }}</span>
+                <span class="h-1 w-1 rounded-full bg-white/30"></span>
+                <span>{{ scalePercent }}%</span>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <button
+                  type="button"
+                  class="grid h-9 w-9 place-items-center rounded-xl bg-white/10 text-white transition hover:bg-white/20"
+                  @click="zoomOut"
+                >
+                  <Icon icon="lucide:zoom-out" class="h-4 w-4" />
+                </button>
+
+                <input
+                  v-model.number="scale"
+                  type="range"
+                  :min="minScale"
+                  :max="maxScale"
+                  step="0.05"
+                  class="h-2 w-36 accent-green-500"
+                  @input="clampPan"
+                >
+
+                <button
+                  type="button"
+                  class="grid h-9 w-9 place-items-center rounded-xl bg-white/10 text-white transition hover:bg-white/20"
+                  @click="zoomIn"
+                >
+                  <Icon icon="lucide:zoom-in" class="h-4 w-4" />
+                </button>
+              </div>
+            </footer>
           </div>
         </div>
       </div>
     </teleport>
-
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useRoute } from 'vue-router'
-import { useRuntimeConfig, useSeoMeta, useHead } from 'nuxt/app'
+import { useHead, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
 import { useWeb } from '~/composables/data/useWeb'
 
-definePageMeta({ ssr: false }) // opsional, agar meta reaktif dari client
-const lightboxOpen = ref(false)
-const naturalW = ref(0)
-const naturalH = ref(0)
-const fitScale = ref(1)                 // skala agar gambar pas di panggung
+definePageMeta({
+  ssr: false
+})
 
-/* ======= Ambil meta + sections dari useWeb untuk path /gallery ======= */
+type GallerySourceItem = {
+  src?: string
+  title?: string
+  category?: string
+  tagsText?: string
+  tags?: string[]
+  createdAt?: number
+  cloudinaryPublicId?: string
+}
+
+type GalleryItem = {
+  src: string
+  title: string
+  category: string
+  tags: string[]
+  createdAt: number
+  cloudinaryPublicId?: string
+}
+
+type Shape = {
+  hero: {
+    cover: string
+    badge: string
+    title: string
+    subtitle: string
+    heightSm: string
+    heightLg: string
+  }
+  texts: {
+    searchPlaceholder: string
+    categoryAll: string
+    loadMore: string
+  }
+  gallery: {
+    items: GallerySourceItem[]
+  }
+}
+
+const PATH = '/gallery'
+
+const defaults: Shape = {
+  hero: {
+    cover: '/assets/images/activity1.jpg',
+    badge: 'Galeri',
+    title: 'Galeri',
+    subtitle: 'Dokumentasi kegiatan, fasilitas, dan momen terbaik.',
+    heightSm: '36vh',
+    heightLg: '44vh'
+  },
+  texts: {
+    searchPlaceholder: 'Cari foto, kategori, atau tag…',
+    categoryAll: 'Semua Kategori',
+    loadMore: 'Tampilkan Lebih Banyak'
+  },
+  gallery: {
+    items: []
+  }
+}
+
 const route = useRoute()
 const config = useRuntimeConfig()
 const web = useWeb()
 const { subscribePage, sections, meta } = web
 
-const PATH = '/gallery'
-onMounted(async () => {
-  (web as any)?.setActivePath?.(PATH)
-  await subscribePage(PATH)
-})
-watch(() => route.path, async () => {
-  (web as any)?.setActivePath?.(PATH)
-  await subscribePage(PATH)
+const loading = ref(true)
+const q = ref('')
+const selectedCategory = ref('all')
+const selectedTag = ref('all')
+const sortBy = ref<'newest' | 'oldest' | 'title'>('newest')
+const page = ref(1)
+const pageSize = 12
+
+const brokenImages = ref<Record<string, boolean>>({})
+
+const isLg = ref(false)
+
+const lightboxOpen = ref(false)
+const index = ref(0)
+const stageRef = ref<HTMLElement | null>(null)
+const naturalW = ref(0)
+const naturalH = ref(0)
+const fitScale = ref(1)
+const scale = ref(1)
+const maxScale = 4
+const tx = ref(0)
+const ty = ref(0)
+const isDragging = ref(false)
+
+let mediaQuery: MediaQueryList | null = null
+let startX = 0
+let startY = 0
+let startTx = 0
+let startTy = 0
+let pinchStartDist = 0
+let pinchStartScale = 1
+let pinchCenter = { x: 0, y: 0 }
+
+const canonical = computed(() => {
+  const siteUrl = String(config.public?.siteUrl || '').replace(/\/$/, '')
+  return siteUrl ? `${siteUrl}${PATH}` : PATH
 })
 
-/* ======= SEO dari meta CMS (fallback ke defaults) ======= */
-const fallbackTitle = 'Galeri ALBERR'
-const fallbackDesc = 'Dokumentasi kegiatan, fasilitas, dan momen terbaik di pesantren.'
-const canonical = computed(() => new URL(PATH, config.public.siteUrl).toString())
-const seoTitle = computed(() => meta.value?.title || fallbackTitle)
-const seoDesc  = computed(() => meta.value?.description || fallbackDesc)
-const ogImage  = computed(() => meta.value?.ogImage || '/assets/logo.png')
+const seoTitle = computed(() => meta.value?.title || 'Galeri')
+const seoDesc = computed(() => meta.value?.description || 'Dokumentasi kegiatan, fasilitas, dan momen terbaik.')
+const ogImage = computed(() => meta.value?.ogImage || '/assets/logo.png')
 
 useSeoMeta({
-  title: seoTitle,
-  description: seoDesc,
-  ogTitle: seoTitle,
-  ogDescription: seoDesc,
+  title: () => seoTitle.value,
+  description: () => seoDesc.value,
+  ogTitle: () => seoTitle.value,
+  ogDescription: () => seoDesc.value,
   ogType: 'website',
-  ogUrl: canonical,
-  ogImage,
+  ogUrl: () => canonical.value,
+  ogImage: () => ogImage.value,
   twitterCard: 'summary_large_image',
-  themeColor: '#0ea5e9',
+  themeColor: '#16a34a',
   robots: 'index, follow'
 })
-useHead({ link: [{ rel: 'canonical', href: canonical.value }] })
 
-/* ======= Props Galeri dari section 'GalleryPage' ======= */
-type Shape = {
-  hero: { cover: string; badge: string; title: string; subtitle: string; heightSm: string; heightLg: string },
-  texts: { searchPlaceholder: string; categoryAll: string; loadMore: string },
-  gallery: { items: Array<{ src: string; title: string; category: string; tagsText?: string; tags?: string[]; createdAt?: number }> }
-}
-const defaults: Shape = {
-  hero: {
-    cover: '/assets/images/activity1.jpg',
-    badge: 'Galeri ALBERR',
-    title: 'Galeri ALBERR',
-    subtitle: 'Dokumentasi kegiatan, fasilitas, dan momen terbaik di pesantren.',
-    heightSm: '36vh',
-    heightLg: '44vh'
-  },
-  texts: {
-    searchPlaceholder: 'Cari foto (judul/tag/kategori)…',
-    categoryAll: 'All',
-    loadMore: 'Tampilkan Lebih Banyak'
-  },
-  gallery: { items: [] }
+useHead(() => ({
+  link: [
+    {
+      rel: 'canonical',
+      href: canonical.value
+    }
+  ]
+}))
+
+const galleryProps = computed<Partial<Shape> | undefined>(() => {
+  return sections.value.find((section: any) => section.key === 'GalleryPage')?.props as Partial<Shape> | undefined
+})
+
+const shape = computed<Shape>(() => merge(defaults, galleryProps.value))
+
+const hero = computed(() => shape.value.hero)
+const texts = computed(() => shape.value.texts)
+
+const heroHeight = computed(() => {
+  return isLg.value ? hero.value.heightLg : hero.value.heightSm
+})
+
+const items = computed<GalleryItem[]>(() => {
+  return (shape.value.gallery.items || []).map((item, idx) => {
+    const tags = Array.isArray(item.tags)
+      ? item.tags.map((tag) => String(tag).trim()).filter(Boolean)
+      : tagsArray(item.tagsText)
+
+    return {
+      src: String(item.src || '').trim(),
+      title: String(item.title || '').trim() || `Dokumentasi #${idx + 1}`,
+      category: String(item.category || '').trim() || 'Umum',
+      tags,
+      createdAt: Number(item.createdAt || Date.now() - (idx + 1) * 86400000),
+      cloudinaryPublicId: String(item.cloudinaryPublicId || '').trim()
+    }
+  })
+})
+
+const categories = computed(() => {
+  return Array.from(new Set(items.value.map((item) => item.category).filter(Boolean))).sort((a, b) => a.localeCompare(b))
+})
+
+const allTags = computed(() => {
+  return Array.from(new Set(items.value.flatMap((item) => item.tags).filter(Boolean))).sort((a, b) => a.localeCompare(b))
+})
+
+const filtered = computed(() => {
+  const query = q.value.trim().toLowerCase()
+
+  const result = items.value.filter((item) => {
+    const matchQuery =
+      !query ||
+      item.title.toLowerCase().includes(query) ||
+      item.category.toLowerCase().includes(query) ||
+      item.tags.some((tag) => tag.toLowerCase().includes(query))
+
+    const matchCategory = selectedCategory.value === 'all' || item.category === selectedCategory.value
+    const matchTag = selectedTag.value === 'all' || item.tags.includes(selectedTag.value)
+
+    return matchQuery && matchCategory && matchTag
+  })
+
+  if (sortBy.value === 'newest') {
+    result.sort((a, b) => b.createdAt - a.createdAt)
+  }
+
+  if (sortBy.value === 'oldest') {
+    result.sort((a, b) => a.createdAt - b.createdAt)
+  }
+
+  if (sortBy.value === 'title') {
+    result.sort((a, b) => a.title.localeCompare(b.title))
+  }
+
+  return result
+})
+
+const startIndex = computed(() => 0)
+
+const paged = computed(() => {
+  return filtered.value.slice(0, page.value * pageSize)
+})
+
+const hasMore = computed(() => {
+  return paged.value.length < filtered.value.length
+})
+
+const hasActiveFilter = computed(() => {
+  return Boolean(q.value || selectedCategory.value !== 'all' || selectedTag.value !== 'all')
+})
+
+const current = computed(() => {
+  return filtered.value[index.value]
+})
+
+const minScale = computed(() => {
+  return Math.max(0.1, fitScale.value)
+})
+
+const scalePercent = computed(() => {
+  return Math.round(scale.value * 100)
+})
+
+const imgStyle = computed(() => {
+  return {
+    transform: `translate(-50%, -50%) translate(${tx.value}px, ${ty.value}px) scale(${scale.value})`,
+    transformOrigin: 'center center',
+    maxWidth: 'none',
+    maxHeight: 'none',
+    userSelect: 'none',
+    pointerEvents: 'none'
+  }
+})
+
+watch([q, selectedCategory, selectedTag, sortBy], () => {
+  page.value = 1
+})
+
+watch(
+  () => route.path,
+  async () => {
+    await loadPage()
+  }
+)
+
+onMounted(async () => {
+  await loadPage()
+  setupMediaQuery()
+  setupResizeListener()
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', onKey)
+  window.removeEventListener('resize', onWindowResize)
+
+  if (mediaQuery) {
+    mediaQuery.removeEventListener('change', updateIsLg)
+  }
+
+  lockScroll(false)
+})
+
+async function loadPage() {
+  try {
+    loading.value = true
+    ;(web as any)?.setActivePath?.(PATH)
+    await subscribePage(PATH)
+  } finally {
+    loading.value = false
+  }
 }
 
 function merge(base: Shape, patch?: Partial<Shape>): Shape {
@@ -272,262 +793,336 @@ function merge(base: Shape, patch?: Partial<Shape>): Shape {
       loadMore: patch?.texts?.loadMore ?? base.texts.loadMore
     },
     gallery: {
-      items: Array.isArray(patch?.gallery?.items) ? patch!.gallery!.items : []
+      items: Array.isArray(patch?.gallery?.items) ? patch.gallery.items : base.gallery.items
     }
   }
 }
 
-const galleryProps = computed<Partial<Shape> | undefined>(() =>
-  sections.value.find(s => s.key === 'GalleryPage')?.props as any
-)
-const shape = computed<Shape>(() => merge(defaults, galleryProps.value))
-
-/* ======= Derivasi untuk UI ======= */
-const hero = computed(() => shape.value.hero)
-const texts = computed(() => shape.value.texts)
-const items = computed(() =>
-  (shape.value.gallery.items || []).map((it, idx) => {
-    const tags = Array.isArray((it as any).tags)
-      ? (it as any).tags
-      : (it.tagsText || '').split(',').map(t => t.trim()).filter(Boolean)
-    return {
-      src: it.src,
-      title: it.title || `Dokumentasi #${idx + 1}`,
-      category: it.category || '',
-      tags,
-      createdAt: it.createdAt ?? (Date.now() - (idx + 1) * 86400000)
-    }
-  })
-)
-
-/* Responsive hero height */
-const isLg = ref(false)
-const heroHeight = computed(() => (isLg.value ? hero.value.heightLg : hero.value.heightSm))
-onMounted(() => {
-  const mq = window.matchMedia('(min-width: 1024px)')
-  const handler = () => (isLg.value = mq.matches)
-  handler(); mq.addEventListener('change', handler)
-  onBeforeUnmount(() => mq.removeEventListener('change', handler))
-})
-
-/* Filter / Sort / Pagination (tetap seperti punyamu) */
-const q = ref('')
-const selectedCategory = ref<string>('')
-const sortBy = ref<'newest' | 'oldest' | 'title'>('newest')
-const categories = computed(() => Array.from(new Set(items.value.map(i => i.category).filter(Boolean))))
-const allTags = computed(() => Array.from(new Set(items.value.flatMap(i => i.tags))))
-const selectedTags = ref<Set<string>>(new Set())
-const tagsUi = computed(() => allTags.value)
-function setCategory(c: string){ selectedCategory.value = c || '' }
-function toggleTag(t: string){ const s=new Set(selectedTags.value); s.has(t)?s.delete(t):s.add(t); selectedTags.value=s }
-function resetFilters(){ q.value=''; selectedCategory.value=''; selectedTags.value=new Set(); sortBy.value='newest' }
-
-const filtered = computed(() => {
-  let out = items.value.filter(i => {
-    const mq = q.value.trim().toLowerCase()
-    const matchQ = !mq || i.title.toLowerCase().includes(mq) || i.tags.some(t => t.toLowerCase().includes(mq)) || i.category.toLowerCase().includes(mq)
-    const matchC = !selectedCategory.value || i.category === selectedCategory.value
-    const matchT = selectedTags.value.size === 0 || [...selectedTags.value].every(t => i.tags.includes(t))
-    return matchQ && matchC && matchT
-  })
-  if (sortBy.value === 'newest') out.sort((a, b) => b.createdAt - a.createdAt)
-  if (sortBy.value === 'oldest') out.sort((a, b) => a.createdAt - b.createdAt)
-  if (sortBy.value === 'title') out.sort((a, b) => a.title.localeCompare(b.title))
-  return out
-})
-const page = ref(1)
-const pageSize = 12
-const startIndex = computed(() => 0)
-const paged = computed(() => filtered.value.slice(0, page.value * pageSize))
-const hasMore = computed(() => paged.value.length < filtered.value.length)
-function loadMore(){ page.value++ }
-
-/* Lightbox (tetap) */
-const index = ref(0)
-const current = computed(() => filtered.value[index.value])
-function prev(){ index.value = (index.value - 1 + filtered.value.length) % filtered.value.length; resetZoom(false) }
-function next(){ index.value = (index.value + 1) % filtered.value.length; resetZoom(false) }
-
-/* Zoom/pan (tetap) */
-const stageRef = ref<HTMLElement | null>(null)
-const scale = ref(1) 
-const maxScale = 4
-const minScale = computed(() => Math.max(0.1, fitScale.value))
-const tx = ref(0), ty = ref(0)
-const isDragging = ref(false)
-let startX=0, startY=0, startTx=0, startTy=0, pinchStartDist=0, pinchStartScale=1
-let pinchCenter = { x:0, y:0 }
-const imgStyle = computed(() => ({
-  transform: `translate(-50%, -50%) translate(${tx.value}px, ${ty.value}px) scale(${scale.value})`,
-  transformOrigin: 'center center',
-  maxWidth: 'none',
-  maxHeight: 'none'
-}))
-function lockScroll(on: boolean) {
-  const html = document.documentElement
-  html.style.overflow = on ? 'hidden' : ''
+function tagsArray(value?: string) {
+  return String(value || '')
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean)
 }
-function addKb() { document.addEventListener('keydown', onKey) }
-function removeKb() { document.removeEventListener('keydown', onKey) }
-function openLightbox(i: number) {
-  index.value = i
+
+function markBroken(src?: string) {
+  if (!src) return
+
+  brokenImages.value = {
+    ...brokenImages.value,
+    [src]: true
+  }
+}
+
+function clearBroken(src?: string) {
+  if (!src || !brokenImages.value[src]) return
+
+  const next = { ...brokenImages.value }
+  delete next[src]
+  brokenImages.value = next
+}
+
+function isBrokenImage(src?: string) {
+  if (!src) return false
+  return Boolean(brokenImages.value[src])
+}
+
+function resetFilters() {
+  q.value = ''
+  selectedCategory.value = 'all'
+  selectedTag.value = 'all'
+  sortBy.value = 'newest'
+  page.value = 1
+}
+
+function loadMore() {
+  page.value += 1
+}
+
+function setupMediaQuery() {
+  mediaQuery = window.matchMedia('(min-width: 1024px)')
+  updateIsLg()
+  mediaQuery.addEventListener('change', updateIsLg)
+}
+
+function updateIsLg() {
+  isLg.value = Boolean(mediaQuery?.matches)
+}
+
+function setupResizeListener() {
+  window.addEventListener('resize', onWindowResize)
+}
+
+function onWindowResize() {
+  if (!lightboxOpen.value) return
+
+  computeFitScale()
+  resetZoom(false)
+}
+
+function openLightbox(targetIndex: number) {
+  if (!filtered.value.length) return
+
+  index.value = Math.min(Math.max(targetIndex, 0), filtered.value.length - 1)
   lightboxOpen.value = true
+
+  naturalW.value = 0
+  naturalH.value = 0
+  fitScale.value = 1
+  scale.value = 1
+  tx.value = 0
+  ty.value = 0
+
   nextTick(() => {
-    computeFitScale()
-    resetZoom()
-    addKb()
+    document.addEventListener('keydown', onKey)
     lockScroll(true)
   })
 }
+
 function closeLightbox() {
   lightboxOpen.value = false
-  removeKb()
+  document.removeEventListener('keydown', onKey)
   lockScroll(false)
 }
-function onImageLoaded(e: Event) {
-  const img = e.target as HTMLImageElement
-  naturalW.value = img.naturalWidth || img.width
-  naturalH.value = img.naturalHeight || img.height
+
+function prev() {
+  if (!filtered.value.length) return
+
+  index.value = (index.value - 1 + filtered.value.length) % filtered.value.length
+  resetZoom(false)
+  clearBroken(current.value?.src)
+}
+
+function next() {
+  if (!filtered.value.length) return
+
+  index.value = (index.value + 1) % filtered.value.length
+  resetZoom(false)
+  clearBroken(current.value?.src)
+}
+
+function onImageLoaded(event: Event) {
+  const image = event.target as HTMLImageElement
+  naturalW.value = image.naturalWidth || image.width
+  naturalH.value = image.naturalHeight || image.height
+
   computeFitScale()
   resetZoom()
 }
+
 function computeFitScale() {
-  const el = stageRef.value
-  if (!el || !naturalW.value || !naturalH.value) { fitScale.value = 1; return }
-  const r = el.getBoundingClientRect()
-  const sx = r.width / naturalW.value
-  const sy = r.height / naturalH.value
-  const s = Math.min(sx, sy)
-  fitScale.value = isFinite(s) && s > 0 ? s : 1
-}
-function resetZoom(center=true){ scale.value=0.6; tx.value=0; ty.value=0; if(center) clampPan() }
-function clampPan() {
-  const el = stageRef.value
-  if (!el) return
-  const r = el.getBoundingClientRect()
-  const imgW = naturalW.value * scale.value
-  const imgH = naturalH.value * scale.value
-  const boundX = Math.max(0, (imgW - r.width) / 2)
-  const boundY = Math.max(0, (imgH - r.height) / 2)
-  tx.value = Math.max(Math.min(tx.value,  boundX), -boundX)
-  ty.value = Math.max(Math.min(ty.value,  boundY), -boundY)
-}
-function onKey(e: KeyboardEvent) {
-  if (!lightboxOpen.value) return
-  if (e.key === 'Escape') closeLightbox()
-  if (e.key === 'ArrowLeft') prev()
-  if (e.key === 'ArrowRight') next()
+  const stage = stageRef.value
+
+  if (!stage || !naturalW.value || !naturalH.value) {
+    fitScale.value = 1
+    return
+  }
+
+  const rect = stage.getBoundingClientRect()
+  const scaleX = rect.width / naturalW.value
+  const scaleY = rect.height / naturalH.value
+  const nextScale = Math.min(scaleX, scaleY)
+
+  fitScale.value = Number.isFinite(nextScale) && nextScale > 0 ? nextScale : 1
 }
 
-function onWheel(e: WheelEvent) {
-  const el = stageRef.value
-  if (!el) return
-  const rect = el.getBoundingClientRect()
-  const cx = e.clientX - rect.left - rect.width / 2
-  const cy = e.clientY - rect.top - rect.height / 2
+function resetZoom(center = true) {
+  scale.value = minScale.value
+  tx.value = 0
+  ty.value = 0
 
-  const prev = scale.value
-  let next = prev * (1 - e.deltaY * (e.ctrlKey ? 0.002 : 0.001))
-  next = Math.min(Math.max(next, minScale.value), maxScale)
-
-  if (next !== prev) {
-    const k = next / prev
-    tx.value = cx - k * (cx - tx.value)
-    ty.value = cy - k * (cy - ty.value)
-    scale.value = next
+  if (center) {
     clampPan()
-    e.preventDefault()
   }
 }
 
-function onPointerDown(e: MouseEvent) {
-  if (e.button !== 0) return
+function zoomIn() {
+  scale.value = Math.min(maxScale, scale.value + 0.15)
+  clampPan()
+}
+
+function zoomOut() {
+  scale.value = Math.max(minScale.value, scale.value - 0.15)
+  clampPan()
+}
+
+function clampPan() {
+  const stage = stageRef.value
+
+  if (!stage) return
+
+  const rect = stage.getBoundingClientRect()
+  const imageWidth = naturalW.value * scale.value
+  const imageHeight = naturalH.value * scale.value
+
+  const boundX = Math.max(0, (imageWidth - rect.width) / 2)
+  const boundY = Math.max(0, (imageHeight - rect.height) / 2)
+
+  tx.value = Math.max(Math.min(tx.value, boundX), -boundX)
+  ty.value = Math.max(Math.min(ty.value, boundY), -boundY)
+}
+
+function lockScroll(active: boolean) {
+  document.documentElement.style.overflow = active ? 'hidden' : ''
+}
+
+function onKey(event: KeyboardEvent) {
+  if (!lightboxOpen.value) return
+
+  if (event.key === 'Escape') closeLightbox()
+  if (event.key === 'ArrowLeft') prev()
+  if (event.key === 'ArrowRight') next()
+}
+
+function onWheel(event: WheelEvent) {
+  const stage = stageRef.value
+
+  if (!stage) return
+
+  event.preventDefault()
+
+  const rect = stage.getBoundingClientRect()
+  const centerX = event.clientX - rect.left - rect.width / 2
+  const centerY = event.clientY - rect.top - rect.height / 2
+  const previousScale = scale.value
+
+  let nextScale = previousScale * (1 - event.deltaY * 0.001)
+  nextScale = Math.min(Math.max(nextScale, minScale.value), maxScale)
+
+  if (nextScale === previousScale) return
+
+  const ratio = nextScale / previousScale
+
+  tx.value = centerX - ratio * (centerX - tx.value)
+  ty.value = centerY - ratio * (centerY - ty.value)
+  scale.value = nextScale
+
+  clampPan()
+}
+
+function onPointerDown(event: MouseEvent) {
+  if (event.button !== 0) return
+
   isDragging.value = true
-  startX = e.clientX; startY = e.clientY
-  startTx = tx.value; startTy = ty.value
+  startX = event.clientX
+  startY = event.clientY
+  startTx = tx.value
+  startTy = ty.value
 }
-function onPointerMove(e: MouseEvent) {
+
+function onPointerMove(event: MouseEvent) {
   if (!isDragging.value) return
-  tx.value = startTx + (e.clientX - startX)
-  ty.value = startTy + (e.clientY - startY)
-  clampPan()
-}
-function onPointerUp() { isDragging.value = false }
 
-/* Double click: zoom in/out */
-function onDblClick(e: MouseEvent) {
-  const el = stageRef.value
-  if (!el) return
-  const rect = el.getBoundingClientRect()
-  const cx = e.clientX - rect.left - rect.width / 2
-  const cy = e.clientY - rect.top - rect.height / 2
+  tx.value = startTx + event.clientX - startX
+  ty.value = startTy + event.clientY - startY
 
-  const prev = scale.value
-  const target = prev < 2 * minScale.value ? prev * 2 : minScale.value
-  const next = Math.min(Math.max(target, minScale.value), maxScale)
-  const k = next / prev
-
-  tx.value = cx - k * (cx - tx.value)
-  ty.value = cy - k * (cy - ty.value)
-  scale.value = next
-
-  if (next === minScale.value) centerImage()
   clampPan()
 }
 
-/* Touch: drag + pinch */
-function distance(t1: Touch, t2: Touch) {
-  const dx = t2.clientX - t1.clientX
-  const dy = t2.clientY - t1.clientY
-  return Math.hypot(dx, dy)
+function onPointerUp() {
+  isDragging.value = false
 }
-function midpoint(t1: Touch, t2: Touch, rect: DOMRect) {
-  return { x: ((t1.clientX + t2.clientX) / 2) - rect.left - rect.width / 2,
-           y: ((t1.clientY + t2.clientY) / 2) - rect.top  - rect.height / 2 }
+
+function onDblClick(event: MouseEvent) {
+  const stage = stageRef.value
+
+  if (!stage) return
+
+  const rect = stage.getBoundingClientRect()
+  const centerX = event.clientX - rect.left - rect.width / 2
+  const centerY = event.clientY - rect.top - rect.height / 2
+  const previousScale = scale.value
+  const targetScale = previousScale < minScale.value * 2 ? previousScale * 2 : minScale.value
+  const nextScale = Math.min(Math.max(targetScale, minScale.value), maxScale)
+  const ratio = nextScale / previousScale
+
+  tx.value = centerX - ratio * (centerX - tx.value)
+  ty.value = centerY - ratio * (centerY - ty.value)
+  scale.value = nextScale
+
+  if (nextScale === minScale.value) {
+    tx.value = 0
+    ty.value = 0
+  }
+
+  clampPan()
 }
-function onTouchStart(e: TouchEvent) {
-  if (e.touches.length === 1) {
+
+function onTouchStart(event: TouchEvent) {
+  if (event.touches.length === 1) {
     isDragging.value = true
-    startX = e.touches[0]!.clientX
-    startY = e.touches[0]!.clientY
+    startX = event.touches[0]!.clientX
+    startY = event.touches[0]!.clientY
     startTx = tx.value
     startTy = ty.value
-  } else if (e.touches.length === 2) {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    pinchStartDist = distance(e.touches[0]!, e.touches[1]!)
-    pinchStartScale = scale.value
-    pinchCenter = midpoint(e.touches[0]!, e.touches[1]!, rect)
   }
-}
-function onTouchMove(e: TouchEvent) {
-  if (e.touches.length === 1 && isDragging.value) {
-    tx.value = startTx + (e.touches[0]!.clientX - startX)
-    ty.value = startTy + (e.touches[0]!.clientY - startY)
-    clampPan()
-  } else if (e.touches.length === 2 && pinchStartDist > 0) {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    const curr = distance(e.touches[0]!, e.touches[1]!)
-    let next = pinchStartScale * (curr / pinchStartDist)
-    next = Math.min(Math.max(next, minScale.value), maxScale)
 
-    const prev = scale.value
-    const k = next / prev
-    tx.value = pinchCenter.x - k * (pinchCenter.x - tx.value)
-    ty.value = pinchCenter.y - k * (pinchCenter.y - ty.value)
-    scale.value = next
+  if (event.touches.length === 2) {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+
+    pinchStartDist = distance(event.touches[0]!, event.touches[1]!)
+    pinchStartScale = scale.value
+    pinchCenter = midpoint(event.touches[0]!, event.touches[1]!, rect)
+  }
+}
+
+function onTouchMove(event: TouchEvent) {
+  if (event.touches.length === 1 && isDragging.value) {
+    tx.value = startTx + event.touches[0]!.clientX - startX
+    ty.value = startTy + event.touches[0]!.clientY - startY
+
+    clampPan()
+  }
+
+  if (event.touches.length === 2 && pinchStartDist > 0) {
+    const currentDistance = distance(event.touches[0]!, event.touches[1]!)
+    const previousScale = scale.value
+
+    let nextScale = pinchStartScale * (currentDistance / pinchStartDist)
+    nextScale = Math.min(Math.max(nextScale, minScale.value), maxScale)
+
+    const ratio = nextScale / previousScale
+
+    tx.value = pinchCenter.x - ratio * (pinchCenter.x - tx.value)
+    ty.value = pinchCenter.y - ratio * (pinchCenter.y - ty.value)
+    scale.value = nextScale
+
     clampPan()
   }
 }
+
 function onTouchEnd() {
   isDragging.value = false
-  if (pinchStartDist > 0 && scale.value < minScale.value * 1.02) resetZoom()
+
+  if (pinchStartDist > 0 && scale.value < minScale.value * 1.02) {
+    resetZoom()
+  }
+
   pinchStartDist = 0
 }
 
-onMounted(() => {
-  const onResize = () => { if (lightboxOpen.value) { computeFitScale(); resetZoom(false) } }
-  window.addEventListener('resize', onResize)
-  onBeforeUnmount(() => window.removeEventListener('resize', onResize))
-})
-onBeforeUnmount(() => { document.removeEventListener('keydown', onKey) })
+function distance(touchA: Touch, touchB: Touch) {
+  const deltaX = touchB.clientX - touchA.clientX
+  const deltaY = touchB.clientY - touchA.clientY
+
+  return Math.hypot(deltaX, deltaY)
+}
+
+function midpoint(touchA: Touch, touchB: Touch, rect: DOMRect) {
+  return {
+    x: (touchA.clientX + touchB.clientX) / 2 - rect.left - rect.width / 2,
+    y: (touchA.clientY + touchB.clientY) / 2 - rect.top - rect.height / 2
+  }
+}
 </script>
+
+<style scoped>
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+</style>

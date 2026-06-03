@@ -1,140 +1,207 @@
 <template>
-  <section id="news" class="relative overflow-hidden dark:bg-neutral-900 bg-gray-100">
-    <!-- Subtle BG grid + blobs -->
+  <section id="news" class="relative min-h-screen overflow-hidden bg-gray-50 text-gray-800 dark:bg-neutral-950 dark:text-neutral-200">
+    <!-- Background -->
     <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-      <div class="absolute top-10 -left-24 w-[42rem] h-[42rem] rounded-full opacity-40 blur-3xl
-                  bg-gradient-to-br from-green-200 to-green-200 dark:from-green-900/40 dark:to-green-900/30" />
-      <div class="absolute bottom-10 -right-24 w-[36rem] h-[36rem] rounded-full opacity-30 blur-3xl
-                  bg-gradient-to-tr from-green-100 to-green-100 dark:from-green-900/30 dark:to-green-900/30" />
-      <div class="absolute inset-0 [mask-image:radial-gradient(70%_60%_at_50%_40%,#000,transparent_80%)]">
-        <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(0,0,0,.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,.06)_1px,transparent_1px)] bg-[size:32px_32px]
-                    dark:bg-[linear-gradient(to_right,rgba(255,255,255,.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,.06)_1px,transparent_1px)]" />
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(22,163,74,0.14),transparent_32%),radial-gradient(circle_at_80%_20%,rgba(132,204,22,0.14),transparent_28%),linear-gradient(to_bottom,#f9fafb,#f3f4f6)] dark:bg-[radial-gradient(circle_at_top_left,rgba(22,163,74,0.18),transparent_32%),radial-gradient(circle_at_80%_20%,rgba(132,204,22,0.12),transparent_28%),linear-gradient(to_bottom,#0a0a0a,#111827)]"></div>
+      <div class="absolute -left-28 top-16 h-[34rem] w-[34rem] rounded-full bg-green-200/40 blur-3xl dark:bg-green-900/20"></div>
+      <div class="absolute -right-28 top-80 h-[30rem] w-[30rem] rounded-full bg-lime-200/35 blur-3xl dark:bg-lime-900/10"></div>
+      <div class="absolute inset-0 opacity-[0.35] dark:opacity-[0.16]">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(22,163,74,.13)_1px,transparent_1px),linear-gradient(to_bottom,rgba(22,163,74,.13)_1px,transparent_1px)] bg-[size:34px_34px]"></div>
       </div>
     </div>
 
-    <!-- HERO -->
-    <div class="relative">
+    <!-- Hero -->
+    <section class="relative pt-28 md:pt-32">
       <div class="absolute inset-0">
-        <img :src="cfg.hero.cover" class="w-full heroH object-cover opacity-80"
-             :style="{'--hero-sm': cfg.hero.heightSm, '--hero-lg': cfg.hero.heightLg}" alt="Cover News">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/10" />
-      </div>
-      <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 heroH flex items-end"
-           :style="{'--hero-sm': cfg.hero.heightSm, '--hero-lg': cfg.hero.heightLg}">
-        <div class="mb-10">
-          <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-green-200">
-            <span class="inline-block size-2 rounded-full bg-green-400" /> {{ cfg.hero.badge }}
-          </p>
-          <h1 class="mt-1 text-3xl sm:text-5xl font-bold text-white">{{ cfg.hero.title }}</h1>
-          <p class="mt-2 text-green-100">{{ cfg.hero.subtitle }}</p>
-        </div>
-      </div>
-    </div>
+        <img
+          v-if="cfg.hero.cover && !isBrokenNewsImage(cfg.hero.cover)"
+          :src="cfg.hero.cover"
+          alt="Cover News"
+          class="h-full w-full object-cover opacity-90"
+          @error="markBrokenNewsImage(cfg.hero.cover)"
+        >
 
-    <!-- BODY -->
-    <div class="relative max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
-      <!-- DETAIL -->
-      <div v-if="isDetail" class="max-w-5xl mx-auto">
-        <div class="flex items-center justify-between">
-          <button @click="backToList" class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-3 py-1.5 text-sm hover:bg-green-700">
-            <Icon icon="ph:arrow-left" class="size-4" /> Kembali
-          </button>
-
-          <div class="flex items-center gap-2">
-            <button @click="copyLink" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60 px-3 py-1.5 text-sm text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-neutral-700">
-              <Icon icon="ph:link" class="size-4" /> {{ copied ? 'Tersalin' : 'Salin URL' }}
-            </button>
-            <button type="button"
-                data-hs-overlay="#hs-share-modal"
-                class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60 px-3 py-1.5 text-sm text-gray-700 dark:text-neutral-200 hover:bg-gray-50 dark:hover:bg-neutral-700">
-              <Icon icon="ph:share-network" class="size-4" /> Bagikan
-            </button>
+        <div
+          v-else
+          class="grid h-full w-full place-items-center bg-gradient-to-br from-green-700 via-green-600 to-lime-500 text-white"
+        >
+          <div class="text-center">
+            <Icon icon="lucide:image-off" class="mx-auto h-10 w-10 opacity-90" />
+            <p class="mt-3 text-sm font-bold">Invalid image url</p>
           </div>
         </div>
 
-        <div v-if="!current && !pending" class="mt-8 rounded-2xl border border-dashed border-gray-300 dark:border-neutral-700 p-10 text-center">
-          <p class="text-gray-600 dark:text-neutral-300">{{ cfg.texts.notFound }}</p>
-          <button @click="backToList" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 text-sm hover:bg-green-700">
-            <Icon icon="ph:arrow-left" class="size-4" /> Kembali ke Daftar
+        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/20"></div>
+      </div>
+
+      <div
+        class="relative mx-auto flex max-w-[85rem] items-end px-4 sm:px-6 lg:px-8 heroH"
+        :style="{ '--hero-sm': cfg.hero.heightSm, '--hero-lg': cfg.hero.heightLg }"
+      >
+        <div class="mb-10 max-w-3xl">
+          <p class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-green-100 backdrop-blur">
+            <span class="inline-block h-2 w-2 rounded-full bg-lime-300"></span>
+            {{ cfg.hero.badge }}
+          </p>
+
+          <h1 class="mt-4 text-3xl font-black tracking-tight text-white sm:text-5xl">
+            {{ cfg.hero.title }}
+          </h1>
+
+          <p class="mt-3 max-w-2xl text-sm leading-relaxed text-green-50/90 sm:text-base">
+            {{ cfg.hero.subtitle }}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Body -->
+    <main class="relative mx-auto max-w-[85rem] px-4 pb-16 pt-8 sm:px-6 lg:px-8">
+      <!-- Detail -->
+      <div v-if="isDetail" class="mx-auto max-w-5xl">
+        <div class="-mt-16 rounded-[30px] border border-white/80 bg-white/90 p-4 shadow-2xl shadow-green-950/10 backdrop-blur-2xl dark:border-neutral-800 dark:bg-neutral-900/90 dark:shadow-black/30 md:p-5">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              type="button"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-sm font-bold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+              @click="backToList"
+            >
+              <Icon icon="lucide:arrow-left" class="h-4 w-4" />
+              Kembali
+            </button>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-700 transition hover:border-green-200 hover:bg-green-50 hover:text-green-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-green-900/60 dark:hover:bg-green-900/10 dark:hover:text-green-300"
+                @click="copyLink"
+              >
+                <Icon icon="lucide:link" class="h-4 w-4" />
+                {{ copied ? 'Tersalin' : 'Salin URL' }}
+              </button>
+
+              <button
+                type="button"
+                data-hs-overlay="#hs-share-modal"
+                class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-700 transition hover:border-green-200 hover:bg-green-50 hover:text-green-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-green-900/60 dark:hover:bg-green-900/10 dark:hover:text-green-300"
+              >
+                <Icon icon="lucide:share-2" class="h-4 w-4" />
+                Bagikan
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="!current && !pending"
+          class="mt-6 rounded-[30px] border border-dashed border-gray-300 bg-white/90 p-10 text-center shadow-sm backdrop-blur dark:border-neutral-700 dark:bg-neutral-900/80"
+        >
+          <div class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-300">
+            <Icon icon="lucide:newspaper" class="h-7 w-7" />
+          </div>
+
+          <p class="mt-4 text-sm text-gray-600 dark:text-neutral-300">
+            {{ cfg.texts.notFound }}
+          </p>
+
+          <button
+            type="button"
+            class="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+            @click="backToList"
+          >
+            <Icon icon="lucide:arrow-left" class="h-4 w-4" />
+            Kembali ke Daftar
           </button>
         </div>
 
-        <div v-if="pending" class="mt-6 space-y-3">
-          <div class="h-8 w-3/4 bg-gray-200/70 dark:bg-neutral-700 rounded animate-pulse" />
-          <div class="h-4 w-1/2 bg-gray-200/70 dark:bg-neutral-700 rounded animate-pulse" />
-          <div class="h-72 bg-gray-200/70 dark:bg-neutral-700 rounded-xl animate-pulse" />
-          <div class="h-40 bg-gray-200/70 dark:bg-neutral-700 rounded animate-pulse" />
+        <div v-if="pending" class="mt-6 overflow-hidden rounded-[30px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 sm:p-8">
+          <div class="h-8 w-3/4 animate-pulse rounded bg-gray-200/80 dark:bg-neutral-800"></div>
+          <div class="mt-4 h-4 w-1/2 animate-pulse rounded bg-gray-200/80 dark:bg-neutral-800"></div>
+          <div class="mt-6 h-72 animate-pulse rounded-[24px] bg-gray-200/80 dark:bg-neutral-800"></div>
+          <div class="mt-6 h-40 animate-pulse rounded bg-gray-200/80 dark:bg-neutral-800"></div>
         </div>
 
         <article
           v-else-if="current"
-          class="mt-6 overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+          class="mt-6 overflow-hidden rounded-[30px] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <!-- Article Header -->
           <header class="p-5 sm:p-8">
             <div class="flex flex-wrap items-center gap-2">
               <span
                 v-if="current.category"
                 class="inline-flex items-center gap-1 rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700 ring-1 ring-green-100 dark:bg-green-900/20 dark:text-green-300 dark:ring-green-900/40"
               >
-                <Icon icon="ph:bookmark-simple" class="size-3.5" />
+                <Icon icon="lucide:bookmark" class="h-3.5 w-3.5" />
                 {{ current.category }}
               </span>
 
               <span
-                v-if="(current).segment"
+                v-if="(current as any).segment"
                 class="inline-flex items-center gap-1 rounded-full bg-gray-50 px-3 py-1 text-xs font-bold text-gray-700 ring-1 ring-gray-100 dark:bg-neutral-800 dark:text-neutral-200 dark:ring-neutral-700"
               >
-                <Icon icon="ph:student" class="size-3.5" />
-                {{ current.segment }}
+                <Icon icon="lucide:graduation-cap" class="h-3.5 w-3.5" />
+                {{ (current as any).segment }}
               </span>
             </div>
 
-            <h1 class="mt-4 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+            <h1 class="mt-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white sm:text-5xl">
               {{ current.title }}
             </h1>
 
             <p
               v-if="current.excerpt"
-              class="mt-4 max-w-2xl text-base leading-8 text-gray-600 dark:text-neutral-300"
+              class="mt-4 max-w-3xl text-base leading-8 text-gray-600 dark:text-neutral-300"
             >
               {{ current.excerpt }}
             </p>
 
             <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 dark:text-neutral-400">
               <span class="inline-flex items-center gap-1.5">
-                <Icon icon="ph:calendar" class="size-4" />
+                <Icon icon="lucide:calendar-days" class="h-4 w-4" />
                 {{ formatDate(current.publishedAt) }}
               </span>
 
               <span class="inline-flex items-center gap-1.5">
-                <Icon icon="ph:clock" class="size-4" />
-                {{ current.readTime }} min read
+                <Icon icon="lucide:clock-3" class="h-4 w-4" />
+                {{ current.readTime || 1 }} min read
               </span>
 
               <span v-if="current.tags?.length" class="inline-flex flex-wrap items-center gap-1.5">
-                <Icon icon="ph:hash" class="size-4" />
+                <Icon icon="lucide:hash" class="h-4 w-4" />
                 <span
-                  v-for="t in current.tags"
-                  :key="t"
+                  v-for="tag in current.tags"
+                  :key="tag"
                   class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-neutral-800 dark:text-neutral-300"
-              >
-                  {{ t }}
+                >
+                  {{ tag }}
                 </span>
               </span>
             </div>
           </header>
 
-          <!-- Cover -->
           <div v-if="current.cover" class="px-5 sm:px-8">
             <img
+              v-if="!isBrokenNewsImage(current.cover)"
               :src="current.cover"
               :alt="current.title"
               class="w-full rounded-[24px] border border-gray-200 object-cover shadow-sm dark:border-neutral-800"
-            />
+              @error="markBrokenNewsImage(current.cover)"
+            >
+
+            <div
+              v-else
+              class="grid min-h-72 w-full place-items-center rounded-[24px] border border-gray-200 bg-gradient-to-br from-green-50 to-lime-50 p-6 text-center dark:border-neutral-800 dark:from-neutral-800 dark:to-neutral-900"
+            >
+              <div>
+                <div class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-white text-green-600 shadow-sm dark:bg-neutral-950 dark:text-green-300">
+                  <Icon icon="lucide:image-off" class="h-7 w-7" />
+                </div>
+                <p class="mt-4 text-base font-black text-gray-950 dark:text-white">Invalid image url</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Cover berita tidak dapat dimuat.</p>
+              </div>
+            </div>
           </div>
 
-          <!-- Tiptap Rendered Content -->
           <div class="p-5 sm:p-8">
             <div
               class="news-tiptap-content"
@@ -148,11 +215,11 @@
               <div class="flex items-end justify-between gap-4">
                 <div>
                   <p class="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700 ring-1 ring-green-100 dark:bg-green-900/20 dark:text-green-300 dark:ring-green-900/40">
-                    <Icon icon="ph:sparkle" class="size-3.5" />
+                    <Icon icon="lucide:sparkles" class="h-3.5 w-3.5" />
                     Rekomendasi
                   </p>
 
-                  <h3 class="mt-3 text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                  <h3 class="mt-3 text-xl font-black tracking-tight text-gray-900 dark:text-white">
                     Yang Mungkin Menarik
                   </h3>
 
@@ -166,23 +233,31 @@
                 <article
                   v-for="article in relatedArticles"
                   :key="article.id"
+                  class="group cursor-pointer overflow-hidden rounded-[26px] border border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-green-200 hover:shadow-xl hover:shadow-green-950/10 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-green-900/50"
                   @click="openDetail(article.slug)"
-                  class="group cursor-pointer overflow-hidden rounded-[22px] border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-green-200 hover:shadow-xl dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-green-900/50"
                 >
-                  <div class="relative aspect-[16/10] overflow-hidden bg-gray-100 dark:bg-neutral-800">
+                  <div class="relative aspect-[16/11] overflow-hidden bg-gray-100 dark:bg-neutral-800">
                     <img
-                      v-if="article.cover"
+                      v-if="article.cover && !isBrokenNewsImage(article.cover)"
                       :src="article.cover"
                       :alt="article.title"
-                      class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-                    />
+                      class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.05]"
+                      @error="markBrokenNewsImage(article.cover)"
+                    >
 
                     <div
                       v-else
-                      class="grid h-full place-items-center text-3xl"
+                      class="grid h-full place-items-center bg-gradient-to-br from-green-50 to-lime-50 p-6 text-center dark:from-neutral-800 dark:to-neutral-900"
                     >
-                      📰
+                      <div>
+                        <div class="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white text-green-600 shadow-sm dark:bg-neutral-950 dark:text-green-300">
+                          <Icon icon="lucide:image-off" class="h-5 w-5" />
+                        </div>
+                        <p class="mt-3 text-xs font-black text-gray-950 dark:text-white">Invalid image url</p>
+                      </div>
                     </div>
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-80"></div>
 
                     <span
                       v-if="article.category"
@@ -190,6 +265,12 @@
                     >
                       {{ article.category }}
                     </span>
+
+                    <div class="absolute inset-x-0 bottom-0 p-4">
+                      <h4 class="line-clamp-2 text-sm font-black leading-6 text-white">
+                        {{ article.title }}
+                      </h4>
+                    </div>
                   </div>
 
                   <div class="p-4">
@@ -199,18 +280,11 @@
                       <span>{{ article.readTime || 1 }} min read</span>
                     </div>
 
-                    <h4 class="mt-2 line-clamp-2 text-sm font-extrabold leading-6 text-gray-900 transition group-hover:text-green-700 dark:text-white dark:group-hover:text-green-300">
-                      {{ article.title }}
-                    </h4>
-
                     <p class="mt-2 line-clamp-2 text-sm leading-6 text-gray-600 dark:text-neutral-300">
                       {{ article.excerpt || 'Baca artikel selengkapnya.' }}
                     </p>
 
-                    <div
-                      v-if="article.tags?.length"
-                      class="mt-3 flex flex-wrap gap-1.5"
-                    >
+                    <div v-if="article.tags?.length" class="mt-3 flex flex-wrap gap-1.5">
                       <span
                         v-for="tag in article.tags.slice(0, 3)"
                         :key="tag"
@@ -226,10 +300,11 @@
 
             <div class="mt-10 border-t border-gray-200 pt-6 dark:border-neutral-800">
               <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
                 @click="backToList"
-                class="inline-flex items-center gap-2 rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
               >
-                <Icon icon="ph:arrow-left" class="size-4" />
+                <Icon icon="lucide:arrow-left" class="h-4 w-4" />
                 Kembali ke Daftar
               </button>
             </div>
@@ -237,92 +312,298 @@
         </article>
       </div>
 
-      <!-- LIST -->
+      <!-- List -->
       <div v-else>
-        <div class="rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/60 backdrop-blur p-4">
-          <div class="flex flex-wrap flex-col md:flex-row gap-3 md:items-center md:justify-between">
-            <div class="flex-wrap flex items-center gap-2">
-              <label class="relative md:w-xl w-full">
-                <input v-model="q" type="text" :placeholder="cfg.texts.searchPlaceholder"
-                       class="w-full rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-800 dark:text-neutral-100 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-green-600">
-                <span class="absolute right-3 top-2.5 text-gray-400 text-xs">{{ filtered.length }} hasil</span>
-              </label>
+        <!-- Floating Filter Panel -->
+        <section class="-mt-16 rounded-[30px] border border-white/80 bg-white/90 p-4 shadow-2xl shadow-green-950/10 backdrop-blur-2xl dark:border-neutral-800 dark:bg-neutral-900/90 dark:shadow-black/30 md:p-5">
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+              <div>
+                <p class="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700 dark:bg-green-900/20 dark:text-green-300">
+                  <Icon icon="lucide:newspaper" class="h-3.5 w-3.5" />
+                  {{ cfg.hero.badge }}
+                </p>
 
-              <div class="relative md:w-auto w-full">
-                <select v-model="selectedCategory" class="block md:w-auto w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 px-3 py-2 text-sm text-gray-700 dark:text-neutral-200 focus:ring-green-500">
-                  <option value="">Semua Kategori</option>
-                  <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
-                </select>
+                <h2 class="mt-3 text-xl font-black tracking-tight text-gray-950 dark:text-white md:text-2xl">
+                  {{ cfg.hero.title }}
+                </h2>
+
+                <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
+                  {{ cfg.hero.subtitle }}
+                </p>
               </div>
 
-              <div class="hidden sm:block">
-                <select v-model="sortBy"
-                        class="rounded-lg border border-gray-200 dark:border-neutral-700 bg-white/90 text-gray-800 dark:text-neutral-100 dark:bg-neutral-900 px-3 py-2 text-sm focus:outline-hidden">
-                  <option value="newest">Terbaru</option>
-                  <option value="oldest">Terlama</option>
-                  <option value="title">Judul (A–Z)</option>
-                </select>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center gap-2 rounded-2xl bg-gray-100 px-3 py-2 text-xs font-bold text-gray-600 dark:bg-neutral-800 dark:text-neutral-300">
+                  <Icon icon="lucide:newspaper" class="h-4 w-4 text-green-600" />
+                  {{ items.length }} berita
+                </span>
+
+                <span class="inline-flex items-center gap-2 rounded-2xl bg-gray-100 px-3 py-2 text-xs font-bold text-gray-600 dark:bg-neutral-800 dark:text-neutral-300">
+                  <Icon icon="lucide:folder" class="h-4 w-4 text-green-600" />
+                  {{ categories.length }} kategori
+                </span>
+
+                <span class="inline-flex items-center gap-2 rounded-2xl bg-gray-100 px-3 py-2 text-xs font-bold text-gray-600 dark:bg-neutral-800 dark:text-neutral-300">
+                  <Icon icon="lucide:hash" class="h-4 w-4 text-green-600" />
+                  {{ allTags.length }} tags
+                </span>
               </div>
             </div>
 
-            <div class="flex flex-wrap gap-2">
-              <button v-for="t in allTags.splice(0, 5)" :key="t" @click="toggleTag(t)"
-                      class="text-[12px] px-2.5 py-1.5 rounded-full border border-gray-200 dark:border-neutral-700 text-gray-800 dark:text-neutral-100"
-                      :class="selectedTags.toString().includes(t) ? 'bg-green-600 text-white border-green-600' : 'bg-white/80 dark:bg-neutral-900 text-gray-700 dark:text-neutral-300'">
-                #{{ t }}
-              </button>
-              <button @click="resetFilters" class="text-[12px] px-2.5 py-1.5 rounded-full border border-gray-200 dark:border-neutral-700 text-gray-800 dark:text-neutral-100 hover:bg-gray-50 dark:hover:bg-neutral-800">
+            <!-- Filter -->
+            <div class="flex flex-col gap-3 rounded-[26px] border border-gray-200 bg-gray-50/80 p-3 dark:border-neutral-800 dark:bg-neutral-950/60 lg:flex-row lg:items-center">
+              <label class="relative min-w-0 flex-1">
+                <Icon icon="lucide:search" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+
+                <input
+                  v-model="q"
+                  type="search"
+                  :placeholder="cfg.texts.searchPlaceholder"
+                  class="h-12 w-full rounded-2xl border border-gray-200 bg-white pl-11 pr-24 text-sm font-medium text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-green-500 focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                >
+
+                <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-black text-green-700 dark:bg-green-900/20 dark:text-green-300">
+                  {{ filtered.length }} hasil
+                </span>
+              </label>
+
+              <label class="relative w-full lg:w-56">
+                <Icon icon="lucide:folder" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+
+                <select
+                  v-model="selectedCategory"
+                  class="h-12 w-full appearance-none rounded-2xl border border-gray-200 bg-white pl-11 pr-10 text-sm font-bold text-gray-700 outline-none transition focus:border-green-500 focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                >
+                  <option value="">Semua Kategori</option>
+                  <option v-for="category in categories" :key="category" :value="category">
+                    {{ category }}
+                  </option>
+                </select>
+
+                <Icon icon="lucide:chevron-down" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              </label>
+
+              <label class="relative w-full lg:w-56">
+                <Icon icon="lucide:hash" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+
+                <select
+                  :value="firstSelectedTag"
+                  class="h-12 w-full appearance-none rounded-2xl border border-gray-200 bg-white pl-11 pr-10 text-sm font-bold text-gray-700 outline-none transition focus:border-green-500 focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                  @change="onTagSelect"
+                >
+                  <option value="">Semua Tags</option>
+                  <option v-for="tag in allTags" :key="tag" :value="tag">
+                    #{{ tag }}
+                  </option>
+                </select>
+
+                <Icon icon="lucide:chevron-down" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              </label>
+
+              <label class="relative w-full lg:w-48">
+                <Icon icon="lucide:arrow-up-down" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+
+                <select
+                  v-model="sortBy"
+                  class="h-12 w-full appearance-none rounded-2xl border border-gray-200 bg-white pl-11 pr-10 text-sm font-bold text-gray-700 outline-none transition focus:border-green-500 focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                >
+                  <option value="newest">Terbaru</option>
+                  <option value="oldest">Terlama</option>
+                  <option value="title">Judul A-Z</option>
+                </select>
+
+                <Icon icon="lucide:chevron-down" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              </label>
+
+              <button
+                type="button"
+                class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 transition hover:border-green-200 hover:bg-green-50 hover:text-green-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-green-900/60 dark:hover:bg-green-900/10 dark:hover:text-green-300 lg:w-auto"
+                @click="resetNewsFilters"
+              >
+                <Icon icon="lucide:rotate-ccw" class="h-4 w-4" />
                 Reset
               </button>
             </div>
-          </div>
-        </div>
 
-        <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <template v-if="pending">
-            <div v-for="i in 6" :key="i" class="rounded-2xl border border-gray-200 dark:border-neutral-700 bg-white/70 dark:bg-neutral-800/60 p-3">
-              <div class="h-40 bg-gray-200/70 dark:bg-neutral-700 rounded-xl animate-pulse" />
-              <div class="mt-3 h-4 w-32 bg-gray-200/70 dark:bg-neutral-700 rounded animate-pulse" />
-              <div class="mt-2 h-6 w-3/4 bg-gray-200/70 dark:bg-neutral-700 rounded animate-pulse" />
-              <div class="mt-2 h-4 w-5/6 bg-gray-200/70 dark:bg-neutral-700 rounded animate-pulse" />
+            <!-- Active Filters -->
+            <div
+              v-if="q || selectedCategory || firstSelectedTag"
+              class="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-4 dark:border-neutral-800"
+            >
+              <span class="text-xs font-black uppercase tracking-wide text-gray-400">
+                Aktif:
+              </span>
+
+              <span
+                v-if="q"
+                class="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700 dark:bg-green-900/20 dark:text-green-300"
+              >
+                Search: {{ q }}
+              </span>
+
+              <span
+                v-if="selectedCategory"
+                class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
+              >
+                {{ selectedCategory }}
+              </span>
+
+              <span
+                v-if="firstSelectedTag"
+                class="inline-flex items-center gap-2 rounded-full bg-lime-50 px-3 py-1.5 text-xs font-bold text-lime-700 dark:bg-lime-900/20 dark:text-lime-300"
+              >
+                #{{ firstSelectedTag }}
+              </span>
             </div>
-          </template>
+          </div>
+        </section>
 
-          <template v-else>
-            <article v-for="a in paged" :key="a.slug"
-                     @click="openDetail(a.slug)"
-                     class="group relative cursor-pointer rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/60 hover:shadow transition">
-              <div class="relative h-44 overflow-hidden">
-                <img :src="a.cover" :alt="a.title" class="w-full h-full object-cover group-hover:scale-[1.02] transition" />
-                <span v-if="a.category" class="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-black/55 text-white px-2 py-0.5 text-[11px]">
-                  {{ a.category }}
-                </span>
-              </div>
-              <div class="p-4">
-                <h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2">{{ a.title }}</h3>
-                <p class="mt-2 text-sm text-gray-600 dark:text-neutral-300 line-clamp-3">{{ a.excerpt }}</p>
-                <div class="mt-3 flex flex-wrap gap-3 items-center justify-between text-[12px] text-gray-500 dark:text-neutral-400">
-                  <div class="flex items-center gap-2">
-                    <span>{{ formatDate(a.publishedAt) }}</span>
-                    <span aria-hidden="true">•</span>
-                    <span>{{ a.readTime }} min read</span>
+        <!-- Loading -->
+        <section v-if="pending" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <article
+            v-for="i in 8"
+            :key="i"
+            class="overflow-hidden rounded-[26px] border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+          >
+            <div class="h-48 animate-pulse bg-gray-200/80 dark:bg-neutral-800"></div>
+            <div class="space-y-3 p-4">
+              <div class="h-4 w-24 animate-pulse rounded bg-gray-200/80 dark:bg-neutral-800"></div>
+              <div class="h-5 w-4/5 animate-pulse rounded bg-gray-200/80 dark:bg-neutral-800"></div>
+              <div class="h-4 w-full animate-pulse rounded bg-gray-200/80 dark:bg-neutral-800"></div>
+              <div class="h-4 w-3/4 animate-pulse rounded bg-gray-200/80 dark:bg-neutral-800"></div>
+            </div>
+          </article>
+        </section>
+
+        <!-- Empty -->
+        <section
+          v-else-if="filtered.length === 0"
+          class="mt-6 rounded-[30px] border border-dashed border-gray-300 bg-white/90 p-10 text-center shadow-sm backdrop-blur dark:border-neutral-700 dark:bg-neutral-900/80"
+        >
+          <div class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-300">
+            <Icon icon="lucide:newspaper" class="h-7 w-7" />
+          </div>
+
+          <h3 class="mt-4 text-lg font-black text-gray-950 dark:text-white">
+            Berita tidak ditemukan
+          </h3>
+
+          <p class="mt-2 text-sm text-gray-500 dark:text-neutral-400">
+            {{ cfg.texts.emptyList }}
+          </p>
+        </section>
+
+        <!-- News Cards -->
+        <section v-else class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <article
+            v-for="article in paged"
+            :key="article.slug"
+            class="group overflow-hidden rounded-[26px] border border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-green-200 hover:shadow-xl hover:shadow-green-950/10 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-green-900/50"
+          >
+            <button
+              type="button"
+              class="relative block aspect-[16/11] w-full overflow-hidden bg-gray-100 text-left dark:bg-neutral-800"
+              @click="openDetail(article.slug)"
+            >
+              <img
+                v-if="article.cover && !isBrokenNewsImage(article.cover)"
+                :src="article.cover"
+                :alt="article.title || 'News cover'"
+                loading="lazy"
+                class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.05]"
+                @error="markBrokenNewsImage(article.cover)"
+              >
+
+              <div
+                v-else
+                class="grid h-full place-items-center bg-gradient-to-br from-green-50 to-lime-50 p-6 text-center dark:from-neutral-800 dark:to-neutral-900"
+              >
+                <div>
+                  <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-white text-green-600 shadow-sm dark:bg-neutral-950 dark:text-green-300">
+                    <Icon icon="lucide:image-off" class="h-6 w-6" />
                   </div>
-                  <div class="hidden sm:flex flex-wrap gap-1">
-                    <span v-for="t in a.tags" :key="t" class="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-neutral-700">#{{ t }}</span>
-                  </div>
+                  <p class="mt-3 text-sm font-black text-gray-950 dark:text-white">Invalid image url</p>
+                  <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">Cover berita tidak dapat dimuat.</p>
                 </div>
               </div>
-            </article>
-          </template>
-        </div>
 
-        <div v-if="!pending && filtered.length === 0" class="mt-10 rounded-2xl border border-dashed border-gray-300 dark:border-neutral-700 p-10 text-center">
-          <p class="text-gray-600 dark:text-neutral-300">{{ cfg.texts.emptyList }}</p>
-        </div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent opacity-85"></div>
 
+              <div class="absolute left-3 top-3 flex flex-wrap gap-2">
+                <span
+                  v-if="article.category"
+                  class="rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur"
+                >
+                  {{ article.category }}
+                </span>
+
+                <span
+                  v-if="(article as any).segment"
+                  class="rounded-full bg-green-600/85 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur"
+                >
+                  {{ (article as any).segment }}
+                </span>
+              </div>
+
+              <div class="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-2xl bg-white/90 text-gray-800 opacity-0 shadow-sm backdrop-blur transition duration-300 group-hover:opacity-100 dark:bg-neutral-950/90 dark:text-white">
+                <Icon icon="lucide:arrow-up-right" class="h-4 w-4" />
+              </div>
+
+              <div class="absolute inset-x-0 bottom-0 p-4">
+                <h3 class="line-clamp-2 text-base font-black text-white">
+                  {{ article.title || 'Tanpa judul' }}
+                </h3>
+
+                <div v-if="article.tags?.length" class="mt-2 flex flex-wrap gap-1.5">
+                  <span
+                    v-for="tag in article.tags.slice(0, 3)"
+                    :key="tag"
+                    class="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold text-white ring-1 ring-white/20 backdrop-blur"
+                  >
+                    #{{ tag }}
+                  </span>
+                </div>
+              </div>
+            </button>
+
+            <div class="space-y-3 p-4">
+              <div class="flex items-center justify-between gap-3 text-[12px] text-gray-500 dark:text-neutral-400">
+                <span class="inline-flex min-w-0 items-center gap-1">
+                  <Icon icon="lucide:calendar-days" class="h-3.5 w-3.5 shrink-0" />
+                  <span class="truncate">{{ formatDate(article.publishedAt) }}</span>
+                </span>
+
+                <span class="inline-flex items-center gap-1">
+                  <Icon icon="lucide:clock-3" class="h-3.5 w-3.5" />
+                  {{ article.readTime || 1 }} min
+                </span>
+              </div>
+
+              <p class="line-clamp-2 text-sm text-gray-600 dark:text-neutral-300">
+                {{ article.excerpt || 'Baca artikel selengkapnya.' }}
+              </p>
+
+              <button
+                type="button"
+                class="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 py-2.5 text-xs font-bold text-gray-700 transition hover:border-green-200 hover:bg-green-50 hover:text-green-700 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-200 dark:hover:border-green-900/60 dark:hover:bg-green-900/10 dark:hover:text-green-300"
+                @click="openDetail(article.slug)"
+              >
+                <Icon icon="lucide:book-open" class="h-4 w-4" />
+                Baca Berita
+              </button>
+            </div>
+          </article>
+        </section>
+
+        <!-- Load More -->
         <div v-if="hasMore && !pending" class="mt-8 text-center">
-          <button @click="loadMore" class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-green-700">
-            <Icon icon="ph:arrow-circle-down" class="size-4" />
+          <button
+            type="button"
+            class="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+            @click="loadMore"
+          >
+            <Icon icon="lucide:arrow-down-circle" class="h-4 w-4" />
             {{ cfg.texts.loadMore }}
           </button>
         </div>
@@ -331,14 +612,13 @@
       <!-- Share Modal -->
       <div
         id="hs-share-modal"
-        class="hs-overlay hidden fixed inset-0 z-[80] overflow-y-auto pointer-events-none [--overlay-backdrop:rgba(15,23,42,.65)]"
+        class="hs-overlay pointer-events-none fixed inset-0 z-[80] hidden overflow-y-auto [--overlay-backdrop:rgba(15,23,42,.65)]"
         role="dialog"
         aria-labelledby="hs-share-modal-label"
         aria-modal="true"
       >
-        <div class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-300 mt-0 opacity-0 transition-all mx-auto flex min-h-[calc(100%-3.5rem)] w-full items-center p-4 sm:max-w-lg">
+        <div class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-300 mx-auto mt-0 flex min-h-[calc(100%-3.5rem)] w-full items-center p-4 opacity-0 transition-all sm:max-w-lg">
           <div class="pointer-events-auto w-full overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-900">
-            <!-- Header -->
             <div class="relative overflow-hidden border-b border-gray-200 bg-gradient-to-br from-green-600 via-green-600 to-lime-500 p-5 text-white dark:border-neutral-800">
               <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-3xl"></div>
               <div class="absolute -bottom-12 left-6 h-28 w-28 rounded-full bg-lime-200/30 blur-3xl"></div>
@@ -346,11 +626,11 @@
               <div class="relative flex items-start justify-between gap-4">
                 <div>
                   <div class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold ring-1 ring-white/20 backdrop-blur">
-                    <Icon icon="ph:share-network" class="size-3.5" />
+                    <Icon icon="lucide:share-2" class="h-3.5 w-3.5" />
                     Bagikan Artikel
                   </div>
 
-                  <h3 id="hs-share-modal-label" class="mt-3 text-xl font-extrabold tracking-tight">
+                  <h3 id="hs-share-modal-label" class="mt-3 text-xl font-black tracking-tight">
                     Sebarkan kabar baik ini
                   </h3>
 
@@ -361,26 +641,24 @@
 
                 <button
                   type="button"
-                  class="inline-flex size-9 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/20 transition hover:bg-white/25"
+                  class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/20 transition hover:bg-white/25"
                   data-hs-overlay="#hs-share-modal"
                   aria-label="Tutup"
                 >
-                  <Icon icon="ph:x" class="size-5" />
+                  <Icon icon="lucide:x" class="h-5 w-5" />
                 </button>
               </div>
             </div>
 
-            <!-- Body -->
             <div class="space-y-5 p-5">
-              <!-- Share options -->
               <div class="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  @click="nativeShare"
                   class="group flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3 text-left transition hover:-translate-y-0.5 hover:border-green-200 hover:bg-green-50 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-green-900/50 dark:hover:bg-green-900/10"
+                  @click="nativeShare"
                 >
-                  <span class="grid size-10 shrink-0 place-items-center rounded-2xl bg-gray-900 text-white dark:bg-white dark:text-gray-900">
-                    <Icon icon="ph:device-mobile" class="size-5" />
+                  <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gray-900 text-white dark:bg-white dark:text-gray-900">
+                    <Icon icon="lucide:smartphone" class="h-5 w-5" />
                   </span>
                   <span class="min-w-0">
                     <span class="block text-sm font-bold text-gray-900 dark:text-white">Sistem</span>
@@ -394,8 +672,8 @@
                   rel="noopener"
                   class="group flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3 text-left transition hover:-translate-y-0.5 hover:border-green-200 hover:bg-green-50 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-green-900/50 dark:hover:bg-green-900/10"
                 >
-                  <span class="grid size-10 shrink-0 place-items-center rounded-2xl bg-green-600 text-white">
-                    <Icon icon="mdi:whatsapp" class="size-5" />
+                  <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-green-600 text-white">
+                    <Icon icon="mdi:whatsapp" class="h-5 w-5" />
                   </span>
                   <span class="min-w-0">
                     <span class="block text-sm font-bold text-gray-900 dark:text-white">WhatsApp</span>
@@ -409,8 +687,8 @@
                   rel="noopener"
                   class="group flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3 text-left transition hover:-translate-y-0.5 hover:border-green-200 hover:bg-green-50 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-green-900/50 dark:hover:bg-green-900/10"
                 >
-                  <span class="grid size-10 shrink-0 place-items-center rounded-2xl bg-green-600 text-white">
-                    <Icon icon="mdi:facebook" class="size-5" />
+                  <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-green-600 text-white">
+                    <Icon icon="mdi:facebook" class="h-5 w-5" />
                   </span>
                   <span class="min-w-0">
                     <span class="block text-sm font-bold text-gray-900 dark:text-white">Facebook</span>
@@ -424,8 +702,8 @@
                   rel="noopener"
                   class="group flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3 text-left transition hover:-translate-y-0.5 hover:border-green-200 hover:bg-green-50 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-green-900/50 dark:hover:bg-green-900/10"
                 >
-                  <span class="grid size-10 shrink-0 place-items-center rounded-2xl bg-black text-white">
-                    <Icon icon="ri:twitter-x-fill" class="size-5" />
+                  <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-black text-white">
+                    <Icon icon="ri:twitter-x-fill" class="h-5 w-5" />
                   </span>
                   <span class="min-w-0">
                     <span class="block text-sm font-bold text-gray-900 dark:text-white">X</span>
@@ -434,7 +712,6 @@
                 </a>
               </div>
 
-              <!-- Copy link -->
               <div class="rounded-3xl border border-gray-200 bg-gray-50 p-3 dark:border-neutral-800 dark:bg-neutral-950">
                 <label class="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-neutral-400">
                   Link Artikel
@@ -445,24 +722,23 @@
                     :value="canonical"
                     readonly
                     class="min-w-0 flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 outline-none dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-200"
-                  />
+                  >
 
                   <button
                     type="button"
-                    @click="copyShare"
                     class="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+                    @click="copyShare"
                   >
-                    <Icon icon="ph:copy" class="size-4" />
+                    <Icon icon="lucide:copy" class="h-4 w-4" />
                     {{ copied ? 'Tersalin' : 'Salin' }}
                   </button>
                 </div>
               </div>
             </div>
 
-            <!-- Footer -->
             <div class="flex items-center justify-between gap-3 border-t border-gray-200 bg-gray-50 px-5 py-4 text-xs text-gray-500 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-400">
               <span class="inline-flex items-center gap-1.5">
-                <Icon icon="ph:lock-simple" class="size-4" />
+                <Icon icon="lucide:lock" class="h-4 w-4" />
                 Link aman untuk dibagikan
               </span>
 
@@ -477,6 +753,7 @@
           </div>
         </div>
       </div>
+
       <!-- Copy Toast -->
       <Transition
         enter-active-class="transition duration-300 ease-out"
@@ -491,8 +768,8 @@
           class="fixed bottom-5 right-5 z-[90] max-w-sm rounded-2xl border border-green-200 bg-white p-4 shadow-2xl shadow-green-900/10 dark:border-green-900/40 dark:bg-neutral-900"
         >
           <div class="flex items-start gap-3">
-            <div class="grid size-10 shrink-0 place-items-center rounded-2xl bg-green-600 text-white">
-              <Icon icon="ph:check-bold" class="size-5" />
+            <div class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-green-600 text-white">
+              <Icon icon="lucide:check" class="h-5 w-5" />
             </div>
 
             <div class="min-w-0">
@@ -507,30 +784,25 @@
         </div>
       </Transition>
 
-      <div v-if="error" class="mt-8 rounded-2xl border border-rose-300/60 dark:border-rose-700 bg-rose-50/60 dark:bg-rose-900/30 p-4 text-sm text-rose-700 dark:text-rose-200">
+      <div
+        v-if="error"
+        class="mt-8 rounded-2xl border border-rose-300/60 bg-rose-50/60 p-4 text-sm text-rose-700 dark:border-rose-700 dark:bg-rose-900/30 dark:text-rose-200"
+      >
         {{ error }}
       </div>
-    </div>
+    </main>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useRoute } from 'vue-router'
+import { useAsyncData, useHead, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
 import { useNews } from '~/composables/data/useNews'
 import { useWeb } from '~/composables/data/useWeb'
-import { useAsyncData, useHead, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
-import { useRoute } from 'vue-router'
 
 defineOptions({ name: 'NewsPage' })
-
-const {
-  pending, error, items,
-  q, selectedCategory, selectedTags, sortBy, toggleTag, resetFilters,
-  filtered, paged, hasMore, page, pageSize,
-  isDetail, current, openDetail, backToList,
-  renderedDetailHtml, categories, allTags
-} = useNews()
 
 type WebPageSnapshot = {
   meta?: {
@@ -550,7 +822,81 @@ type WebPageSnapshot = {
   }>
 }
 
-function loadMore() { page.value++ }
+const {
+  pending,
+  error,
+  items,
+  q,
+  selectedCategory,
+  selectedTags,
+  sortBy,
+  resetFilters,
+  filtered,
+  paged,
+  hasMore,
+  page,
+  isDetail,
+  current,
+  openDetail,
+  backToList,
+  renderedDetailHtml,
+  categories,
+  allTags
+} = useNews()
+
+const brokenNewsImages = ref<Record<string, boolean>>({})
+
+const firstSelectedTag = computed(() => {
+  const value = selectedTags.value as unknown
+
+  if (value instanceof Set) {
+    return Array.from(value)[0] || ''
+  }
+
+  if (Array.isArray(value)) {
+    return value[0] || ''
+  }
+
+  return ''
+})
+
+function onTagSelect(event: Event) {
+  const value = (event.target as HTMLSelectElement).value
+  const selected = selectedTags.value as unknown
+
+  if (selected instanceof Set) {
+    selectedTags.value = value ? new Set([value]) : new Set()
+    return
+  }
+
+  if (Array.isArray(selected)) {
+    ;(selectedTags as any).value = value ? [value] : []
+  }
+}
+
+function resetNewsFilters() {
+  resetFilters()
+  selectedCategory.value = ''
+}
+
+function markBrokenNewsImage(src?: string) {
+  if (!src) return
+
+  brokenNewsImages.value = {
+    ...brokenNewsImages.value,
+    [src]: true
+  }
+}
+
+function isBrokenNewsImage(src?: string) {
+  if (!src) return false
+  return Boolean(brokenNewsImages.value[src])
+}
+
+function loadMore() {
+  page.value += 1
+}
+
 function formatDate(ts: number) {
   return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(ts)
 }
@@ -572,7 +918,7 @@ const PAGE_DEFAULTS = {
   hero: {
     cover: '/assets/images/profile.png',
     badge: 'Kabar Terbaru',
-    title: 'Berita Pondok Pesantren Alberr',
+    title: 'Berita Pondok Pesantren Al-Inayah',
     subtitle: 'Informasi kegiatan, pengumuman, dan liputan santri.',
     heightSm: '36vh',
     heightLg: '44vh'
@@ -585,38 +931,72 @@ const PAGE_DEFAULTS = {
   }
 } as const
 
+const LEGACY_NEWS_TITLES = new Set([
+  'Berita Platform Pondok',
+  'Berita Pondok Pesantren Alberr'
+])
+
+const LEGACY_ORGANIZATION_NAMES = new Set([
+  'Pondok Pesantren Alberr'
+])
+
+function resolveSyncedText(value: unknown, fallback: string, legacySet?: Set<string>) {
+  const text = String(value || '').trim()
+
+  if (!text) return fallback
+  if (legacySet?.has(text)) return fallback
+
+  return text
+}
+
 const route = useRoute()
 const runtime = useRuntimeConfig()
-const siteUrl = runtime.public?.siteUrl || ''
+const NEWS_PAGE_PATH = '/news'
 
 const web = useWeb()
 const { data: pageSnap } = useAsyncData<WebPageSnapshot | null>(
-  `webpage-${route.path}`,
+  `webpage-${NEWS_PAGE_PATH}`,
   async () => {
-    const snap = await web.getPageSnapshot(route.path)
+    const snap = await web.getPageSnapshot(NEWS_PAGE_PATH)
     return (snap || null) as WebPageSnapshot | null
   }
 )
 
 const newsSectionProps = computed<any>(() => {
   const sections: any = pageSnap.value?.sections || []
-  return sections.find((s: any) => s?.key === 'NewsPage')?.props || {}
+  return sections.find((section: any) => section?.key === 'NewsPage')?.props || {}
 })
 
 const cfg = computed(() => ({
   hero: {
-    cover: newsSectionProps.value?.hero?.cover || PAGE_DEFAULTS.hero.cover,
-    badge: newsSectionProps.value?.hero?.badge || PAGE_DEFAULTS.hero.badge,
-    title: newsSectionProps.value?.hero?.title || PAGE_DEFAULTS.hero.title,
-    subtitle: newsSectionProps.value?.hero?.subtitle || PAGE_DEFAULTS.hero.subtitle,
-    heightSm: newsSectionProps.value?.hero?.heightSm || PAGE_DEFAULTS.hero.heightSm,
-    heightLg: newsSectionProps.value?.hero?.heightLg || PAGE_DEFAULTS.hero.heightLg
+    cover: resolveSyncedText(newsSectionProps.value?.hero?.cover, PAGE_DEFAULTS.hero.cover),
+    badge: resolveSyncedText(newsSectionProps.value?.hero?.badge, PAGE_DEFAULTS.hero.badge),
+    title: resolveSyncedText(
+      newsSectionProps.value?.hero?.title,
+      PAGE_DEFAULTS.hero.title,
+      LEGACY_NEWS_TITLES
+    ),
+    subtitle: resolveSyncedText(newsSectionProps.value?.hero?.subtitle, PAGE_DEFAULTS.hero.subtitle),
+    heightSm: resolveSyncedText(newsSectionProps.value?.hero?.heightSm, PAGE_DEFAULTS.hero.heightSm),
+    heightLg: resolveSyncedText(newsSectionProps.value?.hero?.heightLg, PAGE_DEFAULTS.hero.heightLg)
   },
   texts: {
-    searchPlaceholder: newsSectionProps.value?.texts?.searchPlaceholder || PAGE_DEFAULTS.texts.searchPlaceholder,
-    emptyList: newsSectionProps.value?.texts?.emptyList || PAGE_DEFAULTS.texts.emptyList,
-    notFound: newsSectionProps.value?.texts?.notFound || PAGE_DEFAULTS.texts.notFound,
-    loadMore: newsSectionProps.value?.texts?.loadMore || PAGE_DEFAULTS.texts.loadMore
+    searchPlaceholder: resolveSyncedText(
+      newsSectionProps.value?.texts?.searchPlaceholder,
+      PAGE_DEFAULTS.texts.searchPlaceholder
+    ),
+    emptyList: resolveSyncedText(
+      newsSectionProps.value?.texts?.emptyList,
+      PAGE_DEFAULTS.texts.emptyList
+    ),
+    notFound: resolveSyncedText(
+      newsSectionProps.value?.texts?.notFound,
+      PAGE_DEFAULTS.texts.notFound
+    ),
+    loadMore: resolveSyncedText(
+      newsSectionProps.value?.texts?.loadMore,
+      PAGE_DEFAULTS.texts.loadMore
+    )
   }
 }))
 
@@ -637,7 +1017,7 @@ const siteOrigin = computed(() => {
     return window.location.origin
   }
 
-  return 'https://alberr.sch.id'
+  return 'https://obayan.id'
 })
 
 function toAbsoluteUrl(url?: string) {
@@ -677,11 +1057,13 @@ function limitSeoText(value?: string, max = 160) {
 }
 
 const organizationName = computed(() => {
-  return (
+  return resolveSyncedText(
     pageMeta.value?.organizationName ||
-    pageMeta.value?.siteName ||
-    runtime.public?.siteName ||
-    'Pondok Pesantren Alberr'
+      pageMeta.value?.siteName ||
+      runtime.public?.siteName ||
+      runtime.public?.clientName,
+    'Pondok Pesantren Al-Inayah',
+    LEGACY_ORGANIZATION_NAMES
   )
 })
 
@@ -694,10 +1076,10 @@ const organizationLogo = computed(() => {
 })
 
 const baseTitle = computed(() => {
-  return (
-    pageMeta.value?.title ||
-    cfg.value.hero.title ||
-    'Berita | Pondok Pesantren Alberr'
+  return resolveSyncedText(
+    pageMeta.value?.title,
+    cfg.value.hero.title || 'Berita | Pondok Pesantren',
+    LEGACY_NEWS_TITLES
   )
 })
 
@@ -972,7 +1354,7 @@ useHead(() => {
   }
 })
 
-onMounted(async() => {
+onMounted(async () => {
   const { HSStaticMethods } = await import('preline')
   HSStaticMethods?.autoInit?.()
 })
@@ -980,35 +1362,50 @@ onMounted(async() => {
 async function copyToClipboard(text: string) {
   try {
     if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text); return true
+      await navigator.clipboard.writeText(text)
+      return true
     }
   } catch {}
+
   try {
-    const ta = document.createElement('textarea')
-    ta.value = text
-    ta.setAttribute('readonly','')
-    ta.style.position='fixed'; ta.style.opacity='0'
-    document.body.appendChild(ta); ta.select()
-    const ok = document.execCommand('copy'); document.body.removeChild(ta)
+    const textarea = document.createElement('textarea')
+    textarea.value = text
+    textarea.setAttribute('readonly', '')
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+
+    document.body.appendChild(textarea)
+    textarea.select()
+
+    const ok = document.execCommand('copy')
+    document.body.removeChild(textarea)
+
     return ok
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
-const shareText   = computed(() =>
-  (current?.value?.title && isDetail.value) ? current.value.title : 'Berita Ponpes Alberr'
-)
-const encodedUrl  = computed(() => encodeURIComponent(canonical.value))
+const shareText = computed(() => {
+  return current.value?.title && isDetail.value
+    ? current.value.title
+    : `Berita ${organizationName.value}`
+})
+
+const encodedUrl = computed(() => encodeURIComponent(canonical.value))
 const encodedText = computed(() => encodeURIComponent(`${shareText.value} – ${canonical.value}`))
 
-const facebookHref = computed(
-  () => `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl.value}`
-)
-const twitterHref  = computed(
-  () => `https://twitter.com/intent/tweet?url=${encodedUrl.value}&text=${encodeURIComponent(shareText.value)}`
-)
-const whatsappHref = computed(
-  () => `https://wa.me/?text=${encodedText.value}`
-)
+const facebookHref = computed(() => {
+  return `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl.value}`
+})
+
+const twitterHref = computed(() => {
+  return `https://twitter.com/intent/tweet?url=${encodedUrl.value}&text=${encodeURIComponent(shareText.value)}`
+})
+
+const whatsappHref = computed(() => {
+  return `https://wa.me/?text=${encodedText.value}`
+})
 
 function normalizeSearchText(value: string) {
   return String(value || '')
@@ -1022,14 +1419,27 @@ function normalizeSearchText(value: string) {
 
 function getTitleTokens(value: string) {
   const stopWords = new Set([
-    'yang', 'dan', 'di', 'ke', 'dari', 'untuk', 'dengan', 'pada', 'dalam',
-    'the', 'and', 'for', 'with', 'from', 'about'
+    'yang',
+    'dan',
+    'di',
+    'ke',
+    'dari',
+    'untuk',
+    'dengan',
+    'pada',
+    'dalam',
+    'the',
+    'and',
+    'for',
+    'with',
+    'from',
+    'about'
   ])
 
   return normalizeSearchText(value)
     .split(' ')
-    .map((s) => s.trim())
-    .filter((s) => s.length >= 4 && !stopWords.has(s))
+    .map((item) => item.trim())
+    .filter((item) => item.length >= 4 && !stopWords.has(item))
 }
 
 const relatedArticles = computed(() => {
@@ -1067,6 +1477,7 @@ const relatedArticles = computed(() => {
 
       if (item.publishedAt) {
         const daysDiff = Math.abs(Date.now() - item.publishedAt) / (1000 * 60 * 60 * 24)
+
         if (daysDiff <= 30) score += 8
         else if (daysDiff <= 90) score += 4
       }
@@ -1086,34 +1497,55 @@ const relatedArticles = computed(() => {
 })
 
 const copied = ref(false)
+
 async function copyLink() {
   const ok = await copyToClipboard(canonical.value)
   copied.value = ok
 
   if (ok) {
     triggerCopiedToast()
-    setTimeout(() => (copied.value = false), 1200)
+    setTimeout(() => {
+      copied.value = false
+    }, 1200)
   }
 }
+
 async function copyShare() {
   await copyLink()
 }
-async function nativeShare(){
+
+async function nativeShare() {
   const url = canonical.value
+
   try {
-    if (navigator.share) { await navigator.share({ title: shareText.value, text: shareText.value, url }); return }
+    if (navigator.share) {
+      await navigator.share({
+        title: shareText.value,
+        text: shareText.value,
+        url
+      })
+      return
+    }
   } catch {}
-  const w = window.open(twitterHref.value, '_blank', 'noopener,noreferrer')
-  if (!w) await copyLink()
+
+  const windowRef = window.open(twitterHref.value, '_blank', 'noopener,noreferrer')
+
+  if (!windowRef) {
+    await copyLink()
+  }
 }
 </script>
 
 <style scoped>
-.heroH { height: var(--hero-sm); }
-@media (min-width: 640px) {
-  .heroH { height: var(--hero-lg); }
+.heroH {
+  height: var(--hero-sm);
 }
 
+@media (min-width: 640px) {
+  .heroH {
+    height: var(--hero-lg);
+  }
+}
 
 .news-tiptap-content {
   color: rgb(31 41 55);
@@ -1240,7 +1672,6 @@ async function nativeShare(){
   background: white;
 }
 
-/* Dark mode */
 .dark .news-tiptap-content {
   color: rgb(245 245 245);
 }

@@ -278,37 +278,9 @@
       <main class="px-3 pb-28 pt-[92px] transition-all duration-300 lg:pl-[324px] lg:pr-4 lg:pb-4">
         <div class="mx-auto max-w-[1600px]">
           <div class="min-h-[calc(100vh-108px)] overflow-hidden rounded-4xl border border-white/80 bg-white/95 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.35)] backdrop-blur-xl dark:border-neutral-800 dark:bg-neutral-900/95">
-            <template v-if="!isProtectedRoute(route.path) || !aclReady || hasAccessTo(route.path)">
-              <div class="min-h-[calc(100vh-108px)]">
-                <slot />
-              </div>
-            </template>
-
-            <template v-else>
-              <div class="grid min-h-[calc(100vh-108px)] place-items-center p-8">
-                <div class="max-w-md text-center">
-                  <div class="mx-auto grid h-16 w-16 place-items-center rounded-[22px] bg-rose-100 text-rose-600 dark:bg-rose-900/20 dark:text-rose-300">
-                    <Icon icon="lucide:shield-alert" class="h-7 w-7" />
-                  </div>
-
-                  <h2 class="mt-4 text-xl font-black text-slate-900 dark:text-white">
-                    Akses Ditolak
-                  </h2>
-
-                  <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-neutral-400">
-                    Halaman ini tidak tersedia untuk akun wali yang sedang login.
-                  </p>
-
-                  <NuxtLink
-                    :to="firstAllowedPath || '/wali'"
-                    class="mt-5 inline-flex items-center gap-2 rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
-                  >
-                    <Icon icon="lucide:arrow-left" class="h-4 w-4" />
-                    Kembali ke Beranda Wali
-                  </NuxtLink>
-                </div>
-              </div>
-            </template>
+            <div class="min-h-[calc(100vh-108px)]">
+              <slot />
+            </div>
           </div>
         </div>
       </main>
@@ -493,8 +465,14 @@ const DEFAULT_WALI_ROUTES = [
   '/wali/pembayaran',
   '/wali/pengumuman',
   '/wali/akademik',
+  '/wali/absensi',
+  '/wali/hafalan',
   '/wali/perizinan',
   '/wali/kunjungan',
+  '/wali/jadwal',
+  '/wali/pelanggaran',
+  '/wali/book',
+  '/wali/contact',
   '/wali/profile',
   '/wali/setting'
 ]
@@ -505,8 +483,14 @@ const WALI_MENU: WaliMenuItem[] = [
   { label: 'Pembayaran', shortLabel: 'Bayar', href: '/wali/pembayaran', icon: 'akar-icons:money' },
   { label: 'Pengumuman', shortLabel: 'Info', href: '/wali/pengumuman', icon: 'lucide:megaphone' },
   { label: 'Akademik', shortLabel: 'Nilai', href: '/wali/akademik', icon: 'solar:chart-linear' },
+  { label: 'Absensi', shortLabel: 'Absen', href: '/wali/absensi', icon: 'hugeicons:note-03' },
+  { label: 'Hafalan', shortLabel: 'Hafalan', href: '/wali/hafalan', icon: 'ooui:italic-arab-keheh-jeem' },
   { label: 'Perizinan', shortLabel: 'Izin', href: '/wali/perizinan', icon: 'solar:letter-linear' },
   { label: 'Kunjungan', shortLabel: 'Visit', href: '/wali/kunjungan', icon: 'material-symbols:parent-child-dining-outline-rounded' },
+  { label: 'Jadwal', shortLabel: 'Jadwal', href: '/wali/jadwal', icon: 'solar:calendar-line-duotone' },
+  { label: 'Pelanggaran', shortLabel: 'Pelanggaran', href: '/wali/pelanggaran', icon: 'mingcute:fault-line' },
+  { label: 'Buku / Kitab', shortLabel: 'Kitab', href: '/wali/book', icon: 'ion:book-outline' },
+  { label: 'Kontak', shortLabel: 'Kontak', href: '/wali/contact', icon: 'hugeicons:contact-01' },
   { label: 'Profil', shortLabel: 'Profil', href: '/wali/profile', icon: 'lucide:user' },
   { label: 'Pengaturan', shortLabel: 'Setting', href: '/wali/setting', icon: 'lucide:settings-2' }
 ]
@@ -590,14 +574,11 @@ function uniq(items: string[]) {
 }
 
 const effectiveAllowedRoutes = computed(() => {
-  const raw = tokenUser.value?.allowedRoutes
-  const routes = Array.isArray(raw) ? uniq(raw.map(String)) : []
-
-  return routes.length ? routes : DEFAULT_WALI_ROUTES
+  return DEFAULT_WALI_ROUTES
 })
 
 const visibleMenu = computed(() => {
-  return WALI_MENU.filter((item) => isAllowed(item.href, effectiveAllowedRoutes.value))
+  return WALI_MENU
 })
 
 const bottomMenu = computed(() => {
@@ -644,7 +625,8 @@ const user = computed(() => ({
 }))
 
 function hasAccessTo(path: string) {
-  return isAllowed(path, effectiveAllowedRoutes.value)
+  // return isAllowed(path, effectiveAllowedRoutes.value)
+  return true
 }
 
 function isItemActive(currentPath: string, href: string) {
@@ -931,19 +913,11 @@ async function startAclWatcher(uidHint?: string | null) {
 
 function enforceRouteAccess(path: string) {
   if (!isProtectedRoute(path)) return
-  if (!aclReady.value) return
 
   if (!tokenUser.value) {
-    if (normalize(path) !== '/waliLogin') router.replace('/waliLogin')
-    return
-  }
-
-  if (hasAccessTo(path)) return
-
-  const fallback = firstAllowedPath.value || '/wali'
-
-  if (normalize(path) !== normalize(fallback)) {
-    router.replace(fallback)
+    if (normalize(path) !== '/waliLogin') {
+      router.replace('/waliLogin')
+    }
   }
 }
 
@@ -952,11 +926,6 @@ function handleNavClick(to: string, event: MouseEvent) {
   event.stopPropagation()
 
   if (!to || normalize(to) === normalize(route.path)) return
-
-  if (!hasAccessTo(to)) {
-    enforceRouteAccess(route.path)
-    return
-  }
 
   mobileMenuOpen.value = false
   accountOpen.value = false
@@ -1043,10 +1012,10 @@ onMounted(async () => {
     await nextTick()
 
     if (uid) {
-      await startAclWatcher(uid)
+      // await startAclWatcher(uid)
       await startProfileWatcher(uid)
-    } else {
-      applyAllowedRoutes(uid, tokenUser.value?.allowedRoutes || DEFAULT_WALI_ROUTES)
+    // } else {
+      // applyAllowedRoutes(uid, tokenUser.value?.allowedRoutes || DEFAULT_WALI_ROUTES)
     }
 
     if (['/', '/login', '/cakAdmin', '/waliLogin'].includes(normalize(route.path))) {
