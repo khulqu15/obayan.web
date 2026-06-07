@@ -13,7 +13,7 @@
           <h1 class="mt-5 text-3xl font-black leading-tight tracking-tight text-slate-950 dark:text-white sm:text-4xl lg:text-5xl">
             {{ headingMain }}
             <span class="text-green-600 dark:text-green-400">{{ headingHi1 }}</span>
-            <span class="text-green-600 dark:text-green-400"> {{ headingHi2 }}</span>
+            <span class="text-green-600 dark:text-green-400 ml-3">{{ headingHi2 }}</span>
           </h1>
 
           <p class="mt-4 max-w-2xl text-base leading-8 text-slate-600 dark:text-neutral-300">

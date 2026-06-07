@@ -1323,13 +1323,19 @@
               </p>
 
               <!-- Receipt compact fallback -->
-              <div v-if="ok && regInfo" class="mt-5 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 dark:border-green-900/40 dark:bg-green-900/10">
+              <div
+                v-if="ok && regInfo && ppdbUi.showRegistrationCard"
+                class="mt-5 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 dark:border-green-900/40 dark:bg-green-900/10"
+              >
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p class="text-sm font-black text-green-800 dark:text-green-200">
                       Pendaftaran berhasil.
                     </p>
-                    <p class="mt-1 text-sm leading-6 text-green-800 dark:text-green-200">
+                    <p
+                      v-if="ppdbUi.showRegistrationNumber"
+                      class="mt-1 text-sm leading-6 text-green-800 dark:text-green-200"
+                    >
                       Nomor Pendaftaran: <b>{{ regInfo.code }}</b>
                     </p>
                   </div>
@@ -1637,10 +1643,40 @@
                   </h3>
 
                   <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-neutral-400">
-                    Nomor pendaftaran Anda sudah dibuat. Silakan lanjut untuk melihat kartu pendaftaran sebagai bukti.
+                    Pendaftaran berhasil. Data Anda sudah dikirim ke panitia PPDB.
                   </p>
 
-                  <div class="mt-5 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 dark:border-green-900/40 dark:bg-green-900/10">
+                  <div
+                    v-if="ppdbUi.showSuccessContactInfo"
+                    class="mt-5 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 text-left dark:border-green-900/40 dark:bg-green-900/10"
+                  >
+                    <p class="text-sm font-black text-green-900 dark:text-green-100">
+                      {{ ppdbSuccessInfoText }}
+                    </p>
+
+                    <a
+                      v-if="waDigits"
+                      :href="waUrl"
+                      target="_blank"
+                      rel="noopener"
+                      class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 py-3 text-sm font-black text-white transition hover:bg-green-700"
+                    >
+                      <Icon icon="ph:whatsapp-logo" class="h-4 w-4" />
+                      {{ ppdbSuccessContactText }}
+                    </a>
+
+                    <p
+                      v-else
+                      class="mt-3 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-green-800 dark:bg-neutral-900 dark:text-green-200"
+                    >
+                      {{ ppdbSuccessContactText }}
+                    </p>
+                  </div>
+
+                  <div
+                    v-if="ppdbUi.showRegistrationNumber"
+                    class="mt-5 rounded-[1.5rem] border border-green-200 bg-green-50 p-4 dark:border-green-900/40 dark:bg-green-900/10"
+                  >
                     <p class="text-xs font-bold uppercase tracking-[0.14em] text-green-700 dark:text-green-300">
                       Nomor Pendaftaran
                     </p>
@@ -1650,12 +1686,23 @@
                   </div>
 
                   <button
+                    v-if="ppdbUi.showRegistrationCard"
                     type="button"
                     @click="openRegistrationCardModal"
                     class="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 text-sm font-black text-white transition hover:bg-green-700"
                   >
                     <Icon icon="lucide:id-card" class="h-4 w-4" />
                     Lanjut ke Kartu Pendaftaran
+                  </button>
+
+                  <button
+                    v-else
+                    type="button"
+                    @click="router.push('/')"
+                    class="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 text-sm font-black text-white transition hover:bg-green-700"
+                  >
+                    <Icon icon="lucide:check" class="h-4 w-4" />
+                    Selesai
                   </button>
                 </div>
               </div>
@@ -1668,7 +1715,7 @@
       <Teleport to="body">
         <Transition name="fade">
           <div
-            v-if="registrationCardOpen && regInfo && receipt"
+            v-if="registrationCardOpen && regInfo && receipt && ppdbUi.showRegistrationCard"
             class="fixed inset-0 z-[1002] overflow-y-auto px-4 py-6"
             role="dialog"
             aria-modal="true"
@@ -2016,6 +2063,35 @@ const clientName = String(config.public.clientName || 'alinayah')
 const siteUrl = String(config.public.siteUrl || config.public.siteURL || 'https://alinayah.sencra.io').replace(/\/$/, '')
 const appLogo = String(config.public.appLogo || '/assets/logo.png')
 const themeColor = String(config.public.appThemeColor || '#16a34a')
+
+const normalizedClientName = computed(() => clientName.trim().toLowerCase())
+
+const ppdbClientLabel = computed(() => {
+  return String(
+    config.public.clientDisplayName ||
+    registrationConfig.value.institutionShortName ||
+    registrationConfig.value.institutionName ||
+    clientName
+  ).trim()
+})
+
+const ppdbUi = computed(() => {
+  const isAlinayah = normalizedClientName.value === 'alinayah'
+
+  return {
+    showRegistrationNumber: !isAlinayah,
+    showRegistrationCard: !isAlinayah,
+    showSuccessContactInfo: true
+  }
+})
+
+const ppdbSuccessInfoText = computed(() => {
+  return `Hubungi Panitia PPDB ${ppdbClientLabel.value} untuk informasi lebih lanjut.`
+})
+
+const ppdbSuccessContactText = computed(() => {
+  return waText.value && waText.value !== '-' ? waText.value : 'Kontak panitia belum tersedia.'
+})
 
 const { uploadImage, uploading: cloudUploading } = useCloudinaryUpload()
 
@@ -4024,6 +4100,12 @@ async function confirmSubmitFromModal() {
 
 function openRegistrationCardModal() {
   submitSuccessOpen.value = false
+
+  if (!ppdbUi.value.showRegistrationCard) {
+    registrationCardOpen.value = false
+    return
+  }
+
   registrationCardOpen.value = true
 }
 
@@ -4408,7 +4490,9 @@ async function submit() {
     })
 
     ok.value = true
-    feedback.value = 'Pendaftaran terkirim. Nomor pendaftaran dan kredensial sementara telah dibuat.'
+    feedback.value = ppdbUi.value.showRegistrationNumber
+      ? 'Pendaftaran berhasil. Nomor pendaftaran dan kredensial sementara telah dibuat.'
+      : 'Pendaftaran berhasil. Hubungi panitia PPDB untuk informasi lebih lanjut.'
     regInfo.value = { id: regId, code }
     receipt.value = { username, publicToken }
     submittedAtText.value = formatDateTimeID(new Date())

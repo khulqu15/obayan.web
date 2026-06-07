@@ -10,11 +10,11 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, nextTick, watch, onBeforeUnmount } from 'vue'
+import { computed, onMounted, ref, nextTick, watch, onBeforeUnmount } from 'vue'
 import { useSettings } from '~/composables/data/useSettings'
 import { ref as dbRef, onValue, off } from 'firebase/database'
 import { useRoute } from 'vue-router'
-import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
+import { useNuxtApp, useRuntimeConfig, useHead } from 'nuxt/app'
 
 const maintenance = ref(false)
 const page = useRoute()
@@ -23,24 +23,129 @@ const forced = ref(false)
 const config = useRuntimeConfig()
 const clientName = config.public.clientName || 'alinayah'
 
+const faviconUrl = computed(() => {
+  return String(
+    config.public.appLogo ||
+      config.public.appFavicon ||
+      config.public.favicon ||
+      '/assets/logo.png'
+  )
+})
+
+const appTitle = computed(() => {
+  return String(
+    config.public.clientDisplayName ||
+      config.public.siteName ||
+      config.public.appName ||
+      config.public.clientName ||
+      clientName ||
+      'Aplikasi'
+  )
+})
+
+useHead(() => ({
+  link: [
+    {
+      key: 'app-favicon',
+      rel: 'icon',
+      type: 'image/png',
+      href: faviconUrl.value
+    },
+    {
+      key: 'app-shortcut-icon',
+      rel: 'shortcut icon',
+      type: 'image/png',
+      href: faviconUrl.value
+    },
+    {
+      key: 'app-apple-touch-icon',
+      rel: 'apple-touch-icon',
+      href: faviconUrl.value
+    }
+  ],
+  meta: [
+    {
+      key: 'application-name',
+      name: 'application-name',
+      content: appTitle.value
+    },
+    {
+      key: 'apple-mobile-web-app-title',
+      name: 'apple-mobile-web-app-title',
+      content: appTitle.value
+    }
+  ]
+}))
+
+function forceFavicon() {
+  if (typeof document === 'undefined') return
+
+  const href = faviconUrl.value
+
+  const rels = [
+    'icon',
+    'shortcut icon',
+    'apple-touch-icon',
+    'mask-icon'
+  ]
+
+  document
+    .querySelectorAll(
+      [
+        'link[rel="icon"]',
+        'link[rel="shortcut icon"]',
+        'link[rel="apple-touch-icon"]',
+        'link[rel="mask-icon"]'
+      ].join(',')
+    )
+    .forEach((el) => el.remove())
+
+  rels.forEach((rel) => {
+    const link = document.createElement('link')
+    link.rel = rel
+    link.href = href
+
+    if (rel === 'icon' || rel === 'shortcut icon') {
+      link.type = 'image/png'
+    }
+
+    link.setAttribute('data-forced-favicon', 'true')
+    document.head.appendChild(link)
+  })
+}
+
 const { settings, load } = useSettings(`${clientName}/settings`)
+
 function hexToRgbStr(hex: string) {
-  let c = (hex || '').replace('#',''); if (!c) return '37,99,235'
-  if (c.length === 3) c = c.split('').map(h => h+h).join('')
-  const r = parseInt(c.slice(0,2),16), g = parseInt(c.slice(2,4),16), b = parseInt(c.slice(4,6),16)
+  let c = (hex || '').replace('#', '')
+  if (!c) return '37,99,235'
+  if (c.length === 3) c = c.split('').map(h => h + h).join('')
+
+  const r = parseInt(c.slice(0, 2), 16)
+  const g = parseInt(c.slice(2, 4), 16)
+  const b = parseInt(c.slice(4, 6), 16)
+
   return `${r}, ${g}, ${b}`
 }
+
 function getContrastYIQ(hex: string) {
-  const c = (hex || '').replace('#','') || '2563eb'
-  const r = parseInt(c.slice(0,2),16), g = parseInt(c.slice(2,4),16), b = parseInt(c.slice(4,6),16)
-  const yiq = (r*299 + g*587 + b*114)/1000
+  const c = (hex || '').replace('#', '') || '2563eb'
+
+  const r = parseInt(c.slice(0, 2), 16)
+  const g = parseInt(c.slice(2, 4), 16)
+  const b = parseInt(c.slice(4, 6), 16)
+
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000
+
   return yiq >= 128 ? '#000' : '#fff'
 }
 
 function applyPrimary(hex?: string) {
   if (typeof document === 'undefined') return
+
   const root = document.documentElement
   const h = hex || '#2563eb'
+
   root.style.setProperty('--app-primary', h)
   root.style.setProperty('--app-primary-rgb', hexToRgbStr(h))
   root.style.setProperty('--auto-text-on-primary', getContrastYIQ(h))
@@ -48,46 +153,69 @@ function applyPrimary(hex?: string) {
 
 function applySecondary(hex?: string) {
   if (typeof document === 'undefined') return
+
   const root = document.documentElement
   const h = hex || '#10b981'
+
   root.style.setProperty('--app-secondary', h)
   root.style.setProperty('--app-secondary-rgb', hexToRgbStr(h))
   root.style.setProperty('--auto-text-on-secondary', getContrastYIQ(h))
 }
 
-function applyTheme(theme?: 'light'|'dark'|'system') {
+function applyTheme(theme?: 'light' | 'dark' | 'system') {
   if (typeof document === 'undefined') return
+
   const root = document.documentElement
-  const setDark = (d: boolean) => d ? root.classList.add('dark') : root.classList.remove('dark')
+  const setDark = (d: boolean) => {
+    if (d) root.classList.add('dark')
+    else root.classList.remove('dark')
+  }
+
   if (theme === 'dark') setDark(true)
   else if (theme === 'light') setDark(false)
   else {
-    const mq = typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)')
+    const mq =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-color-scheme: dark)')
+
     setDark(!!mq && mq.matches)
   }
 }
 
 function applyFontScale(scale?: number) {
   if (typeof document === 'undefined') return
+
   const s = Number(scale || 1)
+
   document.documentElement.style.setProperty('--app-font-scale', String(s))
   document.documentElement.style.setProperty('font-size', `${(16 * s).toFixed(2)}px`)
 }
 
-function applyDensity(density?: 'comfortable'|'compact') {
+function applyDensity(density?: 'comfortable' | 'compact') {
   if (typeof document === 'undefined') return
-  document.documentElement.setAttribute('data-density', density === 'comfortable' ? 'comfortable' : 'compact')
+
+  document.documentElement.setAttribute(
+    'data-density',
+    density === 'comfortable' ? 'comfortable' : 'compact'
+  )
 }
 
 let rtdbRef: ReturnType<typeof dbRef> | null = null
+
 const cb = (snap: any) => {
   const v = snap?.val?.() ?? snap?.val?.call?.(snap) ?? snap?.val?.()
   const s = v || {}
-  if(s.maintenance != null || s.maintenance != undefined) {
+
+  if (s.maintenance != null || s.maintenance != undefined) {
     maintenance.value = s.maintenance
-    if(s.maintenance) document.querySelector('html')?.classList.add('overflow-hidden')
-    else document.querySelector('html')?.classList.remove('overflow-hidden')
+
+    if (s.maintenance) {
+      document.querySelector('html')?.classList.add('overflow-hidden')
+    } else {
+      document.querySelector('html')?.classList.remove('overflow-hidden')
+    }
   }
+
   applyPrimary(s.primaryColor)
   applySecondary(s.secondaryColor)
   applyTheme(s.theme)
@@ -95,22 +223,46 @@ const cb = (snap: any) => {
   applyDensity(s.density)
 }
 
-onMounted(() => {
+onMounted(async () => {
   console.log(config.public.clientName)
+
+  forceFavicon()
+
   applyPrimary('#2563eb')
   applySecondary('#10b981')
   applyTheme('system')
   applyFontScale(1)
   applyDensity('comfortable')
+
   const { $realtimeDb } = useNuxtApp() as any
+
   rtdbRef = dbRef($realtimeDb, `${clientName}/settings`)
   onValue(rtdbRef, cb, (err) => console.error('RTDB settings error:', err))
 })
 
+watch(
+  () => page.fullPath,
+  async () => {
+    await nextTick()
+    forceFavicon()
+
+    window.setTimeout(() => {
+      forceFavicon()
+    }, 100)
+  }
+)
+
+watch(
+  faviconUrl,
+  async () => {
+    await nextTick()
+    forceFavicon()
+  }
+)
+
 onBeforeUnmount(() => {
   if (rtdbRef) off(rtdbRef, 'value', cb)
 })
-
 </script>
 
 <style>

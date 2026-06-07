@@ -1,3 +1,5 @@
+<!-- /pages/app/santri.vue -->
+
 <template>
   <section class="space-y-6 p-4 md:p-6">
     <!-- Hero -->
@@ -202,7 +204,7 @@
       <div class="rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <div class="flex flex-col gap-3 border-b border-gray-100 p-4 dark:border-neutral-800 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 class="text-base font-bold text-gray-900 dark:text-white">Daftar Santri Lama</h2>
+            <h2 class="text-base font-bold text-gray-900 dark:text-white">Daftar Santri</h2>
             <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
               Menampilkan {{ paginatedRows.length }} dari {{ filteredLamaRows.length }} data.
             </p>
@@ -1075,10 +1077,35 @@ function isCalonThisYear(row: SantriRow): boolean {
   const data = row as Record<string, unknown>
   const year = extractYear(row)
   const yearMatch = year === currentYear
-  const hasPpdb = 'ppdbCode' in data || 'ppdb' in data || ('username' in data && 'publicToken' in data)
-  const looksNew = row.status === 'nonaktif' && (!row.kamar || row.kamar === '-')
 
-  return yearMatch && (hasPpdb || looksNew)
+  const status = String(row.status || '').trim().toLowerCase()
+  const ppdbStatus = String((data.ppdbStatus || data.registrationStatus || '') as string)
+    .trim()
+    .toLowerCase()
+
+  const hasPpdb =
+    'ppdbCode' in data ||
+    'ppdb' in data ||
+    ('username' in data && 'publicToken' in data)
+
+  const isPendingStatus =
+    status === 'nonaktif' ||
+    status === 'calon' ||
+    status === 'pending' ||
+    status === 'menunggu' ||
+    ppdbStatus === 'candidate' ||
+    ppdbStatus === 'pending'
+
+  const isAcceptedStatus =
+    status === 'aktif' ||
+    ppdbStatus === 'accepted' ||
+    ppdbStatus === 'diterima'
+
+  const looksNew = isPendingStatus && (!row.kamar || row.kamar === '-')
+
+  if (isAcceptedStatus) return false
+
+  return yearMatch && isPendingStatus && (hasPpdb || looksNew)
 }
 
 const rowsLama = computed(() => {

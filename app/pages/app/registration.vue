@@ -1,170 +1,181 @@
 <!-- pages/app/registration.vue -->
 <template>
-  <div class="min-h-full bg-transparent text-gray-800 dark:text-neutral-200">
-    <div class="mx-auto max-w-[1720px] space-y-6 p-5 md:p-8 xl:p-10">
+  <div class="min-h-full bg-slate-50 text-slate-800 dark:bg-neutral-950 dark:text-neutral-100">
+    <div class="mx-auto max-w-[1720px] space-y-5 p-4 sm:p-6 lg:p-8">
       <!-- HERO -->
-      <section class="relative overflow-hidden rounded-[32px] border border-green-100 bg-gradient-to-br from-green-600 via-green-600 to-lime-500 p-5 text-white shadow-[0_24px_60px_-18px_rgba(22,163,74,0.35)] md:p-8">
-        <div class="absolute inset-0 opacity-20">
-          <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white blur-3xl"></div>
-          <div class="absolute bottom-0 left-8 h-32 w-32 rounded-full bg-lime-100 blur-3xl"></div>
-        </div>
+      <section class="relative overflow-hidden rounded-[32px] border border-green-100 bg-white p-5 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.35)] dark:border-neutral-800 dark:bg-neutral-900 md:p-8">
+        <div class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-green-200/60 blur-3xl dark:bg-green-900/20"></div>
+        <div class="pointer-events-none absolute -bottom-28 left-12 h-72 w-72 rounded-full bg-green-100/80 blur-3xl dark:bg-green-900/10"></div>
+        <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-500 via-green-500 to-green-400"></div>
 
-        <div class="relative z-10 grid gap-5 xl:grid-cols-[1.2fr,0.8fr] xl:items-end">
-          <div>
-            <div class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold ring-1 ring-white/20">
-              <span class="inline-block h-2 w-2 rounded-full bg-lime-300"></span>
-              PPDB Workspace • Semua Tahun
+        <div class="relative z-10 flex flex-col gap-6">
+          <div class="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+            <div class="max-w-3xl">
+              <div class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-black text-green-700 dark:border-green-900/50 dark:bg-green-900/20 dark:text-green-300">
+                <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                PPDB Registration Workspace
+              </div>
+
+              <h1 class="mt-4 text-2xl font-black tracking-tight text-slate-950 dark:text-white md:text-4xl">
+                Manajemen Pendaftaran PPDB
+              </h1>
+              <p class="mt-3 max-w-2xl text-sm leading-6 text-gray-500 dark:text-neutral-400 md:text-base">
+                Pantau data registrasi PPDB, verifikasi pendaftar, lihat detail formulir, kelola dokumen, dan export data dalam satu workspace yang clean dan responsif.
+              </p>
+
             </div>
 
-            <h1 class="mt-4 text-2xl font-black tracking-tight md:text-4xl">
-              Manajemen Pendaftaran Santri
-            </h1>
+            <div>
+              <div class="flex flex-wrap gap-2">
+                <NuxtLink
+                  to="/registration"
+                  target="_blank"
+                  class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                >
+                  <ClientOnly>
+                    <Icon icon="lucide:external-link" class="h-4 w-4" />
+                  </ClientOnly>
+                  Buka Form
+                </NuxtLink>
+  
+                <button
+                  type="button"
+                  @click="copy(formUrl)"
+                  class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-sm font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
+                >
+                  <ClientOnly>
+                    <Icon icon="lucide:copy" class="h-4 w-4" />
+                  </ClientOnly>
+                  Salin Link
+                </button>
+              </div>
+              <article
+                v-for="stat in registrationStats"
+                :key="stat.label"
+                class="rounded-[24px] mt-3 border border-slate-200 bg-slate-50 p-4 dark:border-neutral-800 dark:bg-neutral-950/50"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-neutral-500">
+                      {{ stat.label }}
+                    </p>
+                    <p class="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+                      {{ stat.value }}
+                    </p>
+                  </div>
 
-            <p class="mt-3 max-w-2xl text-sm leading-6 text-green-50/95 md:text-base">
-              Kelola calon santri putra dan putri, pantau status berkas, lihat detail formulir lengkap, terima pendaftar, dan ekspor data administrasi PPDB.
-            </p>
-
-            <div class="mt-5 flex flex-wrap gap-2">
-              <span class="rounded-full bg-white/12 px-3 py-1.5 text-[11px] font-semibold ring-1 ring-white/15">Detail form lengkap</span>
-              <span class="rounded-full bg-white/12 px-3 py-1.5 text-[11px] font-semibold ring-1 ring-white/15">Dokumen preview</span>
-              <span class="rounded-full bg-white/12 px-3 py-1.5 text-[11px] font-semibold ring-1 ring-white/15">Export CSV</span>
-              <span class="rounded-full bg-white/12 px-3 py-1.5 text-[11px] font-semibold ring-1 ring-white/15">Export Excel</span>
+                  <div
+                    class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl"
+                    :class="stat.tone === 'dark'
+                      ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950'
+                      : stat.tone === 'green'
+                        ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
+                        : stat.tone === 'amber'
+                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'
+                          : 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'"
+                  >
+                    <ClientOnly>
+                      <Icon :icon="stat.icon" class="h-5 w-5" />
+                    </ClientOnly>
+                  </div>
+                </div>
+                <p class="mt-3 text-xs font-semibold leading-5 text-slate-500 dark:text-neutral-400">
+                  {{ stat.description }}
+                </p>
+              </article>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-            <div class="rounded-[24px] bg-white/12 p-4 ring-1 ring-white/15 backdrop-blur">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-green-100">Total Data</div>
-              <div class="mt-2 text-2xl font-black">{{ adminRows.length }}</div>
-              <div class="mt-1 text-xs text-green-50/90">semua pendaftar</div>
-            </div>
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
 
-            <div class="rounded-[24px] bg-white/12 p-4 ring-1 ring-white/15 backdrop-blur">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-green-100">Calon</div>
-              <div class="mt-2 text-2xl font-black">{{ totalCalon }}</div>
-              <div class="mt-1 text-xs text-green-50/90">menunggu verifikasi</div>
-            </div>
-
-            <div class="rounded-[24px] bg-white/12 p-4 ring-1 ring-white/15 backdrop-blur">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-green-100">Diterima</div>
-              <div class="mt-2 text-2xl font-black">{{ totalDiterima }}</div>
-              <div class="mt-1 text-xs text-green-50/90">sudah menjadi santri baru</div>
-            </div>
           </div>
         </div>
       </section>
 
-      <!-- WORKSPACE ACTION - NOT STICKY -->
-      <section class="rounded-[28px] border border-gray-200/80 bg-white/92 p-4 shadow-sm backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/92">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <!-- WORKSPACE ACTION -->
+      <section class="rounded-[30px] border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 sm:p-5">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <h2 class="text-base font-bold text-gray-900 dark:text-white">Workspace Aksi</h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">
-              Kontrol status pendaftaran, filter, pencarian, serta export data.
+            <h2 class="text-lg font-black text-slate-950 dark:text-white">
+              Workspace Aksi
+            </h2>
+            <p class="mt-1 text-sm leading-6 text-slate-500 dark:text-neutral-400">
+              Filter data registrasi, export, dan kontrol buka/tutup PPDB.
             </p>
           </div>
 
-          <div class="relative flex items-center justify-end">
+          <div class="flex flex-wrap gap-2">
             <button
               type="button"
-              @click="workspaceMenuOpen = !workspaceMenuOpen"
-              class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/20 bg-white/15 text-white transition hover:bg-white/25 lg:border-gray-200 lg:bg-white lg:text-gray-700 lg:hover:bg-gray-50 dark:lg:border-neutral-700 dark:lg:bg-neutral-900 dark:lg:text-neutral-200 dark:lg:hover:bg-neutral-800"
-              aria-label="Menu workspace"
+              @click="copy(formUrl)"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
             >
               <ClientOnly>
-                <Icon icon="lucide:ellipsis" class="h-5 w-5" />
+                <Icon icon="lucide:copy" class="h-4 w-4" />
               </ClientOnly>
+              Salin Link
             </button>
 
-            <Transition
-              enter-active-class="transition duration-150 ease-out"
-              enter-from-class="opacity-0 scale-95 translate-y-1"
-              enter-to-class="opacity-100 scale-100 translate-y-0"
-              leave-active-class="transition duration-100 ease-in"
-              leave-from-class="opacity-100 scale-100 translate-y-0"
-              leave-to-class="opacity-0 scale-95 translate-y-1"
+            <button
+              type="button"
+              :disabled="exportBusy || !activeModeRows.length"
+              @click="exportRows(activeModeRows, 'ppdb_semua_data', 'csv')"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
             >
-              <div
-                v-if="workspaceMenuOpen"
-                class="absolute right-0 top-13 z-30 w-72 overflow-hidden rounded-[24px] border border-gray-200 bg-white p-2 shadow-xl shadow-gray-900/10 dark:border-neutral-800 dark:bg-neutral-900"
-              >
-                <NuxtLink
-                  to="/registration"
-                  target="_blank"
-                  class="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                  @click="workspaceMenuOpen = false"
-                >
-                  <ClientOnly><Icon icon="lucide:external-link" class="h-4 w-4 text-green-600" /></ClientOnly>
-                  Buka Form
-                </NuxtLink>
+              <ClientOnly>
+                <Icon icon="lucide:file-down" class="h-4 w-4" />
+              </ClientOnly>
+              CSV
+            </button>
 
-                <button
-                  type="button"
-                  @click="copy(formUrl); workspaceMenuOpen = false"
-                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                >
-                  <ClientOnly><Icon icon="lucide:copy" class="h-4 w-4 text-green-600" /></ClientOnly>
-                  Salin Link Form
-                </button>
+            <button
+              type="button"
+              :disabled="exportBusy || !activeModeRows.length"
+              @click="exportRows(activeModeRows, 'ppdb_semua_data', 'excel')"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-green-200 bg-green-50 px-4 text-sm font-black text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-green-900/40 dark:bg-green-900/10 dark:text-green-300"
+            >
+              <ClientOnly>
+                <Icon icon="lucide:sheet" class="h-4 w-4" />
+              </ClientOnly>
+              Excel
+            </button>
 
-                <div class="my-1 h-px bg-gray-100 dark:bg-neutral-800"></div>
+            <button
+              v-if="!isOpen"
+              type="button"
+              @click="saveSettings({ isClosed: false })"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-sm font-black text-white transition hover:bg-green-700"
+            >
+              <ClientOnly>
+                <Icon icon="ph:door-open" class="h-4 w-4" />
+              </ClientOnly>
+              Buka PPDB
+            </button>
 
-                <button
-                  type="button"
-                  :disabled="exportBusy"
-                  @click="exportRows(activeModeRows, `ppdb_semua_data`, 'csv'); workspaceMenuOpen = false"
-                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                >
-                  <ClientOnly><Icon icon="lucide:file-down" class="h-4 w-4 text-green-600" /></ClientOnly>
-                  Export CSV
-                </button>
-
-                <button
-                  type="button"
-                  :disabled="exportBusy"
-                  @click="exportRows(activeModeRows, `ppdb_semua_data`, 'excel'); workspaceMenuOpen = false"
-                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                >
-                  <ClientOnly><Icon icon="lucide:sheet" class="h-4 w-4 text-green-600" /></ClientOnly>
-                  Export Excel
-                </button>
-
-                <div class="my-1 h-px bg-gray-100 dark:bg-neutral-800"></div>
-
-                <button
-                  v-if="!isOpen"
-                  type="button"
-                  @click="saveSettings({ isClosed: false }); workspaceMenuOpen = false"
-                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-semibold text-green-700 transition hover:bg-green-50 dark:text-green-300 dark:hover:bg-green-900/10"
-                >
-                  <ClientOnly><Icon icon="ph:door-open" class="h-4 w-4" /></ClientOnly>
-                  Buka PPDB
-                </button>
-
-                <button
-                  v-else
-                  type="button"
-                  @click="saveSettings({ isClosed: true }); workspaceMenuOpen = false"
-                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-semibold text-rose-700 transition hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-900/10"
-                >
-                  <ClientOnly><Icon icon="ph:door" class="h-4 w-4" /></ClientOnly>
-                  Tutup PPDB
-                </button>
-              </div>
-            </Transition>
+            <button
+              v-else
+              type="button"
+              @click="saveSettings({ isClosed: true })"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-rose-600 px-4 text-sm font-black text-white transition hover:bg-rose-700"
+            >
+              <ClientOnly>
+                <Icon icon="ph:door" class="h-4 w-4" />
+              </ClientOnly>
+              Tutup PPDB
+            </button>
           </div>
         </div>
 
-        <div class="mt-4 grid gap-3 xl:grid-cols-[auto,1fr]">
-          <div v-if="!usingCustomForm" class="grid gap-3 sm:grid-cols-2">
-            <div class="grid grid-cols-2 gap-2 rounded-2xl border border-gray-200 bg-gray-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
+        <div class="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center">
+          <div v-if="!usingCustomForm" class="flex flex-col gap-3 sm:flex-row lg:w-auto">
+            <div class="grid min-w-full grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1 dark:border-neutral-700 dark:bg-neutral-800 sm:min-w-[220px]">
               <button
                 type="button"
                 @click="ppdbMode = 'putra'"
                 class="rounded-xl px-3 py-2 text-sm font-black transition"
                 :class="ppdbMode === 'putra'
-                  ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-200'
-                  : 'text-gray-500 dark:text-neutral-300'"
+                  ? 'bg-white text-slate-950 shadow-sm dark:bg-neutral-200'
+                  : 'text-slate-500 dark:text-neutral-300'"
               >
                 Putra
               </button>
@@ -174,25 +185,27 @@
                 @click="ppdbMode = 'putri'"
                 class="rounded-xl px-3 py-2 text-sm font-black transition"
                 :class="ppdbMode === 'putri'
-                  ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-200'
-                  : 'text-gray-500 dark:text-neutral-300'"
+                  ? 'bg-white text-slate-950 shadow-sm dark:bg-neutral-200'
+                  : 'text-slate-500 dark:text-neutral-300'"
               >
                 Putri
               </button>
             </div>
 
-            <select v-if="!usingCustomForm"
+            <select
               v-model="filters.jenjang"
-              class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+              class="h-12 min-w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-black text-slate-700 outline-none transition focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white sm:min-w-[190px]"
             >
               <option value="semua">Semua Jenjang</option>
-              <option v-for="j in jenjangOptions" :key="j" :value="j">{{ j }}</option>
+              <option v-for="j in jenjangOptions" :key="j" :value="j">
+                {{ j }}
+              </option>
             </select>
           </div>
 
-          <div class="relative xl:col-span-2">
+          <div class="relative min-w-0 flex-1">
             <ClientOnly>
-              <Icon icon="lucide:search" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Icon icon="lucide:search" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             </ClientOnly>
 
             <input
@@ -201,48 +214,52 @@
               :placeholder="usingCustomForm
                 ? 'Cari data pendaftaran, kode, atau isi form custom...'
                 : 'Cari nama, NIK, alamat, ayah, ibu, no HP, kode pendaftaran...'"
-              class="block w-full rounded-2xl border border-gray-200 bg-gray-50 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+              class="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:focus:bg-neutral-900"
             />
           </div>
         </div>
 
-        <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
           <span
-            class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-semibold"
+            class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 font-black"
             :class="isOpen
               ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
               : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'"
           >
-            <ClientOnly><Icon :icon="isOpen ? 'ph:lock-open' : 'ph:lock'" class="h-3.5 w-3.5" /></ClientOnly>
+            <ClientOnly>
+              <Icon :icon="isOpen ? 'ph:lock-open' : 'ph:lock'" class="h-3.5 w-3.5" />
+            </ClientOnly>
             {{ isOpen ? 'Pendaftaran dibuka' : 'Pendaftaran ditutup' }}
           </span>
 
           <span
             v-if="autoBadge"
-            class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
+            class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1.5 font-black text-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
           >
-            <ClientOnly><Icon icon="lucide:clock" class="h-3.5 w-3.5" /></ClientOnly>
+            <ClientOnly>
+              <Icon icon="lucide:clock" class="h-3.5 w-3.5" />
+            </ClientOnly>
             {{ autoBadge }}
           </span>
 
-          <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 font-semibold text-gray-600 dark:bg-neutral-800 dark:text-neutral-300">
-            <ClientOnly><Icon icon="lucide:filter" class="h-3.5 w-3.5" /></ClientOnly>
-            {{ activeModeRows.length }} data tampil dari {{ adminRows.length }} total
-          </span>
-
-          <span v-if="exportBusy" class="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 font-semibold text-green-700 dark:bg-green-900/20 dark:text-green-300">
-            <ClientOnly><Icon icon="mingcute:loading-fill" class="h-3.5 w-3.5 animate-spin" /></ClientOnly>
+          <span
+            v-if="exportBusy"
+            class="inline-flex items-center gap-1 rounded-full bg-green-50 px-3 py-1.5 font-black text-green-700 dark:bg-green-900/20 dark:text-green-300"
+          >
+            <ClientOnly>
+              <Icon icon="mingcute:loading-fill" class="h-3.5 w-3.5 animate-spin" />
+            </ClientOnly>
             Menyiapkan export...
           </span>
         </div>
 
         <div
           v-if="settings.autoCloseEnabled"
-          class="mt-4 grid gap-3 rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/60 lg:grid-cols-[1fr,auto]"
+          class="mt-4 grid gap-3 rounded-[24px] border border-slate-200 bg-slate-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/60 lg:grid-cols-[1fr,auto]"
         >
-          <div  class="grid gap-3 sm:grid-cols-2">
+          <div class="grid gap-3 sm:grid-cols-2">
             <div>
-              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">
+              <label class="mb-1.5 block text-xs font-black uppercase tracking-[0.16em] text-slate-400 dark:text-neutral-500">
                 Jadwal Tutup Otomatis
               </label>
 
@@ -250,38 +267,65 @@
                 type="datetime-local"
                 :value="autoCloseLocal"
                 @change="onAutoCloseChange(($event.target as HTMLInputElement).value)"
-                class="block w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-green-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
+                class="block h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-green-500 focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"
               />
             </div>
 
             <div>
-              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">
+              <label class="mb-1.5 block text-xs font-black uppercase tracking-[0.16em] text-slate-400 dark:text-neutral-500">
                 Sisa Waktu
               </label>
 
-              <div class="rounded-2xl bg-white px-4 py-3 text-sm font-black dark:bg-neutral-900" :class="countdownClass">
+              <div class="flex h-12 items-center rounded-2xl bg-white px-4 text-sm font-black dark:bg-neutral-900" :class="countdownClass">
                 {{ countdownText }}
               </div>
             </div>
           </div>
 
           <div class="flex flex-wrap items-end gap-2">
-            <button @click="pickTonight" class="rounded-2xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800">23:59</button>
-            <button @click="pickInDays(3)" class="rounded-2xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800">+3 hari</button>
-            <button @click="pickInDays(7)" class="rounded-2xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800">+7 hari</button>
-            <button @click="clearSchedule" class="rounded-2xl border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10">Hapus</button>
+            <button
+              type="button"
+              @click="pickTonight"
+              class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            >
+              23:59
+            </button>
+
+            <button
+              type="button"
+              @click="pickInDays(3)"
+              class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            >
+              +3 hari
+            </button>
+
+            <button
+              type="button"
+              @click="pickInDays(7)"
+              class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            >
+              +7 hari
+            </button>
+
+            <button
+              type="button"
+              @click="clearSchedule"
+              class="rounded-2xl border border-rose-200 bg-white px-3 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-50 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10"
+            >
+              Hapus
+            </button>
           </div>
         </div>
 
         <div class="mt-4">
-          <div class="inline-flex rounded-2xl border border-gray-200 bg-gray-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
+          <div class="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1 dark:border-neutral-700 dark:bg-neutral-800">
             <button
               type="button"
               @click="saveSettings({ autoCloseEnabled: false })"
               class="rounded-xl px-4 py-2 text-sm font-black transition"
               :class="!settings.autoCloseEnabled
-                ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-200'
-                : 'text-gray-500 dark:text-neutral-300'"
+                ? 'bg-white text-slate-950 shadow-sm dark:bg-neutral-200'
+                : 'text-slate-500 dark:text-neutral-300'"
             >
               Manual
             </button>
@@ -291,8 +335,8 @@
               @click="saveSettings({ autoCloseEnabled: true })"
               class="rounded-xl px-4 py-2 text-sm font-black transition"
               :class="settings.autoCloseEnabled
-                ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-200'
-                : 'text-gray-500 dark:text-neutral-300'"
+                ? 'bg-white text-slate-950 shadow-sm dark:bg-neutral-200'
+                : 'text-slate-500 dark:text-neutral-300'"
             >
               Otomatis
             </button>
@@ -304,36 +348,38 @@
       <section
         v-for="group in tableGroups"
         :key="group.key"
-        class="rounded-[30px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+        class="rounded-[30px] border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 sm:p-5"
       >
-        <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div class="flex items-center gap-2">
-              <div
-                class="grid h-10 w-10 place-items-center rounded-2xl"
-                :class="group.tone === 'candidate'
-                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'
-                  : 'bg-green-600 text-white dark:bg-green-900/20'"
-              >
-                <ClientOnly>
-                  <Icon :icon="group.tone === 'candidate' ? 'lucide:user-clock' : 'lucide:badge-check'" class="h-5 w-5" />
-                </ClientOnly>
-              </div>
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div class="flex items-start gap-3">
+            <div
+              class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl"
+              :class="group.tone === 'candidate'
+                ? 'bg-lime-50 text-lime-700 dark:bg-lime-900/20 dark:text-lime-300'
+                : 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'"
+            >
+              <ClientOnly>
+                <Icon :icon="group.tone === 'candidate' ? 'duo-icons:user' : 'lucide:badge-check'" class="h-5 w-5" />
+              </ClientOnly>
+            </div>
 
-              <div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ group.title }}</h3>
-                <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">{{ group.subtitle }}</p>
-              </div>
+            <div>
+              <h3 class="text-lg font-black text-slate-950 dark:text-white">
+                {{ group.title }}
+              </h3>
+              <p class="mt-1 text-sm leading-6 text-slate-500 dark:text-neutral-400">
+                {{ group.subtitle }}
+              </p>
             </div>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
             <label
-              class="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              class="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
             >
               <input
                 type="checkbox"
-                class="h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-900"
+                class="h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-900"
                 :checked="isGroupFullySelected(group.rows)"
                 :indeterminate.prop="isGroupPartiallySelected(group.rows)"
                 :disabled="!group.rows.length"
@@ -346,9 +392,11 @@
               type="button"
               :disabled="!selectedCountInGroup(group.rows) || bulkDeleting"
               @click="openBulkDeleteSelected(group.rows)"
-              class="inline-flex items-center justify-center rounded-2xl border border-rose-200 bg-white px-4 py-2.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 disabled:opacity-60 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10"
+              class="inline-flex items-center justify-center rounded-2xl border border-rose-200 bg-white px-4 py-2.5 text-xs font-black text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-900/40 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10"
             >
-              <ClientOnly><Icon icon="lucide:trash-2" class="mr-2 h-4 w-4" /></ClientOnly>
+              <ClientOnly>
+                <Icon icon="lucide:trash-2" class="mr-2 h-4 w-4" />
+              </ClientOnly>
               Hapus Terpilih ({{ selectedCountInGroup(group.rows) }})
             </button>
 
@@ -356,42 +404,55 @@
               type="button"
               :disabled="!group.rows.length || bulkDeleting"
               @click="openBulkDeleteGroup(group)"
-              class="inline-flex items-center justify-center rounded-2xl bg-rose-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-rose-700 disabled:opacity-60"
+              class="inline-flex items-center justify-center rounded-2xl bg-rose-600 px-4 py-2.5 text-xs font-black text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <ClientOnly><Icon icon="lucide:trash" class="mr-2 h-4 w-4" /></ClientOnly>
+              <ClientOnly>
+                <Icon icon="lucide:trash" class="mr-2 h-4 w-4" />
+              </ClientOnly>
               Hapus Semua
             </button>
+
             <button
+              v-if="shouldShowBulkStatusAction(group)"
+              type="button"
               @click="group.bulkAction()"
               :disabled="!group.rows.length || group.bulkSaving"
-              class="inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-xs font-semibold text-white transition disabled:opacity-60"
+              class="inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-xs font-black text-white transition disabled:cursor-not-allowed disabled:opacity-60"
               :class="group.tone === 'candidate' ? 'bg-green-600 hover:bg-green-700' : 'bg-amber-600 hover:bg-amber-700'"
             >
-              <ClientOnly><Icon :icon="group.tone === 'candidate' ? 'lucide:check-check' : 'lucide:undo-2'" class="mr-2 h-4 w-4" /></ClientOnly>
+              <ClientOnly>
+                <Icon :icon="group.tone === 'candidate' ? 'lucide:check-check' : 'lucide:undo-2'" class="mr-2 h-4 w-4" />
+              </ClientOnly>
               {{ group.bulkLabel }} ({{ group.rows.length }})
             </button>
 
             <button
-              :disabled="exportBusy"
+              type="button"
+              :disabled="exportBusy || !group.rows.length"
               @click="exportRows(group.rows, group.exportName.replace('.csv', ''), 'csv')"
-              class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
             >
-              <ClientOnly><Icon icon="lucide:file-down" class="mr-2 h-4 w-4" /></ClientOnly>
+              <ClientOnly>
+                <Icon icon="lucide:file-down" class="mr-2 h-4 w-4" />
+              </ClientOnly>
               CSV
             </button>
 
             <button
-              :disabled="exportBusy"
+              type="button"
+              :disabled="exportBusy || !group.rows.length"
               @click="exportRows(group.rows, group.exportName.replace('.csv', ''), 'excel')"
-              class="inline-flex items-center justify-center rounded-2xl border border-green-200 bg-green-50 px-4 py-2.5 text-xs font-semibold text-green-700 transition hover:bg-green-100 disabled:opacity-60 dark:border-green-900/40 dark:bg-green-900/10 dark:text-green-300"
+              class="inline-flex items-center justify-center rounded-2xl border border-green-200 bg-green-50 px-4 py-2.5 text-xs font-black text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-green-900/40 dark:bg-green-900/10 dark:text-green-300"
             >
-              <ClientOnly><Icon icon="lucide:sheet" class="mr-2 h-4 w-4" /></ClientOnly>
+              <ClientOnly>
+                <Icon icon="lucide:sheet" class="mr-2 h-4 w-4" />
+              </ClientOnly>
               Excel
             </button>
           </div>
         </div>
 
-        <div class="mt-5 overflow-x-auto max-w-full rounded-[26px] border border-gray-200 dark:border-neutral-800">
+        <div class="mt-5 max-w-full overflow-x-auto rounded-[26px] border border-slate-200 dark:border-neutral-800">
           <DataTable
             :show-actions="true"
             :title="group.title"
@@ -406,16 +467,17 @@
               <label class="inline-flex cursor-pointer items-center justify-center">
                 <input
                   type="checkbox"
-                  class="h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-900"
+                  class="h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-900"
                   :checked="isRowSelectedForDelete(row)"
                   @click.stop
                   @change="toggleDeleteSelection(row)"
                 />
               </label>
             </template>
+
             <template #cell-dokumen="{ row }">
               <span
-                class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold"
+                class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-black"
                 :class="getRowDocCount(row) >= 4
                   ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
                   : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'"
@@ -427,46 +489,52 @@
             <template #cell-action="{ row }">
               <div class="flex flex-wrap items-center justify-end gap-2">
                 <button
+                  type="button"
                   @click="openDetail(row)"
-                  class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-green-700"
+                  class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-3 py-1.5 text-xs font-black text-white transition hover:bg-green-700"
                 >
                   Detail
                 </button>
 
                 <button
+                  type="button"
                   @click="openEdit(row)"
-                  class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
                 >
                   Edit
                 </button>
 
                 <button
                   v-if="!usingCustomForm"
+                  type="button"
                   @click="openDocs(row.id, row)"
-                  class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
                 >
                   Dokumen
                 </button>
 
                 <button
                   v-if="group.tone === 'candidate'"
+                  type="button"
                   @click="approve(row.id)"
-                  class="inline-flex items-center justify-center rounded-2xl border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700 transition hover:bg-green-100 dark:border-green-900/40 dark:bg-green-900/10 dark:text-green-300"
+                  class="inline-flex items-center justify-center rounded-2xl border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-black text-green-700 transition hover:bg-green-100 dark:border-green-900/40 dark:bg-green-900/10 dark:text-green-300"
                 >
                   Terima
                 </button>
 
                 <button
                   v-else
+                  type="button"
                   @click="revertToCalon(row.id)"
-                  class="inline-flex items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 transition hover:bg-amber-100 dark:border-amber-900/40 dark:bg-amber-900/10 dark:text-amber-300"
+                  class="inline-flex items-center justify-center rounded-2xl border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-700 transition hover:bg-amber-100 dark:border-amber-900/40 dark:bg-amber-900/10 dark:text-amber-300"
                 >
                   Jadikan Calon
                 </button>
 
                 <button
+                  type="button"
                   @click="openConfirm(row)"
-                  class="inline-flex items-center justify-center rounded-2xl border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10"
+                  class="inline-flex items-center justify-center rounded-2xl border border-rose-200 bg-white px-3 py-1.5 text-xs font-black text-rose-700 transition hover:bg-rose-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-900/10"
                 >
                   Hapus
                 </button>
@@ -488,8 +556,8 @@
           <div>
             <h3 class="font-black">Data custom belum tampil</h3>
             <p class="mt-1 text-sm leading-6">
-              Data mungkin masih tersaring oleh tahun aktif atau belum memiliki snapshot custom field.
-              Coba cek tahun pendaftaran, pastikan data tersimpan dengan <code>formMode: custom</code>,
+              Data mungkin masih tersaring oleh filter aktif atau belum memiliki snapshot custom field.
+              Pastikan data tersimpan dengan <code>formMode: custom</code>,
               <code>customData</code>, atau <code>ppdb.custom.values</code>.
             </p>
           </div>
@@ -498,68 +566,83 @@
 
       <!-- EDIT MODAL -->
       <ModalShell size="3xl" v-model="showForm" :title="formMode === 'edit' ? 'Ubah Data Ringkas' : 'Tambah Pendaftar'">
-        <form class="space-y-4 max-h-[65vh] overflow-y-auto pr-1" @submit.prevent="saveRow">
-          <div class="rounded-[22px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/60">
+        <form class="max-h-[65vh] space-y-4 overflow-y-auto pr-1" @submit.prevent="saveRow">
+          <div class="rounded-[22px] border border-slate-200 bg-slate-50 p-4 dark:border-neutral-800 dark:bg-neutral-800/60">
             <div class="flex items-start gap-3">
               <div class="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300">
-                <ClientOnly><Icon icon="lucide:user-cog" class="h-5 w-5" /></ClientOnly>
+                <ClientOnly>
+                  <Icon icon="lucide:user-cog" class="h-5 w-5" />
+                </ClientOnly>
               </div>
               <div>
-                <div class="text-sm font-bold text-gray-900 dark:text-white">Edit data ringkas</div>
-                <div class="mt-1 text-sm text-gray-600 dark:text-neutral-300">Untuk data formulir lengkap, gunakan tombol Detail pada tabel.</div>
+                <div class="text-sm font-black text-slate-900 dark:text-white">Edit data ringkas</div>
+                <div class="mt-1 text-sm text-slate-600 dark:text-neutral-300">Untuk data formulir lengkap, gunakan tombol Detail pada tabel.</div>
               </div>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Gen</label>
-              <input v-model.trim="form.gen" required class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+              <label class="mb-1.5 block text-xs font-black uppercase tracking-[0.16em] text-slate-400 dark:text-neutral-500">Gen</label>
+              <input v-model.trim="form.gen" required class="block h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none transition focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
             </div>
 
             <div>
-              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Nama Santri</label>
-              <input v-model.trim="form.santri" required class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+              <label class="mb-1.5 block text-xs font-black uppercase tracking-[0.16em] text-slate-400 dark:text-neutral-500">Nama Santri</label>
+              <input v-model.trim="form.santri" required class="block h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none transition focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
             </div>
 
             <div>
-              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">No. HP</label>
-              <input v-model.trim="form.nohp" class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+              <label class="mb-1.5 block text-xs font-black uppercase tracking-[0.16em] text-slate-400 dark:text-neutral-500">No. HP</label>
+              <input v-model.trim="form.nohp" class="block h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none transition focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
             </div>
 
             <div>
-              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Jenjang</label>
-              <input v-model.trim="form.jenjang" class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
+              <label class="mb-1.5 block text-xs font-black uppercase tracking-[0.16em] text-slate-400 dark:text-neutral-500">Jenjang</label>
+              <input v-model.trim="form.jenjang" class="block h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none transition focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white" />
             </div>
 
-            <div class="sm:col-span-2">
-              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Alamat</label>
-              <textarea v-model.trim="form.alamat" rows="3" class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"></textarea>
+            <div class="md:col-span-2">
+              <label class="mb-1.5 block text-xs font-black uppercase tracking-[0.16em] text-slate-400 dark:text-neutral-500">Alamat</label>
+              <textarea v-model.trim="form.alamat" rows="3" class="block w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none transition focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white"></textarea>
             </div>
 
             <div>
-              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Gender</label>
-              <select v-model="form.gender" class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
+              <label class="mb-1.5 block text-xs font-black uppercase tracking-[0.16em] text-slate-400 dark:text-neutral-500">Gender</label>
+              <select v-model="form.gender" class="block h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none transition focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
                 <option value="L">Laki-laki</option>
                 <option value="P">Perempuan</option>
               </select>
             </div>
 
             <div>
-              <label class="mb-1.5 block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">Status</label>
-              <select v-model="form.status" class="block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-green-500 focus:bg-white dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
+              <label class="mb-1.5 block text-xs font-black uppercase tracking-[0.16em] text-slate-400 dark:text-neutral-500">Status</label>
+              <select v-model="form.status" class="block h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none transition focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
                 <option value="nonaktif">nonaktif / Calon</option>
                 <option value="">Diterima</option>
               </select>
             </div>
           </div>
 
-          <p v-if="formError" class="text-sm text-rose-600">{{ formError }}</p>
+          <p v-if="formError" class="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700 dark:bg-rose-900/20 dark:text-rose-300">
+            {{ formError }}
+          </p>
         </form>
 
         <template #footer>
-          <button @click="showForm=false" class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800">Batal</button>
-          <button :disabled="saving" @click="saveRow" class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:opacity-60">
+          <button
+            type="button"
+            @click="showForm = false"
+            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            :disabled="saving"
+            @click="saveRow"
+            class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
             {{ saving ? 'Menyimpan…' : formMode === 'edit' ? 'Update' : 'Simpan' }}
           </button>
         </template>
@@ -567,8 +650,8 @@
 
       <!-- DOCS MODAL -->
       <ModalShell v-if="!usingCustomForm" size="7xl" v-model="showDocs" title="Dokumen Pendaftar">
-        <div class="space-y-4 max-h-[78vh] overflow-y-auto">
-          <div v-if="docState.loading" class="rounded-2xl bg-gray-50 p-6 text-sm text-gray-500 dark:bg-neutral-800 dark:text-neutral-400">
+        <div class="max-h-[78vh] space-y-4 overflow-y-auto">
+          <div v-if="docState.loading" class="rounded-2xl bg-slate-50 p-6 text-sm text-slate-500 dark:bg-neutral-800 dark:text-neutral-400">
             Memuat dokumen…
           </div>
 
@@ -576,30 +659,31 @@
             {{ docState.error }}
           </div>
 
-          <div v-else-if="!docTabs.length" class="rounded-2xl bg-gray-50 p-6 text-sm text-gray-500 dark:bg-neutral-800 dark:text-neutral-400">
+          <div v-else-if="!docTabs.length" class="rounded-2xl bg-slate-50 p-6 text-sm text-slate-500 dark:bg-neutral-800 dark:text-neutral-400">
             Tidak ada dokumen. Pastikan data pendaftar memiliki field <code>dokumen.kk.url</code>, <code>dokumen.akte.url</code>, <code>dokumen.ktpAyah.url</code>, atau format lama <code>kkUrl</code>.
           </div>
 
           <div v-else>
             <div class="overflow-x-auto">
-              <nav class="flex min-w-max items-center gap-1 rounded-2xl border border-gray-200 bg-gray-50 p-1 dark:border-neutral-800 dark:bg-neutral-800">
+              <nav class="flex min-w-max items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 p-1 dark:border-neutral-800 dark:bg-neutral-800">
                 <button
                   v-for="(t, i) in docTabs"
                   :key="t.key"
+                  type="button"
                   @click="activeDocTab = i"
-                  class="rounded-xl px-3 py-2 text-sm font-semibold transition"
+                  class="rounded-xl px-3 py-2 text-sm font-black transition"
                   :class="activeDocTab === i
-                    ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-200'
-                    : 'text-gray-500 hover:text-gray-900 dark:text-neutral-300'"
+                    ? 'bg-white text-slate-950 shadow-sm dark:bg-neutral-200'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-neutral-300'"
                 >
                   {{ t.label }}
                 </button>
               </nav>
             </div>
 
-            <div class="mt-4 overflow-hidden rounded-[26px] border border-gray-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+            <div class="mt-4 overflow-hidden rounded-[26px] border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
               <div class="p-3">
-                <div v-if="currentTab.isImage" class="grid min-h-[64vh] w-full place-items-center rounded-2xl bg-gray-50 dark:bg-neutral-950">
+                <div v-if="currentTab.isImage" class="grid min-h-[64vh] w-full place-items-center rounded-2xl bg-slate-50 dark:bg-neutral-950">
                   <img :src="currentTab.url" alt="" class="max-h-[64vh] max-w-full rounded-2xl object-contain" @error="() => {}" />
                 </div>
 
@@ -607,18 +691,18 @@
                   <iframe :src="currentTab.viewerUrl" class="h-full w-full rounded-2xl bg-white" allowfullscreen loading="lazy"></iframe>
                 </div>
 
-                <div v-else class="rounded-2xl bg-gray-50 p-6 text-sm text-gray-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <div v-else class="rounded-2xl bg-slate-50 p-6 text-sm text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
                   File tidak dapat dipratinjau.
-                  <a :href="currentTab.url" target="_blank" class="font-semibold text-green-700 underline decoration-dotted">Buka di tab baru</a>.
+                  <a :href="currentTab.url" target="_blank" class="font-bold text-green-700 underline decoration-dotted">Buka di tab baru</a>.
                 </div>
               </div>
 
-              <div class="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-3 text-xs dark:border-neutral-800">
-                <p class="font-semibold text-gray-500 dark:text-neutral-400">{{ currentTab.label }}</p>
+              <div class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 px-4 py-3 text-xs dark:border-neutral-800">
+                <p class="font-bold text-slate-500 dark:text-neutral-400">{{ currentTab.label }}</p>
 
                 <div class="flex items-center gap-2">
-                  <a :href="currentTab.url" target="_blank" class="rounded-2xl border border-gray-200 px-3 py-2 font-semibold hover:bg-gray-50 dark:border-neutral-700 dark:hover:bg-neutral-800">Buka</a>
-                  <a :href="currentTab.url" download class="rounded-2xl bg-green-600 px-3 py-2 font-semibold text-white hover:bg-green-700">Unduh</a>
+                  <a :href="currentTab.url" target="_blank" class="rounded-2xl border border-slate-200 px-3 py-2 font-bold hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-800">Buka</a>
+                  <a :href="currentTab.url" download class="rounded-2xl bg-green-600 px-3 py-2 font-bold text-white hover:bg-green-700">Unduh</a>
                 </div>
               </div>
             </div>
@@ -626,13 +710,19 @@
         </div>
 
         <template #footer>
-          <button @click="showDocs=false" class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800">Tutup</button>
+          <button
+            type="button"
+            @click="showDocs = false"
+            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+          >
+            Tutup
+          </button>
         </template>
       </ModalShell>
 
       <!-- DETAIL MODAL -->
       <ModalShell size="7xl" v-model="showDetail" title="Detail Formulir Pendaftaran">
-        <div v-if="detailState.loading" class="rounded-2xl bg-gray-50 p-6 text-sm text-gray-500 dark:bg-neutral-800 dark:text-neutral-400">
+        <div v-if="detailState.loading" class="rounded-2xl bg-slate-50 p-6 text-sm text-slate-500 dark:bg-neutral-800 dark:text-neutral-400">
           Memuat detail pendaftaran…
         </div>
 
@@ -640,7 +730,7 @@
           {{ detailState.error }}
         </div>
 
-        <div v-else-if="!fullRecord" class="rounded-2xl bg-gray-50 p-6 text-sm text-gray-500 dark:bg-neutral-800 dark:text-neutral-400">
+        <div v-else-if="!fullRecord" class="rounded-2xl bg-slate-50 p-6 text-sm text-slate-500 dark:bg-neutral-800 dark:text-neutral-400">
           Data tidak tersedia.
         </div>
 
@@ -670,14 +760,14 @@
               </div>
             </section>
 
-            <section class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <section class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
               <article
                 v-for="item in detailQuickSummary"
                 :key="item.label"
-                class="rounded-[22px] border border-gray-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
+                class="rounded-[22px] border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
               >
-                <p class="text-[11px] font-black uppercase tracking-[0.16em] text-gray-400 dark:text-neutral-500">{{ item.label }}</p>
-                <p class="mt-2 break-words text-sm font-bold text-gray-950 dark:text-white">{{ item.value }}</p>
+                <p class="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-neutral-500">{{ item.label }}</p>
+                <p class="mt-2 break-words text-sm font-bold text-slate-950 dark:text-white">{{ item.value }}</p>
               </article>
             </section>
 
@@ -685,16 +775,18 @@
               <article
                 v-for="section in detailSections"
                 :key="section.key"
-                class="rounded-[28px] border border-gray-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+                class="rounded-[28px] border border-slate-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
               >
                 <div class="flex items-start gap-3">
                   <div class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300">
-                    <ClientOnly><Icon :icon="section.icon" class="h-5 w-5" /></ClientOnly>
+                    <ClientOnly>
+                      <Icon :icon="section.icon" class="h-5 w-5" />
+                    </ClientOnly>
                   </div>
 
                   <div>
-                    <h4 class="text-base font-black text-gray-950 dark:text-white">{{ section.title }}</h4>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">{{ section.subtitle }}</p>
+                    <h4 class="text-base font-black text-slate-950 dark:text-white">{{ section.title }}</h4>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-neutral-400">{{ section.subtitle }}</p>
                   </div>
                 </div>
 
@@ -703,12 +795,12 @@
                     v-for="row in section.rows"
                     :key="`${section.key}-${row.label}`"
                     :class="row.wide ? 'sm:col-span-2' : ''"
-                    class="rounded-2xl bg-gray-50 p-3 dark:bg-neutral-800/70"
+                    class="rounded-2xl bg-slate-50 p-3 dark:bg-neutral-800/70"
                   >
-                    <p class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-400 dark:text-neutral-500">
+                    <p class="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-neutral-500">
                       {{ row.label }}
                     </p>
-                    <p class="mt-1 whitespace-pre-line break-words text-sm font-semibold text-gray-900 dark:text-white">
+                    <p class="mt-1 whitespace-pre-line break-words text-sm font-bold text-slate-900 dark:text-white">
                       {{ row.value }}
                     </p>
                   </div>
@@ -716,37 +808,41 @@
               </article>
             </section>
 
-            <section v-if="!usingCustomForm" class="rounded-[28px] border border-gray-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+            <section v-if="!usingCustomForm" class="rounded-[28px] border border-slate-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
               <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div class="flex items-start gap-3">
                   <div class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300">
-                    <ClientOnly><Icon icon="lucide:folder-check" class="h-5 w-5" /></ClientOnly>
+                    <ClientOnly>
+                      <Icon icon="lucide:folder-check" class="h-5 w-5" />
+                    </ClientOnly>
                   </div>
 
                   <div>
-                    <h4 class="text-base font-black text-gray-950 dark:text-white">Dokumen Pendaftar</h4>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">Berkas yang dikirim dari form pendaftaran.</p>
+                    <h4 class="text-base font-black text-slate-950 dark:text-white">Dokumen Pendaftar</h4>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-neutral-400">Berkas yang dikirim dari form pendaftaran.</p>
                   </div>
                 </div>
 
                 <button
                   type="button"
                   @click="fullRecord?.id && openDocs(fullRecord.id, fullRecord)"
-                  class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
+                  class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-green-700"
                 >
-                  <ClientOnly><Icon icon="lucide:eye" class="mr-2 h-4 w-4" /></ClientOnly>
+                  <ClientOnly>
+                    <Icon icon="lucide:eye" class="mr-2 h-4 w-4" />
+                  </ClientOnly>
                   Lihat Dokumen
                 </button>
               </div>
 
-              <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
                 <div
                   v-for="item in detailDocSummary"
                   :key="item.label"
-                  class="rounded-2xl bg-gray-50 p-3 dark:bg-neutral-800/70"
+                  class="rounded-2xl bg-slate-50 p-3 dark:bg-neutral-800/70"
                 >
-                  <p class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-400 dark:text-neutral-500">{{ item.label }}</p>
-                  <p class="mt-1 text-sm font-bold" :class="item.ready ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'">
+                  <p class="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-neutral-500">{{ item.label }}</p>
+                  <p class="mt-1 text-sm font-black" :class="item.ready ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'">
                     {{ item.ready ? 'Tersedia' : 'Belum Ada' }}
                   </p>
                 </div>
@@ -757,34 +853,36 @@
 
         <template #footer>
           <button
-            @click="showDetail=false"
-            class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            type="button"
+            @click="showDetail = false"
+            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             Tutup
           </button>
 
           <button
             v-if="!usingCustomForm && fullRecord?.id"
+            type="button"
             @click="openDocs(fullRecord.id, fullRecord)"
-            class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
+            class="inline-flex items-center justify-center rounded-2xl bg-green-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-green-700"
           >
             Lihat Dokumen
           </button>
         </template>
       </ModalShell>
 
-      <!-- DELETE MODAL -->
+      <!-- BULK DELETE MODAL -->
       <ModalShell v-model="showBulkDeleteConfirm" title="Hapus Banyak Data">
         <div class="space-y-4 text-sm">
           <div class="rounded-[22px] border border-rose-200 bg-rose-50 p-4 text-rose-700 dark:border-rose-900/40 dark:bg-rose-900/10 dark:text-rose-300">
             Data yang dihapus tidak dapat dikembalikan. Pastikan data yang dipilih sudah benar.
           </div>
 
-          <div class="rounded-[22px] bg-gray-50 p-4 dark:bg-neutral-800">
-            <p class="font-bold text-gray-900 dark:text-white">
+          <div class="rounded-[22px] bg-slate-50 p-4 dark:bg-neutral-800">
+            <p class="font-black text-slate-900 dark:text-white">
               {{ bulkDeleteTitle }}
             </p>
-            <p class="mt-1 text-gray-600 dark:text-neutral-300">
+            <p class="mt-1 text-slate-600 dark:text-neutral-300">
               Total data yang akan dihapus:
               <strong>{{ bulkDeleteRows.length }}</strong>
             </p>
@@ -792,17 +890,17 @@
 
           <div
             v-if="bulkDeleteRows.length"
-            class="max-h-52 space-y-2 overflow-y-auto rounded-[22px] border border-gray-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900"
+            class="max-h-52 space-y-2 overflow-y-auto rounded-[22px] border border-slate-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900"
           >
             <div
               v-for="row in bulkDeleteRows"
               :key="row.id"
-              class="flex items-center justify-between gap-3 rounded-2xl bg-gray-50 px-3 py-2 dark:bg-neutral-800"
+              class="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2 dark:bg-neutral-800"
             >
-              <span class="truncate text-sm font-semibold text-gray-800 dark:text-neutral-200">
+              <span class="truncate text-sm font-bold text-slate-800 dark:text-neutral-200">
                 {{ getDisplayName(row) }}
               </span>
-              <span class="shrink-0 font-mono text-xs text-gray-400">
+              <span class="shrink-0 font-mono text-xs text-slate-400">
                 {{ row.ppdbCode || row.id }}
               </span>
             </div>
@@ -811,36 +909,50 @@
 
         <template #footer>
           <button
+            type="button"
             @click="showBulkDeleteConfirm = false"
-            class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             Batal
           </button>
 
           <button
+            type="button"
             :disabled="bulkDeleting || !bulkDeleteRows.length"
             @click="confirmBulkDelete"
-            class="inline-flex items-center justify-center rounded-2xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-60"
+            class="inline-flex items-center justify-center rounded-2xl bg-rose-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {{ bulkDeleting ? 'Menghapus…' : `Hapus ${bulkDeleteRows.length} Data` }}
           </button>
         </template>
       </ModalShell>
 
+      <!-- DELETE MODAL -->
       <ModalShell v-model="showConfirm" title="Hapus Data">
         <div class="space-y-4 text-sm">
           <div class="rounded-[22px] border border-rose-200 bg-rose-50 p-4 text-rose-700 dark:border-rose-900/40 dark:bg-rose-900/10 dark:text-rose-300">
             Data yang dihapus tidak dapat dikembalikan.
           </div>
 
-          <p class="text-gray-700 dark:text-neutral-200">
+          <p class="text-slate-700 dark:text-neutral-200">
             Hapus data <strong>{{ getDisplayName(current) }}</strong>?
           </p>
         </div>
 
         <template #footer>
-          <button @click="showConfirm=false" class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800">Batal</button>
-          <button :disabled="deleting" @click="confirmDelete" class="inline-flex items-center justify-center rounded-2xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-60">
+          <button
+            type="button"
+            @click="showConfirm = false"
+            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            :disabled="deleting"
+            @click="confirmDelete"
+            class="inline-flex items-center justify-center rounded-2xl bg-rose-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
             {{ deleting ? 'Menghapus…' : 'Hapus' }}
           </button>
         </template>
@@ -850,7 +962,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRuntimeConfig } from '#imports'
 import { Icon } from '@iconify/vue'
 import DataTable from '~/components/widget/DataTable.vue'
@@ -862,11 +974,17 @@ import {
   type CustomRegistrationField
 } from '~/composables/data/useRegistrationForm'
 
-definePageMeta({ layout: 'app', layoutProps: { title: 'Pendaftaran' } })
+definePageMeta({
+  layout: 'app',
+  layoutProps: { title: 'Pendaftaran' }
+})
 
 const { rows, fetchSantri, updateSantri, deleteSantri, getSantriById } = useSantri()
 const { settings, fetchSettings, saveSettings } = usePendaftaran()
 const config = useRuntimeConfig()
+
+const clientName = String(config.public.clientName || '').trim().toLowerCase()
+const isAlinayahClient = computed(() => clientName === 'alinayah')
 
 const formUrl = computed(() => {
   const base = String(config.public.siteUrl || (import.meta.client ? window.location.origin : ''))
@@ -874,26 +992,19 @@ const formUrl = computed(() => {
 })
 
 const ppdbMode = ref<'putra' | 'putri'>('putra')
-const workspaceMenuOpen = ref(false)
 const exportBusy = ref(false)
 
-async function copy(t: string) {
+async function copy(text: string) {
   try {
-    await navigator.clipboard.writeText(t)
+    await navigator.clipboard.writeText(text)
   } catch {}
 }
 
 /** ===== Filter ===== */
-const filters = reactive<{ q: string; jenjang: string }>({ q: '', jenjang: 'semua' })
-
-const yearOptions = computed(() => {
-  const ys = Array.from(
-    new Set((adminRows.value || []).map((r) => String(r.gen || '').trim()).filter(Boolean))
-  )
-  return ys.sort((a, b) => Number(b) - Number(a))
+const filters = reactive<{ q: string; jenjang: string }>({
+  q: '',
+  jenjang: 'semua'
 })
-
-const selectedYear: any = ref<string>('')
 
 function pickValue(...values: any[]) {
   for (const value of values) {
@@ -901,6 +1012,21 @@ function pickValue(...values: any[]) {
   }
 
   return ''
+}
+
+function isRegistrationRow(row: any) {
+  return (
+    !!row?.ppdbCode ||
+    !!row?.kodePendaftaran ||
+    !!row?.registrationCode ||
+    !!row?.ppdb ||
+    row?.formMode === 'custom' ||
+    row?.formMode === 'default' ||
+    row?.registrationMode === 'custom' ||
+    row?.registrationMode === 'default' ||
+    !!row?.customData ||
+    !!row?.customFieldsSnapshot
+  )
 }
 
 function isCustomRecord(record: any) {
@@ -936,15 +1062,16 @@ function getRecordCustomFields(record: any) {
     .sort((a: any, b: any) => Number(a.order || 0) - Number(b.order || 0))
 }
 
+const registrationSourceRows = computed(() => {
+  return (rows.value || []).filter((row: any) => isRegistrationRow(row))
+})
+
 const hasCustomRows = computed(() => {
-  return (rows.value || []).some((row: any) => isCustomRecord(row))
+  return registrationSourceRows.value.some((row: any) => isCustomRecord(row))
 })
 
 const usingCustomForm = computed(() => {
-  return (
-    settings.value?.formMode === 'custom' ||
-    hasCustomRows.value
-  )
+  return settings.value?.formMode === 'custom' || hasCustomRows.value
 })
 
 const activeCustomFields = computed<CustomRegistrationField[]>(() => {
@@ -958,26 +1085,20 @@ const activeCustomFields = computed<CustomRegistrationField[]>(() => {
       .sort((a: any, b: any) => Number(a.order || 0) - Number(b.order || 0))
   }
 
-  const firstCustomRow = (rows.value || []).find((row: any) => {
+  const firstCustomRow = registrationSourceRows.value.find((row: any) => {
     return getRecordCustomFields(row).length > 0
   })
 
-  if (firstCustomRow) {
-    return getRecordCustomFields(firstCustomRow)
-  }
+  if (firstCustomRow) return getRecordCustomFields(firstCustomRow)
 
   return []
 })
 
-const tableCustomFields = computed<CustomRegistrationField[]>(() => {
+const tableCustomFields = computed<CustomRegistrationField[]>((() => {
   return activeCustomFields.value
     .filter((field: any) => field.type !== 'file')
     .slice(0, 5)
-})
-
-const detailCustomFields = computed<CustomRegistrationField[]>(() => {
-  return activeCustomFields.value
-})
+}) as any)
 
 function safeColumnKey(value: any) {
   return String(value || '')
@@ -1043,37 +1164,26 @@ function getMappedValue(record: any, mapTo?: string) {
   switch (mapTo) {
     case 'nama':
       return pickValue(record?.santri, s?.nama)
-
     case 'nohp':
       return pickValue(record?.nohp, record?.hpOrtu1, o?.hp1, wali?.hp)
-
     case 'tmpLahir':
       return pickValue(s?.tmpLahir, record?.tmpLahir, record?.tempatLahir)
-
     case 'tglLahir':
       return pickValue(s?.tglLahir, record?.tglLahir, record?.tanggalLahir)
-
     case 'tanggal':
       return pickValue(record?.tanggal, record?.createdAt)
-
     case 'jk':
       return pickValue(record?.gender, record?.jk, s?.jk)
-
     case 'alamat':
       return pickValue(record?.alamat, alamatLengkap)
-
     case 'asalSekolah':
       return pickValue(record?.asalSekolah, p?.sekolah)
-
     case 'tujuan':
       return pickValue(record?.tujuan, record?.jenjang, p?.tujuan)
-
     case 'pendidikan':
       return pickValue(record?.jenjang, p?.status, p?.pendidikan)
-
     case 'namaOrtu':
       return pickValue(record?.walisantri, record?.waliNama, wali?.nama, ayah?.nama, ibu?.nama)
-
     default:
       return ''
   }
@@ -1087,6 +1197,23 @@ function getCustomFieldValue(record: any, field: CustomRegistrationField) {
     key ? storage[key] : '',
     key ? record?.[key] : ''
   )
+}
+
+function formatCustomValue(value: any, type?: string) {
+  if (Array.isArray(value)) return value.length ? value.join(', ') : '—'
+
+  if (value && typeof value === 'object') {
+    const url = extractUrl(value)
+    if (url) return url
+
+    return JSON.stringify(value)
+  }
+
+  if (value === null || value === undefined || value === '') return '—'
+
+  if (type === 'date') return formatDetailDate(value)
+
+  return String(value)
 }
 
 function firstReadableCustomValue(record: any) {
@@ -1113,8 +1240,8 @@ function getDisplayName(record: any) {
 
 function findCustomValue(record: any, mapTo: string, keywords: string[] = []) {
   const fields = activeCustomFields.value
-
   const byMap = fields.find((field: any) => field.mapTo === mapTo)
+
   if (byMap) return getCustomFieldValue(record, byMap)
 
   const byLabel = fields.find((field: any) => {
@@ -1125,40 +1252,12 @@ function findCustomValue(record: any, mapTo: string, keywords: string[] = []) {
   return byLabel ? getCustomFieldValue(record, byLabel) : ''
 }
 
-function formatCustomValue(value: any, type?: string) {
-  if (Array.isArray(value)) return value.length ? value.join(', ') : '—'
-
-  if (value && typeof value === 'object') {
-    const url = extractUrl(value)
-    if (url) return url
-
-    return JSON.stringify(value)
-  }
-
-  if (value === null || value === undefined || value === '') return '—'
-
-  if (type === 'date') {
-    return formatDetailDate(value)
-  }
-
-  return String(value)
-}
-
 function buildCustomFieldColumns() {
   return tableCustomFields.value.map((field: any) => ({
     key: customColumnKey(field),
     label: field.label || field.key || 'Input Custom',
     sortable: true
   }))
-}
-
-function countDocsFromAnyRecord(record: any) {
-  if (usingCustomForm.value || isCustomRecord(record)) return 0
-
-  const docs = collectDokumen(record)
-  const fromRow = Number(record?.dokumenCount || 0)
-
-  return Math.max(fromRow, Object.values(docs).filter(Boolean).length)
 }
 
 function jenjangFromStatus(status: any) {
@@ -1181,6 +1280,15 @@ function jenjangFromStatus(status: any) {
   }
 
   return map[key] || raw
+}
+
+function countDocsFromAnyRecord(record: any) {
+  if (usingCustomForm.value || isCustomRecord(record)) return 0
+
+  const docs = collectDokumen(record)
+  const fromRow = Number(record?.dokumenCount || 0)
+
+  return Math.max(fromRow, Object.values(docs).filter(Boolean).length)
 }
 
 function normalizeSantriRow(row: any): SantriRow {
@@ -1212,7 +1320,7 @@ function normalizeSantriRow(row: any): SantriRow {
     ...row,
 
     id: row?.id || '',
-    gen: String(pickValue(row?.gen, row?.year, selectedYear.value, new Date().getFullYear())),
+    gen: String(pickValue(row?.gen, row?.year, settings.value?.year, new Date().getFullYear())),
 
     santri: getDisplayName(row),
     walisantri: pickValue(row?.walisantri, row?.waliNama, wali?.nama, ayah?.nama, ibu?.nama),
@@ -1226,7 +1334,7 @@ function normalizeSantriRow(row: any): SantriRow {
     ibuNama: pickValue(row?.ibuNama, ibu?.nama),
 
     alamat: pickValue(row?.alamat, alamatLengkap),
-    jenjang: pickValue(row?.jenjang, jenjangFromStatus?.(p?.status) || p?.status),
+    jenjang: pickValue(row?.jenjang, jenjangFromStatus(p?.status) || p?.status),
 
     gender,
     tipe,
@@ -1256,94 +1364,76 @@ function normalizeSantriRow(row: any): SantriRow {
 }
 
 const adminRows = computed(() => {
-  return (rows.value || []).map((row: any) => normalizeSantriRow(row))
-})
-
-const mergedYearOptions = computed(() => {
-  const currentYear = String(new Date().getFullYear())
-  const arr = Array.from(
-    new Set([
-      selectedYear.value,
-      String(settings.value?.year || ''),
-      currentYear,
-      ...yearOptions.value
-    ].filter(Boolean))
-  )
-
-  return arr.sort((a, b) => Number(b) - Number(a))
+  return registrationSourceRows.value.map((row: any) => normalizeSantriRow(row))
 })
 
 onMounted(async () => {
   await Promise.all([fetchSantri(), fetchSettings()])
-
-  selectedYear.value = new Date().getFullYear().toString()
-
   startAutoCloseTicker()
   checkAutoClose()
 })
 
-function matchSearch(r: SantriRow, q: string) {
-  if (!q) return true
+function matchSearch(row: SantriRow, query: string) {
+  if (!query) return true
 
-  const s = q.toLowerCase()
-  const row: any = r
+  const searchText = query.toLowerCase()
+  const rawRow: any = row
 
   const customHay = activeCustomFields.value
-    .map((field) => getCustomFieldValue(row, field))
-    .map((v) => formatCustomValue(v))
+    .map((field) => getCustomFieldValue(rawRow, field))
+    .map((value) => formatCustomValue(value))
     .join(' | ')
 
-  const hay = [
-    row.ppdbCode,
-    row.santri,
-    row.walisantri,
-    row.alamat,
-    row.nohp,
-    row.nik,
-    row.kk,
-    row.nisn,
-    row.ayahNama,
-    row.ibuNama,
-    row.waliNama,
-    row.username,
-    row.publicToken,
-    row.jenjang,
-    row.tipe,
-    customHay,
+  const haystack = [
+    rawRow.ppdbCode,
+    rawRow.santri,
+    rawRow.walisantri,
+    rawRow.alamat,
+    rawRow.nohp,
+    rawRow.nik,
+    rawRow.kk,
+    rawRow.nisn,
+    rawRow.ayahNama,
+    rawRow.ibuNama,
+    rawRow.waliNama,
+    rawRow.username,
+    rawRow.publicToken,
+    rawRow.jenjang,
+    rawRow.tipe,
+    customHay
   ]
-    .map((v) => String(v || '').toLowerCase())
+    .map((value) => String(value || '').toLowerCase())
     .join(' | ')
 
-  return hay.includes(s)
+  return haystack.includes(searchText)
 }
 
-function matchJenjang(r: SantriRow, jj: string) {
-  if (jj === 'semua') return true
-  return String(r.jenjang || '').toLowerCase() === jj.toLowerCase()
+function matchJenjang(row: SantriRow, jenjang: string) {
+  if (jenjang === 'semua') return true
+  return String(row.jenjang || '').toLowerCase() === jenjang.toLowerCase()
 }
 
-const isPutri = (r: SantriRow) => r.tipe === 'Putri' || String((r as any).gender).toUpperCase() === 'P'
-const isPutra = (r: SantriRow) => r.tipe === 'Putra' || String((r as any).gender).toUpperCase() !== 'P'
-const isCalon = (r: SantriRow) => String(r.status).toLowerCase() === 'nonaktif'
-const isBaru = (r: SantriRow) => !isCalon(r)
+const isPutri = (row: SantriRow) => row.tipe === 'Putri' || String((row as any).gender).toUpperCase() === 'P'
+const isPutra = (row: SantriRow) => row.tipe === 'Putra' || String((row as any).gender).toUpperCase() !== 'P'
+const isCalon = (row: SantriRow) => String(row.status).toLowerCase() === 'nonaktif'
+const isBaru = (row: SantriRow) => !isCalon(row)
 
 const baseFiltered = computed(() => {
-  let data = (adminRows.value || [])
-    .filter((r) => matchSearch(r, filters.q))
+  let data = (adminRows.value || []).filter((row) => matchSearch(row, filters.q))
 
   if (!usingCustomForm.value) {
-    data = data.filter((r) => matchJenjang(r, filters.jenjang))
+    data = data.filter((row) => matchJenjang(row, filters.jenjang))
   }
 
   return data
 })
 
 const jenjangOptions = computed(() => {
-  const arr = (adminRows.value || [])
-    .map((r) => String(r.jenjang || '').trim())
+  const items = (adminRows.value || [])
+    .map((row) => String(row.jenjang || '').trim())
     .filter(Boolean)
 
-  return Array.from(new Set(arr))
+  return Array.from(new Set(items))
 })
 
 const putraFiltered = computed(() => baseFiltered.value.filter(isPutra))
@@ -1353,22 +1443,35 @@ const baruPutraFiltered = computed(() => putraFiltered.value.filter(isBaru))
 const calonPutriFiltered = computed(() => putriFiltered.value.filter(isCalon))
 const baruPutriFiltered = computed(() => putriFiltered.value.filter(isBaru))
 
-const selectedYearRows = computed(() => {
-  return adminRows.value || []
+const totalCalon = computed(() => {
+  if (usingCustomForm.value) return baseFiltered.value.filter(isCalon).length
+  return calonPutraFiltered.value.length + calonPutriFiltered.value.length
 })
 
-const totalCalon = computed(() => calonPutraFiltered.value.length + calonPutriFiltered.value.length)
-const totalDiterima = computed(() => baruPutraFiltered.value.length + baruPutriFiltered.value.length)
+const totalDiterima = computed(() => {
+  if (usingCustomForm.value) return baseFiltered.value.filter(isBaru).length
+  return baruPutraFiltered.value.length + baruPutriFiltered.value.length
+})
 
 const activeModeRows = computed(() => {
-  if (usingCustomForm.value) {
-    return baseFiltered.value
-  }
+  if (usingCustomForm.value) return baseFiltered.value
 
   return ppdbMode.value === 'putra'
     ? [...calonPutraFiltered.value, ...baruPutraFiltered.value]
     : [...calonPutriFiltered.value, ...baruPutriFiltered.value]
 })
+
+const totalRegistrasi = computed(() => adminRows.value.length)
+
+const registrationStats = computed(() => [
+  {
+    label: 'Santri Pendaftar',
+    value: totalCalon.value,
+    description: 'Santri berhasil daftar',
+    icon: 'duo-icons:user',
+    tone: 'green'
+  },
+])
 
 const tableGroups = computed(() => {
   if (usingCustomForm.value) {
@@ -1387,17 +1490,6 @@ const tableGroups = computed(() => {
         exportName: 'calon_pendaftar_semua.csv',
         bulkAction: () => approveBulk(calon.map((row) => row.id))
       },
-      // {
-      //   key: 'custom-diterima',
-      //   title: `Pendaftar Diterima`,
-      //   subtitle: 'Data pendaftar custom yang sudah diterima.',
-      //   tone: 'accepted' as const,
-      //   rows: diterima,
-      //   bulkSaving: savingBulkRevert.value,
-      //   bulkLabel: 'Jadikan Calon Semua',
-      //   exportName: `pendaftar_diterima.csv`,
-      //   bulkAction: () => revertBulk(diterima.map((row) => row.id))
-      // }
     ]
   }
 
@@ -1405,24 +1497,24 @@ const tableGroups = computed(() => {
     return [
       {
         key: 'calon-putra',
-        title: `Calon Putra`,
+        title: 'Calon Putra',
         subtitle: 'Pendaftar putra yang masih menunggu proses penerimaan.',
         tone: 'candidate' as const,
         rows: calonPutraFiltered.value,
         bulkSaving: savingBulk.value,
         bulkLabel: 'Terima Semua',
-        exportName: `calon_putra.csv`,
+        exportName: 'calon_putra.csv',
         bulkAction: () => approveBulk(calonPutraFiltered.value.map((row) => row.id))
       },
       {
         key: 'baru-putra',
-        title: `Santri Baru Putra`,
+        title: 'Santri Baru Putra',
         subtitle: 'Pendaftar putra yang sudah diterima sebagai santri baru.',
         tone: 'accepted' as const,
         rows: baruPutraFiltered.value,
         bulkSaving: savingBulkRevert.value,
         bulkLabel: 'Jadikan Calon Semua',
-        exportName: `santri_putra.csv`,
+        exportName: 'santri_putra.csv',
         bulkAction: () => revertBulk(baruPutraFiltered.value.map((row) => row.id))
       }
     ]
@@ -1431,51 +1523,33 @@ const tableGroups = computed(() => {
   return [
     {
       key: 'calon-putri',
-      title: `Calon Putri`,
+      title: 'Calon Putri',
       subtitle: 'Pendaftar putri yang masih menunggu proses penerimaan.',
       tone: 'candidate' as const,
       rows: calonPutriFiltered.value,
       bulkSaving: savingBulk.value,
       bulkLabel: 'Terima Semua',
-      exportName: `calon_putri_${selectedYear.value}.csv`,
+      exportName: 'calon_putri.csv',
       bulkAction: () => approveBulk(calonPutriFiltered.value.map((row) => row.id))
     },
     {
       key: 'baru-putri',
-      title: `Santri Baru Putri`,
+      title: 'Santri Baru Putri',
       subtitle: 'Pendaftar putri yang sudah diterima sebagai santri baru.',
       tone: 'accepted' as const,
       rows: baruPutriFiltered.value,
       bulkSaving: savingBulkRevert.value,
       bulkLabel: 'Jadikan Calon Semua',
-      exportName: `santri_putri.csv`,
+      exportName: 'santri_putri.csv',
       bulkAction: () => revertBulk(baruPutriFiltered.value.map((row) => row.id))
     }
   ]
 })
 
-const statusSummary = computed(() => {
-  const total = Math.max(activeModeRows.value.length, 1)
-  const calon = ppdbMode.value === 'putra' ? calonPutraFiltered.value.length : calonPutriFiltered.value.length
-  const diterima = ppdbMode.value === 'putra' ? baruPutraFiltered.value.length : baruPutriFiltered.value.length
-
-  return [
-    {
-      key: 'calon',
-      label: 'Calon',
-      count: calon,
-      width: `${(calon / total) * 100}%`,
-      barClass: 'bg-amber-500'
-    },
-    {
-      key: 'diterima',
-      label: 'Diterima',
-      count: diterima,
-      width: `${(diterima / total) * 100}%`,
-      barClass: 'bg-green-600'
-    }
-  ]
-})
+function shouldShowBulkStatusAction(group: any) {
+  if (isAlinayahClient.value && group?.tone === 'candidate') return false
+  return true
+}
 
 /** ===== Columns ===== */
 const defaultColumnsAdmin = [
@@ -1500,17 +1574,141 @@ const columnsAdmin = computed(() => {
   ]
 })
 
-/** ===== Bulk actions ===== */
+/** ===== Bulk actions / Promote PPDB to Santri ===== */
 const savingBulk = ref(false)
+const savingBulkRevert = ref(false)
+
+function nowMs() {
+  return Date.now()
+}
+
+function cleanText(value: any, fallback = '') {
+  const text = String(value ?? '').trim()
+  return text || fallback
+}
+
+function normalizePhone(value: any) {
+  const raw = String(value || '').trim()
+  if (!raw) return ''
+
+  const digits = raw.replace(/\D+/g, '')
+
+  if (!digits) return ''
+  if (digits.startsWith('0')) return `62${digits.slice(1)}`
+  if (digits.startsWith('620')) return `62${digits.slice(3)}`
+
+  return digits
+}
+
+function normalizeGenderForSantri(row: any) {
+  const raw = String(row?.gender || row?.jk || row?.tipe || '').trim().toLowerCase()
+
+  if (['p', 'putri', 'perempuan', 'wanita'].includes(raw)) return 'P'
+  if (['l', 'putra', 'laki-laki', 'laki laki', 'pria'].includes(raw)) return 'L'
+
+  return row?.tipe === 'Putri' ? 'P' : 'L'
+}
+
+function normalizeTipeForSantri(row: any) {
+  const gender = normalizeGenderForSantri(row)
+  return gender === 'P' ? 'Putri' : 'Putra'
+}
+
+function makeNoInduk(row: any) {
+  const existing = cleanText(row?.noInduk)
+  if (existing) return existing
+
+  const year = cleanText(row?.gen, String(new Date().getFullYear()))
+  const code = cleanText(row?.ppdbCode || row?.registrationCode || row?.kodePendaftaran)
+
+  if (code) return code
+
+  return `${year}-${cleanText(row?.id).slice(-6).toUpperCase()}`
+}
+
+function findRegistrationRow(id: string) {
+  return (
+    adminRows.value.find((row: any) => String(row.id) === String(id)) ||
+    rows.value.find((row: any) => String(row.id) === String(id)) ||
+    null
+  )
+}
+
+function buildAcceptedSantriPayload(row: any) {
+  const acceptedAt = nowMs()
+  const gender = normalizeGenderForSantri(row)
+  const tipe = normalizeTipeForSantri(row)
+
+  return {
+    noInduk: makeNoInduk(row),
+
+    gen: cleanText(row?.gen, String(new Date().getFullYear())),
+    santri: cleanText(row?.santri || row?.nama || getDisplayName(row), 'Tanpa Nama'),
+    walisantri: cleanText(row?.walisantri || row?.waliNama || row?.ayahNama || row?.ibuNama),
+    nohp: normalizePhone(row?.nohp || row?.hpOrtu1 || row?.hp || row?.whatsapp),
+
+    kamar: cleanText(row?.kamar, '-'),
+    maskan: cleanText(row?.maskan, '-'),
+    alamat: cleanText(row?.alamat),
+    jenjang: cleanText(row?.jenjang),
+    status: 'aktif',
+
+    gender,
+    jk: gender,
+    tipe,
+
+    nik: cleanText(row?.nik),
+    kk: cleanText(row?.kk),
+    nisn: cleanText(row?.nisn),
+    ayahNama: cleanText(row?.ayahNama),
+    ibuNama: cleanText(row?.ibuNama),
+    waliNama: cleanText(row?.waliNama || row?.walisantri),
+
+    ppdbStatus: 'accepted',
+    registrationStatus: 'accepted',
+    acceptedAt,
+    movedToSantriAt: acceptedAt,
+    updatedAt: acceptedAt
+  }
+}
+
+function buildCalonPayload() {
+  const revertedAt = nowMs()
+
+  return {
+    status: 'nonaktif',
+    kamar: '-',
+    maskan: '-',
+    ppdbStatus: 'candidate',
+    registrationStatus: 'candidate',
+    revertedToCandidateAt: revertedAt,
+    updatedAt: revertedAt
+  }
+}
+
+async function promoteRegistrationToSantri(id: string, opts: { refresh?: boolean } = {}) {
+  const { refresh = true } = opts
+  const row = findRegistrationRow(id)
+
+  if (!row?.id) {
+    throw new Error('Data pendaftaran tidak ditemukan.')
+  }
+
+  await updateSantri(row.id, buildAcceptedSantriPayload(row), { refresh })
+
+  return row.id
+}
 
 async function approveBulk(ids: string[]) {
-  if (!ids.length) return
+  const uniqueIds = Array.from(new Set(ids.filter(Boolean)))
+
+  if (!uniqueIds.length) return
 
   savingBulk.value = true
 
   try {
-    for (const id of ids) {
-      await updateSantri(id, { status: null as any }, { refresh: false })
+    for (const id of uniqueIds) {
+      await promoteRegistrationToSantri(id, { refresh: false })
     }
   } finally {
     savingBulk.value = false
@@ -1518,16 +1716,16 @@ async function approveBulk(ids: string[]) {
   }
 }
 
-const savingBulkRevert = ref(false)
-
 async function revertBulk(ids: string[]) {
-  if (!ids.length) return
+  const uniqueIds = Array.from(new Set(ids.filter(Boolean)))
+
+  if (!uniqueIds.length) return
 
   savingBulkRevert.value = true
 
   try {
-    for (const id of ids) {
-      await updateSantri(id, { status: 'nonaktif', kamar: '-', maskan: '' }, { refresh: false })
+    for (const id of uniqueIds) {
+      await updateSantri(id, buildCalonPayload(), { refresh: false })
     }
   } finally {
     savingBulkRevert.value = false
@@ -1536,11 +1734,11 @@ async function revertBulk(ids: string[]) {
 }
 
 async function approve(id: string) {
-  await updateSantri(id, { status: null as any })
+  await promoteRegistrationToSantri(id)
 }
 
 async function revertToCalon(id: string) {
-  await updateSantri(id, { status: 'nonaktif', kamar: '-', maskan: '' })
+  await updateSantri(id, buildCalonPayload())
 }
 
 /** ===== Edit Ringkas ===== */
@@ -1569,26 +1767,26 @@ const form = reactive<Omit<SantriRow, 'id'>>({
   dokumenCount: 0
 } as any)
 
-function openEdit(r: SantriRow) {
+function openEdit(row: SantriRow) {
   formMode.value = 'edit'
-  current.value = r
+  current.value = row
 
-  form.gen = String(r.gen || '')
-  form.santri = r.santri || ''
-  form.walisantri = r.walisantri || ''
-  form.nohp = r.nohp || ''
-  form.kamar = r.kamar || ''
-  form.alamat = r.alamat || ''
-  form.status = String(r.status ?? 'nonaktif')
-  form.jenjang = r.jenjang || ''
-  form.maskan = r.maskan || ''
-  form.gender = (r as any).gender || ''
-  form.tipe = (r as any).tipe || (form.gender === 'P' ? 'Putri' : 'Putra')
-  form.ppdbCode = r.ppdbCode || ''
-  form.nik = r.nik || ''
-  form.ayahNama = r.ayahNama || ''
-  form.ibuNama = r.ibuNama || ''
-  form.dokumenCount = r.dokumenCount || 0
+  form.gen = String(row.gen || '')
+  form.santri = row.santri || ''
+  form.walisantri = row.walisantri || ''
+  form.nohp = row.nohp || ''
+  form.kamar = row.kamar || ''
+  form.alamat = row.alamat || ''
+  form.status = String(row.status ?? 'nonaktif')
+  form.jenjang = row.jenjang || ''
+  form.maskan = row.maskan || ''
+  form.gender = (row as any).gender || ''
+  form.tipe = (row as any).tipe || (form.gender === 'P' ? 'Putri' : 'Putra')
+  form.ppdbCode = row.ppdbCode || ''
+  form.nik = row.nik || ''
+  form.ayahNama = row.ayahNama || ''
+  form.ibuNama = row.ibuNama || ''
+  form.dokumenCount = row.dokumenCount || 0
 
   formError.value = null
   showForm.value = true
@@ -1614,8 +1812,8 @@ async function saveRow() {
     } else {
       formError.value = 'Mode tambah belum diaktifkan.'
     }
-  } catch (e: any) {
-    formError.value = e?.message ?? 'Gagal menyimpan data'
+  } catch (error: any) {
+    formError.value = error?.message ?? 'Gagal menyimpan data'
   } finally {
     saving.value = false
   }
@@ -1687,8 +1885,8 @@ function clearDeletedSelection(ids: string[]) {
 const showConfirm = ref(false)
 const deleting = ref(false)
 
-function openConfirm(r: SantriRow) {
-  current.value = r
+function openConfirm(row: SantriRow) {
+  current.value = row
   showConfirm.value = true
 }
 
@@ -1708,6 +1906,60 @@ async function confirmDelete() {
     await fetchSantri()
   } finally {
     deleting.value = false
+  }
+}
+
+/** ===== Bulk Delete ===== */
+const showBulkDeleteConfirm = ref(false)
+const bulkDeleting = ref(false)
+const bulkDeleteRows = ref<SantriRow[]>([])
+const bulkDeleteTitle = ref('Hapus data terpilih')
+
+function openBulkDeleteSelected(groupRows: SantriRow[]) {
+  const groupIds = new Set((groupRows || []).map((row) => getRowId(row)).filter(Boolean))
+
+  const selectedRows = (groupRows || []).filter((row) => {
+    const id = getRowId(row)
+    return id && groupIds.has(id) && selectedDeleteIds.value.includes(id)
+  })
+
+  if (!selectedRows.length) return
+
+  bulkDeleteRows.value = selectedRows
+  bulkDeleteTitle.value = 'Hapus data terpilih'
+  showBulkDeleteConfirm.value = true
+}
+
+function openBulkDeleteGroup(group: any) {
+  const groupRows = Array.isArray(group?.rows) ? group.rows : []
+  if (!groupRows.length) return
+
+  bulkDeleteRows.value = groupRows
+  bulkDeleteTitle.value = `Hapus semua data pada ${group.title}`
+  showBulkDeleteConfirm.value = true
+}
+
+async function confirmBulkDelete() {
+  const ids = bulkDeleteRows.value
+    .map((row: any) => getRowId(row))
+    .filter(Boolean)
+
+  if (!ids.length) return
+
+  bulkDeleting.value = true
+
+  try {
+    for (const id of ids) {
+      await deleteSantri(id)
+    }
+
+    clearDeletedSelection(ids)
+    showBulkDeleteConfirm.value = false
+    bulkDeleteRows.value = []
+
+    await fetchSantri()
+  } finally {
+    bulkDeleting.value = false
   }
 }
 
@@ -1803,15 +2055,6 @@ function collectDokumen(record: any) {
   return output
 }
 
-function getDocUrl(d: any, key: DocKey, legacyKey: string) {
-  const docs = collectDokumen({
-    dokumen: d,
-    [legacyKey]: d?.[legacyKey]
-  })
-
-  return docs[key] || ''
-}
-
 function getRowDocCount(row: any) {
   if (usingCustomForm.value || isCustomRecord(row)) return 0
 
@@ -1823,20 +2066,20 @@ function getRowDocCount(row: any) {
 }
 
 function buildViewerUrl(url: string) {
-  const s = String(url || '')
-  if (!s) return ''
+  const value = String(url || '')
+  if (!value) return ''
 
-  if (s.includes('drive.google.com')) {
-    const m = s.match(/\/file\/d\/([^/]+)\//)
-    if (m?.[1]) return `https://drive.google.com/file/d/${m[1]}/preview`
+  if (value.includes('drive.google.com')) {
+    const fileId = value.match(/\/file\/d\/([^/]+)\//)?.[1]
+    if (fileId) return `https://drive.google.com/file/d/${fileId}/preview`
 
-    const id = s.match(/[?&]id=([^&]+)/)?.[1]
-    if (id) return `https://drive.google.com/file/d/${id}/preview`
+    const openId = value.match(/[?&]id=([^&]+)/)?.[1]
+    if (openId) return `https://drive.google.com/file/d/${openId}/preview`
   }
 
-  if (/\.pdf(\?|#|$)/i.test(s)) return s
+  if (/\.pdf(\?|#|$)/i.test(value)) return value
 
-  return s
+  return value
 }
 
 function isPdfUrl(url: string) {
@@ -1859,59 +2102,6 @@ const docState = reactive<{ loading: boolean; dok: any | null; error: string }>(
 })
 
 const activeDocTab = ref(0)
-
-const showBulkDeleteConfirm = ref(false)
-const bulkDeleting = ref(false)
-const bulkDeleteRows = ref<SantriRow[]>([])
-const bulkDeleteTitle = ref('Hapus data terpilih')
-
-function openBulkDeleteSelected(groupRows: SantriRow[]) {
-  const groupIds = new Set((groupRows || []).map((row) => getRowId(row)).filter(Boolean))
-
-  const selectedRows = (groupRows || []).filter((row) => {
-    const id = getRowId(row)
-    return id && groupIds.has(id) && selectedDeleteIds.value.includes(id)
-  })
-
-  if (!selectedRows.length) return
-
-  bulkDeleteRows.value = selectedRows
-  bulkDeleteTitle.value = 'Hapus data terpilih'
-  showBulkDeleteConfirm.value = true
-}
-
-function openBulkDeleteGroup(group: any) {
-  const groupRows = Array.isArray(group?.rows) ? group.rows : []
-  if (!groupRows.length) return
-
-  bulkDeleteRows.value = groupRows
-  bulkDeleteTitle.value = `Hapus semua data pada ${group.title}`
-  showBulkDeleteConfirm.value = true
-}
-
-async function confirmBulkDelete() {
-  const ids = bulkDeleteRows.value
-    .map((row: any) => getRowId(row))
-    .filter(Boolean)
-
-  if (!ids.length) return
-
-  bulkDeleting.value = true
-
-  try {
-    for (const id of ids) {
-      await deleteSantri(id)
-    }
-
-    clearDeletedSelection(ids)
-    showBulkDeleteConfirm.value = false
-    bulkDeleteRows.value = []
-
-    await fetchSantri()
-  } finally {
-    bulkDeleting.value = false
-  }
-}
 
 const docTabs = computed(() => {
   const docs = collectDokumen({ dokumen: docState.dok || {} })
@@ -1948,6 +2138,7 @@ const currentTab = computed(() => {
 
 async function openDocs(id: string, row?: any) {
   if (usingCustomForm.value || isCustomRecord(row)) return
+
   showDocs.value = true
   activeDocTab.value = 0
   docState.loading = true
@@ -1968,8 +2159,8 @@ async function openDocs(id: string, row?: any) {
     if (activeDocTab.value >= docTabs.value.length) {
       activeDocTab.value = 0
     }
-  } catch (e: any) {
-    docState.error = e?.message || 'Gagal memuat dokumen.'
+  } catch (error: any) {
+    docState.error = error?.message || 'Gagal memuat dokumen.'
   } finally {
     docState.loading = false
   }
@@ -1980,14 +2171,14 @@ const showDetail = ref(false)
 const detailState = reactive({ loading: false, error: '' })
 const fullRecord = ref<any | null>(null)
 
-async function openDetail(r: SantriRow) {
+async function openDetail(row: SantriRow) {
   showDetail.value = true
   detailState.loading = true
   detailState.error = ''
   fullRecord.value = null
 
   try {
-    const full = await resolveFullRecord(r.id, r)
+    const full = await resolveFullRecord(row.id, row)
 
     if (!full) {
       detailState.error = 'Data detail tidak ditemukan.'
@@ -1995,8 +2186,8 @@ async function openDetail(r: SantriRow) {
     }
 
     fullRecord.value = full
-  } catch (e: any) {
-    detailState.error = e?.message || 'Gagal memuat detail pendaftaran.'
+  } catch (error: any) {
+    detailState.error = error?.message || 'Gagal memuat detail pendaftaran.'
   } finally {
     detailState.loading = false
   }
@@ -2269,28 +2460,28 @@ const detailDocSummary = computed(() => {
 })
 
 /** ===== Export Full Form ===== */
-function flattenDefaultForExport(rec: any) {
-  const s = rec?.ppdb?.siswa || {}
-  const a = rec?.ppdb?.alamat || {}
-  const p = rec?.ppdb?.pendidikan || {}
-  const o = rec?.ppdb?.ortu || {}
-  const w = rec?.ppdb?.wali || {}
+function flattenDefaultForExport(record: any) {
+  const s = record?.ppdb?.siswa || {}
+  const a = record?.ppdb?.alamat || {}
+  const p = record?.ppdb?.pendidikan || {}
+  const o = record?.ppdb?.ortu || {}
+  const w = record?.ppdb?.wali || {}
   const ayah = o?.ayah || {}
   const ibu = o?.ibu || {}
-  const docs = collectDokumen(rec)
+  const docs = collectDokumen(record)
 
   return {
-    id: rec?.id || '',
-    no_pendaftaran: rec?.ppdbCode || '',
-    gen: rec?.gen || '',
-    status: isCalon(rec) ? 'Calon' : 'Diterima',
-    tipe: rec?.tipe || '',
-    gender: rec?.gender || s?.jk || '',
-    created_at: formatCreatedAt(rec?.createdAt),
-    username: rec?.username || '',
-    public_token: rec?.publicToken || '',
+    id: record?.id || '',
+    no_pendaftaran: record?.ppdbCode || '',
+    gen: record?.gen || '',
+    status: isCalon(record) ? 'Calon' : 'Diterima',
+    tipe: record?.tipe || '',
+    gender: record?.gender || s?.jk || '',
+    created_at: formatCreatedAt(record?.createdAt),
+    username: record?.username || '',
+    public_token: record?.publicToken || '',
 
-    nama: rec?.santri || s?.nama || '',
+    nama: record?.santri || s?.nama || '',
     tempat_lahir: s?.tmpLahir || '',
     tanggal_lahir: s?.tglLahir || '',
     tinggi: s?.tinggi || '',
@@ -2298,7 +2489,7 @@ function flattenDefaultForExport(rec: any) {
     cita_cita: s?.cita || '',
     hobi: s?.hobi || '',
     no_kk: s?.kk || '',
-    nik: rec?.nik || s?.nik || '',
+    nik: record?.nik || s?.nik || '',
     nisn: s?.nisn || '',
 
     alamat_jalan: a?.jalan || '',
@@ -2311,7 +2502,7 @@ function flattenDefaultForExport(rec: any) {
     provinsi: a?.prov || '',
     kode_pos: a?.kodepos || '',
     tinggal_dengan: a?.tinggal || '',
-    alamat_ringkas: rec?.alamat || '',
+    alamat_ringkas: record?.alamat || '',
 
     pendidikan_status: p?.status || '',
     sekolah_asal: p?.sekolah || '',
@@ -2320,22 +2511,22 @@ function flattenDefaultForExport(rec: any) {
     lembaga_nonformal: p?.nfNama || '',
     alamat_nonformal: p?.nfAlamat || '',
 
-    ayah_nama: ayah?.nama || rec?.ayahNama || '',
+    ayah_nama: ayah?.nama || record?.ayahNama || '',
     ayah_status: ayah?.status || '',
     ayah_pendidikan: ayah?.pendidikan || '',
     ayah_pekerjaan: ayah?.pekerjaan || '',
     ayah_penghasilan: ayah?.penghasilan || '',
 
-    ibu_nama: ibu?.nama || rec?.ibuNama || '',
+    ibu_nama: ibu?.nama || record?.ibuNama || '',
     ibu_status: ibu?.status || '',
     ibu_pendidikan: ibu?.pendidikan || '',
     ibu_pekerjaan: ibu?.pekerjaan || '',
     ibu_penghasilan: ibu?.penghasilan || '',
 
-    hp_1: o?.hp1 || rec?.nohp || '',
+    hp_1: o?.hp1 || record?.nohp || '',
     hp_2: o?.hp2 || '',
 
-    wali_nama: w?.nama || rec?.walisantri || '',
+    wali_nama: w?.nama || record?.walisantri || '',
     wali_status: w?.status || '',
     wali_pendidikan: w?.pendidikan || '',
     wali_pekerjaan: w?.pekerjaan || '',
@@ -2350,34 +2541,34 @@ function flattenDefaultForExport(rec: any) {
   }
 }
 
-function flattenCustomForExport(rec: any) {
+function flattenCustomForExport(record: any) {
   const output: Record<string, any> = {
-    id: rec?.id || '',
-    no_pendaftaran: rec?.ppdbCode || '',
-    gen: rec?.gen || '',
-    status: isCalon(rec) ? 'Calon' : 'Diterima',
-    created_at: formatCreatedAt(rec?.createdAt),
-    username: rec?.username || '',
-    public_token: rec?.publicToken || ''
+    id: record?.id || '',
+    no_pendaftaran: record?.ppdbCode || '',
+    gen: record?.gen || '',
+    status: isCalon(record) ? 'Calon' : 'Diterima',
+    created_at: formatCreatedAt(record?.createdAt),
+    username: record?.username || '',
+    public_token: record?.publicToken || ''
   }
 
   for (const field of activeCustomFields.value) {
     const key = safeColumnKey(field.label || field.key || field.id)
-    output[key] = formatCustomValue(getCustomFieldValue(rec, field), field.type)
+    output[key] = formatCustomValue(getCustomFieldValue(record, field), field.type)
   }
 
   return output
 }
 
-function flattenForExport(rec: any) {
+function flattenForExport(record: any) {
   return usingCustomForm.value
-    ? flattenCustomForExport(rec)
-    : flattenDefaultForExport(rec)
+    ? flattenCustomForExport(record)
+    : flattenDefaultForExport(record)
 }
 
 function csvEscape(value: any) {
-  const s = String(value ?? '')
-  const escaped = s.replace(/"/g, '""')
+  const text = String(value ?? '')
+  const escaped = text.replace(/"/g, '""')
   return /[",\n\r]/.test(escaped) ? `"${escaped}"` : escaped
 }
 
@@ -2389,7 +2580,7 @@ function toCSV(records: any[]) {
 
   const head = headers.join(',')
   const body = flat
-    .map((row) => headers.map((h) => csvEscape((row as any)[h])).join(','))
+    .map((row) => headers.map((header) => csvEscape((row as any)[header])).join(','))
     .join('\n')
 
   return `${head}\n${body}`
@@ -2406,10 +2597,10 @@ function toExcelHtml(records: any[]) {
   const flat = records.map(flattenForExport)
   const headers = flat.length ? Object.keys(flat[0] || {}) : ['id']
 
-  const headerHtml = headers.map((h) => `<th>${excelEscape(h)}</th>`).join('')
+  const headerHtml = headers.map((header) => `<th>${excelEscape(header)}</th>`).join('')
   const rowsHtml = flat
     .map((row) => {
-      return `<tr>${headers.map((h) => `<td>${excelEscape((row as any)[h])}</td>`).join('')}</tr>`
+      return `<tr>${headers.map((header) => `<td>${excelEscape((row as any)[header])}</td>`).join('')}</tr>`
     })
     .join('')
 
@@ -2436,13 +2627,13 @@ function toExcelHtml(records: any[]) {
 function downloadBlob(content: BlobPart, filename: string, type: string) {
   const blob = new Blob([content], { type })
   const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
+  const anchor = document.createElement('a')
 
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
+  anchor.href = url
+  anchor.download = filename
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
 
   URL.revokeObjectURL(url)
 }
@@ -2479,32 +2670,24 @@ async function exportRows(source: SantriRow[], filename: string, type: 'csv' | '
   }
 }
 
-async function exportFullCSV(source: SantriRow[], filename: string) {
-  await exportRows(source, filename.replace(/\.csv$/i, ''), 'csv')
-}
-
 /** ===== Auto close ===== */
 const isOpen = computed(() => !settings.value.isClosed)
 
 const autoBadge = computed(() => {
   if (!settings.value.autoCloseEnabled || !settings.value.autoCloseAt) return ''
 
-  const d = new Date(settings.value.autoCloseAt)
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  const hh = String(d.getHours()).padStart(2, '0')
-  const mm = String(d.getMinutes()).padStart(2, '0')
+  const date = new Date(settings.value.autoCloseAt)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hour = String(date.getHours()).padStart(2, '0')
+  const minute = String(date.getMinutes()).padStart(2, '0')
 
-  return `Auto • ${y}-${m}-${day} ${hh}:${mm}`
+  return `Auto • ${year}-${month}-${day} ${hour}:${minute}`
 })
 
-function toggleOpen() {
-  saveSettings({ isClosed: isOpen.value ? true : false })
-}
-
 function toLocalDatetimeInput(date: Date) {
-  const pad = (n: number) => String(n).padStart(2, '0')
+  const pad = (number: number) => String(number).padStart(2, '0')
 
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
@@ -2514,36 +2697,36 @@ const autoCloseLocal = computed(() => {
   return toLocalDatetimeInput(new Date(settings.value.autoCloseAt))
 })
 
-function onAutoCloseChange(v: string) {
-  if (!v) {
+function onAutoCloseChange(value: string) {
+  if (!value) {
     saveSettings({ autoCloseAt: '' })
     return
   }
 
   saveSettings({
     autoCloseEnabled: true,
-    autoCloseAt: new Date(v).toISOString()
+    autoCloseAt: new Date(value).toISOString()
   })
 }
 
 function pickTonight() {
-  const d = new Date()
-  d.setHours(23, 59, 0, 0)
+  const date = new Date()
+  date.setHours(23, 59, 0, 0)
 
   saveSettings({
     autoCloseEnabled: true,
-    autoCloseAt: d.toISOString()
+    autoCloseAt: date.toISOString()
   })
 }
 
-function pickInDays(n: number) {
-  const d = new Date()
-  d.setDate(d.getDate() + n)
-  d.setHours(23, 59, 0, 0)
+function pickInDays(days: number) {
+  const date = new Date()
+  date.setDate(date.getDate() + days)
+  date.setHours(23, 59, 0, 0)
 
   saveSettings({
     autoCloseEnabled: true,
-    autoCloseAt: d.toISOString()
+    autoCloseAt: date.toISOString()
   })
 }
 
@@ -2551,15 +2734,6 @@ function clearSchedule() {
   saveSettings({
     autoCloseEnabled: false,
     autoCloseAt: ''
-  })
-}
-
-function testScheduleNow() {
-  const d = new Date(Date.now() + 60 * 1000)
-
-  saveSettings({
-    autoCloseEnabled: true,
-    autoCloseAt: d.toISOString()
   })
 }
 
@@ -2594,18 +2768,18 @@ const countdownText = computed(() => {
   if (!Number.isFinite(due)) return 'Jadwal tidak valid'
   if (diff <= 0) return 'Sudah waktunya ditutup'
 
-  const sec = Math.floor(diff / 1000)
-  const d = Math.floor(sec / 86400)
-  const h = Math.floor((sec % 86400) / 3600)
-  const m = Math.floor((sec % 3600) / 60)
-  const s = sec % 60
-  const pad = (n: number) => String(n).padStart(2, '0')
+  const second = Math.floor(diff / 1000)
+  const day = Math.floor(second / 86400)
+  const hour = Math.floor((second % 86400) / 3600)
+  const minute = Math.floor((second % 3600) / 60)
+  const sec = second % 60
+  const pad = (number: number) => String(number).padStart(2, '0')
 
-  return d > 0 ? `${d} hari ${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(h)}:${pad(m)}:${pad(s)}`
+  return day > 0 ? `${day} hari ${pad(hour)}:${pad(minute)}:${pad(sec)}` : `${pad(hour)}:${pad(minute)}:${pad(sec)}`
 })
 
 const countdownClass = computed(() => {
-  if (!settings.value.autoCloseEnabled || !settings.value.autoCloseAt) return 'text-gray-600 dark:text-neutral-300'
+  if (!settings.value.autoCloseEnabled || !settings.value.autoCloseAt) return 'text-slate-600 dark:text-neutral-300'
 
   const due = new Date(settings.value.autoCloseAt).getTime()
   const diff = due - now.value
@@ -2617,6 +2791,5 @@ const countdownClass = computed(() => {
 
 onUnmounted(() => {
   if (timer) clearInterval(timer)
-  if (yearDebounce) clearTimeout(yearDebounce)
 })
 </script>

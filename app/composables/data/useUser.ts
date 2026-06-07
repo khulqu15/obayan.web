@@ -1,7 +1,15 @@
 // composables/data/useUser.ts
 import { ref as vRef, computed } from 'vue'
 import { child, get, ref as dbRef, set, update, remove } from 'firebase/database'
-import { createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail, getAuth, type Auth } from 'firebase/auth'
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  updatePassword,
+  updateProfile,
+  type Auth
+} from 'firebase/auth'
 import { initializeApp, getApps } from 'firebase/app'
 
 export type AppRole = 'admin' | 'pengurus' | 'wali'
@@ -124,7 +132,7 @@ export const useUser = () => {
   const rows = vRef<UserRow[]>([])
   const createdTempPassword = vRef<string>('')
 
-  const { $realtimeDb, $auth } = useNuxtApp() as any
+  const { $realtimeDb, $auth, $secondaryAuth } = useNuxtApp() as any
 
   // READ
   async function fetchUsers() {
@@ -163,44 +171,127 @@ export const useUser = () => {
     role: AppRole
     createAuth?: boolean
     password?: string
+    allowedRoutes?: string[]
   }) {
     loading.value = true
     error.value = null
     createdTempPassword.value = ''
+
     try {
-      const { displayName, email, phone, role, createAuth, password: inputPassword } = opts
+      const {
+        displayName,
+        email,
+        phone,
+        role,
+        createAuth,
+        password: inputPassword,
+        allowedRoutes
+      } = opts
+
       let uid = ''
-      let loginEmail = email?.trim()
-      if (!loginEmail && phone) loginEmail = phoneToEmail(phone)
+      let loginEmail = String(email || '').trim().toLowerCase()
+
+      if (!loginEmail && phone) {
+        loginEmail = phoneToEmail(phone).toLowerCase()
+      }
+
+      const authForCreate = $secondaryAuth || ensureSecondaryAuth($auth)
+      const password = inputPassword?.trim()?.length
+        ? inputPassword.trim()
+        : generatePassword(12)
+
+      let authMode: 'created' | 'synced-existing' | 'profile-only' = 'profile-only'
 
       if (createAuth && loginEmail) {
-        const secondaryAuth = ensureSecondaryAuth($auth)
-        const password = (inputPassword?.trim()?.length ? inputPassword.trim() : generatePassword(12))
-        const cred = await createUserWithEmailAndPassword(secondaryAuth, loginEmail, password)
-        await updateProfile(cred.user, { displayName })
-        uid = cred.user.uid
-        createdTempPassword.value = password
-        await secondaryAuth.signOut().catch(() => {})
+        try {
+          const cred = await createUserWithEmailAndPassword(authForCreate, loginEmail, password)
+
+          await updateProfile(cred.user, { displayName })
+
+          uid = cred.user.uid
+          createdTempPassword.value = password
+          authMode = 'created'
+
+          await authForCreate.signOut().catch(() => {})
+        } catch (e: any) {
+          const code = String(e?.code || '')
+          const message = String(e?.message || '')
+
+          const isEmailAlreadyUsed =
+            code === 'auth/email-already-in-use' ||
+            message.includes('email-already-in-use')
+
+          if (!isEmailAlreadyUsed) {
+            throw e
+          }
+
+          if (!inputPassword?.trim()) {
+            throw new Error(
+              `Email ${loginEmail} sudah ada di Firebase Auth, tetapi belum ada di database users. Karena tidak memakai server/Admin SDK, masukkan password lama akun tersebut untuk sinkron UID ke RTDB, atau kirim reset password dulu.`
+            )
+          }
+
+          try {
+            const existingCred = await signInWithEmailAndPassword(
+              authForCreate,
+              loginEmail,
+              inputPassword.trim()
+            )
+
+            uid = existingCred.user.uid
+            authMode = 'synced-existing'
+
+            await updateProfile(existingCred.user, { displayName }).catch(() => {})
+            await authForCreate.signOut().catch(() => {})
+          } catch (signInError: any) {
+            const signInCode = String(signInError?.code || '')
+
+            if (
+              signInCode === 'auth/wrong-password' ||
+              signInCode === 'auth/invalid-credential' ||
+              signInCode === 'auth/invalid-login-credentials'
+            ) {
+              throw new Error(
+                `Email ${loginEmail} memang sudah ada di Firebase Auth, tetapi password yang dimasukkan tidak cocok. Gunakan password lama yang benar atau reset password terlebih dahulu.`
+              )
+            }
+
+            throw signInError
+          }
+        }
       } else {
         uid = crypto.randomUUID()
+        authMode = 'profile-only'
+      }
+
+      if (!uid) {
+        throw new Error('UID gagal dibuat atau disinkronkan.')
       }
 
       const profile: UserRow = {
         uid,
-        displayName,
+        displayName: String(displayName || '').trim(),
         email: loginEmail,
         phone,
         role,
         isActive: true,
-        allowedRoutes: ROLE_DEFAULT_ROUTES[role],
+        allowedRoutes: Array.isArray(allowedRoutes) && allowedRoutes.length
+          ? allowedRoutes
+          : ROLE_DEFAULT_ROUTES[role],
         createdAt: now(),
-        updatedAt: now(),
+        updatedAt: now()
       }
+
       await set(dbRef($realtimeDb, `${clientName}/users/${uid}`), profile)
+
+      if (authMode === 'synced-existing') {
+        createdTempPassword.value = ''
+      }
+
       return profile
     } catch (e: any) {
-      console.error(e)
-      error.value = e?.message ?? 'Gagal membuat user'
+      const message = String(e?.message || 'Gagal membuat user')
+      error.value = message
       throw e
     } finally {
       loading.value = false
