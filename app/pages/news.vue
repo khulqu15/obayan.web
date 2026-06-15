@@ -13,8 +13,17 @@
     <!-- Hero -->
     <section class="relative pt-28 md:pt-32">
       <div class="absolute inset-0">
+        <div
+          v-if="isPageConfigLoading || !cfg.hero.cover"
+          class="h-full w-full bg-gradient-to-br from-green-700 via-green-600 to-lime-500"
+        >
+          <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,.12)_1px,transparent_1px)] bg-[size:34px_34px] opacity-40"></div>
+          <div class="absolute -left-24 top-16 h-80 w-80 rounded-full bg-white/20 blur-3xl"></div>
+          <div class="absolute -right-24 bottom-12 h-80 w-80 rounded-full bg-lime-200/25 blur-3xl"></div>
+        </div>
+
         <img
-          v-if="cfg.hero.cover && !isBrokenNewsImage(cfg.hero.cover)"
+          v-else-if="cfg.hero.cover && !isBrokenNewsImage(cfg.hero.cover)"
           :src="cfg.hero.cover"
           alt="Cover News"
           class="h-full w-full object-cover opacity-90"
@@ -38,7 +47,14 @@
         class="relative mx-auto flex max-w-[85rem] items-end px-4 sm:px-6 lg:px-8 heroH"
         :style="{ '--hero-sm': cfg.hero.heightSm, '--hero-lg': cfg.hero.heightLg }"
       >
-        <div class="mb-10 max-w-3xl">
+        <div v-if="isPageConfigLoading" class="mb-10 max-w-3xl">
+          <div class="h-7 w-36 animate-pulse rounded-full bg-white/20"></div>
+          <div class="mt-4 h-12 w-[min(42rem,82vw)] animate-pulse rounded-2xl bg-white/20 sm:h-14"></div>
+          <div class="mt-3 h-5 w-[min(32rem,75vw)] animate-pulse rounded bg-white/20"></div>
+          <div class="mt-2 h-5 w-[min(24rem,60vw)] animate-pulse rounded bg-white/15"></div>
+        </div>
+
+        <div v-else class="mb-10 max-w-3xl">
           <p class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-green-100 backdrop-blur">
             <span class="inline-block h-2 w-2 rounded-full bg-lime-300"></span>
             {{ cfg.hero.badge }}
@@ -93,7 +109,7 @@
         </div>
 
         <div
-          v-if="!current && !pending"
+          v-if="!current && !isInitialLoading"
           class="mt-6 rounded-[30px] border border-dashed border-gray-300 bg-white/90 p-10 text-center shadow-sm backdrop-blur dark:border-neutral-700 dark:bg-neutral-900/80"
         >
           <div class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-300">
@@ -114,7 +130,7 @@
           </button>
         </div>
 
-        <div v-if="pending" class="mt-6 overflow-hidden rounded-[30px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 sm:p-8">
+        <div v-if="isInitialLoading" class="mt-6 overflow-hidden rounded-[30px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 sm:p-8">
           <div class="h-8 w-3/4 animate-pulse rounded bg-gray-200/80 dark:bg-neutral-800"></div>
           <div class="mt-4 h-4 w-1/2 animate-pulse rounded bg-gray-200/80 dark:bg-neutral-800"></div>
           <div class="mt-6 h-72 animate-pulse rounded-[24px] bg-gray-200/80 dark:bg-neutral-800"></div>
@@ -460,7 +476,7 @@
         </section>
 
         <!-- Loading -->
-        <section v-if="pending" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <section v-if="isInitialLoading" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <article
             v-for="i in 8"
             :key="i"
@@ -597,7 +613,7 @@
         </section>
 
         <!-- Load More -->
-        <div v-if="hasMore && !pending" class="mt-8 text-center">
+        <div v-if="hasMore && !isInitialLoading" class="mt-8 text-center">
           <button
             type="button"
             class="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
@@ -916,15 +932,15 @@ function triggerCopiedToast() {
 
 const PAGE_DEFAULTS = {
   hero: {
-    cover: '/assets/images/profile.png',
+    cover: '',
     badge: 'Kabar Terbaru',
-    title: 'Berita Pondok Pesantren Al-Inayah',
-    subtitle: 'Informasi kegiatan, pengumuman, dan liputan santri.',
+    title: 'Berita Lembaga',
+    subtitle: 'Informasi kegiatan, pengumuman, dan kabar terbaru lembaga.',
     heightSm: '36vh',
     heightLg: '44vh'
   },
   texts: {
-    searchPlaceholder: 'Cari berita (judul/isi/tag)…',
+    searchPlaceholder: 'Cari berita lembaga…',
     emptyList: 'Berita masih kosong.',
     notFound: 'Berita tidak ditemukan.',
     loadMore: 'Tampilkan Lebih Banyak'
@@ -954,13 +970,38 @@ const runtime = useRuntimeConfig()
 const NEWS_PAGE_PATH = '/news'
 
 const web = useWeb()
-const { data: pageSnap } = useAsyncData<WebPageSnapshot | null>(
-  `webpage-${NEWS_PAGE_PATH}`,
+function safeSnapshotKey() {
+  const host =
+    typeof window !== 'undefined'
+      ? window.location.host
+      : String(runtime.public?.siteUrl || runtime.public?.siteURL || 'default')
+
+  return `webpage-${host.replace(/[^a-z0-9.-]/gi, '-')}-${NEWS_PAGE_PATH}`
+}
+
+const {
+  data: pageSnap,
+  pending: pageSnapPending,
+  status: pageSnapStatus
+} = useAsyncData<WebPageSnapshot | null>(
+  safeSnapshotKey(),
   async () => {
     const snap = await web.getPageSnapshot(NEWS_PAGE_PATH)
     return (snap || null) as WebPageSnapshot | null
+  },
+  {
+    server: false,
+    default: () => null
   }
 )
+
+const isPageConfigLoading = computed(() => {
+  return pageSnapStatus.value === 'idle' || pageSnapStatus.value === 'pending' || pageSnapPending.value
+})
+
+const isInitialLoading = computed(() => {
+  return Boolean(pending.value || isPageConfigLoading.value)
+})
 
 const newsSectionProps = computed<any>(() => {
   const sections: any = pageSnap.value?.sections || []
@@ -1059,10 +1100,8 @@ function limitSeoText(value?: string, max = 160) {
 const organizationName = computed(() => {
   return resolveSyncedText(
     pageMeta.value?.organizationName ||
-      pageMeta.value?.siteName ||
-      runtime.public?.siteName ||
-      runtime.public?.clientName,
-    'Pondok Pesantren Al-Inayah',
+      pageMeta.value?.siteName,
+    'Lembaga',
     LEGACY_ORGANIZATION_NAMES
   )
 })
@@ -1078,7 +1117,7 @@ const organizationLogo = computed(() => {
 const baseTitle = computed(() => {
   return resolveSyncedText(
     pageMeta.value?.title,
-    cfg.value.hero.title || 'Berita | Pondok Pesantren',
+    cfg.value.hero.title || 'Berita | Lembaga',
     LEGACY_NEWS_TITLES
   )
 })
@@ -1087,7 +1126,7 @@ const baseDescription = computed(() => {
   return limitSeoText(
     pageMeta.value?.description ||
       cfg.value.hero.subtitle ||
-      'Kumpulan kabar terbaru: kegiatan, pengumuman, prestasi, kajian santri.',
+      'Kumpulan kabar terbaru lembaga: kegiatan, pengumuman, dan informasi penting.',
     160
   )
 })
@@ -1162,12 +1201,11 @@ const seoKeywords = computed(() => {
     articleSegment.value,
     ...articleTags.value,
     organizationName.value,
-    'berita pondok',
-    'berita pesantren',
-    'informasi pesantren',
-    'kegiatan santri',
-    'pengumuman pondok',
-    'prestasi santri'
+    'berita lembaga',
+    'informasi lembaga',
+    'kegiatan lembaga',
+    'pengumuman lembaga',
+    'prestasi lembaga'
   ]
 
   return values
@@ -1195,7 +1233,7 @@ const modifiedIso = computed(() => {
 })
 
 const robotsMeta = computed(() => {
-  if (isDetail.value && !current.value && !pending.value) {
+  if (isDetail.value && !current.value && !isInitialLoading.value) {
     return 'noindex, follow'
   }
 

@@ -14,8 +14,17 @@
     <!-- Hero -->
     <section class="relative pt-28 md:pt-32">
       <div class="absolute inset-0">
+        <div
+          v-if="isPageConfigLoading || !hero.cover"
+          class="h-full w-full bg-gradient-to-br from-green-700 via-green-600 to-lime-500"
+        >
+          <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,.12)_1px,transparent_1px)] bg-[size:34px_34px] opacity-40"></div>
+          <div class="absolute -left-24 top-16 h-80 w-80 rounded-full bg-white/20 blur-3xl"></div>
+          <div class="absolute -right-24 bottom-12 h-80 w-80 rounded-full bg-lime-200/25 blur-3xl"></div>
+        </div>
+
         <img
-          v-if="hero.cover && !isBrokenImage(hero.cover)"
+          v-else-if="hero.cover && !isBrokenImage(hero.cover)"
           :src="hero.cover"
           alt="Cover Gallery"
           class="h-full w-full object-cover opacity-90"
@@ -39,7 +48,14 @@
         class="relative mx-auto flex max-w-[85rem] items-end px-4 sm:px-6 lg:px-8"
         :style="{ height: heroHeight }"
       >
-        <div class="mb-10 max-w-3xl">
+        <div v-if="isPageConfigLoading" class="mb-10 max-w-3xl">
+          <div class="h-7 w-32 animate-pulse rounded-full bg-white/20"></div>
+          <div class="mt-4 h-12 w-[min(36rem,82vw)] animate-pulse rounded-2xl bg-white/20 sm:h-14"></div>
+          <div class="mt-3 h-5 w-[min(32rem,75vw)] animate-pulse rounded bg-white/20"></div>
+          <div class="mt-2 h-5 w-[min(24rem,60vw)] animate-pulse rounded bg-white/15"></div>
+        </div>
+
+        <div v-else class="mb-10 max-w-3xl">
           <p class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-green-100 backdrop-blur">
             <span class="inline-block h-2 w-2 rounded-full bg-lime-300"></span>
             {{ hero.badge }}
@@ -209,7 +225,7 @@
 
       <!-- Empty -->
       <section
-        v-if="!loading && filtered.length === 0"
+        v-if="!isInitialLoading && filtered.length === 0"
         class="mt-6 rounded-[30px] border border-dashed border-gray-300 bg-white/90 p-10 text-center shadow-sm backdrop-blur dark:border-neutral-700 dark:bg-neutral-900/80"
       >
         <div class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-300">
@@ -226,7 +242,7 @@
       </section>
 
       <!-- Loading -->
-      <section v-else-if="loading" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <section v-else-if="isInitialLoading" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <div
           v-for="i in 8"
           :key="i"
@@ -327,7 +343,7 @@
       </section>
 
       <!-- Load More -->
-      <div v-if="hasMore && !loading" class="mt-8 text-center">
+      <div v-if="hasMore && !isInitialLoading" class="mt-8 text-center">
         <button
           type="button"
           class="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700"
@@ -496,9 +512,8 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { Icon } from '@iconify/vue'
-import { useRoute } from 'vue-router'
 import { useHead, useRuntimeConfig, useSeoMeta } from 'nuxt/app'
+import { Icon } from '@iconify/vue'
 import { useWeb } from '~/composables/data/useWeb'
 
 definePageMeta({
@@ -543,14 +558,31 @@ type Shape = {
   }
 }
 
+type WebPageSnapshot = {
+  meta?: {
+    title?: string
+    description?: string
+    ogImage?: string
+    themeColor?: string
+    robots?: string
+    organizationName?: string
+    siteName?: string
+    logo?: string
+  }
+  sections?: Array<{
+    key?: string
+    props?: any
+  }>
+}
+
 const PATH = '/gallery'
 
 const defaults: Shape = {
   hero: {
-    cover: '/assets/images/activity1.jpg',
+    cover: '',
     badge: 'Galeri',
-    title: 'Galeri',
-    subtitle: 'Dokumentasi kegiatan, fasilitas, dan momen terbaik.',
+    title: 'Galeri Lembaga',
+    subtitle: 'Dokumentasi kegiatan, fasilitas, dan momen terbaik lembaga.',
     heightSm: '36vh',
     heightLg: '44vh'
   },
@@ -564,12 +596,9 @@ const defaults: Shape = {
   }
 }
 
-const route = useRoute()
 const config = useRuntimeConfig()
 const web = useWeb()
-const { subscribePage, sections, meta } = web
 
-const loading = ref(true)
 const q = ref('')
 const selectedCategory = ref('all')
 const selectedTag = ref('all')
@@ -593,6 +622,107 @@ const tx = ref(0)
 const ty = ref(0)
 const isDragging = ref(false)
 
+const FALLBACK_CREATED_AT = Date.now()
+
+const pageSnap = ref<WebPageSnapshot | null>(null)
+const pageSnapError = ref('')
+const loading = ref(true)
+
+function getCurrentHost() {
+  if (typeof window !== 'undefined') {
+    return window.location.host
+  }
+
+  return String(config.public?.siteUrl || config.public?.siteURL || 'default')
+}
+
+function snapshotStorageKey() {
+  return `obayan-page-snapshot:${getCurrentHost()}:${PATH}`
+}
+
+function normalizeSnapshot(snapshot: any): WebPageSnapshot | null {
+  if (!snapshot || typeof snapshot !== 'object') return null
+
+  return {
+    meta: snapshot.meta && typeof snapshot.meta === 'object' ? snapshot.meta : {},
+    sections: Array.isArray(snapshot.sections) ? snapshot.sections : []
+  }
+}
+
+function hydrateSnapshotFromCache() {
+  if (typeof window === 'undefined') return
+
+  try {
+    const raw = window.sessionStorage.getItem(snapshotStorageKey())
+    if (!raw) return
+
+    const parsed = JSON.parse(raw)
+    const normalized = normalizeSnapshot(parsed)
+
+    if (normalized) {
+      pageSnap.value = normalized
+    }
+  } catch {
+    // ignore cache error
+  }
+}
+
+function cacheSnapshot(snapshot: WebPageSnapshot | null) {
+  if (typeof window === 'undefined' || !snapshot) return
+
+  try {
+    window.sessionStorage.setItem(snapshotStorageKey(), JSON.stringify(snapshot))
+  } catch {
+    // ignore cache error
+  }
+}
+
+
+async function loadPageSnapshot() {
+  loading.value = !pageSnap.value
+  pageSnapError.value = ''
+
+  try {
+    const api = web as any
+    api?.setActivePath?.(PATH)
+
+    let snapshot: WebPageSnapshot | null = null
+
+    if (typeof api?.getPageSnapshot === 'function') {
+      snapshot = normalizeSnapshot(await api.getPageSnapshot(PATH))
+    } else if (typeof api?.subscribePage === 'function') {
+      try {
+        await api.subscribePage(PATH)
+
+        snapshot = normalizeSnapshot({
+          meta: api.meta?.value || api.meta || {},
+          sections: api.sections?.value || api.sections || []
+        })
+      } catch (err: any) {
+        pageSnapError.value = String(err?.message || err || 'Gagal memuat konfigurasi galeri.')
+      }
+    }
+
+    if (snapshot) {
+      pageSnap.value = snapshot
+      cacheSnapshot(snapshot)
+    }
+  } catch (err: any) {
+    pageSnapError.value = String(err?.message || err || 'Gagal memuat konfigurasi galeri.')
+    hydrateSnapshotFromCache()
+  } finally {
+    loading.value = false
+  }
+}
+
+const isPageConfigLoading = computed(() => {
+  return loading.value && !pageSnap.value
+})
+
+const isInitialLoading = computed(() => {
+  return loading.value && !pageSnap.value
+})
+
 let mediaQuery: MediaQueryList | null = null
 let startX = 0
 let startY = 0
@@ -602,14 +732,122 @@ let pinchStartDist = 0
 let pinchStartScale = 1
 let pinchCenter = { x: 0, y: 0 }
 
-const canonical = computed(() => {
-  const siteUrl = String(config.public?.siteUrl || '').replace(/\/$/, '')
-  return siteUrl ? `${siteUrl}${PATH}` : PATH
+const pageMeta = computed(() => {
+  return pageSnap.value?.meta && typeof pageSnap.value.meta === 'object'
+    ? pageSnap.value.meta
+    : {}
 })
 
-const seoTitle = computed(() => meta.value?.title || 'Galeri')
-const seoDesc = computed(() => meta.value?.description || 'Dokumentasi kegiatan, fasilitas, dan momen terbaik.')
-const ogImage = computed(() => meta.value?.ogImage || '/assets/logo.png')
+const galleryProps = computed<Partial<Shape>>(() => {
+  const list = Array.isArray(pageSnap.value?.sections) ? pageSnap.value?.sections || [] : []
+  const found = list.find((section: any) => section?.key === 'GalleryPage')?.props
+
+  return found && typeof found === 'object' ? found as Partial<Shape> : {}
+})
+
+const shape = computed<Shape>(() => {
+  return merge(defaults, galleryProps.value)
+})
+
+const hero = computed<Shape['hero']>(() => {
+  return shape.value?.hero || defaults.hero
+})
+
+const texts = computed<Shape['texts']>(() => {
+  return shape.value?.texts || defaults.texts
+})
+
+const siteOrigin = computed(() => {
+  const fromRuntime =
+    config.public?.siteUrl ||
+    config.public?.siteURL ||
+    config.public?.site_url ||
+    ''
+
+  if (fromRuntime) {
+    return String(fromRuntime).replace(/\/$/, '')
+  }
+
+  if (typeof window !== 'undefined') {
+    return window.location.origin
+  }
+
+  return ''
+})
+
+function toAbsoluteUrl(url?: string) {
+  const raw = String(url || '/assets/logo.png').trim()
+
+  if (raw.startsWith('http://') || raw.startsWith('https://')) {
+    return raw
+  }
+
+  if (!siteOrigin.value) return raw
+
+  return `${siteOrigin.value}${raw.startsWith('/') ? raw : `/${raw}`}`
+}
+
+function stripHtml(value?: string) {
+  return String(value || '')
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function limitSeoText(value?: string, max = 160) {
+  const clean = stripHtml(value)
+  if (!clean) return ''
+  return clean.length > max ? `${clean.slice(0, max).trim()}...` : clean
+}
+
+const canonical = computed(() => {
+  return siteOrigin.value ? `${siteOrigin.value}${PATH}` : PATH
+})
+
+const organizationName = computed(() => {
+  return resolveSyncedText(
+    pageMeta.value?.organizationName || pageMeta.value?.siteName,
+    'Lembaga'
+  )
+})
+
+const seoTitle = computed(() => {
+  const fallbackTitle = hero.value?.title || defaults.hero.title || 'Galeri Lembaga'
+
+  return resolveSyncedText(
+    pageMeta.value?.title,
+    fallbackTitle
+  )
+})
+
+const seoDesc = computed(() => {
+  return limitSeoText(
+    pageMeta.value?.description ||
+      hero.value?.subtitle ||
+      defaults.hero.subtitle ||
+      'Dokumentasi kegiatan, fasilitas, dan momen terbaik lembaga.',
+    160
+  )
+})
+
+const ogImage = computed(() => {
+  return toAbsoluteUrl(
+    pageMeta.value?.ogImage ||
+      hero.value?.cover ||
+      pageMeta.value?.logo ||
+      '/assets/logo.png'
+  )
+})
+
+const themeColor = computed(() => {
+  return pageMeta.value?.themeColor || config.public?.themeColor || '#16a34a'
+})
 
 useSeoMeta({
   title: () => seoTitle.value,
@@ -619,9 +857,14 @@ useSeoMeta({
   ogType: 'website',
   ogUrl: () => canonical.value,
   ogImage: () => ogImage.value,
+  ogImageAlt: () => organizationName.value,
+  ogSiteName: () => organizationName.value,
   twitterCard: 'summary_large_image',
-  themeColor: '#16a34a',
-  robots: 'index, follow'
+  twitterTitle: () => seoTitle.value,
+  twitterDescription: () => seoDesc.value,
+  twitterImage: () => ogImage.value,
+  themeColor: () => themeColor.value,
+  robots: () => pageMeta.value?.robots || 'index, follow'
 })
 
 useHead(() => ({
@@ -633,21 +876,8 @@ useHead(() => ({
   ]
 }))
 
-const galleryProps = computed<Partial<Shape> | undefined>(() => {
-  return sections.value.find((section: any) => section.key === 'GalleryPage')?.props as Partial<Shape> | undefined
-})
-
-const shape = computed<Shape>(() => merge(defaults, galleryProps.value))
-
-const hero = computed(() => shape.value.hero)
-const texts = computed(() => shape.value.texts)
-
-const heroHeight = computed(() => {
-  return isLg.value ? hero.value.heightLg : hero.value.heightSm
-})
-
 const items = computed<GalleryItem[]>(() => {
-  return (shape.value.gallery.items || []).map((item, idx) => {
+  return (shape.value?.gallery?.items || []).map((item, idx) => {
     const tags = Array.isArray(item.tags)
       ? item.tags.map((tag) => String(tag).trim()).filter(Boolean)
       : tagsArray(item.tagsText)
@@ -657,7 +887,7 @@ const items = computed<GalleryItem[]>(() => {
       title: String(item.title || '').trim() || `Dokumentasi #${idx + 1}`,
       category: String(item.category || '').trim() || 'Umum',
       tags,
-      createdAt: Number(item.createdAt || Date.now() - (idx + 1) * 86400000),
+      createdAt: Number.isFinite(Number(item.createdAt)) ? Number(item.createdAt) : FALLBACK_CREATED_AT - (idx + 1) * 86400000,
       cloudinaryPublicId: String(item.cloudinaryPublicId || '').trim()
     }
   })
@@ -672,14 +902,18 @@ const allTags = computed(() => {
 })
 
 const filtered = computed(() => {
-  const query = q.value.trim().toLowerCase()
+  const query = normalizeSearchText(q.value)
 
   const result = items.value.filter((item) => {
+    const title = normalizeSearchText(item.title)
+    const category = normalizeSearchText(item.category)
+    const tags = item.tags.map((tag) => normalizeSearchText(tag))
+
     const matchQuery =
       !query ||
-      item.title.toLowerCase().includes(query) ||
-      item.category.toLowerCase().includes(query) ||
-      item.tags.some((tag) => tag.toLowerCase().includes(query))
+      title.includes(query) ||
+      category.includes(query) ||
+      tags.some((tag) => tag.includes(query))
 
     const matchCategory = selectedCategory.value === 'all' || item.category === selectedCategory.value
     const matchTag = selectedTag.value === 'all' || item.tags.includes(selectedTag.value)
@@ -700,6 +934,12 @@ const filtered = computed(() => {
   }
 
   return result
+})
+
+const heroHeight = computed(() => {
+  return isLg.value
+    ? hero.value?.heightLg || defaults.hero.heightLg
+    : hero.value?.heightSm || defaults.hero.heightSm
 })
 
 const startIndex = computed(() => 0)
@@ -743,54 +983,48 @@ watch([q, selectedCategory, selectedTag, sortBy], () => {
   page.value = 1
 })
 
-watch(
-  () => route.path,
-  async () => {
-    await loadPage()
-  }
-)
-
 onMounted(async () => {
-  await loadPage()
+  hydrateSnapshotFromCache()
+
   setupMediaQuery()
   setupResizeListener()
+
+  await loadPageSnapshot()
 })
 
-onBeforeUnmount(() => {
-  document.removeEventListener('keydown', onKey)
-  window.removeEventListener('resize', onWindowResize)
+function resolveSyncedText(value: unknown, fallback: string, legacySet?: Set<string>) {
+  const text = String(value || '').trim()
 
-  if (mediaQuery) {
-    mediaQuery.removeEventListener('change', updateIsLg)
-  }
+  if (!text) return fallback
+  if (legacySet?.has(text)) return fallback
 
-  lockScroll(false)
-})
+  return text
+}
 
-async function loadPage() {
-  try {
-    loading.value = true
-    ;(web as any)?.setActivePath?.(PATH)
-    await subscribePage(PATH)
-  } finally {
-    loading.value = false
-  }
+function normalizeSearchText(value: string) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 function merge(base: Shape, patch?: Partial<Shape>): Shape {
   return {
     hero: {
-      cover: patch?.hero?.cover ?? base.hero.cover,
-      badge: patch?.hero?.badge ?? base.hero.badge,
-      title: patch?.hero?.title ?? base.hero.title,
-      subtitle: patch?.hero?.subtitle ?? base.hero.subtitle,
-      heightSm: patch?.hero?.heightSm ?? base.hero.heightSm,
-      heightLg: patch?.hero?.heightLg ?? base.hero.heightLg
+      cover: resolveSyncedText(patch?.hero?.cover, base.hero.cover),
+      badge: resolveSyncedText(patch?.hero?.badge, base.hero.badge),
+      title: resolveSyncedText(patch?.hero?.title, base.hero.title),
+      subtitle: resolveSyncedText(patch?.hero?.subtitle, base.hero.subtitle),
+      heightSm: resolveSyncedText(patch?.hero?.heightSm, base.hero.heightSm),
+      heightLg: resolveSyncedText(patch?.hero?.heightLg, base.hero.heightLg)
     },
     texts: {
-      searchPlaceholder: patch?.texts?.searchPlaceholder ?? base.texts.searchPlaceholder,
-      categoryAll: patch?.texts?.categoryAll ?? base.texts.categoryAll,
-      loadMore: patch?.texts?.loadMore ?? base.texts.loadMore
+      searchPlaceholder: resolveSyncedText(patch?.texts?.searchPlaceholder, base.texts.searchPlaceholder),
+      categoryAll: resolveSyncedText(patch?.texts?.categoryAll, base.texts.categoryAll),
+      loadMore: resolveSyncedText(patch?.texts?.loadMore, base.texts.loadMore)
     },
     gallery: {
       items: Array.isArray(patch?.gallery?.items) ? patch.gallery.items : base.gallery.items
