@@ -66,6 +66,9 @@ export default defineNuxtConfig({
       appSubtitle: process.env.NUXT_PUBLIC_APP_SUBTITLE || 'SIAKAD Ponpes. AL-INAYAH',
       appLogo: process.env.NUXT_PUBLIC_APP_LOGO || '/assets/logo.png',
       appThemeColor: process.env.NUXT_PUBLIC_APP_THEME_COLOR || '#0ea5e9',
+      saasExpiresAt: process.env.NUXT_PUBLIC_SAAS_EXPIRES_AT || null,
+      saasSupportEmail: process.env.NUXT_PUBLIC_SAAS_SUPPORT_EMAIL || '',
+      saasSupportWhatsapp: process.env.NUXT_PUBLIC_SAAS_SUPPORT_WHATSAPP || '',
 
       heroBgImage: process.env.NUXT_PUBLIC_HERO_BG_IMAGE || '',
       heroTitleMain: process.env.NUXT_PUBLIC_HERO_TITLE_MAIN || '',

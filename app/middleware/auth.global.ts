@@ -1,9 +1,11 @@
-// middleware/auth.global.ts
+import { get, ref as dbRef } from 'firebase/database'
+
 export default defineNuxtRouteMiddleware(async (to) => {
   if (!to.path.startsWith('/app')) return
   
   const config = useRuntimeConfig()
   const clientName = config.public.clientName || 'alinayah'
+  const saasManagerEmail = 'team.sencra@gmail.com'
 
   const authLoading = useState<boolean>('authLoading', () => true)
   const authChecked = useState<boolean>('authChecked', () => false)
@@ -33,6 +35,51 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const list = Array.isArray(allowed) && allowed.length ? allowed : ['/app']
     return list[0] || '/app'
   }
+  function normalizeRole(value?: string | null) {
+    return String(value || '').trim().toLowerCase().replace(/[\s_-]+/g, '')
+  }
+  function normalizeEmail(value?: string | null) {
+    return String(value || '').trim().toLowerCase()
+  }
+  function isDashboardPath(path: string) {
+    return normalize(path) === '/app'
+  }
+  function isSaasManagerIdentity(value?: any) {
+    return (
+      normalizeRole(value?.role || value?.claims?.role || value?.user?.role) === 'superadmin' &&
+      normalizeEmail(value?.email || value?.user?.email || value?.auth?.email) === saasManagerEmail
+    )
+  }
+  async function readProfile(session: any) {
+    const uid = String(session?.uid || session?.sub || '').trim()
+    if (!uid) return null
+
+    try {
+      const { $realtimeDb } = useNuxtApp() as any
+      const paths = [`${clientName}/users/${uid}`, `${clientName}/user/${uid}`]
+
+      for (const path of paths) {
+        const snap = await get(dbRef($realtimeDb, path))
+        if (snap.exists()) return snap.val()
+      }
+    } catch {}
+
+    return null
+  }
+
+  async function isAllowedForRoute(path: string, session: any) {
+    if (isPathAllowed(path, session?.allowedRoutes || [])) return true
+
+    if (!isDashboardPath(path)) return false
+    if (normalizeRole(session?.role) === 'superadmin') return true
+    if (isSaasManagerIdentity(session)) return true
+
+    const profile = await readProfile(session)
+    return isSaasManagerIdentity({
+      role: profile?.role || session?.role,
+      email: profile?.email || session?.email
+    })
+  }
 
   if (process.server) {
     authLoading.value = true
@@ -41,7 +88,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // Sudah pernah cek & sudah punya session di state
   if (authChecked.value && isAuthed.value && sessionUser.value) {
-    const ok = isPathAllowed(to.path, sessionUser.value?.allowedRoutes || [])
+    const ok = await isAllowedForRoute(to.path, sessionUser.value)
     if (!ok) return navigateTo(bestAllowed(sessionUser.value?.allowedRoutes))
     authLoading.value = false
     return
@@ -88,7 +135,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     isAuthed.value = true
 
     // Scope check pada rute yang dituju
-    const ok = isPathAllowed(to.path, Array.isArray(data.allowedRoutes) ? data.allowedRoutes : [])
+    const ok = await isAllowedForRoute(to.path, data)
     if (!ok) return navigateTo(bestAllowed(data.allowedRoutes))
   } catch {
     isAuthed.value = false

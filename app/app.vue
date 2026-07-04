@@ -1,8 +1,9 @@
 <template>
   <div>
     <NuxtLoadingIndicator :color="settings?.primaryColor || '#2563eb'" :height="3" :throttle="0" :duration="2000" />
-    <AppLoading :force="forced" label="Memuat..." sublabel="Menyiapkan halaman" />
-    <NuxtLayout v-bind="page?.meta?.layoutProps">
+    <AppLoading v-if="!showSaasOutOfService" :force="forced" label="Memuat..." sublabel="Menyiapkan halaman" />
+    <SaasOutOfService v-if="showSaasOutOfService" :expired-at-label="saasExpiredAtLabel" />
+    <NuxtLayout v-else v-bind="page?.meta?.layoutProps">
       <Maintenance v-if="maintenance"></Maintenance>
       <NuxtPage/>
     </NuxtLayout>
@@ -12,6 +13,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, nextTick, watch, onBeforeUnmount } from 'vue'
 import { useSettings } from '~/composables/data/useSettings'
+import { useSaasExpiry } from '~/composables/useSaasExpiry'
 import { ref as dbRef, onValue, off } from 'firebase/database'
 import { useRoute } from 'vue-router'
 import { useNuxtApp, useRuntimeConfig, useHead } from 'nuxt/app'
@@ -22,6 +24,16 @@ const forced = ref(false)
 
 const config = useRuntimeConfig()
 const clientName = config.public.clientName || 'alinayah'
+const {
+  isExpired: saasExpired,
+  formattedExpiresAt: saasExpiredAtLabel,
+  setRealtimeExpiresAt
+} = useSaasExpiry()
+
+const canBypassSaasBlocker = computed(() => {
+  return ['/cakAdmin', '/app'].some((path) => page.path === path)
+})
+const showSaasOutOfService = computed(() => saasExpired.value && !canBypassSaasBlocker.value)
 
 const faviconUrl = computed(() => {
   return String(
@@ -202,18 +214,39 @@ function applyDensity(density?: 'comfortable' | 'compact') {
 
 let rtdbRef: ReturnType<typeof dbRef> | null = null
 
+function syncPageBlockerScroll() {
+  if (typeof document === 'undefined') return
+
+  const shouldLock = maintenance.value || showSaasOutOfService.value
+  document.documentElement.classList.toggle('overflow-hidden', shouldLock)
+}
+
+function getSaasExpiresAtFromSettings(settingsValue: Record<string, any>) {
+  const service = settingsValue?.saasOutOfService
+
+  if (service && typeof service === 'object') {
+    if (service.enabled === false) return null
+    if (Object.prototype.hasOwnProperty.call(service, 'expiresAt')) {
+      return service.expiresAt || null
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(settingsValue || {}, 'saasExpiresAt')) {
+    return settingsValue.saasExpiresAt || null
+  }
+
+  return undefined
+}
+
 const cb = (snap: any) => {
   const v = snap?.val?.() ?? snap?.val?.call?.(snap) ?? snap?.val?.()
   const s = v || {}
 
+  setRealtimeExpiresAt(getSaasExpiresAtFromSettings(s))
+
   if (s.maintenance != null || s.maintenance != undefined) {
     maintenance.value = s.maintenance
-
-    if (s.maintenance) {
-      document.querySelector('html')?.classList.add('overflow-hidden')
-    } else {
-      document.querySelector('html')?.classList.remove('overflow-hidden')
-    }
+    syncPageBlockerScroll()
   }
 
   applyPrimary(s.primaryColor)
@@ -227,6 +260,7 @@ onMounted(async () => {
   console.log(config.public.clientName)
 
   forceFavicon()
+  syncPageBlockerScroll()
 
   applyPrimary('#2563eb')
   applySecondary('#10b981')
@@ -251,6 +285,8 @@ watch(
     }, 100)
   }
 )
+
+watch(showSaasOutOfService, syncPageBlockerScroll, { immediate: true })
 
 watch(
   faviconUrl,

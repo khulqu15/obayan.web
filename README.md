@@ -38,6 +38,28 @@ yarn dev
 bun run dev
 ```
 
+## SaaS Expiry Blocker
+
+Set `NUXT_PUBLIC_SAAS_EXPIRES_AT` untuk mengaktifkan tampilan out of service.
+
+```env
+# Kosong/null/off/false = website tetap aktif
+NUXT_PUBLIC_SAAS_EXPIRES_AT=
+
+# Blocker aktif mulai 00:00 WIB pada tanggal ini
+NUXT_PUBLIC_SAAS_EXPIRES_AT=2026-08-01
+```
+
+Kontak pada halaman blocker bisa diatur lewat:
+
+```env
+NUXT_PUBLIC_SAAS_SUPPORT_EMAIL=team-sencra@gmail.com
+NUXT_PUBLIC_SAAS_SUPPORT_WHATSAPP=62895396004952
+```
+
+Superadmin `team.sencra@gmail.com` dapat mengubah tanggal blocker dari dashboard `/app`.
+Nilai dashboard disimpan di Realtime Database pada `settings/saasOutOfService` dan menjadi override untuk runtime config.
+
 ## Production
 
 Build the application for production:

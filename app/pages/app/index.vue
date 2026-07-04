@@ -6,6 +6,46 @@
     </div>
 
     <template v-else>
+      <section
+        v-if="showDashboardSaasLock"
+        class="grid min-h-[calc(100vh-180px)] place-items-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-8 text-gray-800 shadow-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100"
+      >
+        <div class="w-full max-w-2xl overflow-hidden rounded-lg border border-gray-200 bg-white text-left shadow-xl shadow-gray-200/60 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-black/20">
+          <div class="h-1.5 bg-green-500"></div>
+          <div class="p-5 sm:p-6">
+            <div class="flex items-start gap-4">
+              <div class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-green-50 text-green-600 ring-1 ring-green-100 dark:bg-green-900/20 dark:text-green-300 dark:ring-green-900/30">
+                <Icon icon="lucide:shield-alert" class="h-5 w-5" />
+              </div>
+              <div class="min-w-0">
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-green-100 dark:bg-green-900/20 dark:text-green-300 dark:ring-green-900/30">
+                  <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                  Out of service
+                </div>
+                <h1 class="mt-3 text-2xl font-bold tracking-normal text-gray-950 dark:text-white">
+                  Website sedang tidak aktif
+                </h1>
+                <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-neutral-300">
+                  Masa aktif layanan berakhir pada {{ activationActiveDateLabel }}. Aktivasi ulang hanya dapat dilakukan oleh superadmin team.sencra@gmail.com.
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-5 divide-y divide-gray-200 rounded-lg border border-gray-200 text-sm dark:divide-neutral-800 dark:border-neutral-800">
+              <div class="flex items-center justify-between gap-4 px-4 py-3">
+                <span class="text-gray-500 dark:text-neutral-400">Email aktif</span>
+                <span class="truncate text-right font-semibold text-gray-900 dark:text-white">{{ viewerEmail || '-' }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-4 px-4 py-3">
+                <span class="text-gray-500 dark:text-neutral-400">Role aktif</span>
+                <span class="truncate text-right font-semibold text-gray-900 dark:text-white">{{ viewerRole || '-' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <template v-else>
       <section class="relative overflow-hidden rounded-[32px] border border-green-100 bg-gradient-to-br from-green-600 via-green-600 to-lime-500 p-6 text-white shadow-[0_24px_60px_-18px_rgba(22,163,74,0.38)] md:p-7 dark:border-white/10">
         <div class="absolute inset-0 opacity-25">
           <div class="absolute -right-10 -top-12 h-40 w-40 rounded-full bg-white blur-3xl"></div>
@@ -36,6 +76,94 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <section
+        v-if="canManageActivation"
+        class="grid gap-4 rounded-[28px] border border-gray-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 lg:grid-cols-[minmax(0,1fr),320px]"
+      >
+        <form class="min-w-0" @submit.prevent="saveSaasExpiry">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <div class="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1.5 text-xs font-black text-green-700 ring-1 ring-green-100 dark:bg-green-900/20 dark:text-green-300 dark:ring-green-900/40">
+                <Icon icon="lucide:shield-check" class="h-4 w-4" />
+                Aktivasi SaaS
+              </div>
+              <h2 class="mt-3 text-lg font-black text-gray-950 dark:text-white">Masa aktif layanan</h2>
+              <p class="mt-1 text-sm leading-6 text-gray-500 dark:text-neutral-400">
+                Kontrol tanggal out of service untuk tenant {{ clientDisplayName }}.
+              </p>
+            </div>
+
+            <span class="inline-flex w-fit items-center gap-2 rounded-full bg-green-50 px-3 py-1.5 text-xs font-black text-green-700 dark:bg-green-900/20 dark:text-green-300">
+              <span class="h-2 w-2 rounded-full bg-green-500"></span>
+              Authorized
+            </span>
+          </div>
+
+          <div class="mt-5 grid gap-3 md:grid-cols-[minmax(0,1fr),auto] md:items-end">
+            <div>
+              <label class="mb-1.5 block text-xs font-black uppercase tracking-[0.16em] text-gray-400">
+                Pilih tanggal
+              </label>
+              <input
+                v-model="expiryInput"
+                type="date"
+                :disabled="activationLoading || activationSaving"
+                class="h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm font-bold text-gray-800 outline-none transition focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-950 dark:text-white"
+              />
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="submit"
+                :disabled="activationLoading || activationSaving || !expiryInput"
+                class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 text-sm font-black text-white shadow-lg shadow-green-500/20 transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Icon icon="lucide:save" class="h-4 w-4" />
+                {{ activationSaving ? 'Menyimpan...' : 'Simpan' }}
+              </button>
+              <button
+                type="button"
+                :disabled="activationLoading || activationSaving"
+                class="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                @click="clearSaasExpiry"
+              >
+                <Icon icon="lucide:power" class="h-4 w-4" />
+                Nonaktifkan
+              </button>
+            </div>
+          </div>
+
+          <p v-if="activationError" class="mt-4 rounded-2xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 dark:bg-rose-900/20 dark:text-rose-300">
+            {{ activationError }}
+          </p>
+          <p v-if="activationNotice" class="mt-4 rounded-2xl bg-green-50 px-4 py-3 text-sm font-semibold text-green-700 dark:bg-green-900/20 dark:text-green-300">
+            {{ activationNotice }}
+          </p>
+        </form>
+
+        <aside class="rounded-[24px] border border-gray-200 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-950/50">
+          <div class="grid gap-3 text-sm">
+            <div>
+              <div class="text-[11px] font-black uppercase tracking-[0.16em] text-gray-400">Status</div>
+              <div class="mt-1 font-black" :class="activationStatusClass">{{ activationStatusLabel }}</div>
+            </div>
+            <div>
+              <div class="text-[11px] font-black uppercase tracking-[0.16em] text-gray-400">Tanggal</div>
+              <div class="mt-1 font-bold text-gray-900 dark:text-white">{{ activationActiveDateLabel }}</div>
+            </div>
+            <div>
+              <div class="text-[11px] font-black uppercase tracking-[0.16em] text-gray-400">Audit</div>
+              <div class="mt-1 font-bold text-gray-900 dark:text-white">{{ activationUpdatedBy || '-' }}</div>
+              <div class="text-xs text-gray-500 dark:text-neutral-400">{{ activationUpdatedAtLabel }}</div>
+            </div>
+            <div>
+              <div class="text-[11px] font-black uppercase tracking-[0.16em] text-gray-400">Sumber</div>
+              <div class="mt-1 font-bold text-gray-900 dark:text-white">{{ activationSourceLabel }}</div>
+            </div>
+          </div>
+        </aside>
       </section>
 
       <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -380,6 +508,7 @@
           </div>
         </div>
       </section>
+      </template>
     </template>
 
     <teleport to="body">
@@ -459,11 +588,14 @@ import { useIzin } from '~/composables/data/useIzin'
 import { useFaults } from '~/composables/data/useFaults'
 import { useAnnouncements } from '~/composables/data/useAnnouncements'
 import { useAgenda } from '~/composables/data/useAgenda'
-import { get, off, onValue, ref as dbRef } from 'firebase/database'
+import { get, off, onValue, ref as dbRef, set } from 'firebase/database'
 import { useNuxtApp, useRuntimeConfig } from 'nuxt/app'
+import { useSaasExpiry } from '~/composables/useSaasExpiry'
 
 const config = useRuntimeConfig()
 const clientName = config.public.clientName || 'alinayah'
+const clientDisplayName = String(config.public.clientDisplayName || config.public.siteName || clientName)
+const AUTHORIZED_ACTIVATION_EMAIL = 'team.sencra@gmail.com'
 
 definePageMeta({ layout: 'app', layoutProps: { title: 'Dashboard' } })
 
@@ -479,12 +611,27 @@ type PlainSession = {
 }
 
 const router = useRouter()
-const { $realtimeDb } = useNuxtApp() as any
+const { $realtimeDb, $auth } = useNuxtApp() as any
+const {
+  isExpired: saasExpired,
+  rawExpiresAt: saasRawExpiresAt,
+  formattedExpiresAt: saasFormattedExpiresAt,
+  setRealtimeExpiresAt
+} = useSaasExpiry()
 const dashboardLoading = ref(true)
 const dashboardSession = ref<PlainSession | null>(null)
 const firebaseProfile = ref<any>(null)
 const allowedRoutesState = ref<string[]>([])
+const activationLoading = ref(true)
+const activationSaving = ref(false)
+const activationError = ref('')
+const activationNotice = ref('')
+const expiryInput = ref('')
+const activationState = ref<Record<string, any>>({})
+const activationUpdatedBy = ref('')
+const activationUpdatedAt = ref<number | null>(null)
 let profileRef: ReturnType<typeof dbRef> | null = null
+let activationRef: ReturnType<typeof dbRef> | null = null
 
 const AUTH_KEY = `${clientName}:auth`
 const PASSPHRASE = `${clientName}-admin-secret`
@@ -522,6 +669,14 @@ function coerceRoutes(v: any): string[] {
 
 function uniqRoutes(arr: string[]) {
   return Array.from(new Set(arr.map(normalize)))
+}
+
+function normalizeEmail(value?: string | null) {
+  return String(value || '').trim().toLowerCase()
+}
+
+function normalizeRole(value?: string | null) {
+  return String(value || '').trim().toLowerCase().replace(/[\s_-]+/g, '')
 }
 
 async function deriveKey(pass: string, salt: string) {
@@ -570,10 +725,59 @@ async function readAuthToken(): Promise<PlainSession | null> {
 
 const role = computed(() => firebaseProfile.value?.role || dashboardSession.value?.role || 'admin')
 const roleLabel = computed(() => {
-  if (role.value === 'wali') return 'Wali Santri'
-  if (role.value === 'pengurus') return 'Pengurus'
-  if (role.value === 'admin') return 'Admin'
+  const normalized = normalizeRole(role.value)
+  if (normalized === 'wali') return 'Wali Santri'
+  if (normalized === 'pengurus') return 'Pengurus'
+  if (normalized === 'admin') return 'Admin'
+  if (normalized === 'superadmin') return 'Superadmin'
   return role.value || 'User'
+})
+
+const currentUid = computed(() => {
+  return String(dashboardSession.value?.uid || dashboardSession.value?.sub || $auth?.currentUser?.uid || '')
+})
+
+const viewerEmail = computed(() => {
+  return normalizeEmail(firebaseProfile.value?.email || dashboardSession.value?.email || $auth?.currentUser?.email || '')
+})
+
+const viewerRole = computed(() => {
+  return normalizeRole(firebaseProfile.value?.role || dashboardSession.value?.role || '')
+})
+
+const canManageActivation = computed(() => {
+  return viewerRole.value === 'superadmin' && viewerEmail.value === AUTHORIZED_ACTIVATION_EMAIL
+})
+
+const showDashboardSaasLock = computed(() => saasExpired.value && !canManageActivation.value)
+
+const activationStatusLabel = computed(() => {
+  if (!saasRawExpiresAt.value) return 'Aktif'
+  if (saasExpired.value) return 'Out of Service'
+  return 'Terjadwal'
+})
+
+const activationStatusClass = computed(() => {
+  if (!saasRawExpiresAt.value) return 'text-green-700 dark:text-green-300'
+  if (saasExpired.value) return 'text-rose-700 dark:text-rose-300'
+  return 'text-amber-700 dark:text-amber-300'
+})
+
+const activationActiveDateLabel = computed(() => saasFormattedExpiresAt.value || 'Tidak diset')
+
+const activationUpdatedAtLabel = computed(() => {
+  if (!activationUpdatedAt.value) return '-'
+  return new Date(activationUpdatedAt.value).toLocaleString('id-ID', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'Asia/Jakarta'
+  })
+})
+
+const activationSourceLabel = computed(() => {
+  if (Object.keys(activationState.value).length) return 'Firebase settings'
+  if (config.public.saasExpiresAt) return 'Runtime config'
+  return 'Default aktif'
 })
 
 const allowedRoutes = computed(() => {
@@ -1199,6 +1403,103 @@ function go(path: string) {
   router.push(path)
 }
 
+function applyActivationValue(raw: any) {
+  const data = raw && typeof raw === 'object' ? raw : {}
+  activationState.value = data
+  activationUpdatedBy.value = String(data.updatedBy || '')
+  activationUpdatedAt.value = Number(data.updatedAt || 0) || null
+
+  if (!Object.keys(data).length) {
+    setRealtimeExpiresAt(undefined)
+    expiryInput.value = saasRawExpiresAt.value || ''
+    return
+  }
+
+  const nextExpiresAt = data.enabled === false ? null : String(data.expiresAt || '').trim() || null
+  expiryInput.value = nextExpiresAt || ''
+  setRealtimeExpiresAt(nextExpiresAt)
+}
+
+async function bindActivationSettings() {
+  try {
+    if (activationRef) off(activationRef)
+  } catch {}
+
+  activationRef = dbRef($realtimeDb, `${clientName}/settings/saasOutOfService`)
+
+  const snap = await get(activationRef)
+  applyActivationValue(snap.val() || {})
+
+  onValue(activationRef, (snapshot) => {
+    applyActivationValue(snapshot.val() || {})
+  })
+}
+
+function denyActivationUpdate() {
+  activationError.value = 'Akses ditolak. Update hanya untuk superadmin team.sencra@gmail.com.'
+}
+
+async function saveSaasExpiry() {
+  activationError.value = ''
+  activationNotice.value = ''
+
+  if (!canManageActivation.value) {
+    denyActivationUpdate()
+    return
+  }
+
+  if (!expiryInput.value) {
+    activationError.value = 'Pilih tanggal masa akhir layanan terlebih dahulu.'
+    return
+  }
+
+  activationSaving.value = true
+
+  try {
+    await set(dbRef($realtimeDb, `${clientName}/settings/saasOutOfService`), {
+      enabled: true,
+      expiresAt: expiryInput.value,
+      updatedAt: Date.now(),
+      updatedBy: viewerEmail.value,
+      updatedByUid: currentUid.value
+    })
+    setRealtimeExpiresAt(expiryInput.value)
+    activationNotice.value = 'Tanggal out of service berhasil disimpan.'
+  } catch (error: any) {
+    activationError.value = error?.message || 'Gagal menyimpan tanggal aktivasi.'
+  } finally {
+    activationSaving.value = false
+  }
+}
+
+async function clearSaasExpiry() {
+  activationError.value = ''
+  activationNotice.value = ''
+
+  if (!canManageActivation.value) {
+    denyActivationUpdate()
+    return
+  }
+
+  activationSaving.value = true
+
+  try {
+    await set(dbRef($realtimeDb, `${clientName}/settings/saasOutOfService`), {
+      enabled: false,
+      expiresAt: '',
+      updatedAt: Date.now(),
+      updatedBy: viewerEmail.value,
+      updatedByUid: currentUid.value
+    })
+    setRealtimeExpiresAt(null)
+    activationNotice.value = 'Blocker out of service dinonaktifkan.'
+  } catch (error: any) {
+    activationError.value = error?.message || 'Gagal menonaktifkan blocker.'
+  } finally {
+    activationSaving.value = false
+  }
+}
+
 async function bindFirebaseProfile(uid?: string | null) {
   if (!uid) return
 
@@ -1206,15 +1507,28 @@ async function bindFirebaseProfile(uid?: string | null) {
     if (profileRef) off(profileRef)
   } catch {}
 
-  profileRef = dbRef($realtimeDb, `/${clientName}/users/${uid}`)
-
   try {
-    const snap = await get(profileRef)
-    if (snap.exists()) {
-      firebaseProfile.value = snap.val()
-      allowedRoutesState.value = uniqRoutes(coerceRoutes(snap.val()?.allowedRoutes))
+    const paths = [
+      `/${clientName}/users/${uid}`,
+      `/${clientName}/user/${uid}`
+    ]
+
+    for (const path of paths) {
+      const candidateRef = dbRef($realtimeDb, path)
+      const snap = await get(candidateRef)
+
+      if (snap.exists()) {
+        profileRef = candidateRef
+        firebaseProfile.value = snap.val()
+        allowedRoutesState.value = uniqRoutes(coerceRoutes(snap.val()?.allowedRoutes))
+        break
+      }
     }
   } catch {}
+
+  if (!profileRef) {
+    profileRef = dbRef($realtimeDb, `/${clientName}/users/${uid}`)
+  }
 
   onValue(profileRef, (snap) => {
     const val = snap.val() || null
@@ -1235,6 +1549,19 @@ onMounted(async () => {
     }
   } catch {
     allowedRoutesState.value = []
+  }
+
+  try {
+    await bindActivationSettings()
+  } catch (error: any) {
+    activationError.value = error?.message || 'Gagal memuat konfigurasi aktivasi.'
+  } finally {
+    activationLoading.value = false
+  }
+
+  if (showDashboardSaasLock.value) {
+    dashboardLoading.value = false
+    return
   }
 
   const d = new Date()
@@ -1293,6 +1620,10 @@ onMounted(async () => {
 onUnmounted(() => {
   try {
     if (profileRef) off(profileRef)
+  } catch {}
+
+  try {
+    if (activationRef) off(activationRef)
   } catch {}
 })
 </script>

@@ -881,6 +881,14 @@ function uniq(arr: string[]) {
   return Array.from(new Set(arr.map(normalize)))
 }
 
+function normalizeRole(value?: string | null) {
+  return String(value || '').trim().toLowerCase().replace(/[\s_-]+/g, '')
+}
+
+function adminSidebarPaths() {
+  return uniq(ADMIN_SIDEBAR.flatMap((group) => group.items.map((item) => item.href)))
+}
+
 function groupKey(g: SidebarGroup) {
   return g.key ?? g.title.toLowerCase().trim().replace(/[^\w]+/g, '-')
 }
@@ -903,9 +911,11 @@ function toggleGroup(key: string) {
 }
 
 function getSidebarForRole(role?: string, currentPath?: string) {
-  if (role === 'wali') return WALI_SIDEBAR
+  const normalizedRole = normalizeRole(role)
 
-  if (role === 'admin' || role === 'superadmin' || role === 'operator' || role === 'staff' || role === 'pengurus') {
+  if (normalizedRole === 'wali') return WALI_SIDEBAR
+
+  if (['admin', 'superadmin', 'operator', 'staff', 'pengurus'].includes(normalizedRole)) {
     return ADMIN_SIDEBAR
   }
 
@@ -913,14 +923,17 @@ function getSidebarForRole(role?: string, currentPath?: string) {
 }
 
 const effectiveAllowedRoutes = computed<string[]>(() => {
-  const role = tokenUser.value?.role
+  const role = normalizeRole(tokenUser.value?.role)
   const raw = tokenUser.value?.allowedRoutes
   const routes = Array.isArray(raw) ? uniq(raw.map(String)) : []
 
-  if (routes.length) return routes
+  if (routes.length) {
+    return role === 'superadmin' ? uniq([...routes, '/app']) : routes
+  }
 
   if (role === 'wali') return DEFAULT_WALI_ROUTES
-  if (['admin', 'superadmin', 'operator', 'staff', 'pengurus'].includes(role || '')) return ['/app']
+  if (role === 'superadmin') return adminSidebarPaths()
+  if (['admin', 'operator', 'staff', 'pengurus'].includes(role || '')) return ['/app']
 
   return []
 })
@@ -1207,20 +1220,23 @@ function applyProfile(uid: string, v: any) {
   const nextName = v?.displayName || v?.name || sessionUser.value?.name || tokenUser.value?.name || 'Pengguna'
   const nextEmail = v?.email || sessionUser.value?.email || tokenUser.value?.email || '-'
   const nextAvatar = v?.avatar || sessionUser.value?.avatar || '/assets/pp.jpg'
+  const nextRole = v?.role || sessionUser.value?.role || tokenUser.value?.role
 
   sessionUser.value = {
     ...(sessionUser.value || {}),
     uid,
     name: nextName,
     email: nextEmail,
-    avatar: nextAvatar
+    avatar: nextAvatar,
+    role: nextRole
   }
 
   if (tokenUser.value) {
     tokenUser.value = {
       ...tokenUser.value,
       name: nextName,
-      email: nextEmail
+      email: nextEmail,
+      role: nextRole || tokenUser.value.role
     }
   }
 }
@@ -1232,12 +1248,28 @@ async function startProfileWatcher(uid?: string | null) {
     if (profileRef) off(profileRef)
   } catch {}
 
-  profileRef = dbRef($realtimeDb, `${userPath}/${uid}`)
+  const paths = [
+    `${userPath}/${uid}`,
+    `${firebaseRoot}/user/${uid}`
+  ]
 
   try {
-    const snap = await get(profileRef)
-    if (snap.exists()) applyProfile(uid, snap.val())
+    for (const path of paths) {
+      const r = dbRef($realtimeDb, path)
+      const snap = await get(r)
+
+      if (snap.exists()) {
+        profileRef = r
+        applyProfile(uid, snap.val())
+        break
+      }
+    }
   } catch {}
+
+  if (!profileRef) {
+    profileRef = dbRef($realtimeDb, `${userPath}/${uid}`)
+    applyProfile(uid, {})
+  }
 
   onValue(profileRef, (snap) => applyProfile(uid, snap.val()))
 }
@@ -1252,11 +1284,14 @@ function applyAllowedRoutes(uid: string, routesRaw: any) {
     role: 'wali',
     allowedRoutes: []
   }
+  const prevRole = normalizeRole(prev.role)
 
   const fallbackDefault =
-    prev.role === 'wali'
+    prevRole === 'wali'
       ? DEFAULT_WALI_ROUTES
-      : (['admin', 'superadmin', 'operator', 'staff', 'pengurus'].includes(prev.role) ? ['/app'] : [])
+      : prevRole === 'superadmin'
+        ? adminSidebarPaths()
+        : (['admin', 'operator', 'staff', 'pengurus'].includes(prevRole) ? ['/app'] : [])
 
   const nextAllowed = coerced.length ? coerced : fallbackDefault
 
