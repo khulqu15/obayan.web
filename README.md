@@ -60,6 +60,41 @@ NUXT_PUBLIC_SAAS_SUPPORT_WHATSAPP=62895396004952
 Superadmin `team.sencra@gmail.com` dapat mengubah tanggal blocker dari dashboard `/app`.
 Nilai dashboard disimpan di Realtime Database pada `settings/saasOutOfService` dan menjadi override untuk runtime config.
 
+## Backend Modular
+
+Backend baru memakai MySQL sebagai sumber data utama, Redis sebagai cache, dan Firebase Realtime Database hanya sebagai mirror data realtime sementara.
+
+File utama:
+
+```text
+server/utils/mysql.ts
+server/utils/redis.ts
+server/repositories/appRecordRepository.ts
+server/services/appDataService.ts
+server/services/firebaseRealtimeService.ts
+server/services/backupService.ts
+app/composables/useAppRepository.ts
+```
+
+Endpoint generik:
+
+```http
+GET  /api/repository?collection=santri
+GET  /api/repository?collection=santri&id=abc
+POST /api/repository?collection=santri
+POST /api/repository?collection=santri&id=abc&method=update
+POST /api/repository?collection=santri&id=abc&method=delete
+```
+
+Maintenance manual:
+
+```http
+POST /api/maintenance-firebase-cleanup
+POST /api/maintenance-backup-monthly
+```
+
+Atur `AUTO_MAINTENANCE_ENABLED=true` untuk mengaktifkan cleanup berkala dan backup bulanan otomatis. Contoh env lengkap ada di `.env.example`.
+
 ## Production
 
 Build the application for production:

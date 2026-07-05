@@ -1,26 +1,55 @@
-import { useRouter } from "vue-router";
+import { defineNuxtPlugin } from 'nuxt/app'
 
-import $ from "jquery";
-import _ from "lodash";
-import noUiSlider from "nouislider";
-import "datatables.net";
-import "dropzone/dist/dropzone-min.js";
-import * as VanillaCalendarPro from "vanilla-calendar-pro";
-import { defineNuxtPlugin } from "nuxt/app";
+type IdleCallback = (callback: () => void, options?: { timeout?: number }) => number
 
-window._ = _;
-window.$ = $;
-window.jQuery = $;
-window.DataTable = $.fn.dataTable;
-window.noUiSlider = noUiSlider;
-window.VanillaCalendarPro = VanillaCalendarPro;
+function runWhenIdle(callback: () => void) {
+  const requestIdleCallback = (window as unknown as { requestIdleCallback?: IdleCallback }).requestIdleCallback
 
-import("preline/dist");
+  if (requestIdleCallback) {
+    requestIdleCallback(callback, { timeout: 1800 })
+    return
+  }
 
-export default defineNuxtPlugin(async () => {
-  const { HSStaticMethods } = await import('preline')
-  queueMicrotask(() => {
-    // @ts-ignore
-    window.HSStaticMethods?.autoInit()
+  window.setTimeout(callback, 800)
+}
+
+export default defineNuxtPlugin((nuxtApp) => {
+  let prelineReady: Promise<void> | null = null
+
+  const initPreline = () => {
+    const hs = (window as unknown as { HSStaticMethods?: { autoInit?: () => void } }).HSStaticMethods
+    hs?.autoInit?.()
+  }
+
+  const loadPreline = () => {
+    prelineReady ||= Promise.all([
+      import('preline/dist'),
+      import('preline')
+    ])
+      .then(([, preline]) => {
+        preline.HSStaticMethods?.autoInit?.()
+        initPreline()
+      })
+      .catch((error) => {
+        console.error('[preline] failed to load', error)
+      })
+
+    return prelineReady
+  }
+
+  if (document.readyState === 'complete') {
+    runWhenIdle(loadPreline)
+  } else {
+    window.addEventListener('load', () => runWhenIdle(loadPreline), { once: true })
+  }
+
+  nuxtApp.hook('page:finish', () => {
+    prelineReady?.then(initPreline)
   })
+
+  return {
+    provide: {
+      loadPreline
+    }
+  }
 })

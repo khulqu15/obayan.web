@@ -350,7 +350,7 @@
           </div>
 
           <div class="h-[calc(100%-73px)] overflow-y-auto">
-            <WidgetNotificationView />
+            <LazyWidgetNotificationView />
           </div>
         </aside>
       </div>

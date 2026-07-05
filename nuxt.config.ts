@@ -5,10 +5,23 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
 
   devtools: {
-    enabled: true
+    enabled: process.env.NUXT_DEVTOOLS === 'true'
   },
 
   sourcemap: false,
+
+  experimental: {
+    browserDevtoolsTiming: false,
+    defaults: {
+      nuxtLink: {
+        prefetch: true,
+        prefetchOn: {
+          visibility: false,
+          interaction: true
+        }
+      }
+    }
+  },
 
   alias: {
     '~': fileURLToPath(new URL('./app', import.meta.url)),
@@ -42,6 +55,12 @@ export default defineNuxtConfig({
 
   imports: {
     autoImport: true
+  },
+
+  nitro: {
+    externals: {
+      traceInclude: process.env.NODE_ENV === 'production' ? ['xlsx'] : []
+    }
   },
 
   app: {

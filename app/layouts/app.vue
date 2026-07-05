@@ -270,7 +270,7 @@
           </div>
 
           <div class="flex-1 overflow-y-auto">
-            <WidgetNotificationView />
+            <LazyWidgetNotificationView v-if="rightOpen" />
           </div>
         </div>
       </aside>
