@@ -9,10 +9,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, nextTick, watch, onBeforeUnmount } from 'vue'
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 const page = useRoute()
 const forced = ref(false)
-
 </script>

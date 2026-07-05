@@ -1,6 +1,9 @@
 export type PaymentPackageId = 'basic' | 'standard' | 'pro' | 'advance' | 'fullaccess'
 export type BillingDuration = 'monthly' | 'yearly'
 
+export const PAYMENT_PACKAGE_IDS: PaymentPackageId[] = ['basic', 'standard', 'pro', 'advance', 'fullaccess']
+export const DEFAULT_YEARLY_CHARGED_MONTHS = 10
+
 export type PaymentPackage = {
   id: PaymentPackageId
   name: string
@@ -14,13 +17,37 @@ export type PaymentPackage = {
   perSantriPrice: number
 
   isOneTime?: boolean
+  enabled?: boolean
   badge?: string
   promoLabel?: string
   tone?: 'soft' | 'popular' | 'premium'
   features: string[]
 }
 
-export const PAYMENT_PACKAGES: Record<PaymentPackageId, PaymentPackage> = {
+export type PaymentPackageMap = Record<PaymentPackageId, PaymentPackage>
+
+export type TenantPackagePricing = Partial<Pick<
+  PaymentPackage,
+  | 'name'
+  | 'subtitle'
+  | 'description'
+  | 'regularMonthlyPrice'
+  | 'baseMonthlyPrice'
+  | 'regularPerSantriPrice'
+  | 'perSantriPrice'
+  | 'badge'
+  | 'promoLabel'
+  | 'enabled'
+  | 'features'
+>>
+
+export type TenantPricingConfig = {
+  yearlyChargedMonths?: number
+  packages?: Partial<Record<PaymentPackageId, TenantPackagePricing>>
+  updatedAt?: unknown
+}
+
+export const PAYMENT_PACKAGES: PaymentPackageMap = {
   basic: {
     id: 'basic',
     name: 'Basic',
@@ -162,13 +189,89 @@ export function normalizePhone(value: string) {
     .trim()
     .replace(/[^\d+]/g, '')
 }
+
+function cleanMoney(value: unknown, fallback: number) {
+  const numberValue = Number(value)
+
+  return Number.isFinite(numberValue) && numberValue >= 0
+    ? Math.round(numberValue)
+    : fallback
+}
+
+export function normalizeYearlyChargedMonths(value: unknown) {
+  const numberValue = Math.round(Number(value))
+
+  if (!Number.isFinite(numberValue)) return DEFAULT_YEARLY_CHARGED_MONTHS
+
+  return Math.min(12, Math.max(1, numberValue))
+}
+
+export function normalizeTenantPricingConfig(value: unknown): TenantPricingConfig {
+  const raw = value && typeof value === 'object'
+    ? value as Record<string, any>
+    : {}
+
+  const packagesRaw = raw.packages && typeof raw.packages === 'object'
+    ? raw.packages as Record<string, any>
+    : {}
+
+  const packages = PAYMENT_PACKAGE_IDS.reduce<TenantPricingConfig['packages']>((acc, id) => {
+    const rawPackage = packagesRaw[id]
+
+    if (rawPackage && typeof rawPackage === 'object') {
+      acc![id] = { ...rawPackage }
+    }
+
+    return acc
+  }, {})
+
+  return {
+    yearlyChargedMonths: normalizeYearlyChargedMonths(raw.yearlyChargedMonths),
+    packages,
+    updatedAt: raw.updatedAt
+  }
+}
+
+export function resolvePaymentPackages(config?: TenantPricingConfig | null): PaymentPackageMap {
+  const overrides = config?.packages || {}
+
+  return PAYMENT_PACKAGE_IDS.reduce<PaymentPackageMap>((acc, id) => {
+    const base = PAYMENT_PACKAGES[id]
+    const override = overrides[id] || {}
+    const regularPerSantriFallback = base.regularPerSantriPrice ?? base.perSantriPrice
+
+    acc[id] = {
+      ...base,
+      name: String(override.name || base.name),
+      subtitle: String(override.subtitle || base.subtitle),
+      description: String(override.description || base.description),
+      regularMonthlyPrice: cleanMoney(override.regularMonthlyPrice, base.regularMonthlyPrice),
+      baseMonthlyPrice: cleanMoney(override.baseMonthlyPrice, base.baseMonthlyPrice),
+      regularPerSantriPrice: cleanMoney(override.regularPerSantriPrice, regularPerSantriFallback),
+      perSantriPrice: cleanMoney(override.perSantriPrice, base.perSantriPrice),
+      badge: String(override.badge ?? base.badge ?? ''),
+      promoLabel: String(override.promoLabel ?? base.promoLabel ?? ''),
+      enabled: override.enabled !== false,
+      features: Array.isArray(override.features) && override.features.length
+        ? override.features.map((feature) => String(feature)).filter(Boolean)
+        : base.features
+    }
+
+    return acc
+  }, {} as PaymentPackageMap)
+}
+
 export function calculateInvoice(input: {
   packageId: PaymentPackageId
   duration: BillingDuration
   santriCount?: number
+  packages?: PaymentPackageMap
+  yearlyChargedMonths?: number
 }) {
-  const pkg = PAYMENT_PACKAGES[input.packageId]
+  const packages = input.packages || PAYMENT_PACKAGES
+  const pkg = packages[input.packageId]
   const santriCount = Math.max(0, Number(input.santriCount || 0))
+  const yearlyChargedMonths = normalizeYearlyChargedMonths(input.yearlyChargedMonths)
 
   if (!pkg) throw new Error('Paket tidak valid')
 
@@ -187,7 +290,9 @@ export function calculateInvoice(input: {
       launchingDiscount,
       yearlyDiscount: 0,
       totalDiscount: launchingDiscount,
+      discount: launchingDiscount,
       total: subtotal,
+      currency: 'IDR' as const,
       chargedMonths: 1,
       durationLabel: 'Pembelian Putus'
     }
@@ -197,12 +302,14 @@ export function calculateInvoice(input: {
   const monthlyUnitPrice = pkg.baseMonthlyPrice + (pkg.perSantriPrice * santriCount)
 
   const normalMonths = input.duration === 'yearly' ? 12 : 1
-  const chargedMonths = input.duration === 'yearly' ? 10 : 1
+  const chargedMonths = input.duration === 'yearly' ? yearlyChargedMonths : 1
 
   const regularSubtotal = regularMonthlyUnitPrice * normalMonths
   const subtotal = monthlyUnitPrice * normalMonths
   const launchingDiscount = regularSubtotal - subtotal
-  const yearlyDiscount = input.duration === 'yearly' ? monthlyUnitPrice * 2 : 0
+  const yearlyDiscount = input.duration === 'yearly'
+    ? monthlyUnitPrice * (normalMonths - chargedMonths)
+    : 0
   const totalDiscount = launchingDiscount + yearlyDiscount
   const total = subtotal - yearlyDiscount
 
@@ -216,10 +323,12 @@ export function calculateInvoice(input: {
     launchingDiscount,
     yearlyDiscount,
     totalDiscount,
+    discount: totalDiscount,
     total,
+    currency: 'IDR' as const,
     chargedMonths,
     durationLabel: input.duration === 'yearly'
-      ? 'Tahunan - bayar 10 bulan'
+      ? `Tahunan - bayar ${chargedMonths} bulan`
       : 'Bulanan'
   }
 }

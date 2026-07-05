@@ -432,7 +432,7 @@
                   <div class="flex items-center justify-between gap-3">
                     <div>
                       <p class="font-black text-slate-950">Tahunan</p>
-                      <p class="mt-1 text-sm text-slate-500">Bayar 10 bulan, aktif 12 bulan.</p>
+                      <p class="mt-1 text-sm text-slate-500">{{ yearlyDurationDescription }}</p>
                     </div>
 
                     <span class="rounded-full bg-green-600 px-3 py-1 text-xs font-bold text-white">
@@ -567,6 +567,13 @@
                 class="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700"
               >
                 {{ errors.general }}
+              </div>
+
+              <div
+                v-if="paymentFallbackMessage"
+                class="rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-800"
+              >
+                {{ paymentFallbackMessage }}
               </div>
 
               <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
@@ -929,13 +936,15 @@
 import { computed, defineComponent, h, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { ref as dbRef, get } from 'firebase/database'
 import {
-  PAYMENT_PACKAGES,
   OBAYAN_TERMS_SECTIONS,
   type PaymentPackageId,
   type BillingDuration,
   calculateContractEndDate,
   calculateInvoice,
   formatIDR,
+  normalizeTenantPricingConfig,
+  normalizeYearlyChargedMonths,
+  resolvePaymentPackages,
   sanitizeTenantSlug,
   titleCaseTenant,
   todayInputDate
@@ -984,6 +993,7 @@ const invoiceModalBodyRef = ref<HTMLElement | null>(null)
 const invoiceModalOpen = ref(false)
 const exporting = ref(false)
 const exportMessage = ref('')
+const paymentFallbackMessage = ref('')
 
 const downloadedInvoiceKeys = ref<Set<string>>(new Set())
 
@@ -1045,15 +1055,36 @@ const errors = reactive<Record<ErrorKey, string>>({
 
 const currentInvoice = ref<any | null>(null)
 
-const packageList = computed(() => Object.values(PAYMENT_PACKAGES))
-const selectedPackage = computed(() => PAYMENT_PACKAGES[form.packageId])
+const tenantPricingConfig = computed(() => {
+  return normalizeTenantPricingConfig((settings.value as any)?.pricing)
+})
+
+const yearlyChargedMonths = computed(() => {
+  return normalizeYearlyChargedMonths(tenantPricingConfig.value.yearlyChargedMonths)
+})
+
+const paymentPackages = computed(() => resolvePaymentPackages(tenantPricingConfig.value))
+const packageList = computed(() => {
+  const packages = Object.values(paymentPackages.value)
+  const enabledPackages = packages.filter((pkg) => pkg.enabled !== false)
+
+  return enabledPackages.length ? enabledPackages : packages
+})
+const selectedPackage = computed(() => {
+  return paymentPackages.value[form.packageId] || packageList.value[0] || paymentPackages.value.standard
+})
 const requiresSantriCount = computed(() => selectedPackage.value.perSantriPrice > 0)
+const yearlyDurationDescription = computed(() => {
+  return `Bayar ${yearlyChargedMonths.value} bulan, aktif 12 bulan.`
+})
 
 const pricing = computed(() => {
   return calculateInvoice({
     packageId: form.packageId,
     duration: form.duration,
-    santriCount: form.santriCount
+    santriCount: form.santriCount,
+    packages: paymentPackages.value,
+    yearlyChargedMonths: yearlyChargedMonths.value
   })
 })
 
@@ -1153,6 +1184,16 @@ const statusClass = computed(() => {
 
   return 'bg-white/10 text-slate-200'
 })
+
+watch(
+  packageList,
+  (packages) => {
+    if (packages.some((pkg) => pkg.id === form.packageId)) return
+
+    form.packageId = packages[0]?.id || 'standard'
+  },
+  { immediate: true }
+)
 
 watch(
   () => settings.value,
@@ -1261,7 +1302,7 @@ function packageCardClass(id: PaymentPackageId) {
 function selectPackage(id: PaymentPackageId) {
   form.packageId = id
 
-  if (PAYMENT_PACKAGES[id].isOneTime) {
+  if (paymentPackages.value[id]?.isOneTime) {
     form.duration = 'yearly'
   }
 
@@ -1488,6 +1529,7 @@ function buildInvoicePayload(status: 'waiting_payment' | 'paid' | 'demo_paid') {
 
 async function generateInvoiceAndPay() {
   errors.general = ''
+  paymentFallbackMessage.value = ''
 
   if (!tenantReady.value) {
     errors.general = 'Tenant belum valid, jadi invoice belum bisa dibuat.'
@@ -1512,6 +1554,7 @@ async function generateInvoiceAndPay() {
 
 async function generateWithoutPayment() {
   submitting.value = true
+  paymentFallbackMessage.value = ''
 
   try {
     const invoice = buildInvoicePayload('demo_paid')
@@ -1519,23 +1562,15 @@ async function generateWithoutPayment() {
     currentInvoice.value = invoice
     invoiceModalOpen.value = true
 
-    await createInvoice(invoice)
-    await updateInvoiceStatus(invoice.orderId, 'paid', {
-      source: 'without_payment',
-      mode: 'demo',
-      paidAt: Date.now()
-    })
-    await activateTenantSubscription(
-      {
-        ...invoice,
-        status: 'paid'
-      },
-      {
+    await persistInvoiceBestEffort(invoice, {
+      status: 'paid',
+      paymentResult: {
         source: 'without_payment',
         mode: 'demo',
         paidAt: Date.now()
-      }
-    )
+      },
+      activate: true
+    })
 
     currentInvoice.value.status = 'paid'
 
@@ -1553,6 +1588,7 @@ async function generateWithoutPayment() {
 
 async function generateWithMidtrans() {
   submitting.value = true
+  paymentFallbackMessage.value = ''
 
   try {
     const response = await $fetch<any>('/api/payments/midtrans/create', {
@@ -1575,7 +1611,7 @@ async function generateWithMidtrans() {
     currentInvoice.value = response.invoice
     invoiceModalOpen.value = true
 
-    await createInvoice(response.invoice)
+    await persistInvoiceBestEffort(response.invoice)
     await loadSnapScript()
 
     window.snap.pay(response.midtrans.token, {
@@ -1614,14 +1650,74 @@ async function generateWithMidtrans() {
       }
     })
   } catch (error: any) {
-    errors.general =
-      error?.data?.message ||
-      error?.statusMessage ||
-      error?.message ||
-      'Pembayaran belum bisa dibuat. Coba cek konfigurasi Midtrans atau koneksi server.'
+    await generateStaticExportInvoice(error)
   } finally {
     submitting.value = false
   }
+}
+
+async function persistInvoiceBestEffort(
+  invoice: any,
+  options: {
+    status?: 'waiting_payment' | 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled'
+    paymentResult?: unknown
+    activate?: boolean
+  } = {}
+) {
+  try {
+    await createInvoice(invoice)
+
+    if (options.status) {
+      await updateInvoiceStatus(invoice.orderId, options.status, options.paymentResult)
+    }
+
+    if (options.activate) {
+      await activateTenantSubscription(
+        {
+          ...invoice,
+          status: options.status || invoice.status
+        },
+        options.paymentResult
+      )
+    }
+
+    return true
+  } catch (error) {
+    console.warn('Invoice tidak tersimpan ke database, lanjut export lokal:', error)
+    return false
+  }
+}
+
+async function generateStaticExportInvoice(error: any) {
+  const invoice = currentInvoice.value || {
+    ...buildInvoicePayload('waiting_payment'),
+    source: 'static_export',
+    midtrans: {
+      mode: 'static_export',
+      token: '',
+      redirectUrl: '',
+      serverError: getPaymentErrorMessage(error)
+    }
+  }
+
+  currentInvoice.value = invoice
+  invoiceModalOpen.value = true
+
+  await persistInvoiceBestEffort(invoice)
+
+  paymentFallbackMessage.value =
+    'Server payment/Midtrans tidak tersedia, jadi invoice dibuat secara lokal. PDF dan JPG tetap bisa disimpan dari browser.'
+
+  await autoDownloadInvoiceFiles()
+}
+
+function getPaymentErrorMessage(error: any) {
+  return (
+    error?.data?.message ||
+    error?.statusMessage ||
+    error?.message ||
+    'Server payment tidak tersedia.'
+  )
 }
 
 async function autoExportPaidInvoice() {
@@ -1633,10 +1729,26 @@ async function autoExportPaidInvoice() {
   const orderId = String(currentInvoice.value.orderId || '')
   if (!orderId) return
 
+  await autoDownloadInvoiceFiles()
+}
+
+async function autoDownloadInvoiceFiles() {
+  if (!currentInvoice.value) return
+
   await nextTick()
   await new Promise((resolve) => setTimeout(resolve, 500))
 
   invoiceModalOpen.value = true
+
+  try {
+    await downloadInvoicePdf(true)
+    await new Promise((resolve) => setTimeout(resolve, 250))
+    await downloadInvoiceJpg(true)
+  } catch (downloadError) {
+    console.error('Gagal auto export invoice:', downloadError)
+    paymentFallbackMessage.value =
+      'Invoice sudah dibuat. Jika file belum otomatis terunduh, gunakan tombol Save PDF atau Save JPG.'
+  }
 }
 
 function invoiceFilename(ext: 'pdf' | 'jpg') {

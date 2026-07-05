@@ -1,7 +1,7 @@
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NUXT_DEVTOOLS === 'true' },
   hub: {
     db: 'mysql',
   },
@@ -35,6 +35,9 @@ export default defineNuxtConfig({
         '/alinayah/payment',
         '/alladunni/payment',
         '/martopuro/payment',
+        '/alinayah/setting',
+        '/alladunni/setting',
+        '/martopuro/setting',
         '/institutions',
         '/organizations',
         '/login',
@@ -55,6 +58,7 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/app/**': { prerender: false },
+    '/**/setting': { prerender: false },
     '/dev/**': { prerender: false },
     '/news/**': { prerender: false },
     '/facilities/**': { prerender: false },
@@ -144,8 +148,5 @@ export default defineNuxtConfig({
     authCookieMaxAge: process.env.AUTH_COOKIE_MAX_AGE || '604800000',
   },
 
-  modules: ['nuxt-tiptap-editor'],
-  tiptap: {
-    prefix: 'Tiptap',
-  },
+  modules: [],
 })

@@ -1,26 +1,45 @@
-import { useRouter } from "vue-router";
+import { nextTick } from 'vue'
+import { defineNuxtPlugin } from 'nuxt/app'
 
-import $ from "jquery";
-import _ from "lodash";
-import noUiSlider from "nouislider";
-import "datatables.net";
-import "dropzone/dist/dropzone-min.js";
-import * as VanillaCalendarPro from "vanilla-calendar-pro";
-import { defineNuxtPlugin } from "nuxt/app";
+type PrelineModule = {
+  HSStaticMethods?: {
+    autoInit?: () => void
+  }
+}
 
-window._ = _;
-window.$ = $;
-window.jQuery = $;
-window.DataTable = $.fn.dataTable;
-window.noUiSlider = noUiSlider;
-window.VanillaCalendarPro = VanillaCalendarPro;
+let prelinePromise: Promise<PrelineModule> | null = null
+let initTimer: ReturnType<typeof window.setTimeout> | null = null
 
-import("preline/dist");
+function scheduleIdle(callback: () => void) {
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(callback, { timeout: 1200 })
+    return
+  }
 
-export default defineNuxtPlugin(async () => {
-  const { HSStaticMethods } = await import('preline')
-  queueMicrotask(() => {
-    // @ts-ignore
-    window.HSStaticMethods?.autoInit()
-  })
+  window.setTimeout(callback, 120)
+}
+
+async function initPreline() {
+  prelinePromise ||= import('preline') as Promise<PrelineModule>
+
+  const mod = await prelinePromise
+  const methods = window.HSStaticMethods || mod.HSStaticMethods
+
+  methods?.autoInit?.()
+}
+
+export default defineNuxtPlugin((nuxtApp) => {
+  const queueInit = () => {
+    if (initTimer) window.clearTimeout(initTimer)
+
+    initTimer = window.setTimeout(() => {
+      scheduleIdle(async () => {
+        await nextTick()
+        await initPreline()
+      })
+    }, 32)
+  }
+
+  nuxtApp.hook('app:mounted', queueInit)
+  nuxtApp.hook('page:finish', queueInit)
 })
